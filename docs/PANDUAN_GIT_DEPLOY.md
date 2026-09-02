@@ -54,21 +54,21 @@ Buka **Terminal cPanel** pada server hosting:
 
 ```bash
 # 1. Masuk ke folder repository server
-cd /home/nadp3189/repositories/angkringan-pos
+cd /home/nadp3189/repositories/master-cafe-pos
 
 # 2. Pindah ke branch master & tarik kode terbaru dari GitHub
 git checkout master
 git pull origin master
 
-# 3. Sinkronkan kode terbaru ke folder web live (angkringan.nadeak.net)
-cp -Rf app /home/nadp3189/public_html/angkringan.nadeak.net/
-cp -Rf resources /home/nadp3189/public_html/angkringan.nadeak.net/
-cp -Rf routes /home/nadp3189/public_html/angkringan.nadeak.net/
-cp -Rf public/* /home/nadp3189/public_html/angkringan.nadeak.net/public/ 2>/dev/null || true
+# 3. Sinkronkan kode terbaru ke folder web live (mastercafe.nadeak.net)
+cp -Rf app /home/nadp3189/public_html/mastercafe.nadeak.net/
+cp -Rf resources /home/nadp3189/public_html/mastercafe.nadeak.net/
+cp -Rf routes /home/nadp3189/public_html/mastercafe.nadeak.net/
+cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/public/ 2>/dev/null || true
 
 # 4. Pastikan ijin folder storage & public tetap aman (0777)
-chmod -R 777 /home/nadp3189/public_html/angkringan.nadeak.net/storage 2>/dev/null || true
-chmod -R 777 /home/nadp3189/public_html/angkringan.nadeak.net/public/storage 2>/dev/null || true
+chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/storage 2>/dev/null || true
+chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/public/storage 2>/dev/null || true
 ```
 
 ---
@@ -76,3 +76,5 @@ chmod -R 777 /home/nadp3189/public_html/angkringan.nadeak.net/public/storage 2>/
 ## Catatan Penting
 - **Jangan pernah koding langsung di server live.** Selalu gunakan branch lokal untuk uji coba.
 - **Folder Gambar:** Folder `public/storage` di server adalah folder fisik asli (bukan symlink) untuk menghindari pemblokiran keamanan CageFS cPanel.
+
+

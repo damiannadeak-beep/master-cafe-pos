@@ -47,20 +47,20 @@ Route::get('/storage/{path}', function ($path) {
         storage_path('app/public/' . $path),
         public_path('storage/' . $path),
         // Folder utama home
-        $homeDir . '/angkringan.nadeak.net/public/storage/' . $path,
-        $homeDir . '/angkringan.nadeak.net/storage/app/public/' . $path,
-        $homeDir . '/angkringan.nadeak.net/storage/' . $path,
+        $homeDir . '/mastercafe.nadeak.net/public/storage/' . $path,
+        $homeDir . '/mastercafe.nadeak.net/storage/app/public/' . $path,
+        $homeDir . '/mastercafe.nadeak.net/storage/' . $path,
         // Folder public_html langsung
         $homeDir . '/public_html/storage/app/public/' . $path,
         $homeDir . '/public_html/storage/' . $path,
         $homeDir . '/public_html/public/storage/' . $path,
-        // Folder public_html/angkringan.nadeak.net
-        $homeDir . '/public_html/angkringan.nadeak.net/public/storage/' . $path,
-        $homeDir . '/public_html/angkringan.nadeak.net/storage/app/public/' . $path,
-        $homeDir . '/public_html/angkringan.nadeak.net/storage/' . $path,
+        // Folder public_html/mastercafe.nadeak.net
+        $homeDir . '/public_html/mastercafe.nadeak.net/public/storage/' . $path,
+        $homeDir . '/public_html/mastercafe.nadeak.net/storage/app/public/' . $path,
+        $homeDir . '/public_html/mastercafe.nadeak.net/storage/' . $path,
         // Folder repositories
-        $homeDir . '/repositories/angkringan-pos/storage/app/public/' . $path,
-        $homeDir . '/repositories/angkringan-pos/public/storage/' . $path,
+        $homeDir . '/repositories/master-cafe-pos/storage/app/public/' . $path,
+        $homeDir . '/repositories/master-cafe-pos/public/storage/' . $path,
     ];
 
     if (isset($_SERVER['DOCUMENT_ROOT'])) {
@@ -276,3 +276,4 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/rating/store', [KonsumenController::class, 'storeRating']);
     });
 });
+

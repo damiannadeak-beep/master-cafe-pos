@@ -6,6 +6,7 @@ echo json_encode([
     'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'unknown',
     'script_filename' => $_SERVER['SCRIPT_FILENAME'] ?? 'unknown',
     'current_dir' => __DIR__,
-    'is_cpanel_subdomain' => str_contains(__DIR__, 'angkringan.nadeak.net'),
+    'is_cpanel_subdomain' => str_contains(__DIR__, 'mastercafe.nadeak.net'),
     'files_in_dir' => array_slice(scandir(__DIR__), 0, 10)
 ], JSON_PRETTY_PRINT);
+
