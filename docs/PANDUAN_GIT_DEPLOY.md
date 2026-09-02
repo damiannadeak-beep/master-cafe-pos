@@ -50,13 +50,13 @@ git branch -d fitur-stok-otomatis
 
 ## 3. Deployment ke Server cPanel Live (Secure Architecture)
 
-**Arsitektur Baru:** File inti Laravel (pp, outes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/angkringan-pos. Kita HANYA mengkopi folder public ke internet.
+**Arsitektur Baru:** File inti Laravel (pp, outes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/master-cafe-pos. Kita HANYA mengkopi folder public ke internet.
 
 Buka **Terminal cPanel** pada server hosting:
 
 `ash
 # 1. Masuk ke folder repository server
-cd /home/nadp3189/repositories/angkringan-pos
+cd /home/nadp3189/repositories/master-cafe-pos
 
 # 2. Tarik kode terbaru dari GitHub
 git checkout master
@@ -66,11 +66,11 @@ git pull origin master
 cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/ 2>/dev/null || true
 
 # 4. Suntikkan (Modifikasi) index.php agar mengarah ke folder repositories yang aman
-sed -i "s|__DIR__.'/../vendor/autoload.php'|__DIR__.'/../../repositories/angkringan-pos/vendor/autoload.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
-sed -i "s|__DIR__.'/../bootstrap/app.php'|__DIR__.'/../../repositories/angkringan-pos/bootstrap/app.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
+sed -i "s|__DIR__.'/../vendor/autoload.php'|__DIR__.'/../../repositories/master-cafe-pos/vendor/autoload.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
+sed -i "s|__DIR__.'/../bootstrap/app.php'|__DIR__.'/../../repositories/master-cafe-pos/bootstrap/app.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
 
 # 5. Pastikan ijin folder storage & public tetap aman (0777)
-chmod -R 777 /home/nadp3189/repositories/angkringan-pos/storage 2>/dev/null || true
+chmod -R 777 /home/nadp3189/repositories/master-cafe-pos/storage 2>/dev/null || true
 chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/storage 2>/dev/null || true
 `
 
@@ -79,4 +79,5 @@ chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/storage 2>/dev/nul
 ## Catatan Penting
 - **Jangan pernah koding langsung di server live.** Selalu gunakan branch lokal untuk uji coba.
 - **Folder Gambar:** Folder storage di server adalah folder fisik asli (bukan symlink) untuk menghindari pemblokiran keamanan CageFS cPanel.
+
 
