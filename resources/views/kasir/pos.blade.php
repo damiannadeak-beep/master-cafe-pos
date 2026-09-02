@@ -20,8 +20,12 @@
                     <!-- Kategori Pills -->
                     <div class="d-flex gap-2 mt-4 overflow-auto pb-2" style="white-space: nowrap;">
                         <button type="button" class="btn btn-soft rounded-pill px-4 active" onclick="filterCategory('semua', this)">Semua</button>
-                        <button type="button" class="btn btn-soft rounded-pill px-4" onclick="filterCategory('makanan', this)">Makanan</button>
-                        <button type="button" class="btn btn-soft rounded-pill px-4" onclick="filterCategory('minuman', this)">Minuman</button>
+                        @php
+                            $categories = $menus->pluck('kategori')->unique()->filter()->values();
+                        @endphp
+                        @foreach($categories as $cat)
+                            <button type="button" class="btn btn-soft rounded-pill px-4" onclick="filterCategory('{{ $cat }}', this)">{{ $cat }}</button>
+                        @endforeach
                     </div>
                 </div>
                 
@@ -271,9 +275,7 @@
                        <i class="bi bi-image text-muted opacity-50" style="font-size: 2.5rem;"></i>
                    </div>`;
                    
-            const badgeCat = menu.kategori === 'makanan' 
-                ? `<span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill shadow-sm bg-warning text-white" style="backdrop-filter: blur(4px);">Makanan</span>`
-                : `<span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill shadow-sm bg-info text-white" style="backdrop-filter: blur(4px);">Minuman</span>`;
+            const badgeCat = `<span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill shadow-sm bg-info text-white text-capitalize" style="backdrop-filter: blur(4px);">${menu.kategori}</span>`;
 
             const stockAlertClass = ''; // Garis merah dimatikan sesuai permintaan user
             const stockBadge = menu.stok > 0 && menu.stok <= 5 && menu.is_available ? `<span class="badge bg-danger position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill shadow-sm" style="backdrop-filter: blur(4px);"><i class="bi bi-exclamation-circle me-1"></i>Sisa ${menu.stok}</span>` : '';
@@ -294,7 +296,7 @@
                         ${imageHtml}
                         <div class="card-body text-center p-2 p-md-3">
                             <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.9rem;" title="${menu.nama_menu}">${menu.nama_menu}</h6>
-                            <p class="price mb-0 fw-bold text-primary font-sans" style="font-size: 0.9rem;">Rp ${parseFloat(menu.harga).toLocaleString('id-ID')}</p>
+                            <p class="price mb-0 fw-bold text-primary font-sans" style="font-size: 0.9rem;">${menu.is_dynamic_price ? 'Sesuai Timbangan' : 'Rp ' + parseFloat(menu.harga).toLocaleString('id-ID')}</p>
                             <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Sisa: ${menu.stok}</small>
                         </div>
                     </div>
@@ -307,6 +309,7 @@
     // --- LOGIKA CART (KERANJANG) ---
     let currentSelectedMenu = null;
     let currentModalQty = 1;
+    let currentDynamicBasePrice = 0;
 
     function changeModalQty(delta) {
         currentModalQty += delta;
@@ -319,6 +322,20 @@
         const menu = allMenus.find(m => m.id === id);
         if (!menu) return;
 
+        let dynamicPrice = null;
+        if (menu.is_dynamic_price) {
+            let inputPrice = prompt(`Masukkan harga aktual untuk menu: ${menu.nama_menu}\n(Contoh: harga berdasarkan timbangan ikan)`);
+            if (inputPrice === null || inputPrice === '') return;
+            dynamicPrice = parseFloat(inputPrice);
+            if (isNaN(dynamicPrice) || dynamicPrice < 0) {
+                alert("Harga yang dimasukkan tidak valid!");
+                return;
+            }
+            currentDynamicBasePrice = dynamicPrice;
+        } else {
+            currentDynamicBasePrice = parseFloat(menu.harga);
+        }
+
         let variants = [];
         if (menu.variants_json) {
             try { variants = JSON.parse(menu.variants_json); } catch(e) {}
@@ -326,7 +343,7 @@
 
         if (variants.length === 0) {
             // Langsung tambah ke cart jika tidak ada varian
-            addToCart(menu.id, menu.nama_menu, menu.harga, []);
+            addToCart(menu.id, menu.nama_menu, currentDynamicBasePrice, []);
             return;
         }
 
@@ -397,7 +414,7 @@
 
     function calculateVariantPrice() {
         if (!currentSelectedMenu) return;
-        let unitPrice = parseFloat(currentSelectedMenu.harga);
+        let unitPrice = currentDynamicBasePrice;
         
         document.querySelectorAll('.var-option-input:checked').forEach(input => {
             unitPrice += parseFloat(input.dataset.price);

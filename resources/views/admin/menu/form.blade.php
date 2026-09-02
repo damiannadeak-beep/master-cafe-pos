@@ -32,14 +32,22 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Kategori</label>
-                    <select class="form-select" name="kategori" required>
-                        <option value="makanan" {{ old('kategori', $menu->kategori) == 'makanan' ? 'selected' : '' }}>Makanan</option>
-                        <option value="minuman" {{ old('kategori', $menu->kategori) == 'minuman' ? 'selected' : '' }}>Minuman</option>
-                    </select>
+                    <input type="text" list="kategori_list" name="kategori" class="form-control" value="{{ old('kategori', $menu->kategori) }}" required placeholder="Contoh: Makanan, Minuman, Nasi Goreng, Kopi">
+                    <datalist id="kategori_list">
+                        <option value="Makanan">
+                        <option value="Minuman">
+                        <option value="Nasi Goreng">
+                        <option value="Mie">
+                        <option value="Coffee">
+                    </datalist>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Harga</label>
                     <input type="number" step="0.01" name="harga" class="form-control" value="{{ old('harga', $menu->harga) }}" required>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" name="is_dynamic_price" value="1" class="form-check-input" id="is_dynamic_price" {{ old('is_dynamic_price', $menu->is_dynamic_price) ? 'checked' : '' }}>
+                    <label class="form-check-label fw-bold text-primary" for="is_dynamic_price">Harga Dinamis (Input manual harga saat transaksi. Contoh: Sesuai berat ikan)</label>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Stok</label>

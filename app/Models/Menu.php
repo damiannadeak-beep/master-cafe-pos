@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Menu extends Model
 {
     protected $table = 'menu';
-    protected $fillable = ['nama_menu', 'harga', 'stok', 'image', 'kategori', 'is_available', 'variants_json', 'deskripsi'];
+    protected $fillable = ['nama_menu', 'harga', 'stok', 'image', 'kategori', 'is_available', 'is_dynamic_price', 'variants_json', 'deskripsi'];
 
     protected $casts = [
         'is_available' => 'boolean',
+        'is_dynamic_price' => 'boolean',
         'stok' => 'integer',
         'harga' => 'float',
     ];

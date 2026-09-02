@@ -46,10 +46,14 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-4 mb-3 gap-2">
         <h5 class="fw-bold mb-0">Menu Tersedia</h5>
-        <div class="btn-group shadow-sm" role="group">
-            <button type="button" class="btn btn-outline-primary active btn-filter" onclick="filterMenu('semua', this)">Semua</button>
-            <button type="button" class="btn btn-outline-primary btn-filter" onclick="filterMenu('makanan', this)">Makanan</button>
-            <button type="button" class="btn btn-outline-primary btn-filter" onclick="filterMenu('minuman', this)">Minuman</button>
+        <div class="d-flex gap-2 overflow-auto pb-2" style="white-space: nowrap; max-width: 100%;">
+            <button type="button" class="btn btn-outline-primary active btn-filter rounded-pill px-3" onclick="filterMenu('semua', this)">Semua</button>
+            @php
+                $categories = $menus->pluck('kategori')->unique()->filter()->values();
+            @endphp
+            @foreach($categories as $cat)
+                <button type="button" class="btn btn-outline-primary btn-filter rounded-pill px-3 text-capitalize" onclick="filterMenu('{{ $cat }}', this)">{{ $cat }}</button>
+            @endforeach
         </div>
     </div>
     <div class="row g-4">
@@ -71,7 +75,7 @@
                 <div class="card-body d-flex flex-column p-3">
                     <h6 class="fw-bold text-dark mb-1">{{ $menu->nama_menu }}</h6>
                     <small class="text-muted mb-2" style="cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" onclick="this.style.webkitLineClamp = this.style.webkitLineClamp === '2' ? 'unset' : '2'" title="Klik untuk membaca selengkapnya">{{ $menu->deskripsi ?? 'Tanpa deskripsi' }}</small>
-                    <h6 class="text-primary fw-bold mb-3 mt-auto">Rp {{ number_format($menu->harga, 0, ',', '.') }}</h6>
+                    <h6 class="text-primary fw-bold mb-3 mt-auto">{{ $menu->is_dynamic_price ? 'Harga Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}</h6>
                     
                     <div class="d-flex justify-content-between align-items-center mt-auto">
                         <div class="d-flex align-items-center gap-3">
@@ -82,7 +86,7 @@
                             </button>
                             <span id="qty-{{ $menu->id }}" class="fw-bold fs-5 mb-0" style="min-width: 15px; text-align: center;">0</span>
                             <button class="btn btn-primary rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
-                                    onclick="openVariantModal({{ $menu->id }})"
+                                    onclick="{{ $menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Kasir karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')' }}"
                                     style="width: 32px; height: 32px; transition: all 0.2s;">
                                 <i class="bi bi-plus fs-5"></i>
                             </button>
@@ -196,6 +200,11 @@
     function openVariantModal(id) {
         const menu = allMenus.find(m => m.id === id);
         if (!menu) return;
+
+        if (menu.is_dynamic_price) {
+            alert("Menu ini harus dipesan langsung melalui Kasir karena harga menyesuaikan timbangan/ukuran.");
+            return;
+        }
 
         let variants = [];
         if (menu.variants_json) {
