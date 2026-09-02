@@ -75,7 +75,7 @@
 <body>
 
     <div class="qr-card">
-        <h1>ANGKRINGAN POS</h1>
+        <h1>MASTER CAFE</h1>
         <h2>{{ $meja->nama_meja_atau_nomor }}</h2>
         
         <div class="qr-image">

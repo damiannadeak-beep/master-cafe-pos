@@ -100,7 +100,7 @@
             <div class="auth-brand-icon">
                 <i class="bi bi-shop fs-2"></i>
             </div>
-            <h3 class="fw-bold text-dark mb-1">Masuk ke Angkringan</h3>
+            <h3 class="fw-bold text-dark mb-1">Masuk ke Master Cafe</h3>
             <p class="text-muted small">Pesan makanan & minuman racikan langsung dari meja</p>
         </div>
 

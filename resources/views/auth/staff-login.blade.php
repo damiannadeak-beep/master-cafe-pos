@@ -107,7 +107,7 @@
                 <label for="email" class="form-label fw-bold small text-white-50">Email Staf / Kasir</label>
                 <div class="input-group staff-input-group">
                     <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="staf@angkringan.com">
+                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="staf@mastercafe.com">
                 </div>
                 @error('email')
                     <span class="text-warning small mt-1 d-block fw-bold">{{ $message }}</span>

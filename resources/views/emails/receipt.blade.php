@@ -31,7 +31,7 @@
 <body>
     <div class="receipt-container">
         <div class="header">
-            <h1>Angkringan POS</h1>
+            <h1>Master Cafe</h1>
             <p>{{ \App\Models\Setting::getVal('store_address', 'Jl. Contoh Alamat No. 123') }}</p>
             <p>{{ \App\Models\Setting::getVal('store_phone', '081234567890') }}</p>
         </div>

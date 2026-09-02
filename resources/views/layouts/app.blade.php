@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Warung Angkringan</title>
+    <title>Master Cafe</title>
     
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -51,7 +51,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-light border-bottom border-secondary shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">
-                    <i class="bi bi-shop me-1"></i> Warung Angkringan
+                    <i class="bi bi-shop me-1"></i> Master Cafe
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -142,7 +142,7 @@
         </main>
         
         <footer class="text-center py-4 mt-auto w-100" style="padding-bottom: env(safe-area-inset-bottom, 120px) !important;">
-            <small class="text-muted">&copy; {{ date('Y') }} Warung Angkringan. Hak Cipta Dilindungi.</small>
+            <small class="text-muted">&copy; {{ date('Y') }} Master Cafe. Hak Cipta Dilindungi.</small>
         </footer>
     </div>
     

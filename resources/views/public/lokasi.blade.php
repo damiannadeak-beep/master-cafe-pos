@@ -7,7 +7,7 @@
     <div class="container text-center position-relative z-index-1 py-3">
         <h1 class="display-5 fw-bold mb-3">{{ \App\Models\Setting::getVal('lokasi_judul') ?? 'Titik Temu Kita' }}</h1>
         <p class="fs-5 text-light opacity-75 mx-auto mb-0" style="max-width: 600px;">
-            {{ \App\Models\Setting::getVal('lokasi_deskripsi') ?? 'Temukan lokasi gerobak angkringan kami. Suasana hangat dan hidangan lezat telah menanti kedatangan Anda.' }}
+            {{ \App\Models\Setting::getVal('lokasi_deskripsi') ?? 'Temukan lokasi Master Cafe. Suasana hangat dan hidangan lezat telah menanti kedatangan Anda.' }}
         </p>
     </div>
 </div>
@@ -28,8 +28,8 @@
                         <div>
                             <h5 class="fw-bold mb-2">Lokasi Utama</h5>
                             <p class="text-muted mb-0 lh-base">
-                                <strong>{{ \App\Models\Setting::getVal('lokasi_utama_nama') ?? 'Rusunawa Politeknik Negeri Bengkalis (Polbeng)' }}</strong><br>
-                                {!! nl2br(e(\App\Models\Setting::getVal('lokasi_utama_alamat') ?? "Jl. Bathin Alam, Sungai Alam, Kec. Bengkalis\nKab. Bengkalis, Riau 28711")) !!}
+                                <strong>{{ \App\Models\Setting::getVal('lokasi_utama_nama') ?? 'Master Cafe' }}</strong><br>
+                                {!! nl2br(e(\App\Models\Setting::getVal('lokasi_utama_alamat') ?? "Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711")) !!}
                             </p>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                         <div>
                             <h5 class="fw-bold mb-2">Jam Operasional</h5>
                             <p class="text-muted mb-0 fw-bold fs-5 text-dark">
-                                {{ \App\Models\Setting::getVal('lokasi_jam_operasional') ?? 'Buka Setiap Hari: 17.00 - 01.00 WIB' }}
+                                {{ \App\Models\Setting::getVal('lokasi_jam_operasional') ?? 'Buka Setiap Hari: 10:00 AM - 23:00 PM' }}
                             </p>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-primary mb-2"><i class="bi bi-info-circle-fill me-2"></i>Panduan Menuju Lokasi</h6>
                         <p class="text-muted small mb-0">
-                            {{ \App\Models\Setting::getVal('lokasi_panduan') ?? 'Masuk dari gerbang utama Polbeng, lurus ikuti jalan utama, lalu belok ke arah asrama mahasiswa (Rusunawa). Gerobak angkringan kami berada tepat di area titik kumpul Rusunawa.' }}
+                            {{ \App\Models\Setting::getVal('lokasi_panduan') ?? 'Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711' }}
                         </p>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
                 <div class="card-body p-0 position-relative" style="min-height: 500px;">
                     @php
-                        $gmapsUrl = \App\Models\Setting::getVal('lokasi_gmaps_url') ?? 'https://maps.google.com/maps?q=Politeknik%20Negeri%20Bengkalis&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                        $gmapsUrl = \App\Models\Setting::getVal('lokasi_gmaps_url') ?? 'https://maps.google.com/maps?q=Senggoro,%20Bengkalis&t=&z=16&ie=UTF8&iwloc=&output=embed';
                         if (preg_match('/src="([^"]+)"/', $gmapsUrl, $match)) {
                             $gmapsUrl = $match[1];
                         }

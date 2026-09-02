@@ -131,7 +131,10 @@
         </h1>
 
         <p class="hero-sub-student mx-auto mb-5">
-            Suasana angkringan yang hangat, harga ramah di kantong mahasiswa, dan kemudahan pesan dari meja via Scan QR Code tanpa memutus obrolan atau konsentrasi nugas.
+            Suasana cafe yang hangat, harga ramah, dan kemudahan pesan dari meja via Scan QR Code tanpa memutus obrolan santai Anda.
+          </p>
+          <p class="hero-sub-student mx-auto mb-5 text-white fw-bold">
+            <i class="bi bi-clock me-1"></i> Jam Operasional: 10:00 AM - 23:00 PM
         </p>
 
         <div class="d-flex flex-wrap justify-content-center gap-3">
@@ -209,7 +212,7 @@
                     </span>
                     <h3 class="fw-bold text-dark mb-3 display-6">Diciptakan Sebagai Ruang Santai Mahasiswa</h3>
                     <p class="text-muted mb-3" style="line-height: 1.8; text-align: justify; font-size: 1rem;">
-                        Kami memahami betapa melelahkannya rutinitas kuliah dan tumpukan tugas harian. Angkringan ini didirikan khusus sebagai tempat pelarian yang hangat bagi mahasiswa—tempat di mana Anda bisa menikmati sajian favorit dengan harga bersahabat.
+                        Master Cafe hadir sebagai tempat bersantai yang nyaman bagi Anda. Tempat di mana Anda bisa menikmati sajian favorit laut (seafood), kopi, dan hidangan lezat lainnya dengan harga bersahabat.
                     </p>
                     <p class="text-muted mb-0" style="line-height: 1.8; text-align: justify; font-size: 1rem;">
                         Melalui sistem pemesanan QR Code cerdas ini, Anda dapat memesan hidangan favorit langsung dari meja tanpa harus memutus obrolan atau mengganggu konsentrasi belajar Anda.

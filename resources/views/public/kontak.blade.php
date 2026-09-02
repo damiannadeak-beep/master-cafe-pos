@@ -22,14 +22,14 @@
                                 $waClean = '62' . substr($waClean, 1);
                             }
                             
-                            $emailRaw = \App\Models\Setting::getVal('kontak_email') ?? 'halo@angkringan.com';
+                            $emailRaw = \App\Models\Setting::getVal('kontak_email') ?? 'halo@mastercafe.com';
 
                             $sosmedDynamic = json_decode(\App\Models\Setting::getVal('kontak_sosmed_dynamic') ?? '[]', true);
                             if (empty($sosmedDynamic)) {
                                 $igRaw = \App\Models\Setting::getVal('kontak_ig');
                                 $tiktokRaw = \App\Models\Setting::getVal('kontak_tiktok');
                                 if (!empty($igRaw)) {
-                                    $sosmedDynamic[] = ['platform' => 'Instagram', 'url' => 'https://instagram.com/'.ltrim($igRaw, '@'), 'label' => $igRaw, 'icon' => 'bi-instagram'];
+                                    $sosmedDynamic[] = ['platform' => 'Instagram', 'url' => 'https://instagram.com/'.ltrim($igRaw ?? 'mastercafe24', '@'), 'label' => $igRaw ?? '@mastercafe24', 'icon' => 'bi-instagram'];
                                 }
                                 if (!empty($tiktokRaw)) {
                                     $sosmedDynamic[] = ['platform' => 'TikTok', 'url' => 'https://tiktok.com/@'.ltrim($tiktokRaw, '@'), 'label' => $tiktokRaw, 'icon' => 'bi-tiktok'];

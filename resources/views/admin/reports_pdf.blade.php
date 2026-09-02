@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Keuangan & Bisnis - Angkringan POS</title>
+    <title>Laporan Keuangan & Bisnis - Master Cafe</title>
     <style>
         @page {
             margin: 15mm 15mm 15mm 15mm;
@@ -140,8 +140,8 @@
     <table class="kop-header">
         <tr>
             <td style="border: none; padding: 0;">
-                <h1 class="brand-title">ANGKRINGAN POS</h1>
-                <div class="brand-subtitle">Sistem Kasir & Operasional Angkringan Modern</div>
+                <h1 class="brand-title">MASTER CAFE</h1>
+                <div class="brand-subtitle">Sistem Kasir & Operasional Cafe Modern</div>
             </td>
             <td style="border: none; padding: 0; text-align: right;" class="report-meta">
                 <strong>LAPORAN KEUANGAN & BISNIS</strong><br>
@@ -281,7 +281,7 @@
     <table class="footer-note">
         <tr>
             <td style="border: none; padding: 0;">
-                Dokumen resmi komputerisasi Angkringan POS - Berlaku tanpa tanda tangan basah.
+                Dokumen resmi komputerisasi Master Cafe - Berlaku tanpa tanda tangan basah.
             </td>
             <td style="border: none; padding: 0; text-align: right;">
                 Halaman 1 dari 1

@@ -28,7 +28,7 @@
                         @csrf
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nama Warung</label>
-                            <input type="text" class="form-control" name="store_name" value="{{ $settings['store_name'] ?? 'Angkringan POS' }}" required>
+                            <input type="text" class="form-control" name="store_name" value="{{ $settings['store_name'] ?? 'Master Cafe' }}" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Alamat Lengkap</label>
@@ -237,7 +237,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Judul Halaman Lokasi</label>
-                                    <input type="text" class="form-control" name="lokasi_judul" value="{{ $settings['lokasi_judul'] ?? 'Lokasi Angkringan Kami' }}">
+                                    <input type="text" class="form-control" name="lokasi_judul" value="{{ $settings['lokasi_judul'] ?? 'Lokasi Master Cafe' }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Deskripsi Halaman</label>
@@ -245,25 +245,25 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Nama Tempat/Jalan</label>
-                                    <input type="text" class="form-control" name="lokasi_utama_nama" value="{{ $settings['lokasi_utama_nama'] ?? 'Rusunawa Politeknik Negeri Bengkalis (Polbeng)' }}">
+                                    <input type="text" class="form-control" name="lokasi_utama_nama" value="{{ $settings['lokasi_utama_nama'] ?? 'Master Cafe' }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Panduan Menuju Lokasi</label>
-                                    <textarea class="form-control" name="lokasi_panduan" rows="3">{{ $settings['lokasi_panduan'] ?? 'Masuk dari gerbang utama Polbeng, lurus ikuti jalan utama, lalu belok ke arah asrama mahasiswa (Rusunawa). Gerobak angkringan kami berada tepat di area titik kumpul Rusunawa.' }}</textarea>
+                                    <textarea class="form-control" name="lokasi_panduan" rows="3">{{ $settings['lokasi_panduan'] ?? 'Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711' }}</textarea>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Alamat Lengkap</label>
-                                    <textarea class="form-control" name="lokasi_utama_alamat" rows="2">{{ $settings['lokasi_utama_alamat'] ?? "Jl. Bathin Alam, Sungai Alam, Kec. Bengkalis\nKab. Bengkalis, Riau 28711" }}</textarea>
+                                    <textarea class="form-control" name="lokasi_utama_alamat" rows="2">{{ $settings['lokasi_utama_alamat'] ?? "Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711" }}</textarea>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Jam Operasional (Teks)</label>
-                                    <input type="text" class="form-control" name="lokasi_jam_operasional" value="{{ $settings['lokasi_jam_operasional'] ?? 'Buka Setiap Hari: 17.00 - 01.00 WIB' }}">
+                                    <input type="text" class="form-control" name="lokasi_jam_operasional" value="{{ $settings['lokasi_jam_operasional'] ?? 'Buka Setiap Hari: 10:00 AM - 23:00 PM' }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Link Google Maps (Iframe SRC) atau URL biasa</label>
-                                    <textarea class="form-control" name="lokasi_gmaps_url" rows="2" placeholder="https://maps.google.com/...">{{ $settings['lokasi_gmaps_url'] ?? 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15814.773827415443!2d110.36603099999999!3d-7.789182!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a57a3e791b8d5%3A0xc3f8e5d26ff8f8a!2sYogyakarta!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid' }}</textarea>
+                                    <textarea class="form-control" name="lokasi_gmaps_url" rows="2" placeholder="https://maps.google.com/...">{{ $settings['lokasi_gmaps_url'] ?? 'https://maps.google.com/maps?q=Senggoro,%20Bengkalis&t=&z=16&ie=UTF8&iwloc=&output=embed' }}</textarea>
                                     <div class="form-text">Bisa menggunakan URL biasa atau src dari embed peta (Google Maps).</div>
                                 </div>
                             </div>
@@ -340,7 +340,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Alamat Email</label>
-                                <input type="email" class="form-control" name="kontak_email" value="{{ $settings['kontak_email'] ?? 'halo@angkringan.com' }}">
+                                <input type="email" class="form-control" name="kontak_email" value="{{ $settings['kontak_email'] ?? 'halo@mastercafe.com' }}">
                             </div>
                         </div>
 
