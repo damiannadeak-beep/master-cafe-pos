@@ -11,11 +11,13 @@ use Illuminate\Support\Facades\Mail;
 use Exception;
 use App\Models\{Pesanan, DetailPesanan, Pembayaran, Menu, Meja, Promo, Setting};
 use App\Services\OrderService;
+use App\Services\PaymentService;
+use App\Services\PrintService;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 use Mike42\Escpos\Printer;
 use Illuminate\Support\Facades\Hash;
 
-use App\Http\Requests\Pos\{StoreManualOrderRequest, VoidOrderRequest, SplitOrderRequest};
+use App\Http\Requests\Pos\{StoreManualOrderRequest, VoidOrderRequest, SplitOrderRequest, UpdateOrderStatusRequest, PayOrderRequest};
 
 class PosController extends Controller
 {
@@ -144,24 +146,20 @@ class PosController extends Controller
     /**
      * Update status pesanan dari kasir
      */
-    public function updateOrderStatus(Request $request, $id_pesanan)
+    public function updateOrderStatus(UpdateOrderStatusRequest $request, $id_pesanan)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:processing,completed',
-        ]);
-
         try {
             $pesanan = Pesanan::findOrFail($id_pesanan);
             
             // Update status
             $pesanan->update([
-                'status' => $validated['status'],
+                'status' => $request->validated('status'),
                 'id_kasir' => auth()->id() // Kasir yang memproses pesanan
             ]);
 
             // Notify Customer via Web Push
             if ($pesanan->konsumen) {
-                $statusText = $validated['status'] === 'completed' ? 'Selesai' : 'Diproses';
+                $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
                 $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
                     'Pesanan ' . $statusText,
                     'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
@@ -181,57 +179,19 @@ class PosController extends Controller
     /**
      * Update status pembayaran dari kasir
      */
-    public function payOrder(Request $request, $id_pesanan)
+    public function payOrder(PayOrderRequest $request, $id_pesanan, PaymentService $paymentService)
     {
-        $validated = $request->validate([
-            'metode' => 'required|in:cash,qris',
-            'email_pelanggan' => 'nullable|email'
-        ]);
+        $validated = $request->validated();
 
         try {
             DB::beginTransaction();
-            $pesanan = Pesanan::findOrFail($id_pesanan);
-            $pembayaran = Pembayaran::where('id_pesanan', $id_pesanan)->first();
-
-            if (!$pembayaran) {
-                throw new \Exception('Data pembayaran tidak ditemukan.');
-            }
-
-            if ($pembayaran->status === 'paid') {
-                throw new \Exception('Pesanan ini sudah dibayar.');
-            }
-
-            $pembayaran->update([
-                'status' => 'paid',
-                'metode' => $validated['metode'],
-                'tanggal' => now(),
-            ]);
-
-            // Jika dibayar, kasir yang menangani pembayaran ini dicatat
-            $pesanan->update(['id_kasir' => auth()->id()]);
-
-            // Notify Customer via Web Push
-            if ($pesanan->konsumen) {
-                $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
-                    'Pembayaran Diterima',
-                    'Pembayaran untuk Order #' . $pesanan->id . ' telah dikonfirmasi oleh Kasir.',
-                    '/konsumen/profil'
-                ));
-            }
-
-            // Kirim E-Receipt jika ada email pelanggan (opsional dari kasir) ATAU jika pesanan punya relasi konsumen dengan email
-            $targetEmail = $validated['email_pelanggan'] ?? null;
-            if (!$targetEmail && $pesanan->konsumen && $pesanan->konsumen->email) {
-                $targetEmail = $pesanan->konsumen->email;
-            }
-
-            if ($targetEmail) {
-                try {
-                    Mail::to($targetEmail)->send(new ReceiptMail($pesanan));
-                } catch (\Exception $mailEx) {
-                    \Illuminate\Support\Facades\Log::error("Gagal mengirim e-receipt: " . $mailEx->getMessage());
-                }
-            }
+            
+            $pesanan = $paymentService->processPayment(
+                $id_pesanan,
+                $validated['metode'],
+                $validated['email_pelanggan'] ?? null,
+                auth()->id()
+            );
 
             DB::commit();
             return response()->json([
@@ -261,92 +221,13 @@ class PosController extends Controller
     /**
      * Cetak struk langsung ke Printer Thermal (Raw ESC/POS Network)
      */
-    public function printThermalReceipt($id)
+    public function printThermalReceipt($id, PrintService $printService)
     {
-        $order = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'kasir', 'meja'])->findOrFail($id);
-        
-        if (!$order->pembayaran || $order->pembayaran->status !== 'paid') {
-            return response()->json(['error' => 'Pesanan belum dibayar lunas.'], 403);
-        }
-
-        $printer_active = Setting::getVal('printer_active') == '1';
-        $printer_ip = Setting::getVal('printer_ip');
-        $printer_port = Setting::getVal('printer_port', 9100);
-
-        if (!$printer_active || empty($printer_ip)) {
-            return response()->json(['error' => 'Fitur printer thermal tidak aktif atau IP belum diatur di Pengaturan.'], 400);
-        }
-
         try {
-            $connector = new NetworkPrintConnector($printer_ip, $printer_port);
-            $printer = new Printer($connector);
-            
-            // Pengaturan Struk
-            $storeName = Setting::getVal('store_name', 'Angkringan POS');
-            $storeAddress = Setting::getVal('store_address', '');
-            
-            // Header
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->setEmphasis(true);
-            $printer->text($storeName . "\n");
-            $printer->setEmphasis(false);
-            $printer->text($storeAddress . "\n");
-            $printer->text("--------------------------------\n");
-
-            // Info Pesanan
-            $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $printer->text("Waktu   : " . \Carbon\Carbon::parse($order->pembayaran->tanggal)->format('d/m/Y H:i') . "\n");
-            $printer->text("Kasir   : " . ($order->kasir->name ?? 'Kasir') . "\n");
-            $printer->text("Meja    : " . ($order->meja->nama_meja_atau_nomor ?? '-') . "\n");
-            $printer->text("Metode  : " . strtoupper($order->pembayaran->metode ?? '-') . "\n");
-            $printer->text("--------------------------------\n");
-
-            // Items
-            foreach ($order->detail_pesanan as $detail) {
-                $namaMenu = substr($detail->menu->nama_menu, 0, 20); // Potong jika kepanjangan
-                $qty = str_pad($detail->jumlah . "x", 4, " ", STR_PAD_RIGHT);
-                $harga = str_pad(number_format($detail->subtotal, 0, ',', '.'), 8, " ", STR_PAD_LEFT);
-                
-                $printer->text($namaMenu . "\n");
-                $printer->text("    " . $qty . $harga . "\n");
-                
-                if (!empty($detail->selected_variants)) {
-                    $variants = json_decode($detail->selected_variants, true);
-                    if (is_array($variants) && count($variants) > 0) {
-                        $varText = implode(', ', array_column($variants, 'name'));
-                        $printer->text("    - " . substr($varText, 0, 26) . "\n");
-                    }
-                }
-
-                if (!empty($detail->catatan)) {
-                    $printer->text("    * " . substr($detail->catatan, 0, 26) . "\n");
-                }
-            }
-            $printer->text("--------------------------------\n");
-
-            // Total
-            $printer->setJustification(Printer::JUSTIFY_RIGHT);
-            if ($order->discount_amount > 0) {
-                $printer->text("Subtotal : Rp " . number_format($order->total, 0, ',', '.') . "\n");
-                $printer->text("Diskon   : Rp " . number_format($order->discount_amount, 0, ',', '.') . "\n");
-            }
-            $printer->setEmphasis(true);
-            $printer->text("TOTAL : Rp " . number_format($order->pembayaran->total_bayar, 0, ',', '.') . "\n");
-            $printer->setEmphasis(false);
-            $printer->text("--------------------------------\n");
-
-            // Footer
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $footerText = Setting::getVal('receipt_footer', 'Terima kasih atas kunjungan Anda!');
-            $printer->text(str_replace('\n', "\n", $footerText) . "\n\n\n\n\n");
-
-            // Potong kertas
-            $printer->cut();
-            $printer->close();
-
+            $printService->printReceipt($id);
             return response()->json(['message' => 'Struk berhasil dikirim ke printer thermal.']);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Gagal terhubung ke printer (' . $printer_ip . ':' . $printer_port . '). Error: ' . $e->getMessage()], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -391,10 +272,19 @@ class PosController extends Controller
     /**
      * Cetak struk dapur (tanpa harga).
      */
-    public function printKitchenReceipt($id)
+    public function printKitchenReceipt($id, PrintService $printService)
     {
-        $order = Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id);
-        return view('kasir.kitchen_receipt', compact('order'));
+        try {
+            $printService->printKitchenReceipt($id);
+            return response()->json(['message' => 'Tiket dapur berhasil dikirim ke printer thermal.']);
+        } catch (\Exception $e) {
+            // Jika fitur mati, jatuh kembali ke print html biasa (fallback)
+            if (str_contains($e->getMessage(), 'tidak aktif')) {
+                $order = Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id);
+                return view('kasir.kitchen_receipt', compact('order'));
+            }
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**

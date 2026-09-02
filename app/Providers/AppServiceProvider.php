@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Database\Eloquent\Model::preventLazyLoading(!app()->isProduction());
+
         if ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || str_contains(request()->url(), 'https://')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
