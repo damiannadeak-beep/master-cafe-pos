@@ -72,17 +72,17 @@ trait HandlesImageUpload
         $homeDir = env('HOME') ?: getenv('HOME') ?: '/home/nadp3189';
         if ($homeDir) {
             // Folder utama di home (DOCUMENT ROOT AKTIF)
-            $destinations[] = $homeDir . '/angkringan.nadeak.net/public/storage/' . $path;
-            $destinations[] = $homeDir . '/angkringan.nadeak.net/storage/app/public/' . $path;
-            $destinations[] = $homeDir . '/angkringan.nadeak.net/storage/' . $path;
+            $destinations[] = $homeDir . '/mastercafe.nadeak.net/public/storage/' . $path;
+            $destinations[] = $homeDir . '/mastercafe.nadeak.net/storage/app/public/' . $path;
+            $destinations[] = $homeDir . '/mastercafe.nadeak.net/storage/' . $path;
             // Folder public_html
             $destinations[] = $homeDir . '/public_html/storage/' . $path;
             $destinations[] = $homeDir . '/public_html/public/storage/' . $path;
             $destinations[] = $homeDir . '/public_html/storage/app/public/' . $path;
-            // Folder public_html/angkringan.nadeak.net
-            $destinations[] = $homeDir . '/public_html/angkringan.nadeak.net/storage/' . $path;
-            $destinations[] = $homeDir . '/public_html/angkringan.nadeak.net/public/storage/' . $path;
-            $destinations[] = $homeDir . '/public_html/angkringan.nadeak.net/storage/app/public/' . $path;
+            // Folder public_html/mastercafe.nadeak.net
+            $destinations[] = $homeDir . '/public_html/mastercafe.nadeak.net/storage/' . $path;
+            $destinations[] = $homeDir . '/public_html/mastercafe.nadeak.net/public/storage/' . $path;
+            $destinations[] = $homeDir . '/public_html/mastercafe.nadeak.net/storage/app/public/' . $path;
         }
 
         $savedPaths = [];
@@ -141,8 +141,8 @@ trait HandlesImageUpload
         if ($homeDir) {
             $targetPaths[] = $homeDir . '/public_html/storage/' . $imagePath;
             $targetPaths[] = $homeDir . '/public_html/public/storage/' . $imagePath;
-            $targetPaths[] = $homeDir . '/public_html/angkringan.nadeak.net/storage/' . $imagePath;
-            $targetPaths[] = $homeDir . '/public_html/angkringan.nadeak.net/public/storage/' . $imagePath;
+            $targetPaths[] = $homeDir . '/public_html/mastercafe.nadeak.net/storage/' . $imagePath;
+            $targetPaths[] = $homeDir . '/public_html/mastercafe.nadeak.net/public/storage/' . $imagePath;
         }
 
         foreach ($targetPaths as $targetFile) {
@@ -152,3 +152,4 @@ trait HandlesImageUpload
         }
     }
 }
+

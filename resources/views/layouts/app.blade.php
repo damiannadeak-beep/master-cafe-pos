@@ -28,19 +28,19 @@
             touch-action: manipulation;
         }
         
-        .btn-angkringan {
+        .btn-mastercafe {
             background-color: #5d4037 !important;
             color: #ffffff !important;
             border: none;
         }
-        .btn-angkringan:hover {
+        .btn-mastercafe:hover {
             background-color: #4e342e !important;
             color: #ffffff !important;
         }
-        .text-angkringan {
+        .text-mastercafe {
             color: #5d4037 !important;
         }
-        .bg-angkringan {
+        .bg-mastercafe {
             background-color: #5d4037 !important;
             color: #ffffff !important;
         }
@@ -152,4 +152,5 @@
 
 </body>
 </html>
+
 

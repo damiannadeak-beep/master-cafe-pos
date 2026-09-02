@@ -1,5 +1,5 @@
 /**
- * Angkringan POS - PWA Offline-First & Background Sync Engine
+ * Master Cafe POS - PWA Offline-First & Background Sync Engine
  */
 
 // 1. Register Service Worker
@@ -88,7 +88,7 @@ window.fetch = async function(...args) {
 };
 
 // 3. IndexedDB Storage Engine for Offline Queue
-const DB_NAME = 'AngkringanPosOfflineDB';
+const DB_NAME = 'MasterCafeOfflineDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'offline_orders';
 
@@ -165,3 +165,4 @@ async function syncOfflineOrders() {
         console.warn('Sync IndexedDB error:', e);
     }
 }
+

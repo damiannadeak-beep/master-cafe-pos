@@ -13,7 +13,7 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            ['key' => 'store_name', 'value' => 'Angkringan Maknyus'],
+            ['key' => 'store_name', 'value' => 'Master Cafe Maknyus'],
             ['key' => 'store_address', 'value' => 'Jl. Kebahagiaan No. 123, Yogyakarta'],
             ['key' => 'store_phone', 'value' => '081234567890'],
             ['key' => 'receipt_footer', 'value' => 'Terima kasih atas kunjungan Anda!\nKritik & Saran: 081234567890'],
@@ -27,3 +27,4 @@ class SettingSeeder extends Seeder
         }
     }
 }
+

@@ -14,7 +14,7 @@
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="mb-1 fw-bold"><i class="bi bi-geo-alt me-2"></i>Belum di Lokasi?</h5>
-                                <p class="mb-0 small text-white-50">Pesan dulu sekarang, cari meja kosong saat tiba di Angkringan!</p>
+                                <p class="mb-0 small text-white-50">Pesan dulu sekarang, cari meja kosong saat tiba di Master Cafe!</p>
                             </div>
                             <a href="{{ route('menu_nanti') }}" class="btn btn-light fw-bold px-4 text-primary rounded-pill">Pesan Sekarang</a>
                         </div>
@@ -54,3 +54,4 @@
     </div>
 </div>
 @endsection
+

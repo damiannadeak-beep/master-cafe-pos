@@ -336,7 +336,7 @@ class AdminController extends Controller
 
         $topMenus = collect($data['bestSeller'])->map(fn($m) => "- {$m->nama_menu} ({$m->total_terjual} porsi)")->implode("\n");
 
-        $prompt = "Berikut adalah data ringkasan penjualan angkringan saya selama 7 hari terakhir:\n";
+        $prompt = "Berikut adalah data ringkasan penjualan Master Cafe saya selama 7 hari terakhir:\n";
         $prompt .= "- Total Pendapatan Kotor: {$totalPendapatanStr}\n";
         $prompt .= "- Laba Bersih: {$labaBersihStr}\n";
         $prompt .= "- Menu Paling Laris:\n{$topMenus}\n\n";

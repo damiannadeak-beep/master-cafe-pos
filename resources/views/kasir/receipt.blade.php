@@ -93,8 +93,8 @@
     <button class="no-print btn-print" onclick="window.print()">Cetak Struk Sekarang</button>
 
     <div class="header text-center">
-        <h3>{{ \App\Models\Setting::getVal('store_name', 'ANGKRINGAN POS') }}</h3>
-        <p>{{ \App\Models\Setting::getVal('store_address', 'Jl. Contoh Angkringan No. 123') }}<br>Telp: {{ \App\Models\Setting::getVal('store_phone', '08123456789') }}</p>
+        <h3>{{ \App\Models\Setting::getVal('store_name', 'MASTER CAFE POS') }}</h3>
+        <p>{{ \App\Models\Setting::getVal('store_address', 'Jl. Contoh Master Cafe No. 123') }}<br>Telp: {{ \App\Models\Setting::getVal('store_phone', '08123456789') }}</p>
     </div>
     
     <div class="mb-2" style="font-size: 11px;">
@@ -168,8 +168,9 @@
     <div class="divider"></div>
     
     <div class="footer">
-        {!! nl2br(e(\App\Models\Setting::getVal('receipt_footer', "Terima Kasih Atas Kunjungan Anda!\nKritik & Saran: angkringan@pos.com"))) !!}
+        {!! nl2br(e(\App\Models\Setting::getVal('receipt_footer', "Terima Kasih Atas Kunjungan Anda!\nKritik & Saran: info@mastercafe.com"))) !!}
     </div>
 
 </body>
 </html>
+

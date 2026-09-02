@@ -11,14 +11,14 @@ class BackupService
      */
     public function runMysqldump(): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\RedirectResponse
     {
-        $filename = 'backup_angkringan_' . date('Y_m_d_His') . '.sql';
+        $filename = 'backup_mastercafe_' . date('Y_m_d_His') . '.sql';
         $filepath = storage_path('app/' . $filename);
 
         $dbHost = config('database.connections.mysql.host', '127.0.0.1');
         $dbPort = (string) config('database.connections.mysql.port', '3306');
         $dbUser = config('database.connections.mysql.username', 'root');
         $dbPass = config('database.connections.mysql.password', '');
-        $dbName = config('database.connections.mysql.database', 'angkringan_pos');
+        $dbName = config('database.connections.mysql.database', 'mastercafe_pos');
 
         $mysqldumpPath = 'C:\\xampp\\mysql\\bin\\mysqldump.exe';
         if (!file_exists($mysqldumpPath)) {
@@ -46,3 +46,4 @@ class BackupService
         return back()->withErrors(['msg' => 'Gagal membuat backup database. Error: ' . $process->getErrorOutput()]);
     }
 }
+

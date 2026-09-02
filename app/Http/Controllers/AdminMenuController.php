@@ -110,7 +110,7 @@ class AdminMenuController extends Controller
             return response()->json(['error' => 'API Key Gemini belum dikonfigurasi di Pengaturan.'], 400);
         }
 
-        $prompt = "Buatkan deskripsi makanan/minuman yang menggugah selera untuk menu bernama '{$namaMenu}'. Deskripsi harus singkat, maksimal 2 kalimat, gaya bahasa santai khas Indonesia yang cocok untuk jualan restoran/angkringan. Jangan gunakan kata-kata yang terlalu kaku.";
+        $prompt = "Buatkan deskripsi makanan/minuman yang menggugah selera untuk menu bernama '{$namaMenu}'. Deskripsi harus singkat, maksimal 2 kalimat, gaya bahasa santai khas Indonesia yang cocok untuk jualan restoran/Master Cafe. Jangan gunakan kata-kata yang terlalu kaku.";
 
         try {
             $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" . $apiKey, [
@@ -134,3 +134,4 @@ class AdminMenuController extends Controller
         }
     }
 }
+

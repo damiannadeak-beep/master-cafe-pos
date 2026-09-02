@@ -1,8 +1,8 @@
-const CACHE_NAME = 'angkringan-pos-v3';
+const CACHE_NAME = 'mastercafe-pos-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/logo-angkringan.png',
+  '/logo-mastercafe.png',
   '/js/pwa-offline.js'
 ];
 
@@ -98,3 +98,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+

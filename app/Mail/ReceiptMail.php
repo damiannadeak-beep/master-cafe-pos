@@ -30,7 +30,7 @@ class ReceiptMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'E-Receipt Pesanan Angkringan POS #' . str_pad($this->pesanan->id, 4, '0', STR_PAD_LEFT),
+            subject: 'E-Receipt Pesanan Master Cafe POS #' . str_pad($this->pesanan->id, 4, '0', STR_PAD_LEFT),
         );
     }
 
@@ -54,3 +54,4 @@ class ReceiptMail extends Mailable
         return [];
     }
 }
+

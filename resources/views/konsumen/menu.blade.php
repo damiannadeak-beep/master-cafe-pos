@@ -16,17 +16,17 @@
 
     @if(isset($promos) && count($promos) > 0)
     <div class="alert border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #f0e6d2, #d9c5a0); color: #4A3B32;">
-        <h6 class="fw-bold mb-2"><i class="bi bi-tags-fill text-angkringan me-1"></i> Promo Spesial Hari Ini!</h6>
+        <h6 class="fw-bold mb-2"><i class="bi bi-tags-fill text-mastercafe me-1"></i> Promo Spesial Hari Ini!</h6>
         <ul class="mb-0 ps-3">
             @foreach($promos as $promo)
                 <li class="mb-1">
                     <strong>{{ $promo->title }}</strong> 
                     @if($promo->type == 'discount')
-                        <span class="badge bg-angkringan rounded-pill ms-1">
+                        <span class="badge bg-mastercafe rounded-pill ms-1">
                         Diskon {{ $promo->discount_type == 'percentage' ? $promo->value.'%' : 'Rp '.number_format($promo->value,0,',','.') }}
                         </span>
                     @elseif($promo->type == 'package')
-                        <span class="badge bg-angkringan rounded-pill ms-1">Paket Khusus</span>
+                        <span class="badge bg-mastercafe rounded-pill ms-1">Paket Khusus</span>
                         <span class="badge bg-warning text-dark rounded-pill ms-1 shadow-sm"><i class="bi bi-tag-fill"></i> Cukup Bayar Rp {{ number_format($promo->value,0,',','.') }}</span>
                         <div class="mt-1 small">
                             <strong>Termasuk:</strong> 
@@ -63,7 +63,7 @@
                 <!-- Promo Badge -->
                 @if(isset($promoMenuIds) && in_array($menu->id, $promoMenuIds))
                 <div class="position-absolute top-0 end-0 m-2" style="z-index: 2;">
-                    <span class="badge bg-angkringan shadow-sm px-2 py-1 rounded-pill"><i class="bi bi-tag-fill me-1"></i> Promo</span>
+                    <span class="badge bg-mastercafe shadow-sm px-2 py-1 rounded-pill"><i class="bi bi-tag-fill me-1"></i> Promo</span>
                 </div>
                 @endif
 

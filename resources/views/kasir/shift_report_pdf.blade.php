@@ -116,7 +116,7 @@
     <table class="kop-header">
         <tr>
             <td style="border: none; padding: 0;">
-                <h1 class="brand-title">ANGKRINGAN POS</h1>
+                <h1 class="brand-title">MASTER CAFE POS</h1>
                 <div class="brand-subtitle">Laporan Rekonsiliasi Tutup Shift Kasir</div>
             </td>
             <td style="border: none; padding: 0; text-align: right;" class="report-meta">
@@ -184,7 +184,7 @@
     <table class="footer-note">
         <tr>
             <td style="border: none; padding: 0;">
-                Laporan Tutup Shift Kasir sah secara sistem komputerisasi Angkringan POS.
+                Laporan Tutup Shift Kasir sah secara sistem komputerisasi Master Cafe POS.
             </td>
             <td style="border: none; padding: 0; text-align: right;">
                 Dicetak pada {{ date('d/m/Y H:i:s') }}
@@ -194,4 +194,5 @@
 
 </body>
 </html>
+
 

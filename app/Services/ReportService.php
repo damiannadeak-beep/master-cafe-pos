@@ -125,7 +125,7 @@ class ReportService
     {
         $data = $this->getReportsData($startDate, $endDate);
         $pdf = Pdf::loadView('admin.reports_pdf', $data);
-        return $pdf->download("Laporan_Angkringan_{$startDate}_sd_{$endDate}.pdf");
+        return $pdf->download("Laporan_Master Cafe_{$startDate}_sd_{$endDate}.pdf");
     }
 
     /**
@@ -169,7 +169,7 @@ class ReportService
         $rows = $query->orderBy('id', 'desc')->get();
 
         $tahun = Carbon::parse($startDate)->format('Y');
-        $filename = 'laporan_penjualan_angkringan_' . $tahun . '.xls';
+        $filename = 'laporan_penjualan_mastercafe_' . $tahun . '.xls';
 
         $html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
         $html .= '<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan Penjualan</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
@@ -177,7 +177,7 @@ class ReportService
         $html .= '<table border="0" cellpadding="5" cellspacing="0" style="font-family: Arial, sans-serif; font-size: 10pt; border-collapse: collapse;">';
 
         // Row 1: Title Header (Merged A1:H1)
-        $html .= '<tr><td colspan="8" style="font-size: 11pt; font-weight: bold; text-align: center; height: 28px; vertical-align: middle; border: 0.5pt solid #000000; background-color: #ffffff;">LAPORAN PENJUALAN ANGKRINGAN - TAHUN ' . $tahun . '</td></tr>';
+        $html .= '<tr><td colspan="8" style="font-size: 11pt; font-weight: bold; text-align: center; height: 28px; vertical-align: middle; border: 0.5pt solid #000000; background-color: #ffffff;">LAPORAN PENJUALAN MASTER CAFE - TAHUN ' . $tahun . '</td></tr>';
 
         // Row 2: Table Column Headers (A2:H2)
         $html .= '<tr style="font-weight: bold; text-align: center; background-color: #ffffff;">';
@@ -246,3 +246,4 @@ class ReportService
         ]);
     }
 }
+
