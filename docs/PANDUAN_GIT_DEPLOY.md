@@ -1,14 +1,14 @@
-# Panduan Workflow Git & Deployment cPanel (Angkringan POS)
+# Panduan Workflow Git & Deployment cPanel (Master Cafe)
 
-Dokumen ini berisi langkah-langkah standar untuk pengembangan fitur baru, perbaikan bug (trial-error di local), hingga deployment ke server cPanel live.
+Dokumen ini berisi langkah-langkah standar untuk pengembangan fitur baru, perbaikan bug (trial-error di local), hingga deployment ke server cPanel live dengan **Keamanan Standar Industri**.
 
 ---
 
 ## 1. Pengembangan & Trial-Error di Laptop (Localhost)
 
-Kerjakan seluruh eksperimen dan uji coba di laptop (Local XAMPP) menggunakan **Branch**.
+Kerjakan seluruh eksperimen dan uji coba di laptop (Local Herd/DBngin) menggunakan **Branch**.
 
-```bash
+`ash
 # 1. Pindah ke branch utama & pastikan kode lokal terbaru
 git checkout master
 git pull origin master
@@ -17,14 +17,14 @@ git pull origin master
 # Format: fitur/nama-fitur  atau  fix/nama-bug
 git checkout -b fitur-stok-otomatis
 
-# 3. Bebas koding dan trial-error di local (http://localhost:8000)
+# 3. Bebas koding dan trial-error di local (http://mastercafe-pos.test)
 # Setelah fitur berhasil & lulus uji coba, simpan perubahan:
 git add -A
 git commit -m "feat: implementasi fitur stok otomatis"
 
 # 4. Push branch fitur ke GitHub
 git push --set-upstream origin fitur-stok-otomatis
-```
+`
 
 ---
 
@@ -32,7 +32,7 @@ git push --set-upstream origin fitur-stok-otomatis
 
 Setelah fitur di branch diuji dan tidak ada error:
 
-```bash
+`ash
 # Pindah kembali ke branch master lokal
 git checkout master
 
@@ -44,38 +44,39 @@ git push origin master
 
 # (Opsional) Hapus branch fitur lokal jika sudah selesai
 git branch -d fitur-stok-otomatis
-```
+`
 
 ---
 
-## 3. Deployment ke Server cPanel Live
+## 3. Deployment ke Server cPanel Live (Secure Architecture)
+
+**Arsitektur Baru:** File inti Laravel (pp, outes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/angkringan-pos. Kita HANYA mengkopi folder public ke internet.
 
 Buka **Terminal cPanel** pada server hosting:
 
-```bash
+`ash
 # 1. Masuk ke folder repository server
-cd /home/nadp3189/repositories/master-cafe-pos
+cd /home/nadp3189/repositories/angkringan-pos
 
-# 2. Pindah ke branch master & tarik kode terbaru dari GitHub
+# 2. Tarik kode terbaru dari GitHub
 git checkout master
 git pull origin master
 
-# 3. Sinkronkan kode terbaru ke folder web live (mastercafe.nadeak.net)
-cp -Rf app /home/nadp3189/public_html/mastercafe.nadeak.net/
-cp -Rf resources /home/nadp3189/public_html/mastercafe.nadeak.net/
-cp -Rf routes /home/nadp3189/public_html/mastercafe.nadeak.net/
-cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/public/ 2>/dev/null || true
+# 3. Kopi HANYA isi folder public ke Document Root domain
+cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/ 2>/dev/null || true
 
-# 4. Pastikan ijin folder storage & public tetap aman (0777)
+# 4. Suntikkan (Modifikasi) index.php agar mengarah ke folder repositories yang aman
+sed -i "s|__DIR__.'/../vendor/autoload.php'|__DIR__.'/../../repositories/angkringan-pos/vendor/autoload.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
+sed -i "s|__DIR__.'/../bootstrap/app.php'|__DIR__.'/../../repositories/angkringan-pos/bootstrap/app.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
+
+# 5. Pastikan ijin folder storage & public tetap aman (0777)
+chmod -R 777 /home/nadp3189/repositories/angkringan-pos/storage 2>/dev/null || true
 chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/storage 2>/dev/null || true
-chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/public/storage 2>/dev/null || true
-```
+`
 
 ---
 
 ## Catatan Penting
 - **Jangan pernah koding langsung di server live.** Selalu gunakan branch lokal untuk uji coba.
-- **Folder Gambar:** Folder `public/storage` di server adalah folder fisik asli (bukan symlink) untuk menghindari pemblokiran keamanan CageFS cPanel.
-
-
+- **Folder Gambar:** Folder storage di server adalah folder fisik asli (bukan symlink) untuk menghindari pemblokiran keamanan CageFS cPanel.
 
