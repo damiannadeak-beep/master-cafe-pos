@@ -10,3 +10,4 @@ echo json_encode([
     'files_in_dir' => array_slice(scandir(__DIR__), 0, 10)
 ], JSON_PRETTY_PRINT);
 
+

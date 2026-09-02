@@ -78,3 +78,4 @@ chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/public/storage 2>/
 - **Folder Gambar:** Folder `public/storage` di server adalah folder fisik asli (bukan symlink) untuk menghindari pemblokiran keamanan CageFS cPanel.
 
 
+
