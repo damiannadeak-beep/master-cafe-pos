@@ -3,7 +3,7 @@
 @section('content')
 <!-- Header Banner -->
 <div class="bg-dark text-white pt-5 pb-4 mb-5 position-relative overflow-hidden rounded-bottom-4 shadow-sm">
-    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(93,64,55,0.3) 0%, transparent 60%); pointer-events: none;"></div>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(178,122,77,0.3) 0%, transparent 60%); pointer-events: none;"></div>
     <div class="container text-center position-relative z-index-1">
         <h1 class="display-5 fw-bold mb-3">Katalog Menu Kami</h1>
         <p class="fs-5 text-light opacity-75 mx-auto mb-4" style="max-width: 600px;">
@@ -33,7 +33,7 @@
 <div class="container mb-5 pb-5">
     
     @if(isset($promos) && count($promos) > 0)
-    <div class="alert border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #f0e6d2, #d9c5a0); color: #4A3B32;">
+    <div class="alert border-0 shadow-sm rounded-4 mb-4" style="background: #1a1d24; border: 1px solid #b27a4d !important; color: #f8f9fa;">
         <h6 class="fw-bold mb-2"><i class="bi bi-tags-fill text-mastercafe me-1"></i> Promo Spesial Hari Ini!</h6>
         <ul class="mb-0 ps-3">
             @foreach($promos as $promo)
@@ -45,11 +45,11 @@
                         </span>
                     @elseif($promo->type == 'package')
                         <span class="badge bg-mastercafe rounded-pill ms-1">Paket Khusus</span>
-                        <span class="badge bg-warning text-dark rounded-pill ms-1 shadow-sm"><i class="bi bi-tag-fill"></i> Cukup Bayar Rp {{ number_format($promo->value,0,',','.') }}</span>
+                        <span class="badge bg-warning text-white rounded-pill ms-1 shadow-sm"><i class="bi bi-tag-fill"></i> Cukup Bayar Rp {{ number_format($promo->value,0,',','.') }}</span>
                         <div class="mt-1 small">
                             <strong>Termasuk:</strong> 
                             @foreach($promo->menus as $pm)
-                                <span class="badge bg-light text-dark border">{{ $pm->nama_menu }}</span>
+                                <span class="badge bg-dark text-light border border-secondary">{{ $pm->nama_menu }}</span>
                             @endforeach
                         </div>
                     @endif
@@ -64,10 +64,10 @@
 
     <!-- Filter Kategori -->
     <div class="d-flex justify-content-center mb-5">
-        <div class="bg-light rounded-pill p-1 shadow-sm border d-inline-flex" role="group">
+        <div class="bg-dark rounded-pill p-1 shadow-sm border border-secondary d-inline-flex" role="group">
             <button type="button" class="btn btn-mastercafe rounded-pill px-4 fw-bold filter-btn" data-filter="semua">Semua</button>
-            <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-muted filter-btn" data-filter="makanan">Makanan</button>
-            <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-muted filter-btn" data-filter="minuman">Minuman</button>
+            <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold text-light filter-btn" data-filter="makanan">Makanan</button>
+            <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold text-light filter-btn" data-filter="minuman">Minuman</button>
         </div>
     </div>
 
@@ -75,15 +75,15 @@
     <div class="row g-4 align-items-start" id="menu-container">
         @forelse($menus as $menu)
         <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}">
-            <div class="card h-auto shadow-sm border-0 rounded-4 overflow-hidden hover-lift bg-white">
+            <div class="card h-auto shadow-sm border-0 rounded-4 overflow-hidden hover-lift bg-dark border border-secondary">
                 <div class="position-relative">
                     <!-- Gambar -->
                     @if($menu->image)
-                        <div class="bg-white text-center w-100 p-2" style="aspect-ratio: 4/3;">
+                        <div class="bg-dark border border-secondary text-center w-100 p-2" style="aspect-ratio: 4/3;">
                             <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='https://placehold.co/600x450/e9ecef/6c757d?text=Belum+Ada+Foto';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%;">
                         </div>
                     @else
-                        <div class="bg-light d-flex align-items-center justify-content-center text-secondary w-100" style="aspect-ratio: 4/3;">
+                        <div class="bg-dark d-flex align-items-center justify-content-center text-secondary w-100" style="aspect-ratio: 4/3;">
                             <div class="text-center w-100">
                                 <i class="bi bi-image fs-1 opacity-50"></i>
                             </div>
@@ -93,9 +93,9 @@
                     <!-- Overlay Kategori -->
                     <div class="position-absolute top-0 start-0 m-2 m-md-3">
                         @if(strtolower($menu->kategori) === 'minuman')
-                            <span class="badge bg-info bg-opacity-75 text-white backdrop-blur rounded-pill border border-info border-opacity-25 px-2 py-1"><i class="bi bi-cup-straw"></i> <span class="d-none d-md-inline">Minuman</span></span>
+                            <span class="badge bg-dark bg-opacity-75 text-primary backdrop-blur rounded-pill border border-primary border-opacity-50 px-2 py-1"><i class="bi bi-cup-straw"></i> <span class="d-none d-md-inline">Minuman</span></span>
                         @else
-                            <span class="badge bg-warning bg-opacity-75 text-dark backdrop-blur rounded-pill border border-warning border-opacity-25 px-2 py-1"><i class="bi bi-egg-fried"></i> <span class="d-none d-md-inline">Makanan</span></span>
+                            <span class="badge bg-warning bg-opacity-75 text-white backdrop-blur rounded-pill border border-warning border-opacity-25 px-2 py-1"><i class="bi bi-egg-fried"></i> <span class="d-none d-md-inline">Makanan</span></span>
                         @endif
                     </div>
 
@@ -108,7 +108,7 @@
                 </div>
                 
                 <div class="card-body p-3 p-md-4 d-flex flex-column">
-                    <h5 class="fw-bold mb-1 mb-md-2 text-dark fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
+                    <h5 class="fw-bold mb-1 mb-md-2 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
                     <div class="mb-2 mb-md-3">
                         <span class="text-mastercafe fw-bold fs-6 fs-md-5">Rp {{ number_format($menu->harga, 0, ',', '.') }}</span>
                     </div>
@@ -174,9 +174,9 @@
                 // Update active state of buttons
                 filterBtns.forEach(b => {
                     b.classList.remove('btn-mastercafe');
-                    b.classList.add('btn-light', 'text-muted');
+                    b.classList.add('btn-dark', 'text-light');
                 });
-                this.classList.remove('btn-light', 'text-muted');
+                this.classList.remove('btn-dark', 'text-light');
                 this.classList.add('btn-mastercafe');
 
                 // Filter items
@@ -202,3 +202,4 @@
     });
 </script>
 @endsection
+
