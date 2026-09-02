@@ -11,47 +11,72 @@
     <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&family=Rye&display=swap" rel="stylesheet">
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
 
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#111418">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <script src="/js/pwa-offline.js"></script>
     <style>
-        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        :root {
+            --bs-primary: #b27a4d;
+            --bs-primary-rgb: 178, 122, 77;
+        }
+        body, button, input, select, textarea, .nav-link {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Rye', serif !important;
+        }
+        .font-cursive {
+            font-family: 'Great Vibes', cursive !important;
         }
         /* Anti-lag touch */
         button, a, input, select, textarea {
             touch-action: manipulation;
         }
         
-        .btn-mastercafe {
-            background-color: #5d4037 !important;
+        .btn-mastercafe, .btn-primary {
+            background-color: #b27a4d !important;
             color: #ffffff !important;
             border: none;
         }
-        .btn-mastercafe:hover {
-            background-color: #4e342e !important;
+        .btn-mastercafe:hover, .btn-primary:hover {
+            background-color: #96653f !important;
             color: #ffffff !important;
         }
-        .text-mastercafe {
-            color: #5d4037 !important;
+        .text-mastercafe, .text-primary {
+            color: #b27a4d !important;
         }
         .bg-mastercafe {
-            background-color: #5d4037 !important;
+            background-color: #b27a4d !important;
             color: #ffffff !important;
+        }
+        .navbar {
+            background-color: #111418 !important;
+            border-bottom: 1px solid #2a2d32 !important;
+        }
+        .dropdown-menu {
+            background-color: #1a1d24;
+            border-color: #2a2d32;
+        }
+        .dropdown-item {
+            color: #e2e8f0;
+        }
+        .dropdown-item:hover {
+            background-color: #2a2d32;
+            color: #ffffff;
         }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-dark text-light" data-bs-theme="dark" style="background-color: #111418 !important;">
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-light border-bottom border-secondary shadow-sm sticky-top">
+        <nav class="navbar navbar-expand-md navbar-dark shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">
-                    <i class="bi bi-shop me-1"></i> Master Cafe
+                    <i class="bi bi-cup-hot-fill me-1"></i> Master Cafe
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -89,9 +114,9 @@
                             @endif
                         @else
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle fw-bold text-dark d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle fw-bold text-light d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     @if(Auth::user()->foto)
-                                        <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" alt="Foto" class="rounded-circle me-2" style="width: 25px; height: 25px; object-fit: cover;">
+                                        <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" alt="Foto" class="rounded-circle me-2 border border-primary" style="width: 25px; height: 25px; object-fit: cover;">
                                     @else
                                         <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
                                     @endif
@@ -141,8 +166,9 @@
             @yield('content')
         </main>
         
-        <footer class="text-center py-4 mt-auto w-100" style="padding-bottom: env(safe-area-inset-bottom, 120px) !important;">
-            <small class="text-muted">&copy; {{ date('Y') }} Master Cafe. Hak Cipta Dilindungi.</small>
+        <footer class="text-center py-4 mt-auto w-100 border-top" style="border-color: #2a2d32 !important; padding-bottom: env(safe-area-inset-bottom, 120px) !important;">
+            <p class="font-cursive text-primary fs-3 mb-0">Master Cafe</p>
+            <small class="text-secondary">&copy; {{ date('Y') }} Master Cafe. Hak Cipta Dilindungi.</small>
         </footer>
     </div>
     
@@ -152,5 +178,6 @@
 
 </body>
 </html>
+
 
 
