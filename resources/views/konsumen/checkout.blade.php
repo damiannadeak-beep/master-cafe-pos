@@ -30,11 +30,18 @@
                         </div>
                     </div>
                     
-                    <div class="d-grid mt-4">
+                                        <div class="d-grid mt-4">
+                        @if($pembayaran->snap_token)
                         <!-- Tombol Bayar Midtrans -->
                         <button id="pay-button" class="btn btn-lg fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; padding: 12px 20px;">
                             Bayar Sekarang <i class="bi bi-credit-card ms-2"></i>
                         </button>
+                        @else
+                        <!-- Tombol Manual -->
+                        <a href="{{ url('/konsumen/profil') }}" class="btn btn-lg fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; padding: 12px 20px;">
+                            Tutup & Bayar di Kasir <i class="bi bi-check-circle ms-2"></i>
+                        </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -42,6 +49,7 @@
     </div>
 </div>
 
+@if($pembayaran->snap_token)
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 <script>
     document.getElementById('pay-button').onclick = function () {
@@ -61,4 +69,46 @@
         });
     };
 </script>
+@endif
+<script>
+    document.getElementById('pay-button').onclick = function () {
+        snap.pay('{{ $pembayaran->snap_token }}', {
+            onSuccess: function (result) {
+                window.location.href = "{{ url('/konsumen/profil') }}";
+            },
+            onPending: function (result) {
+                window.location.href = "{{ url('/konsumen/profil') }}";
+            },
+            onError: function (result) {
+                alert("Pembayaran Gagal!");
+            },
+            onClose: function () {
+                console.log('User closed popup without finishing payment');
+            }
+        });
+    };
+</script>
+@endsection
+
+@if($pembayaran->snap_token)
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<script>
+    document.getElementById('pay-button').onclick = function () {
+        snap.pay('{{ $pembayaran->snap_token }}', {
+            onSuccess: function (result) {
+                window.location.href = "{{ url('/konsumen/profil') }}";
+            },
+            onPending: function (result) {
+                window.location.href = "{{ url('/konsumen/profil') }}";
+            },
+            onError: function (result) {
+                alert("Pembayaran Gagal!");
+            },
+            onClose: function () {
+                console.log('User closed popup without finishing payment');
+            }
+        });
+    };
+</script>
+@endif
 @endsection
