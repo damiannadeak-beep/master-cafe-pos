@@ -34,7 +34,7 @@
                 
                 <!-- NEW: Filter Hari -->
                 <div class="mb-3">
-                    <label class="form-label d-block">Berlaku di Hari <small class="text-muted">(Pilih hari promo aktif. Kosongkan jika berlaku setiap hari)</small></label>
+                    <label class="form-label d-block">Berlaku di Hari <small class="text-white-50">(Pilih hari promo aktif. Kosongkan jika berlaku setiap hari)</small></label>
                     <div>
                         @php
                             $selectedDays = old('days', $promo->days ?? []);
@@ -58,9 +58,9 @@
                 </div>
                 
                 <!-- NEW: Dynamic Form for Package -->
-                <div id="paket-menu-container" class="mb-3 p-3 border rounded bg-light" style="{{ old('type', $promo->type) == 'package' ? '' : 'display: none;' }}">
+                <div id="paket-menu-container" class="mb-3 p-3 border rounded  text-white" style="{{ old('type', $promo->type) == 'package' ? '' : 'display: none;' }}">
                     <label class="form-label fw-bold"><i class="bi bi-box-seam me-1"></i> Daftar Menu dalam Paket ini</label>
-                    <p class="small text-muted mb-2">Pilih menu-menu apa saja dan jumlahnya yang harus dibeli pelanggan untuk mendapatkan harga Paket ini.</p>
+                    <p class="small text-white-50 mb-2">Pilih menu-menu apa saja dan jumlahnya yang harus dibeli pelanggan untuk mendapatkan harga Paket ini.</p>
                     
                     <div id="paket-items">
                         @php
@@ -83,7 +83,7 @@
                                 <div class="col-sm-3 mb-2 mb-sm-0">
                                     <div class="input-group">
                                         <span class="input-group-text">Qty</span>
-                                        <input type="number" name="package_qty[]" class="form-control text-center" value="{{ $em->pivot->jumlah }}" min="1">
+                                        <input type="number" name="package_qty[]" class="form-control text-white border-secondary  text-center" value="{{ $em->pivot->jumlah }}" min="1">
                                     </div>
                                 </div>
                                 <div class="col-sm-1 text-end">
@@ -104,7 +104,7 @@
                                 <div class="col-sm-3 mb-2 mb-sm-0">
                                     <div class="input-group">
                                         <span class="input-group-text">Qty</span>
-                                        <input type="number" name="package_qty[]" class="form-control text-center" value="1" min="1">
+                                        <input type="number" name="package_qty[]" class="form-control text-white border-secondary  text-center" value="1" min="1">
                                     </div>
                                 </div>
                                 <div class="col-sm-1 text-end">
@@ -118,14 +118,14 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Tipe Diskon <small class="text-muted">(Abaikan jika Tipe = Paket)</small></label>
+                        <label class="form-label">Tipe Diskon <small class="text-white-50">(Abaikan jika Tipe = Paket)</small></label>
                         <select name="discount_type" class="form-control">
                             <option value="percentage" {{ old('discount_type', $promo->discount_type ?? 'percentage') == 'percentage' ? 'selected' : '' }}>Persentase (%)</option>
                             <option value="nominal" {{ old('discount_type', $promo->discount_type ?? 'percentage') == 'nominal' ? 'selected' : '' }}>Nominal (Rp)</option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Nilai <small class="text-muted">(Jika Tipe=Paket, ini adalah Harga Akhir Paket)</small></label>
+                        <label class="form-label">Nilai <small class="text-white-50">(Jika Tipe=Paket, ini adalah Harga Akhir Paket)</small></label>
                         <input type="number" step="0.01" name="value" class="form-control" value="{{ old('value', $promo->value ? ($promo->value + 0) : '') }}" required>
                     </div>
                 </div>

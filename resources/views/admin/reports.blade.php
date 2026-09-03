@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2>Laporan Penjualan</h2>
-            <p class="text-muted mb-0">Lihat grafik penjualan dan unduh ringkasan pendapatan.</p>
+            <p class="text-white-50 mb-0">Lihat grafik penjualan dan unduh ringkasan pendapatan.</p>
         </div>
     </div>
 
@@ -51,13 +51,13 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-trophy text-warning me-2"></i> Menu Terlaris (Top 10)
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Peringkat</th>
                                     <th>Nama Menu</th>
@@ -68,7 +68,7 @@
                                 @forelse($bestSeller as $index => $item)
                                 <tr>
                                     <td>
-                                        @if($index == 0) <span class="badge bg-warning text-dark"><i class="bi bi-star-fill"></i> 1</span>
+                                        @if($index == 0) <span class="badge bg-warning text-white"><i class="bi bi-star-fill"></i> 1</span>
                                         @elseif($index == 1) <span class="badge bg-secondary"><i class="bi bi-star-fill"></i> 2</span>
                                         @elseif($index == 2) <span class="badge bg-danger"><i class="bi bi-star-fill"></i> 3</span>
                                         @else {{ $index + 1 }} @endif
@@ -77,7 +77,7 @@
                                     <td><span class="badge bg-primary rounded-pill">{{ $item->total_terjual }} porsi</span></td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="3" class="text-center text-muted">Belum ada data penjualan.</td></tr>
+                                <tr><td colspan="3" class="text-center text-white-50">Belum ada data penjualan.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -87,7 +87,7 @@
         </div>
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-pie-chart text-info me-2"></i> Metode Pembayaran
                 </div>
                 <div class="card-body d-flex justify-content-center align-items-center">
@@ -101,13 +101,13 @@
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-person-badge text-primary me-2"></i> Kinerja Kasir per Shift
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Nama Kasir</th>
                                     <th>Shift</th>
@@ -121,16 +121,16 @@
                                     <td class="fw-medium">{{ $kasir->name }}</td>
                                     <td>
                                         @if($kasir->shift == 'pagi')
-                                            <span class="badge bg-info text-dark"><i class="bi bi-brightness-high"></i> Pagi</span>
+                                            <span class="badge bg-info text-white"><i class="bi bi-brightness-high"></i> Pagi</span>
                                         @else
-                                            <span class="badge bg-dark"><i class="bi bi-moon-stars"></i> Malam</span>
+                                            <span class="badge "><i class="bi bi-moon-stars"></i> Malam</span>
                                         @endif
                                     </td>
                                     <td>{{ $kasir->total_transaksi }}</td>
                                     <td class="text-success fw-bold">Rp {{ number_format($kasir->total_pendapatan, 0, ',', '.') }}</td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="4" class="text-center text-muted">Belum ada data kasir.</td></tr>
+                                <tr><td colspan="4" class="text-center text-white-50">Belum ada data kasir.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -140,13 +140,13 @@
         </div>
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-box-seam text-success me-2"></i> Penggunaan Stok Bahan Baku
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Bahan Baku</th>
                                     <th>Total Terpakai</th>
@@ -159,7 +159,7 @@
                                     <td><span class="badge bg-danger">{{ $stok->total_penggunaan }} {{ $stok->satuan }}</span></td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="2" class="text-center text-muted">Belum ada data penggunaan bahan.</td></tr>
+                                <tr><td colspan="2" class="text-center text-white-50">Belum ada data penggunaan bahan.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -173,13 +173,13 @@
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-safe text-danger me-2"></i> Riwayat Rekonsiliasi Kasir (Buka/Tutup Laci)
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Kasir</th>
                                     <th>Waktu Shift</th>
@@ -196,7 +196,7 @@
                                     <td class="fw-medium">{{ $shift->user->name ?? 'Unknown' }}</td>
                                     <td>
                                         {{ $shift->waktu_buka->format('d/m/Y H:i') }} <br>
-                                        <small class="text-muted">s/d {{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') : 'Sekarang' }}</small>
+                                        <small class="text-white-50">s/d {{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') : 'Sekarang' }}</small>
                                     </td>
                                     <td>Rp {{ number_format($shift->modal_awal, 0, ',', '.') }}</td>
                                     <td>Rp {{ number_format($shift->total_pemasukan_tunai, 0, ',', '.') }}</td>
@@ -216,7 +216,7 @@
                                             @elseif($shift->selisih < 0)
                                                 <span class="badge bg-danger"><i class="bi bi-arrow-down me-1"></i> Kurang Rp {{ number_format(abs($shift->selisih), 0, ',', '.') }}</span>
                                             @else
-                                                <span class="badge bg-warning text-dark"><i class="bi bi-arrow-up me-1"></i> Lebih Rp {{ number_format($shift->selisih, 0, ',', '.') }}</span>
+                                                <span class="badge bg-warning text-white"><i class="bi bi-arrow-up me-1"></i> Lebih Rp {{ number_format($shift->selisih, 0, ',', '.') }}</span>
                                             @endif
                                         @endif
                                     </td>
@@ -224,12 +224,12 @@
                                         @if($shift->status == 'open')
                                             <span class="badge bg-primary">Open</span>
                                         @else
-                                            <span class="badge bg-dark">Closed</span>
+                                            <span class="badge ">Closed</span>
                                         @endif
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="7" class="text-center text-muted">Belum ada riwayat shift untuk periode ini.</td></tr>
+                                <tr><td colspan="7" class="text-center text-white-50">Belum ada riwayat shift untuk periode ini.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -327,7 +327,7 @@
         });
     } else if (pmCtx) {
         // Fallback jika kosong
-        pmCtx.parentElement.innerHTML = '<p class="text-muted text-center w-100">Belum ada data pembayaran</p>';
+        pmCtx.parentElement.innerHTML = '<p class="text-white-50 text-center w-100">Belum ada data pembayaran</p>';
     }
 </script>
 @endsection

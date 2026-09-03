@@ -9,13 +9,13 @@
     </div>
 
     <div class="card shadow mb-4 border-0">
-        <div class="card-header py-3 bg-white border-bottom-0">
+        <div class="card-header py-3 text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" border-bottom-0">
             <h6 class="m-0 font-weight-bold text-primary">Data Void Kasir</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                    <thead class="bg-light">
+                <table class="table table-dark table-dark table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="text-white">
                         <tr>
                             <th>Waktu Void</th>
                             <th>No. Pesanan</th>
@@ -35,7 +35,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">Belum ada riwayat void pesanan.</td>
+                            <td colspan="5" class="text-center py-4 text-white-50">Belum ada riwayat void pesanan.</td>
                         </tr>
                         @endforelse
                     </tbody>

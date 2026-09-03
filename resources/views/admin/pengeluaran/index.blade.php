@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2>Manajemen Pengeluaran</h2>
-            <p class="text-muted mb-0">Catat pengeluaran harian untuk menghitung laba bersih.</p>
+            <p class="text-white-50 mb-0">Catat pengeluaran harian untuk menghitung laba bersih.</p>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
         <!-- Kolom Kiri: Form Tambah Pengeluaran -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-wallet2 text-danger me-2"></i> Tambah Pengeluaran
                 </div>
                 <div class="card-body">
@@ -48,13 +48,13 @@
         <!-- Kolom Kanan: Tabel Data Pengeluaran -->
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     Riwayat Pengeluaran
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Tanggal</th>
                                     <th>Deskripsi</th>
@@ -69,12 +69,12 @@
                                 <tr>
                                     <td>{{ \Carbon\Carbon::parse($p->tanggal)->format('d M Y') }}</td>
                                     <td class="fw-medium">{{ $p->deskripsi }}</td>
-                                    <td class="text-muted small">{{ $p->keterangan ?: '-' }}</td>
+                                    <td class="text-white-50 small">{{ $p->keterangan ?: '-' }}</td>
                                     <td>
                                         @if($p->user)
                                             <span class="badge bg-secondary">{{ $p->user->name }} ({{ ucfirst($p->user->role) }})</span>
                                         @else
-                                            <span class="text-muted small">Sistem / Admin</span>
+                                            <span class="text-white-50 small">Sistem / Admin</span>
                                         @endif
                                     </td>
                                     <td class="text-end text-danger fw-bold text-nowrap">Rp {{ number_format($p->nominal, 0, ',', '.') }}</td>
@@ -87,7 +87,7 @@
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="6" class="text-center text-muted py-4">Belum ada data pengeluaran.</td></tr>
+                                <tr><td colspan="6" class="text-center text-white-50 py-4">Belum ada data pengeluaran.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

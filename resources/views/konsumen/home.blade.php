@@ -13,7 +13,7 @@
                         <strong>Scan QR Code</strong> yang terdapat di meja Anda.
                     </p>
                     
-                    <a href="/konsumen/riwayat" class="btn btn-outline-primary px-4 rounded-pill">
+                    <a href="/konsumen/riwayat" class="btn btn-outline-primary px-4 rounded-pill btn-touch">
                         Lihat Riwayat Pesanan Saya
                     </a>
                 </div>

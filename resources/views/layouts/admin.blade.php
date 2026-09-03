@@ -1,146 +1,47 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Admin - Master Cafe POS</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0d6efd">
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    <script src="/js/pwa-offline.js"></script>
-    <style>
-        /* Anti-lag touch */
-        button, a, input, select, textarea {
-            touch-action: manipulation;
-        }
-        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        }
-        body { background: transparent; }
-        .admin-layout { min-height: 100vh; display: flex; flex-direction: column; }
-        .admin-topbar { 
-            padding: 1rem 1.75rem; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            background: rgba(253, 251, 247, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(62, 39, 35, 0.1);
-        }
-        .admin-topbar .brand { font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem; color: #3e2723; letter-spacing: 0.02em; }
-        .admin-topbar .logout-top { 
-            background: #3e2723; 
-            color: #f0e9dd; 
-            border: none; 
-            padding: 0.55rem 1.35rem; 
-            border-radius: 999px; 
-            cursor: pointer; 
-            font-weight: 600; 
-            font-size: 0.85rem;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 12px rgba(62, 39, 35, 0.15);
-        }
-        .admin-topbar .logout-top:hover { 
-            background: #2d1a11; 
-            color: white; 
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(62, 39, 35, 0.25);
-        }
-        .admin-main-wrapper { display: flex; flex: 1; }
-        .admin-sidebar { 
-            width: 250px; 
-            background: linear-gradient(180deg, #5d4037 0%, #4e342e 100%); 
-            color: #f0e9dd; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 1.75rem 1.25rem; 
-            box-shadow: 4px 0 20px rgba(0,0,0,0.06); 
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .admin-sidebar .brand-title { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.03em; color: #f0e9dd; }
-        .admin-sidebar .brand-subtitle { font-size: 0.82rem; color: #d7ccc8; opacity: 0.9; }
-        .admin-sidebar .nav-link { 
-            color: #f0e9dd; 
-            border-radius: 0.85rem; 
-            padding: 0.75rem 1rem; 
-            font-size: 0.92rem;
-            font-weight: 500;
-            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); 
-            display: flex;
-            align-items: center;
-        }
-        .admin-sidebar .nav-link:hover { 
-            background: rgba(62, 39, 35, 0.6); 
-            color: #ffffff; 
-            transform: translateX(4px);
-        }
-        .admin-sidebar .nav-link.active { 
-            background: #3e2723; 
-            color: #ffffff; 
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(45, 26, 17, 0.3);
-        }
-        .admin-sidebar .nav-link i { width: 1.35rem; font-size: 1.05rem; }
-        .admin-sidebar .logout-btn { background: #3e2723; color: #f0e9dd; border: 1px solid rgba(0,0,0,0.08); border-radius: 1rem; }
-        .admin-sidebar .logout-btn:hover { background: #2d1a11; }
-        .admin-content { flex: 1; padding: 2.25rem; }
-        .admin-card { border-radius: 1.25rem; }
-        .card-summary { border: none; border-radius: 1.25rem; }
-        .badge {
-            font-family: system-ui, -apple-system, sans-serif !important;
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            padding: 0.35em 0.65em !important;
-            font-weight: 700;
-        }
-        
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .admin-main-wrapper { flex-direction: column; }
-            .admin-sidebar { width: 100%; padding: 1rem; border-right: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            .admin-sidebar .nav { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; gap: 0.5rem; }
-            .admin-sidebar .nav-link { white-space: nowrap; padding: 0.5rem 1rem; font-size: 0.9rem; }
-            .admin-sidebar .nav-link:hover { transform: none; }
-            .admin-sidebar .brand-title, .admin-sidebar .brand-subtitle { display: none; }
-            .admin-content { padding: 1.25rem; }
-        }
+    @include("layouts.includes.head-assets")
+            <style>
+        .admin-layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; margin: 0; padding: 0; }
+        .admin-topbar { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: var(--gradient-surface); z-index: 1050; flex-shrink: 0; }
+        .admin-sidebar { width: 280px; flex-shrink: 0; background: var(--gradient-surface); border-right: 1px solid var(--border-subtle); height: 100%; overflow-y: auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; }
+        .admin-sidebar .nav-link { color: var(--text-muted); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; }
+        .admin-sidebar .nav-link.active { background: var(--gradient-bronze) !important; color: #ffffff !important; box-shadow: 0 4px 16px rgba(192, 142, 92, 0.25); font-weight: 600; }
+        .admin-sidebar .nav-link i { font-size: 1.25rem; width: 24px; margin-right: 16px; }
+        .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } 
+        .admin-content { flex: 1; padding: 2rem; background: var(--bg-base); overflow-y: auto; }
+        .nav-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin: 1.5rem 0 0.5rem 1rem; opacity: 0.7; }
+        @media (max-width: 991.98px) { .admin-sidebar { position: fixed; transform: translateX(-100%); z-index: 1040; transition: transform 0.3s ease; width: 280px; } .admin-sidebar.show { transform: translateX(0); } .admin-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1035; } .admin-overlay.show { display: block; } .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } .admin-content { padding: 1rem; } }
     </style>
 </head>
 <body>
     <div id="app" class="admin-layout">
         <div class="admin-topbar">
             <div class="brand">
-                <i class="bi bi-shop"></i> Master Cafe POS
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 40px; width: 40px; object-fit: cover;"> Master Cafe POS
             </div>
             <div class="d-flex align-items-center gap-3">
                 <!-- Notification Bell -->
                 <div class="dropdown">
-                    <button class="btn btn-link text-dark text-decoration-none position-relative p-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bell-fill fs-5" style="color: #6a3a45;"></i>
+                    <button class="btn btn-link text-white text-decoration-none position-relative p-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell-fill fs-5" style="color: #c08e5c;"></i>
                         @if(isset($stokMenipisCount) && $stokMenipisCount > 0)
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
                                 {{ $stokMenipisCount }}
                             </span>
                         @endif
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="notificationDropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                        <li><h6 class="dropdown-header fw-bold">Notifikasi Stok Menipis</h6></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0  text-white" aria-labelledby="notificationDropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                        <li><h6 class="dropdown-header fw-bold text-white">Notifikasi Stok Menipis</h6></li>
                         @if(isset($stokMenipisCount) && $stokMenipisCount > 0)
                             @foreach($menuMenipis as $menu)
                                 <li>
-                                    <a class="dropdown-item d-flex justify-content-between align-items-center py-2" href="{{ route('admin.menu.index') }}">
+                                    <a class="dropdown-item d-flex text-white justify-content-between align-items-center py-2" href="{{ route('admin.menu.index') }}">
                                         <div>
                                             <i class="bi bi-box-seam text-warning me-2"></i> {{ $menu->nama_menu }}
                                         </div>
@@ -150,7 +51,7 @@
                             @endforeach
                             @foreach($bahanMenipis as $bahan)
                                 <li>
-                                    <a class="dropdown-item d-flex justify-content-between align-items-center py-2" href="{{ route('admin.stok.index') }}">
+                                    <a class="dropdown-item d-flex text-white justify-content-between align-items-center py-2" href="{{ route('admin.stok.index') }}">
                                         <div>
                                             <i class="bi bi-layers text-warning me-2"></i> {{ $bahan->nama_bahan }}
                                         </div>
@@ -159,12 +60,12 @@
                                 </li>
                             @endforeach
                         @else
-                            <li><span class="dropdown-item text-muted small text-center py-3">Semua stok aman</span></li>
+                            <li><span class="dropdown-item text-secondary small text-center py-3">Semua stok aman</span></li>
                         @endif
                     </ul>
                 </div>
 
-                <button class="logout-top" onclick="document.getElementById('logout-form').submit();">
+                <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm d-inline-flex align-items-center" onclick="document.getElementById('logout-form').submit();">
                     <i class="bi bi-box-arrow-right me-2"></i> Logout
                 </button>
             </div>
@@ -246,5 +147,61 @@
     </form>
     @include('components.webpush')
     @stack('scripts')
+
+    <!-- Global UI/UX Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toast Notification System
+            window.showToast = function(message, type = 'success') {
+                const toastContainer = document.getElementById('toast-container') || (function() {
+                    const div = document.createElement('div');
+                    div.id = 'toast-container';
+                    div.className = 'toast-container position-fixed bottom-0 end-0 p-3 z-modal';
+                    document.body.appendChild(div);
+                    return div;
+                })();
+
+                const toastId = 'toast-' + Date.now();
+                const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle';
+                const borderColor = type === 'success' ? '#986c43' : '#dc3545';
+                
+                const toastHtml = 
+                    <div id=" + toastId + " class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid  + borderColor +  !important; background-color: #161b22; color: #fff;">
+                        <div class="d-flex">
+                            <div class="toast-body d-flex align-items-center">
+                                <i class="bi  + icon +  me-2" style="font-size: 20px; color:  + borderColor + ;"></i>
+                                <span style="font-size: 16px;"> + message + </span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto btn-touch" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                ;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
+            };
+            
+            // Override native alert (Optional but useful for catching unmigrated alerts)
+            window.nativeAlert = window.alert;
+            window.alert = function(msg) {
+                window.showToast(msg, 'warning');
+            };
+        });
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

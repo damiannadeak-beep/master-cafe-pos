@@ -1,23 +1,65 @@
-// Colors
-$primary: #3E2723;     // Dark roasted brown
-$secondary: #5D4037;   // Medium brown
-$success: #556B2F;     // Dark olive green
-$info: #4E5B61;        // Muted slate/steel
-$warning: #B05923;     // Burnt orange
-$danger: #8B2C2C;      // Brick red
-$light: #F0E9DD;       // Vintage cream
-$dark: #2D1A11;        // Extra dark brown
+// Colors - Dark Bronze Theme
+$primary: #c08e5c;      // Bronze gold
+$secondary: #986c43;    // Deep bronze
+$success: #48bb78;      // Emerald green
+$info: #63b3ed;         // Sky blue
+$warning: #ecc94b;      // Gold yellow
+$danger: #f56565;       // Soft red
+$light: #e2e8f0;        // Dark surface element
+$dark: #0e1217;         // Darkest background
 
 // Body
-$body-bg: $light;
-$body-color: $primary;
+$body-bg: #0e1217;
+$body-color: #ffffff;
 
 // Typography
-$font-family-sans-serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-sans-serif: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $font-size-base: 0.95rem;
 $line-height-base: 1.6;
 
 // Components
-$border-radius: 0.75rem;       // More rounded by default
+$border-radius: 0.75rem;
 $border-radius-lg: 1rem;
 $border-radius-sm: 0.5rem;
+
+// Cards
+$card-bg: #161b22;
+$card-border-color: #21262d;
+
+// Inputs
+$input-bg: #0e1217;
+$input-border-color: #21262d;
+$input-color: #ffffff;
+$input-placeholder-color: #6c757d;
+$input-focus-border-color: #c08e5c;
+$input-focus-box-shadow: none;
+
+// Navbar
+$navbar-dark-color: rgba(255, 255, 255, 0.85);
+
+// Tables
+$table-bg: transparent;
+$table-color: #ffffff;
+$table-border-color: #21262d;
+$table-striped-bg: rgba(255, 255, 255, 0.03);
+$table-hover-bg: rgba(192, 142, 92, 0.08);
+
+// Dropdowns
+$dropdown-bg: #161b22;
+$dropdown-border-color: #21262d;
+$dropdown-link-color: #e2e8f0;
+$dropdown-link-hover-bg: #21262d;
+$dropdown-link-hover-color: #ffffff;
+
+// Modals
+$modal-content-bg: #161b22;
+$modal-content-border-color: #21262d;
+$modal-header-border-color: #21262d;
+$modal-footer-border-color: #21262d;
+
+// Buttons
+$btn-border-radius: 0.75rem;
+
+// Links
+$link-color: #c08e5c;
+$link-hover-color: #d49b78;

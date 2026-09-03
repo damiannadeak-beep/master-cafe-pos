@@ -77,7 +77,7 @@
         <div class="error-description">
             Maaf, halaman yang Anda cari mungkin telah dihapus, diubah namanya, atau tidak tersedia untuk sementara waktu.
         </div>
-        <a href="{{ url('/') }}" class="btn-home">
+        <a href="{{ url('/') }}" class="btn-home btn-touch">
             <i class="bi bi-house-door-fill me-2"></i>Kembali ke Beranda
         </a>
     </div>

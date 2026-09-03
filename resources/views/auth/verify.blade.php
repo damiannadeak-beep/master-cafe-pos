@@ -8,10 +8,10 @@
                 <div class="row g-0">
                     <div class="col-12 p-4 p-md-5">
                         <div class="text-center mb-4">
-                            <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 70px; height: 70px;">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 70px; height: 70px;">
                                 <i class="bi bi-envelope-exclamation fs-1"></i>
                             </div>
-                            <h3 class="fw-bold text-dark mb-1">Verifikasi Email Anda</h3>
+                            <h3 class="fw-bold text-white mb-1">Verifikasi Email Anda</h3>
                             <p class="text-muted">Langkah terakhir sebelum memesan</p>
                         </div>
 
@@ -33,7 +33,7 @@
                         <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
                             @csrf
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm py-3 text-dark">
+                                <button type="submit" class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm py-3 text-white btn-touch">
                                     <i class="bi bi-send-fill me-2"></i> Kirim Ulang Link
                                 </button>
                             </div>

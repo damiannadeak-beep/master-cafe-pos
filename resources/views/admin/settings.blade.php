@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2><i class="bi bi-gear me-2"></i>Pengaturan</h2>
-            <p class="text-muted mb-0">Kelola informasi warung dan keamanan akun Anda.</p>
+            <p class="text-white-50 mb-0">Kelola informasi warung dan keamanan akun Anda.</p>
         </div>
     </div>
 
@@ -17,114 +17,16 @@
     @endif
 
     <div class="row g-4">
-        <!-- Kolom Profil Warung -->
-        <div class="col-lg-6">
-            <div class="card admin-card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-shop me-2 text-primary"></i>Profil Warung & Struk</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.settings.profile') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Warung</label>
-                            <input type="text" class="form-control" name="store_name" value="{{ $settings['store_name'] ?? 'Master Cafe' }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Alamat Lengkap</label>
-                            <textarea class="form-control" name="store_address" rows="2" required>{{ $settings['store_address'] ?? '' }}</textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nomor Telepon / WhatsApp</label>
-                            <input type="text" class="form-control" name="store_phone" value="{{ $settings['store_phone'] ?? '' }}" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Pesan Bawah Struk (Footer)</label>
-                            <textarea class="form-control" name="receipt_footer" rows="2" placeholder="Terima kasih atas kunjungan Anda!">{{ str_replace('\n', "\n", $settings['receipt_footer'] ?? '') }}</textarea>
-                            <div class="form-text">Bisa menggunakan beberapa baris. Teks ini akan dicetak di bagian paling bawah struk kasir.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold">Simpan Profil Warung</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        @include("components.admin.settings-profile")
 
-        <!-- Kolom Keamanan Akun -->
-        <div class="col-lg-6">
-            <div class="card admin-card border-0 shadow-sm h-100">
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock me-2 text-danger"></i>Keamanan Akun</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.settings.security') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Admin</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', auth()->user()->name) }}" required>
-                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', auth()->user()->email) }}" required>
-                            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
+        @include("components.admin.settings-security")
 
-                        <hr class="my-4">
-                        <h6 class="fw-bold mb-3">Ubah Password (Opsional)</h6>
-                        <p class="small text-muted mb-3">Kosongkan bagian ini jika Anda tidak ingin mengubah password.</p>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Password Saat Ini</label>
-                            <input type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password">
-                            @error('current_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Password Baru</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" minlength="8">
-                            @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Konfirmasi Password Baru</label>
-                            <input type="password" class="form-control" name="password_confirmation" minlength="8">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-danger w-100 fw-bold">Perbarui Keamanan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kolom Pengaturan Pembayaran -->
-        <div class="col-12 mt-4">
-            <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-credit-card me-2 text-success"></i>Pengaturan Pembayaran & QRIS</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.settings.payment') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="row g-4">
-                            <!-- Kolom Upload QRIS -->
-                            <div class="col-md-6 border-end">
-                                <h6 class="fw-bold mb-3">QRIS Statis Warung</h6>
-                                <p class="text-muted small">Unggah gambar QRIS Statis agar kasir bisa menampilkannya di layar saat pelanggan ingin membayar menggunakan QRIS (E-Wallet/M-Banking).</p>
-                                
-                                <div class="mb-3">
-                                    @if(isset($settings['qris_image']) && $settings['qris_image'])
-                                        <div class="mb-3">
-                                            <img src="{{ asset('storage/'.$settings['qris_image']) }}" alt="QRIS Warung" class="img-thumbnail" style="max-height: 200px;">
-                                        </div>
-                                    @endif
-                                    <label class="form-label fw-bold">Unggah Barcode QRIS</label>
-                                    <input class="form-control" type="file" name="qris_image" accept="image/jpeg, image/png, image/jpg">
-                                    <div class="form-text">Maksimal 2MB. Format: JPG, PNG.</div>
-                                </div>
-                            </div>
+        @include("components.admin.settings-payment-printer")
 
                             <!-- Kolom AI API Key -->
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3">Sistem Verifikasi Otomatis <span class="badge bg-secondary">Opsional</span></h6>
-                                <p class="text-muted small">Masukkan API Key agar sistem dapat memvalidasi struk transfer pelanggan secara otomatis.</p>
+                                <p class="text-white-50 small">Masukkan API Key agar sistem dapat memvalidasi struk transfer pelanggan secara otomatis.</p>
                                 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">API Key (Gemini)</label>
@@ -144,7 +46,7 @@
         <!-- Kolom Pengaturan Absensi -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-calendar-check me-2 text-warning"></i>Pengaturan Absensi & Shift</h5>
                 </div>
                 <div class="card-body">
@@ -171,7 +73,7 @@
                             </div>
                             <div class="col-md-12 mt-3">
                                 <label class="form-label fw-bold">Toleransi Terlambat (Menit)</label>
-                                <input type="number" class="form-control w-50" name="toleransi_terlambat" value="{{ $settings['toleransi_terlambat'] ?? '15' }}" min="0" required>
+                                <input type="number" class="form-control text-white border-secondary  w-50" name="toleransi_terlambat" value="{{ $settings['toleransi_terlambat'] ?? '15' }}" min="0" required>
                                 <div class="form-text">Batas maksimal dari jam mulai shift. Jika melebihi ini maka statusnya "Terlambat".</div>
                             </div>
                         </div>
@@ -186,7 +88,7 @@
         <!-- Kolom Pengaturan Printer Thermal -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-printer me-2 text-info"></i>Pengaturan Printer Thermal (ESC/POS)</h5>
                 </div>
                 <div class="card-body">
@@ -195,7 +97,7 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3">Koneksi Jaringan (Network)</h6>
-                                <p class="text-muted small">Masukkan IP Address printer thermal Anda yang terhubung dalam satu jaringan Wi-Fi/LAN dengan server ini.</p>
+                                <p class="text-white-50 small">Masukkan IP Address printer thermal Anda yang terhubung dalam satu jaringan Wi-Fi/LAN dengan server ini.</p>
                                 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">IP Address Printer</label>
@@ -227,7 +129,7 @@
         <!-- Kolom Pengaturan Lokasi -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-geo-alt me-2 text-primary"></i>Pengaturan Halaman Lokasi</h5>
                 </div>
                 <div class="card-body">
@@ -279,7 +181,7 @@
         <!-- Kolom Pengaturan Absensi Geolocation -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-geo-fill me-2 text-danger"></i>Pengaturan Absensi Geolocation (Lokasi Warung)</h5>
                 </div>
                 <div class="card-body">
@@ -288,7 +190,7 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3">Koordinat Pusat Warung</h6>
-                                <p class="text-muted small mb-3">Tentukan titik kordinat (Latitude & Longitude) warung. Kasir hanya bisa melakukan absensi jika berada dalam radius tertentu dari titik ini.</p>
+                                <p class="text-white-50 small mb-3">Tentukan titik kordinat (Latitude & Longitude) warung. Kasir hanya bisa melakukan absensi jika berada dalam radius tertentu dari titik ini.</p>
                                 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Latitude</label>
@@ -301,12 +203,12 @@
                                 <button type="button" class="btn btn-outline-danger btn-sm fw-bold mb-2" onclick="getCurrentLocation()">
                                     <i class="bi bi-crosshair me-1"></i> Ambil Lokasi Saya Saat Ini
                                 </button>
-                                <div class="form-text text-muted small" id="location-status">Klik tombol di atas jika Anda sedang berada tepat di warung sekarang.</div>
+                                <div class="form-text text-white-50 small" id="location-status">Klik tombol di atas jika Anda sedang berada tepat di warung sekarang.</div>
                             </div>
 
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3">Radius Absensi</h6>
-                                <p class="text-muted small">Tentukan batas maksimal jarak (dalam meter) agar kasir bisa absen. Standarnya adalah 5 meter sesuai instruksi.</p>
+                                <p class="text-white-50 small">Tentukan batas maksimal jarak (dalam meter) agar kasir bisa absen. Standarnya adalah 5 meter sesuai instruksi.</p>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Radius Maksimal (Meter)</label>
                                     <input type="number" class="form-control" name="absensi_radius_meter" value="{{ $settings['absensi_radius_meter'] ?? '5' }}" min="1" max="1000">
@@ -326,7 +228,7 @@
         <!-- Kolom Pengaturan Kontak -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0">
+                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2 text-warning"></i>Pengaturan Halaman Kontak</h5>
                 </div>
                 <div class="card-body">
@@ -378,7 +280,7 @@
                             <div class="row g-2 mb-3 align-items-end sosmed-row">
                                 <div class="col-md-3">
                                     <label class="form-label small fw-bold">Platform</label>
-                                    <select class="form-select sosmed-platform" name="sosmed[platform][]" onchange="updateSosmedIcon(this)">
+                                    <select class="form-select text-white border-secondary  sosmed-platform" name="sosmed[platform][]" onchange="updateSosmedIcon(this)">
                                         <option value="Instagram" data-icon="bi-instagram" {{ $sosmed['platform'] == 'Instagram' ? 'selected' : '' }}>Instagram</option>
                                         <option value="TikTok" data-icon="bi-tiktok" {{ $sosmed['platform'] == 'TikTok' ? 'selected' : '' }}>TikTok</option>
                                         <option value="Facebook" data-icon="bi-facebook" {{ $sosmed['platform'] == 'Facebook' ? 'selected' : '' }}>Facebook</option>
@@ -412,11 +314,11 @@
         <!-- Kolom Backup Database -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-database-down me-2 text-primary"></i>Backup Database</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-3">Unduh salinan lengkap database sistem (transaksi, menu, dll) dalam format <code>.sql</code> untuk mengamankan data Anda.</p>
+                    <p class="text-white-50 small mb-3">Unduh salinan lengkap database sistem (transaksi, menu, dll) dalam format <code>.sql</code> untuk mengamankan data Anda.</p>
                     <a href="{{ route('admin.backup') }}" class="btn btn-primary fw-bold">
                         <i class="bi bi-download me-2"></i> Download Backup SQL
                     </a>
@@ -469,7 +371,7 @@ function addSosmedRow() {
     row.innerHTML = `
         <div class="col-md-3">
             <label class="form-label small fw-bold">Platform</label>
-            <select class="form-select sosmed-platform" name="sosmed[platform][]" onchange="updateSosmedIcon(this)">
+            <select class="form-select text-white border-secondary  sosmed-platform" name="sosmed[platform][]" onchange="updateSosmedIcon(this)">
                 <option value="Instagram" data-icon="bi-instagram">Instagram</option>
                 <option value="TikTok" data-icon="bi-tiktok">TikTok</option>
                 <option value="Facebook" data-icon="bi-facebook">Facebook</option>

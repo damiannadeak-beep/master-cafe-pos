@@ -17,10 +17,10 @@
                     <p class="fw-bold mb-3">Apakah Anda berada di rombongan yang sama dengan pemesan sebelumnya?</p>
                     
                     <div class="d-grid gap-3">
-                        <a href="{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id, 'confirm' => 1]) }}" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                        <a href="{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id, 'confirm' => 1]) }}" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm btn-touch">
                             <i class="bi bi-check-circle me-2"></i> Ya, Kami Satu Rombongan
                         </a>
-                        <a href="{{ url('/konsumen/menu') }}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold">
+                        <a href="{{ url('/konsumen/menu') }}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold btn-touch">
                             <i class="bi bi-arrow-left me-2"></i> Bukan, Pilih Meja Lain
                         </a>
                     </div>

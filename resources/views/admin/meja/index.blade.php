@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2>Manajemen Meja & QR Code</h2>
-            <p class="text-muted mb-0">Kelola meja dan cetak QR code untuk pemesanan konsumen.</p>
+            <p class="text-white-50 mb-0">Kelola meja dan cetak QR code untuk pemesanan konsumen.</p>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
         <!-- Kolom Kiri: Form Tambah Meja -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-plus-square text-primary me-2"></i> Tambah Meja
                 </div>
                 <div class="card-body">
@@ -45,13 +45,13 @@
         <!-- Kolom Kanan: Tabel Data Meja -->
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold bg-white">
+                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     Daftar Meja
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>No</th>
                                     <th>Nama / Nomor Meja</th>
@@ -109,7 +109,7 @@
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="3" class="text-center text-muted py-4">Belum ada meja.</td></tr>
+                                <tr><td colspan="3" class="text-center text-white-50 py-4">Belum ada meja.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

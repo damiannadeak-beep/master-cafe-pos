@@ -1,9 +1,9 @@
-@extends('layouts.kasir')
+﻿@extends('layouts.kasir')
 
 @section('content')
 <div class="row justify-content-center mt-5">
     <div class="col-md-6">
-        <div class="card kasir-card border-0 shadow-sm text-center">
+        <div class="card kasir-card hover-lift border-0 shadow-sm text-center">
             <div class="card-header bg-transparent border-0 pt-4">
                 <h4 class="fw-bold mb-0">
                     <i class="bi bi-geo-alt-fill text-danger me-2"></i> Absensi Shift Kasir
@@ -13,29 +13,29 @@
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <i class="bi bi-check-circle me-1"></i> {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-touch" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
                 @if(session('error'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="bi bi-exclamation-triangle me-1"></i> {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-touch" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
 
                 <h5 class="fw-bold mb-3">{{ auth()->user()->name }}</h5>
-                <p class="text-muted">Shift Anda: <span class="badge bg-primary text-uppercase">{{ auth()->user()->shift ?? 'Pagi' }}</span></p>
+                <p class="text-white-50">Shift Anda: <span class="badge bg-primary text-uppercase">{{ auth()->user()->shift ?? 'Pagi' }}</span></p>
 
                 <div class="my-4">
-                    <p class="mb-1 text-muted small">Status Absensi Hari Ini:</p>
+                    <p class="mb-1 text-white-50 small">Status Absensi Hari Ini:</p>
                     @if(!$absensi)
                         <h4 class="text-danger fw-bold"><i class="bi bi-x-circle me-1"></i> Belum Absen Masuk</h4>
                     @elseif($absensi && !$absensi->jam_keluar)
                         <h4 class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i> Sudah Absen Masuk ({{ \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') }})</h4>
                         <p class="text-warning fw-bold small"><i class="bi bi-info-circle me-1"></i> Belum Absen Keluar</p>
                     @else
-                        <h4 class="text-secondary fw-bold"><i class="bi bi-check-all me-1"></i> Shift Selesai</h4>
-                        <p class="small text-muted mb-0">Masuk: {{ \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') }} | Keluar: {{ \Carbon\Carbon::parse($absensi->jam_keluar)->format('H:i') }}</p>
+                        <h4 class="text-white-50 fw-bold"><i class="bi bi-check-all me-1"></i> Shift Selesai</h4>
+                        <p class="small text-white-50 mb-0">Masuk: {{ \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') }} | Keluar: {{ \Carbon\Carbon::parse($absensi->jam_keluar)->format('H:i') }}</p>
                     @endif
                 </div>
 
@@ -53,11 +53,11 @@
                             <input type="hidden" name="longitude" id="longitude">
 
                             <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-lg {{ !$absensi ? 'btn-danger' : 'btn-warning' }} fw-bold rounded-pill" onclick="prosesAbsensi()">
+                                <button type="button" class="btn  {{ !$absensi ? 'btn-danger' : 'btn-warning' }} fw-bold rounded-pill btn-touch" onclick="prosesAbsensi()">
                                     <i class="bi bi-geo-alt me-2"></i> {{ !$absensi ? 'Proses Absen Masuk' : 'Proses Absen Keluar' }}
                                 </button>
                             </div>
-                            <div class="mt-3 small text-muted" id="lokasi-status">
+                            <div class="mt-3 small text-white-50" id="lokasi-status">
                                 Membutuhkan akses lokasi (GPS) untuk validasi jarak 5 meter dari warung.
                             </div>
                         </form>
@@ -113,3 +113,4 @@
     }
 </script>
 @endsection
+

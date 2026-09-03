@@ -1,31 +1,31 @@
 @extends('layouts.kasir')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-0 py-0">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="mb-1 fw-bold text-accent"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Manajemen Meja</h4>
-            <p class="text-muted mb-0">Kelola status ketersediaan meja untuk pengunjung</p>
+            <p class="text-white-50 mb-0">Kelola status ketersediaan meja untuk pengunjung</p>
         </div>
     </div>
 
     <div class="row g-4">
         @forelse($mejas as $meja)
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden {{ !$meja->is_available ? 'bg-light' : 'bg-white' }}" id="card-meja-{{ $meja->id }}">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden {{ !$meja->is_available ? ' text-white' : 'bg-transparent' }}" id="card-meja-{{ $meja->id }}">
                     <div class="card-body p-4 text-center">
                         <div class="mb-3 d-flex justify-content-center">
                             <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
                                  id="icon-meja-{{ $meja->id }}"
                                  style="width: 80px; height: 80px; background-color: {{ $meja->is_available ? '#e8f5e9' : '#ffebee' }}; color: {{ $meja->is_available ? '#2e7d32' : '#c62828' }};">
-                                <i class="bi bi-shop" style="font-size: 2.5rem;"></i>
+                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 48px; width: 48px; object-fit: cover; margin-bottom: 8px;">
                             </div>
                         </div>
                         <h5 class="fw-bold mb-1">{{ $meja->nama_meja_atau_nomor }}</h5>
-                        <p class="text-muted small mb-3">{{ $meja->keterangan ?? 'Meja Pelanggan' }}</p>
+                        <p class="text-white-50 small mb-3">{{ $meja->keterangan ?? 'Meja Pelanggan' }}</p>
                         
                         <div class="d-flex align-items-center justify-content-center gap-2">
-                            <span class="small fw-bold {{ $meja->is_available ? 'text-success' : 'text-muted' }}" id="label-on-{{ $meja->id }}">Tersedia</span>
+                            <span class="small fw-bold {{ $meja->is_available ? 'text-success' : 'text-white-50' }}" id="label-on-{{ $meja->id }}">Tersedia</span>
                             <div class="form-check form-switch fs-4 mb-0">
                                 <input class="form-check-input" type="checkbox" role="switch" 
                                        id="switch-meja-{{ $meja->id }}" 
@@ -98,22 +98,22 @@
         const badge = document.getElementById(`badge-meja-${id}`);
 
         if (isAvailable) {
-            card.classList.remove('bg-light');
-            card.classList.add('bg-white');
+            card.classList.remove(' text-white');
+            card.classList.add('bg-transparent');
             icon.style.backgroundColor = '#e8f5e9';
             icon.style.color = '#2e7d32';
-            labelOn.classList.remove('text-muted');
+            labelOn.classList.remove('text-white-50');
             labelOn.classList.add('text-success');
             badge.classList.remove('bg-danger');
             badge.classList.add('bg-success');
             badge.innerText = 'Tersedia';
         } else {
-            card.classList.remove('bg-white');
-            card.classList.add('bg-light');
+            card.classList.remove('bg-transparent');
+            card.classList.add(' text-white');
             icon.style.backgroundColor = '#ffebee';
             icon.style.color = '#c62828';
             labelOn.classList.remove('text-success');
-            labelOn.classList.add('text-muted');
+            labelOn.classList.add('text-white-50');
             badge.classList.remove('bg-success');
             badge.classList.add('bg-danger');
             badge.innerText = 'Terisi';
@@ -121,3 +121,4 @@
     }
 </script>
 @endsection
+

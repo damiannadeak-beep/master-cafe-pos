@@ -6,9 +6,9 @@
         <div>
             <h2>{{ $pageTitle == 'Manajemen Menu' ? 'Manajemen Produk' : $pageTitle }}</h2>
             @if(!empty($showStockPage))
-                <p class="text-muted mb-0">Kelola stok produk dan perbarui jumlah item yang tersedia.</p>
+                <p class="text-white-50 mb-0">Kelola stok produk dan perbarui jumlah item yang tersedia.</p>
             @else
-                <p class="text-muted mb-0">Tambah, edit, dan pantau ketersediaan produk.</p>
+                <p class="text-white-50 mb-0">Tambah, edit, dan pantau ketersediaan produk.</p>
             @endif
         </div>
         <div class="d-flex gap-2">
@@ -43,7 +43,7 @@
                     
                     <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary ms-auto">Reset Filter</a>
                 </div>
-                <table class="table mb-0">
+                <table class="table table-dark text-white border-secondary mb-0">
                     <thead>
                         <tr>
                             <th>Gambar</th>
@@ -60,7 +60,7 @@
                             <tr>
                                 <td>
                                     @if($m->image)
-                                        <div class="bg-white border rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                        <div class="text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" border rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                                             <img src="{{ $m->image_url }}" onerror="this.onerror=null; this.src='https://placehold.co/600x450/e9ecef/6c757d?text=Belum+Ada+Foto';" alt="{{ $m->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; padding: 4px;">
                                         </div>
                                     @else
@@ -75,7 +75,7 @@
                                         <span class="fw-bold">{{ $m->stok }}</span>
                                         <form class="d-flex gap-1" action="{{ route('admin.menu.stock', $m->id) }}" method="POST">
                                             @csrf
-                                            <input type="number" name="stok" value="{{ $m->stok }}" min="0" class="form-control form-control-sm text-center" style="width:65px;">
+                                            <input type="number" name="stok" value="{{ $m->stok }}" min="0" class="form-control text-white border-secondary  form-control-sm text-center" style="width:65px;">
                                             <button type="submit" class="btn btn-sm btn-outline-secondary" title="Update"><i class="bi bi-check-lg"></i> <span class="d-none d-xl-inline">Update</span></button>
                                         </form>
                                     </div>

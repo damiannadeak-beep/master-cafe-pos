@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2>Manajemen Stok Bahan Baku</h2>
-            <p class="text-muted mb-0">Kelola persediaan bahan baku yang digunakan untuk membuat produk.</p>
+            <p class="text-white-50 mb-0">Kelola persediaan bahan baku yang digunakan untuk membuat produk.</p>
         </div>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBahanModal">Tambah Bahan</button>
     </div>
@@ -26,8 +26,8 @@
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table mb-0">
-                    <thead class="table-light">
+                <table class="table table-dark text-white border-secondary mb-0">
+                    <thead class="table-dark">
                         <tr>
                             <th>Nama Bahan</th>
                             <th>Stok</th>

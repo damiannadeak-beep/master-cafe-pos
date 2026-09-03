@@ -19,7 +19,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table mb-0">
+                        <table class="table table-dark text-white border-secondary mb-0">
                             <thead>
                                 <tr>
                                     <th>Nama</th>
@@ -39,7 +39,7 @@
                                             @if($k->shift == 'pagi')
                                                 <span class="badge bg-info">Pagi</span>
                                             @elseif($k->shift == 'malam')
-                                                <span class="badge bg-dark">Malam</span>
+                                                <span class="badge ">Malam</span>
                                             @else
                                                 <span class="badge bg-secondary">-</span>
                                             @endif
@@ -82,7 +82,7 @@
                             </div>
                             <div class="col-12 mb-3">
                                 <label for="shift" class="form-label">Shift</label>
-                                <select class="form-select" id="shift" name="shift" required>
+                                <select class="form-select text-white border-secondary " id="shift" name="shift" required>
                                     <option value="pagi">Pagi</option>
                                     <option value="malam">Malam</option>
                                 </select>

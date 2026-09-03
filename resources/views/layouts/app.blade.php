@@ -6,24 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Master Cafe</title>
     
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600&family=Rye&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
-
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#111418">
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    <script src="/js/pwa-offline.js"></script>
-    <style>
-        :root {
-            --bs-primary: #b27a4d;
-            --bs-primary-rgb: 178, 122, 77;
-        }
+    @include("layouts.includes.head-assets")
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Rye&family=Outfit:wght@300;400;600&display=swap');
         body, button, input, select, textarea, .nav-link {
             font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
@@ -33,45 +18,10 @@
         .font-cursive {
             font-family: 'Great Vibes', cursive !important;
         }
-        /* Anti-lag touch */
-        button, a, input, select, textarea {
-            touch-action: manipulation;
-        }
-        
-        .btn-mastercafe, .btn-primary {
-            background-color: #b27a4d !important;
-            color: #ffffff !important;
-            border: none;
-        }
-        .btn-mastercafe:hover, .btn-primary:hover {
-            background-color: #96653f !important;
-            color: #ffffff !important;
-        }
-        .text-mastercafe, .text-primary {
-            color: #b27a4d !important;
-        }
-        .bg-mastercafe {
-            background-color: #b27a4d !important;
-            color: #ffffff !important;
-        }
-        .navbar {
-            background-color: #111418 !important;
-            border-bottom: 1px solid #2a2d32 !important;
-        }
-        .dropdown-menu {
-            background-color: #1a1d24;
-            border-color: #2a2d32;
-        }
-        .dropdown-item {
-            color: #e2e8f0;
-        }
-        .dropdown-item:hover {
-            background-color: #2a2d32;
-            color: #ffffff;
-        }
+        .app-navbar { background: var(--gradient-surface) !important; border-bottom: 1px solid var(--border-subtle); position: relative; z-index: 1050; box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25); }
     </style>
 </head>
-<body class="bg-dark text-light" data-bs-theme="dark" style="background-color: #111418 !important;">
+<body class="text-light" data-bs-theme="dark" style="background-color: #0e1217 !important;">
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-dark shadow-sm sticky-top">
             <div class="container">
@@ -102,21 +52,19 @@
 
                     <ul class="navbar-nav ms-auto">
                         @guest
-                            @if (Route::has('login'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">Masuk</a>
-                                </li>
-                            @endif
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="btn btn-primary rounded-pill px-3 ms-2 fw-bold" href="{{ route('register') }}">Daftar</a>
-                                </li>
-                            @endif
+                            <li class="nav-item d-flex align-items-center">
+                                @if (Route::has('login'))
+                                    <a class="nav-link py-1" href="{{ route('login') }}">Masuk</a>
+                                @endif
+                                @if (Route::has('register'))
+                                    <a class="btn btn-primary btn-sm rounded-pill px-3 ms-2 fw-semibold py-1" href="{{ route('register') }}">Daftar</a>
+                                @endif
+                            </li>
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle fw-bold text-light d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     @if(Auth::user()->foto)
-                                        <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" alt="Foto" class="rounded-circle me-2 border border-primary" style="width: 25px; height: 25px; object-fit: cover;">
+                                        <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" alt="Foto" class="rounded-circle me-2 border border-primary" style="width: 32px; height: 32px; object-fit: cover;">
                                     @else
                                         <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
                                     @endif
@@ -166,7 +114,7 @@
             @yield('content')
         </main>
         
-        <footer class="text-center py-4 mt-auto w-100 border-top" style="border-color: #2a2d32 !important; padding-bottom: env(safe-area-inset-bottom, 120px) !important;">
+        <footer class="text-center py-4 mt-auto w-100 border-top" style="border-color: #21262d !important; padding-bottom: env(safe-area-inset-bottom, 120px) !important;">
             <p class="font-cursive text-primary fs-3 mb-0">Master Cafe</p>
             <small class="text-secondary">&copy; {{ date('Y') }} Master Cafe. Hak Cipta Dilindungi.</small>
         </footer>
@@ -176,8 +124,59 @@
     @include('components.webpush')
 
 
+
+    <!-- Global UI/UX Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toast Notification System
+            window.showToast = function(message, type = 'success') {
+                const toastContainer = document.getElementById('toast-container') || (function() {
+                    const div = document.createElement('div');
+                    div.id = 'toast-container';
+                    div.className = 'toast-container position-fixed bottom-0 end-0 p-3 z-modal';
+                    document.body.appendChild(div);
+                    return div;
+                })();
+
+                const toastId = 'toast-' + Date.now();
+                const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle';
+                const borderColor = type === 'success' ? '#986c43' : '#dc3545';
+                
+                const toastHtml = 
+                    <div id=" + toastId + " class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid  + borderColor +  !important; background-color: #161b22; color: #fff;">
+                        <div class="d-flex">
+                            <div class="toast-body d-flex align-items-center">
+                                <i class="bi  + icon +  me-2" style="font-size: 20px; color:  + borderColor + ;"></i>
+                                <span style="font-size: 16px;"> + message + </span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto btn-touch" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                ;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
+            };
+            
+            // Override native alert (Optional but useful for catching unmigrated alerts)
+            window.nativeAlert = window.alert;
+            window.alert = function(msg) {
+                window.showToast(msg, 'warning');
+            };
+        });
+    </script>
 </body>
 </html>
+
+
+
+
 
 
 

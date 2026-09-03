@@ -3,8 +3,8 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-check-fill text-danger me-2"></i> Laporan Absensi Kasir</h2>
-        <p class="text-muted mb-0">Pantau kehadiran kasir berdasarkan shift dan lokasi GPS.</p>
+        <h2 class="fw-bold mb-0 text-white"><i class="bi bi-calendar-check-fill text-danger me-2"></i> Laporan Absensi Kasir</h2>
+        <p class="text-white-50 mb-0">Pantau kehadiran kasir berdasarkan shift dan lokasi GPS.</p>
     </div>
 </div>
 
@@ -48,8 +48,8 @@
                                 <i class="bi bi-person-circle fs-1 text-primary opacity-75"></i>
                             </div>
                             <h5 class="fw-bold mb-1">{{ $rekap['nama'] }}</h5>
-                            <h3 class="text-success mb-0 fw-bold">{{ $rekap['total_hadir'] }} <span class="fs-6 text-muted fw-normal">Kali Hadir</span></h3>
-                            <div class="mt-2 text-muted small fw-bold">
+                            <h3 class="text-success mb-0 fw-bold">{{ $rekap['total_hadir'] }} <span class="fs-6 text-white-50 fw-normal">Kali Hadir</span></h3>
+                            <div class="mt-2 text-white-50 small fw-bold">
                                 <i class="bi bi-clock-history"></i> Total: {{ $rekap['format_jam'] }}
                             </div>
                         </div>
@@ -64,8 +64,8 @@
 <div class="card admin-card border-0 shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="table-dark">
                     <tr>
                         <th class="ps-4">Tanggal</th>
                         <th>Nama Kasir</th>
@@ -83,16 +83,16 @@
                             <td class="fw-bold">{{ $absen->user->name ?? 'User Dihapus' }}</td>
                             <td>
                                 @if($absen->shift == 'pagi')
-                                    <span class="badge bg-info text-dark"><i class="bi bi-sun-fill me-1"></i> Pagi</span>
+                                    <span class="badge bg-info text-white"><i class="bi bi-sun-fill me-1"></i> Pagi</span>
                                 @else
-                                    <span class="badge bg-dark"><i class="bi bi-moon-stars-fill me-1"></i> Malam</span>
+                                    <span class="badge "><i class="bi bi-moon-stars-fill me-1"></i> Malam</span>
                                 @endif
                             </td>
                             <td>{{ $absen->jam_masuk ? \Carbon\Carbon::parse($absen->jam_masuk)->format('H:i') : '-' }}</td>
                             <td>{{ $absen->jam_keluar ? \Carbon\Carbon::parse($absen->jam_keluar)->format('H:i') : '-' }}</td>
                             <td>
                                 @if($absen->jarak_meter !== null)
-                                    <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt-fill text-danger"></i> {{ $absen->jarak_meter }} m</span>
+                                    <span class="badge  text-white border"><i class="bi bi-geo-alt-fill text-danger"></i> {{ $absen->jarak_meter }} m</span>
                                 @else
                                     -
                                 @endif
@@ -101,7 +101,7 @@
                                 @if($absen->status == 'hadir')
                                     <span class="badge bg-success">Hadir</span>
                                 @elseif($absen->status == 'terlambat')
-                                    <span class="badge bg-warning text-dark">Terlambat</span>
+                                    <span class="badge bg-warning text-white">Terlambat</span>
                                 @else
                                     <span class="badge bg-danger">{{ ucfirst($absen->status) }}</span>
                                 @endif
@@ -109,7 +109,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">Belum ada data absensi untuk periode ini.</td>
+                            <td colspan="7" class="text-center py-4 text-white-50">Belum ada data absensi untuk periode ini.</td>
                         </tr>
                     @endforelse
                 </tbody>

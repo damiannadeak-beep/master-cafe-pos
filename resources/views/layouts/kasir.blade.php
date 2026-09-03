@@ -1,215 +1,32 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kasir POS - Master Cafe</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0d6efd">
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    <script src="/js/pwa-offline.js"></script>
-    <style>
-        /* Anti-lag touch */
-        button, a, input, select, textarea {
-            touch-action: manipulation;
-        }
-        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        }
-        body { background: transparent; color: #3e2723; }
-        .kasir-navbar { 
-            background: linear-gradient(135deg, #3e2723 0%, #2d1a11 100%) !important; 
-            border-bottom: 1px solid rgba(255,255,255,0.08); 
-            position: relative; 
-            z-index: 1050; 
-            box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25);
-        }
-        .kasir-navbar .navbar-brand { color: #f0e9dd; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.02em; }
-        .kasir-navbar .navbar-text, .kasir-navbar .nav-link { color: #f0e9dd; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-        .kasir-navbar .nav-link.active { color: #d49b78 !important; font-weight: 700; }
-        .kasir-navbar .nav-link:hover { color: #d7ccc8; transform: translateY(-1px); }
-        .kasir-navbar .navbar-toggler-icon { filter: invert(1); }
-        .kasir-main { padding: 1.75rem 1.25rem; }
-        .kasir-container { max-width: 1350px; margin: 0 auto; }
-        .kasir-header { background: rgba(253, 251, 247, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(62,39,35,0.1); border-radius: 1.5rem; }
-        .kasir-header h5 { color: #3e2723; }
-        .kasir-card { border-radius: 1.5rem; border: 1px solid rgba(62, 39, 35, 0.1); background: rgba(253, 251, 247, 0.88) !important; backdrop-filter: blur(12px); box-shadow: 0 12px 36px rgba(62, 39, 35, .06); }
-        .kasir-card .card-body { padding: 1.85rem; }
-        .menu-card { 
-            border: 1px solid rgba(62, 39, 35, 0.08); 
-            border-radius: 1.25rem; 
-            background: rgba(255, 255, 255, 0.8) !important; 
-            backdrop-filter: blur(8px); 
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease; 
-        }
-        .menu-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 20px 40px rgba(62, 39, 35, 0.12); 
-            background: rgba(255, 255, 255, 0.98) !important; 
-        }
-        .menu-card .price { color: #5d4037; font-weight: 700; }
-        .btn-soft { background: #f0e9dd; border: 1px solid #d7ccc8; color: #3e2723; font-weight: 600; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-        .btn-soft:hover { background: #e6ddcf; transform: translateY(-1px); }
-        .btn-soft.active { background: #3e2723 !important; color: #ffffff !important; border-color: #3e2723 !important; box-shadow: 0 4px 12px rgba(62, 39, 35, 0.2); }
-        .payment-pill.active { background: #5d4037; color: #fff; border-color: #5d4037; }
-        input.form-control, select.form-control, .form-select, .input-group, .input-group-text { border-radius: 999px; }
-        textarea.form-control { border-radius: 1rem; }
-        .cart-list { min-height: 240px; }
-        .cart-item { border-bottom: 1px solid rgba(62,39,35,0.1); padding-bottom: .85rem; margin-bottom: .85rem; }
-        .cart-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    @include("layouts.includes.head-assets")
+                        <style>
+        .kasir-layout { height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; overflow: hidden; }
+        .kasir-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; padding: 1.5rem; }
+        .kasir-container { flex: 1; overflow: hidden; max-width: 1360px; margin: 0 auto; padding: 0; width: 100%; }
+        .kasir-navbar { background: var(--gradient-surface) !important; border-bottom: 1px solid var(--border-subtle); position: relative; z-index: 1050; box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25); flex-shrink: 0; }
+        .kasir-navbar .navbar-brand { color: #f0e9dd; font-weight: 700; font-size: 1.25rem; letter-spacing: 0.02em; }
+        .kasir-navbar .navbar-text, .kasir-navbar .nav-link { color: #f0e9dd !important; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .kasir-navbar .nav-link.active { color: #c08e5c !important; font-weight: 700; }
+        .kasir-navbar .nav-link:hover { color: #ffffff !important; transform: translateY(-1px); }
+        .offcanvas.offcanvas-start { width: 320px; background-color: #0e1217; border-right: 1px solid #21262d; }
         
-        .font-sans { font-family: 'Inter', sans-serif !important; }
-        
-        /* Dark Mode Styles */
-        body.dark-mode { background: #121212; color: #e0e0e0; }
-        body.dark-mode .kasir-navbar { background: #1e1e1e !important; border-bottom: 1px solid #333; }
-        body.dark-mode .kasir-navbar .navbar-brand { color: #fff; }
-        body.dark-mode .kasir-header, body.dark-mode .kasir-card, body.dark-mode .menu-card, body.dark-mode .card, body.dark-mode .bg-white { 
-            background-color: rgba(30, 30, 30, 0.95) !important; 
-            background: none !important;
-            border-color: rgba(255,255,255,0.1) !important; 
-            color: #e0e0e0 !important;
-        }
-        body.dark-mode .bg-light { background-color: #2c2c2c !important; color: #e0e0e0 !important; }
-        body.dark-mode .bg-light.bg-opacity-50 { background-color: transparent !important; }
-        body.dark-mode .kasir-header h5, body.dark-mode .menu-card .price { color: #e0e0e0; }
-        body.dark-mode .text-muted, body.dark-mode .text-white-50 { color: #aaa !important; }
-        body.dark-mode .table-light, body.dark-mode thead th { background-color: #2c2c2c !important; color: #fff !important; border-color: #444 !important; }
-        body.dark-mode .table { --bs-table-bg: transparent; --bs-table-color: #e0e0e0; background-color: transparent !important; }
-        body.dark-mode tbody td, body.dark-mode tbody tr { background-color: transparent !important; color: #e0e0e0 !important; border-color: #444 !important; }
-        body.dark-mode .table-hover tbody tr:hover td, body.dark-mode .table-hover tbody tr:hover th { background-color: rgba(255, 255, 255, 0.05) !important; }
-        body.dark-mode .form-control, body.dark-mode .form-select, body.dark-mode .input-group-text { background-color: #2c2c2c !important; color: #fff !important; border-color: #444 !important; }
-        body.dark-mode .form-control::placeholder, body.dark-mode .form-select::placeholder, body.dark-mode textarea::placeholder { color: #888 !important; opacity: 1 !important; }
-        body.dark-mode .btn-soft { background: #2c2c2c; border-color: #444; color: #e0e0e0; }
-        body.dark-mode .btn-soft:hover, body.dark-mode .btn-soft.active { background: #3d3d3d; border-color: #555; color: #fff; }
-        body.dark-mode .payment-pill.active { background: #B05923; border-color: #B05923; color: #fff; }
-        body.dark-mode .cart-item { border-color: rgba(255,255,255,0.1) !important; background: rgba(255,255,255,0.05) !important; color: #e0e0e0; }
-        
-        /* Utility overrides for dark mode */
-        .order-config-box { background-color: #fcfaf8; border: 1px dashed #e6ddcf; }
-        body.dark-mode .order-config-box { background-color: rgba(30, 30, 30, 0.95) !important; background: none !important; border: 1px dashed #444 !important; }
-
-        .text-accent { color: #5d4037; }
-        body.dark-mode .text-accent { color: #d7ccc8 !important; }
-
-        .icon-accent { color: #5d4037; }
-        body.dark-mode .icon-accent { color: #1e1e1e !important; }
-
-        .gradient-card-primary { background: linear-gradient(135deg, #8d6e63, #5d4037); color: white; }
-        body.dark-mode .gradient-card-primary { background: linear-gradient(135deg, #3e2723, #261613) !important; color: #e0e0e0; }
-
-        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
-        body.dark-mode .hover-lift:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.5) !important; }
-
-        /* Fix primary colors blending into dark backgrounds */
-        body.dark-mode .text-primary { color: #d49b78 !important; }
-        body.dark-mode .bg-primary { background-color: #B05923 !important; }
-        body.dark-mode .btn-primary { background-color: #B05923 !important; border-color: #B05923 !important; color: #fff !important; }
-        body.dark-mode .btn-primary:hover { background-color: #964a1d !important; border-color: #964a1d !important; }
-        body.dark-mode .btn-outline-primary { color: #d49b78 !important; border-color: #d49b78 !important; }
-        body.dark-mode .btn-outline-primary:hover { background-color: #d49b78 !important; color: #fff !important; }
+        /* Custom Scrollbar for inner containers */
+        .kasir-container::-webkit-scrollbar { width: 8px; }
+        .kasir-container::-webkit-scrollbar-track { background: transparent; }
+        .kasir-container::-webkit-scrollbar-thumb { background: #21262d; border-radius: 4px; }
+        .kasir-container::-webkit-scrollbar-thumb:hover { background: rgba(152, 108, 67, 0.5); }
     </style>
 </head>
 <body>
-    <div id="app">
-        <nav class="navbar navbar-expand-lg kasir-navbar shadow-sm py-3 d-print-none">
-            <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-center" href="{{ route('kasir.pos') }}">
-                    <i class="bi bi-shop me-2"></i>
-                    Kasir Pos
-                </a>
-                
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#kasirNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse justify-content-center mt-3 mt-lg-0" id="kasirNav">
-                    <ul class="navbar-nav mb-2 mb-lg-0 gap-3 text-center text-lg-start">
-                        <li class="nav-item">
-                            <a class="nav-link fw-bold {{ request()->routeIs('kasir.pos') ? 'active' : '' }}" href="{{ route('kasir.pos') }}">
-                                <i class="bi bi-cart-plus me-1"></i> Transaksi Kasir
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link fw-bold {{ request()->routeIs('kasir.pesanan_aktif') ? 'active' : '' }}" href="{{ route('kasir.pesanan_aktif') }}">
-                                <i class="bi bi-bell me-1"></i> Pesanan Aktif
-                                <span class="badge bg-danger rounded-pill ms-1 shadow-sm" id="badge-active-orders" style="display: none;">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link fw-bold dropdown-toggle {{ request()->routeIs('kasir.shift_report', 'kasir.pengeluaran.*', 'kasir.stok.*', 'kasir.permintaan.*', 'kasir.meja.*', 'kasir.absensi.*') ? 'active' : '' }}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-grid-fill me-1"></i> Menu Lainnya
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark shadow-sm border-0" aria-labelledby="navbarDropdown" style="background-color: #3e2723;">
-                                <li>
-                                    <a class="dropdown-item text-light {{ request()->routeIs('kasir.stok.*') ? 'active' : '' }}" href="{{ route('kasir.stok.index') }}">
-                                        <i class="bi bi-box-seam me-1"></i> Update Stok
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-light {{ request()->routeIs('kasir.permintaan.*') ? 'active' : '' }}" href="{{ route('kasir.permintaan.index') }}">
-                                        <i class="bi bi-bag-plus me-1"></i> Permintaan Belanja
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-light {{ request()->routeIs('kasir.pengeluaran.*') ? 'active' : '' }}" href="{{ route('kasir.pengeluaran.index') }}">
-                                        <i class="bi bi-wallet2 me-1"></i> Pengeluaran
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-light {{ request()->routeIs('kasir.shift_report') ? 'active' : '' }}" href="{{ route('kasir.shift_report') }}">
-                                        <i class="bi bi-journal-text me-1"></i> Laporan Shift
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider border-secondary"></li>
-                                <li>
-                                    <a class="dropdown-item text-light {{ request()->routeIs('kasir.meja.*') ? 'active' : '' }}" href="{{ route('kasir.meja.index') }}">
-                                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Manajemen Meja
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item text-light {{ request()->routeIs('kasir.absensi.*') ? 'active' : '' }}" href="{{ route('kasir.absensi.index') }}">
-                                        <i class="bi bi-geo-alt-fill me-1"></i> Absensi Shift
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-sm btn-outline-light rounded-pill" id="darkModeToggle" title="Toggle Dark Mode">
-                        <i class="bi bi-moon-stars"></i>
-                    </button>
-                    <div class="navbar-text small text-light">{{ auth()->user()->name ?? 'Kasir' }}</div>
-                    @php
-                        $isShiftOwner = \App\Models\KasirShift::where('user_id', auth()->id())->where('status', 'open')->exists();
-                    @endphp
-                    @if($isShiftOwner)
-                        {{-- Kasir 1 (Pemilik Laci) → Wajib Tutup Shift --}}
-                        <a class="btn btn-danger btn-sm rounded-pill shadow-sm" href="{{ route('kasir.shift.tutup') }}">
-                            <i class="bi bi-x-circle me-1"></i> Tutup Shift
-                        </a>
-                    @else
-                        {{-- Kasir 2 (Bukan Pemilik Laci) → Logout Biasa --}}
-                        <a class="btn btn-outline-light btn-sm rounded-pill" href="{{ route('logout') }}"
-                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="bi bi-box-arrow-right me-1"></i> Logout
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </nav>
+    <div id="app" class="kasir-layout">
+        @include("layouts.includes.kasir-topbar")
 
         <main class="kasir-main">
             <div class="kasir-container">
@@ -279,7 +96,7 @@
                         data.forEach(notif => {
                             // Tampilkan alert dengan delay sedikit agar suara sempat diputar
                             setTimeout(() => {
-                                alert('🔔 Notifikasi Baru:\n' + notif.message);
+                                alert('ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Notifikasi Baru:\n' + notif.message);
                             }, 500);
                             
                             // Tandai sudah dibaca
@@ -309,5 +126,64 @@
     </script>
     
     @include('components.webpush')
+
+    <!-- Global UI/UX Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toast Notification System
+            window.showToast = function(message, type = 'success') {
+                const toastContainer = document.getElementById('toast-container') || (function() {
+                    const div = document.createElement('div');
+                    div.id = 'toast-container';
+                    div.className = 'toast-container position-fixed bottom-0 end-0 p-3 z-modal';
+                    document.body.appendChild(div);
+                    return div;
+                })();
+
+                const toastId = 'toast-' + Date.now();
+                const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle';
+                const borderColor = type === 'success' ? '#986c43' : '#dc3545';
+                
+                const toastHtml = 
+                    <div id=" + toastId + " class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid  + borderColor +  !important; background-color: #161b22; color: #fff;">
+                        <div class="d-flex">
+                            <div class="toast-body d-flex align-items-center">
+                                <i class="bi  + icon +  me-2" style="font-size: 20px; color:  + borderColor + ;"></i>
+                                <span style="font-size: 16px;"> + message + </span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto btn-touch" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                ;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
+            };
+            
+            // Override native alert (Optional but useful for catching unmigrated alerts)
+            window.nativeAlert = window.alert;
+            window.alert = function(msg) {
+                window.showToast(msg, 'warning');
+            };
+        });
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+

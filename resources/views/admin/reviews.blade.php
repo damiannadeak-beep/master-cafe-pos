@@ -14,7 +14,7 @@
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table table-dark text-white border-secondary mb-0">
                     <thead>
                         <tr>
                             <th>#</th>

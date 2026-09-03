@@ -105,7 +105,7 @@ class DashboardService
         }
 
         // 6. Data Chart Bulanan (Tahun Ini)
-        $monthlySalesQuery = Pembayaran::selectRaw('MONTH(tanggal) AS month, SUM(total_bayar) AS total')
+        $monthlySalesQuery = Pembayaran::selectRaw('EXTRACT(MONTH FROM tanggal) AS month, SUM(total_bayar) AS total')
             ->whereYear('tanggal', $hariIni->year)
             ->where('status', 'paid')
             ->groupBy('month')
@@ -116,11 +116,11 @@ class DashboardService
             ->join('pembayaran', 'pesanan.id', '=', 'pembayaran.id_pesanan')
             ->whereYear('pembayaran.tanggal', $hariIni->year)
             ->where('pembayaran.status', 'paid')
-            ->selectRaw('MONTH(pembayaran.tanggal) AS month, SUM(pesanan.total_hpp) AS total')
+            ->selectRaw('EXTRACT(MONTH FROM pembayaran.tanggal) AS month, SUM(pesanan.total_hpp) AS total')
             ->groupBy('month')
             ->get()->keyBy('month');
 
-        $monthlyPengeluaranQuery = Pengeluaran::selectRaw('MONTH(tanggal) AS month, SUM(nominal) AS total')
+        $monthlyPengeluaranQuery = Pengeluaran::selectRaw('EXTRACT(MONTH FROM tanggal) AS month, SUM(nominal) AS total')
             ->whereYear('tanggal', $hariIni->year)
             ->groupBy('month')
             ->get()->keyBy('month');
@@ -174,3 +174,4 @@ class DashboardService
         );
     }
 }
+

@@ -65,19 +65,19 @@
                         </button>
                     </div>
                     <textarea name="deskripsi" id="deskripsi-input" class="form-control" rows="3">{{ old('deskripsi', $menu->deskripsi) }}</textarea>
-                    <small class="text-muted" id="ai-status"></small>
+                    <small class="text-white-50" id="ai-status"></small>
                 </div>
 
                 <hr class="my-4">
                 <h5 class="fw-bold mb-3"><i class="bi bi-list-stars text-primary me-2"></i>Resep / Komposisi Bahan Baku (Opsional)</h5>
-                <p class="text-muted small mb-3">Tambahkan bahan baku di sini agar stok bahan otomatis berkurang saat produk ini dipesan.</p>
+                <p class="text-white-50 small mb-3">Tambahkan bahan baku di sini agar stok bahan otomatis berkurang saat produk ini dipesan.</p>
                 
                 <div id="recipe-container">
                     @if($menu->exists && $menu->bahans->count() > 0)
                         @foreach($menu->bahans as $index => $bahan)
                             <div class="row g-2 mb-2 recipe-row">
                                 <div class="col-7">
-                                    <select name="bahans[]" class="form-select">
+                                    <select name="bahans[]" class="form-select text-white border-secondary ">
                                         <option value="">-- Pilih Bahan Baku --</option>
                                         @foreach($bahans as $b)
                                             <option value="{{ $b->id }}" {{ $bahan->id == $b->id ? 'selected' : '' }}>
@@ -105,46 +105,7 @@
                 </button>
                 <hr class="my-4">
 
-                <!-- VARIAN & TOPING -->
-                <h5 class="fw-bold mb-3"><i class="bi bi-tags text-success me-2"></i>Varian & Toping (Add-ons)</h5>
-                <p class="text-muted small mb-3">Atur pilihan seperti "Level Pedas" atau tambahan "Toping" yang memiliki harga tersendiri.</p>
-                
-                <input type="hidden" name="variants_json" id="variants_json_input" value="{{ is_array(old('variants_json', $menu->variants_json)) ? json_encode(old('variants_json', $menu->variants_json)) : (old('variants_json', $menu->variants_json) ?: '[]') }}">
-                
-                <div id="variants-container"></div>
-                
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button type="button" class="btn btn-sm btn-outline-success" id="add-variant-group">
-                        <i class="bi bi-plus-circle me-1"></i> Tambah Grup Kosong
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addPresetVariant('saus')">
-                        <i class="bi bi-magic me-1"></i> Preset Pilihan Saus
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addPresetVariant('pedas')">
-                        <i class="bi bi-fire me-1"></i> Preset Level Pedas
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addPresetVariant('suhu')">
-                        <i class="bi bi-thermometer-half me-1"></i> Preset Suhu (Es/Hot)
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addPresetVariant('toping')">
-                        <i class="bi bi-egg-fried me-1"></i> Preset Toping Extra
-                    </button>
-                </div>
-                <hr class="my-4">
-
-
-                <div class="mb-3">
-                    <label class="form-label">Gambar Produk</label>
-                    @if($menu->image_url)
-                        <div class="mb-2"><img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='/storage/placeholder.svg';" alt="gambar" style="max-width:120px; height:auto;"></div>
-                    @endif
-                    <input type="file" name="image" accept="image/*" class="form-control">
-                </div>
-
-                <button class="btn btn-primary">Simpan</button>
-            </form>
-        </div>
-    </div>
+                @include("components.admin.menu-variant-builder")
 </div>
 
 @push('scripts')
@@ -157,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const template = `
         <div class="row g-2 mb-2 recipe-row">
             <div class="col-7">
-                <select name="bahans[]" class="form-select">
+                <select name="bahans[]" class="form-select text-white border-secondary ">
                     <option value="">-- Pilih Bahan Baku --</option>
                     @if(isset($bahans))
                         @foreach($bahans as $b)
@@ -216,12 +177,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 optionsHtml += `
                     <div class="row g-2 align-items-center mb-2">
                         <div class="col-5">
-                            <input type="text" class="form-control form-control-sm var-opt-name" data-g="${gIndex}" data-o="${oIndex}" value="${opt.name}" placeholder="Nama Opsi (Cth: Level 1)">
+                            <input type="text" class="form-control text-white border-secondary  form-control-sm var-opt-name" data-g="${gIndex}" data-o="${oIndex}" value="${opt.name}" placeholder="Nama Opsi (Cth: Level 1)">
                         </div>
                         <div class="col-4">
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">+ Rp</span>
-                                <input type="number" class="form-control var-opt-price" data-g="${gIndex}" data-o="${oIndex}" value="${opt.price}" placeholder="0" min="0">
+                                <input type="number" class="form-control text-white border-secondary  var-opt-price" data-g="${gIndex}" data-o="${oIndex}" value="${opt.price}" placeholder="0" min="0">
                             </div>
                         </div>
                         <div class="col-3 text-end d-flex gap-1 justify-content-end">
@@ -243,17 +204,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label small">Nama Grup</label>
-                                <input type="text" class="form-control form-control-sm var-group-name" data-g="${gIndex}" value="${group.group_name}" placeholder="Cth: Level Pedas, Toping">
+                                <input type="text" class="form-control text-white border-secondary  form-control-sm var-group-name" data-g="${gIndex}" value="${group.group_name}" placeholder="Cth: Level Pedas, Toping">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small">Tipe Pilihan</label>
-                                <select class="form-select form-select-sm var-group-type" data-g="${gIndex}">
+                                <select class="form-select text-white border-secondary  form-select-sm var-group-type" data-g="${gIndex}">
                                     <option value="single" ${group.type === 'single' ? 'selected' : ''}>Pilih Satu (Radio)</option>
                                     <option value="multiple" ${group.type === 'multiple' ? 'selected' : ''}>Bisa Pilih Banyak (Checkbox)</option>
                                 </select>
                             </div>
                         </div>
-                        <hr class="text-muted">
+                        <hr class="text-white-50">
                         <div class="options-container">
                             ${optionsHtml}
                         </div>

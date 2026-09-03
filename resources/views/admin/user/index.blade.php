@@ -14,8 +14,8 @@
         <div class="card-header fw-bold">Daftar Semua User</div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table table-dark table-hover mb-0">
+                    <thead class="table-dark">
                         <tr>
                             <th>Nama</th>
                             <th>Email</th>

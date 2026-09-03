@@ -1,5 +1,5 @@
-// Fonts
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap');
+﻿// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat&family=Outfit:wght@300;400;600&family=Rye&display=swap');
 
 // Variables
 @import 'variables';
@@ -7,88 +7,339 @@
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
 
+// ============================
+// DARK BRONZE THEME OVERRIDES
+// ============================
+
 // Custom Scrollbar
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(62, 39, 35, 0.05);
+  background: #0e1217;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(93, 64, 55, 0.3);
-  border-radius: 999px;
+  background: #21262d;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(62, 39, 35, 0.6);
+  background: rgba(152, 108, 67, 0.5);
 }
 
-// Global Theme Overrides
+// Global Body
 body {
-    background-color: $light;
-    background-image: 
-        linear-gradient(rgba(62, 39, 35, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(62, 39, 35, 0.04) 1px, transparent 1px);
-    background-size: 28px 28px;
-    background-position: center center;
-    color: $primary;
+  background-color: #0e1217;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-// Glassmorphism Utilities
-.glass-card {
-    background: rgba(253, 251, 247, 0.85) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(62, 39, 35, 0.1) !important;
-    box-shadow: 0 10px 30px rgba(62, 39, 35, 0.05);
-    border-radius: 1.25rem;
+// Typography
+h1, h2, .navbar-brand, .brand-title, .hero-title {
+  font-family: 'Rye', serif !important;
+}
+h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif !important;
 }
 
-.glass-navbar {
-    background: rgba(62, 39, 35, 0.95) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+// Cards
+.card {
+  background-color: #161b22;
+  border-color: #21262d;
+  color: #ffffff;
 }
 
-// Micro-animations & Interactive Effects
+// Tables
+.table {
+  color: #ffffff;
+  border-color: #21262d;
+}
+.table thead th {
+  color: #ffffff !important;
+  background-color: rgba(192, 142, 92, 0.15);
+  border-color: #21262d;
+}
+
+// Navbar
+.navbar {
+  background-color: #0e1217 !important;
+  border-bottom: 1px solid #21262d !important;
+}
+
+// Buttons
+.btn-primary {
+  background-color: #c08e5c !important;
+  border-color: #c08e5c !important;
+  color: #ffffff !important;
+  &:hover, &:focus {
+    background-color: #986c43 !important;
+    border-color: #986c43 !important;
+  }
+}
+
+.btn-outline-primary {
+  color: #c08e5c !important;
+  border-color: #c08e5c !important;
+  &:hover, &:focus {
+    background-color: #c08e5c !important;
+    color: #ffffff !important;
+  }
+}
+
+.btn-outline-secondary {
+  color: #b5bdc4 !important;
+  border-color: #21262d !important;
+  &:hover, &:focus {
+    background-color: #21262d !important;
+    color: #ffffff !important;
+  }
+}
+
+// Forms / Inputs
+.form-control, .form-select {
+  background-color: #0e1217;
+  border-color: #21262d;
+  color: #ffffff;
+  &:focus {
+    background-color: #0e1217;
+    border-color: #c08e5c;
+    color: #ffffff;
+    box-shadow: none;
+  }
+  &::placeholder {
+    color: #6c757d;
+  }
+}
+
+.form-label, label {
+  color: #b5bdc4;
+}
+
+// Text helpers
+.text-secondary {
+  color: #b5bdc4 !important;
+}
+.text-muted {
+  color: #8b949e !important;
+}
+.text-primary {
+  color: #c08e5c !important;
+}
+
+// Dropdowns
+.dropdown-menu {
+  background-color: #161b22;
+  border-color: #21262d;
+}
+.dropdown-item {
+  color: #e2e8f0;
+  &:hover {
+    background-color: #21262d;
+    color: #ffffff;
+  }
+}
+
+// Modals
+.modal-content {
+  background-color: #161b22;
+  border-color: #21262d;
+  color: #ffffff;
+}
+.modal-header {
+  border-color: #21262d;
+  .modal-title { color: #ffffff; }
+  .btn-close { filter: invert(1); }
+}
+.modal-footer {
+  border-color: #21262d;
+}
+
+// Badges
+.badge.bg-light {
+  background-color: #21262d !important;
+  color: #ffffff !important;
+}
+
+// Alerts
+.alert {
+  border: none;
+}
+
+// Hover Lift
 .hover-lift {
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    &:hover {
-        transform: translateY(-4px) !important;
-        box-shadow: 0 16px 32px rgba(62, 39, 35, 0.1) !important;
-    }
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  &:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4) !important;
+  }
 }
 
-.btn-animated {
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    &:active {
-        transform: scale(0.97) !important;
-    }
+// Pagination
+.page-link {
+  background-color: #161b22;
+  border-color: #21262d;
+  color: #c08e5c;
+  &:hover {
+    background-color: #21262d;
+    color: #ffffff;
+  }
+}
+.page-item.active .page-link {
+  background-color: #c08e5c;
+  border-color: #c08e5c;
+  color: #ffffff;
 }
 
-// Typography Classes
-.font-sans {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+// List Groups
+.list-group-item {
+  background-color: #161b22;
+  border-color: #21262d;
+  color: #ffffff;
 }
 
-.font-serif {
-    font-family: 'Playfair Display', Georgia, serif !important;
+// Breadcrumbs
+.breadcrumb-item a {
+  color: #c08e5c;
+}
+.breadcrumb-item.active {
+  color: #b5bdc4;
 }
 
-// Vintage Retro Card Accent
-.box-retro {
-    background-color: $primary;
-    color: white;
-    border: 2px solid $dark;
-    border-radius: $border-radius;
-    position: relative;
-    
-    &::before, &::after {
-        content: '';
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        background-color: transparent;
-    }
+// Touch Target
+.btn-touch:not(.btn-sm):not(.btn-group .btn):not(.btn-close) {
+  min-height: 40px;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Iconography
+.btn .bi, .nav-link .bi, .dropdown-item .bi {
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+}
+
+
+// Danger Button - Muted for Dark Theme
+.btn-danger {
+  background-color: #8B2C2C !important;
+  border-color: #8B2C2C !important;
+  color: #ffffff !important;
+  &:hover, &:focus {
+    background-color: #a33333 !important;
+    border-color: #a33333 !important;
+  }
+}
+
+// Fix form labels always visible
+.form-label, label {
+  color: #ffffff !important;
+}
+
+// Fix opacity-75 on text-light labels  
+.text-light.opacity-75 {
+  opacity: 1 !important;
+  color: #e2e8f0 !important;
+}
+
+// Alert overrides for dark bg
+.alert-success {
+  background-color: rgba(72, 187, 120, 0.15) !important;
+  color: #48bb78 !important;
+  border: 1px solid rgba(72, 187, 120, 0.3) !important;
+}
+.alert-danger {
+  background-color: rgba(245, 101, 101, 0.15) !important;
+  color: #f56565 !important;
+  border: 1px solid rgba(245, 101, 101, 0.3) !important;
+}
+.alert-warning {
+  background-color: rgba(236, 201, 75, 0.15) !important;
+  color: #ecc94b !important;
+  border: 1px solid rgba(236, 201, 75, 0.3) !important;
+}
+.alert-info {
+  background-color: rgba(99, 179, 237, 0.15) !important;
+  color: #63b3ed !important;
+  border: 1px solid rgba(99, 179, 237, 0.3) !important;
+}
+
+// Close button invert for dark bg
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+// Nav tabs/pills
+.nav-tabs {
+  border-color: #21262d;
+  .nav-link {
+    color: #b5bdc4;
+    &:hover { border-color: #21262d #21262d transparent; color: #ffffff; }
+    &.active { background-color: #161b22; border-color: #21262d #21262d #161b22; color: #c08e5c; }
+  }
+}
+.nav-pills .nav-link {
+  color: #b5bdc4;
+  &.active { background-color: #c08e5c; color: #ffffff; }
+}
+
+// Accordion
+.accordion-item { background-color: #161b22; border-color: #21262d; color: #ffffff; }
+.accordion-button {
+  background-color: #161b22; color: #ffffff;
+  &:not(.collapsed) { background-color: rgba(192, 142, 92, 0.1); color: #c08e5c; }
+  &::after { filter: invert(1); }
+}
+
+// Progress bars
+.progress { background-color: #21262d; }
+// Fix buttons WITH ICONS ONLY - proper vertical alignment
+.btn .bi {
+  font-size: inherit;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+// Fix input group text (like Mulai/Selesai blocks next to inputs)
+.input-group-text {
+  background-color: #21262d !important;
+  border-color: #21262d !important;
+  color: #e2e8f0 !important;
+}
+
+// Fix file input "Choose File" button
+.form-control::file-selector-button {
+  background-color: #21262d !important;
+  color: #e2e8f0 !important;
+  border: none !important;
+  border-right: 1px solid #0e1217 !important;
+  margin-right: 1rem;
+}
+.form-control:hover::file-selector-button {
+  background-color: #2d333b !important;
+}
+
+// Fix btn-success and btn-warning colors to fit premium dark theme
+.btn-success {
+  background-color: #2e6b47 !important;
+  border-color: #2e6b47 !important;
+  color: #ffffff !important;
+}
+.btn-success:hover {
+  background-color: #388256 !important;
+  border-color: #388256 !important;
+}
+
+.btn-warning {
+  background-color: #a88132 !important;
+  border-color: #a88132 !important;
+  color: #ffffff !important;
+}
+.btn-warning:hover {
+  background-color: #c09439 !important;
+  border-color: #c09439 !important;
 }

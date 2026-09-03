@@ -5,8 +5,8 @@
     /* Premium Dark & Bronze Hero Section */
     .hero-mastercafe {
         padding: 6rem 0 5rem 0;
-        background: linear-gradient(180deg, #111418 0%, #1a1d24 100%);
-        border-bottom: 1px solid #2a2d32;
+        background: linear-gradient(180deg, #0e1217 0%, #161b22 100%);
+        border-bottom: 1px solid #21262d;
         position: relative;
         overflow: hidden;
     }
@@ -43,11 +43,11 @@
 
     .badge-premium {
         background: rgba(178, 122, 77, 0.1);
-        color: #b27a4d;
+        color: #c08e5c;
         border: 1px solid rgba(178, 122, 77, 0.3);
-        font-size: 0.88rem;
+        font-size: 0.875rem;
         font-weight: 600;
-        padding: 0.45rem 1.25rem;
+        padding: 0.5rem 1.5rem;
         border-radius: 999px;
         letter-spacing: 1px;
     }
@@ -61,7 +61,7 @@
     }
 
     .hero-title-cursive {
-        color: #b27a4d;
+        color: #c08e5c;
         font-size: 3.5rem;
         display: block;
         margin-top: -10px;
@@ -77,10 +77,10 @@
 
     /* Action Buttons */
     .btn-premium-primary {
-        background: #b27a4d;
+        background: #c08e5c;
         color: #ffffff !important;
         font-weight: 600;
-        padding: 0.9rem 2.25rem;
+        padding: 1rem 2.5rem;
         border-radius: 999px;
         border: none;
         box-shadow: 0 8px 20px rgba(178, 122, 77, 0.25);
@@ -91,18 +91,18 @@
     }
 
     .btn-premium-primary:hover {
-        background: #96653f;
+        background: #986c43;
         transform: translateY(-2px);
         box-shadow: 0 12px 28px rgba(178, 122, 77, 0.4);
     }
 
     .btn-premium-outline {
         background: transparent;
-        color: #b27a4d !important;
+        color: #c08e5c !important;
         font-weight: 600;
-        padding: 0.9rem 2rem;
+        padding: 1rem 2.5rem;
         border-radius: 999px;
-        border: 1.5px solid #b27a4d;
+        border: 1.5px solid #c08e5c;
         transition: all 0.3s ease;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -116,10 +116,10 @@
 
     /* 3 Pilar Feature Cards */
     .pillar-card {
-        background: #1a1d24;
-        border: 1px solid #2a2d32;
+        background: #161b22;
+        border: 1px solid #21262d;
         border-radius: 1.5rem;
-        padding: 2.25rem 1.75rem;
+        padding: 2.5rem 2rem;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
     }
@@ -127,16 +127,16 @@
     .pillar-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(178, 122, 77, 0.15);
-        border-color: #b27a4d;
+        border-color: #c08e5c;
     }
 
     .pillar-icon-box {
-        width: 65px;
-        height: 65px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         background: rgba(178, 122, 77, 0.1);
         border: 1px solid rgba(178, 122, 77, 0.3);
-        color: #b27a4d;
+        color: #c08e5c;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -145,7 +145,7 @@
     }
 
     .text-bronze {
-        color: #b27a4d !important;
+        color: #c08e5c !important;
     }
 </style>
 
@@ -171,10 +171,10 @@
         </p>
 
         <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="/katalog" class="btn btn-premium-primary text-decoration-none">
+            <a href="/katalog" class="btn btn-premium-primary text-decoration-none btn-touch">
                 <i class="bi bi-book-half me-2"></i> Eksplorasi Menu
             </a>
-            <a href="/lokasi" class="btn btn-premium-outline text-decoration-none">
+            <a href="/lokasi" class="btn btn-premium-outline text-decoration-none btn-touch">
                 <i class="bi bi-geo-alt me-2"></i> Kunjungi Kami
             </a>
         </div>
@@ -182,7 +182,7 @@
 </section>
 
 <!-- 3 Pilar Pengalaman -->
-<section class="py-5" style="background-color: #111418;">
+<section class="py-5" style="background-color: #0e1217;">
     <div class="container">
         <div class="text-center mb-5">
             <span class="font-cursive text-bronze fs-2 d-block mb-2">Layanan Spesial</span>
@@ -195,10 +195,10 @@
             <div class="col-lg-4 col-md-6">
                 <div class="pillar-card h-100 text-center">
                     <div class="pillar-icon-box mx-auto">
-                        <i class="bi bi-cup-hot fs-2"></i>
+                        <i class="bi bi-fire fs-2"></i>
                     </div>
                     <h4 class="text-white mb-3" style="font-family: 'Rye', serif;">Sajian Premium</h4>
-                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 0.95rem;">
+                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
                         Kopi dan hidangan racikan khusus yang dibuat dengan bahan berkualitas tinggi untuk memanjakan lidah Anda.
                     </p>
                 </div>
@@ -211,7 +211,7 @@
                         <i class="bi bi-qr-code-scan fs-2"></i>
                     </div>
                     <h4 class="text-white mb-3" style="font-family: 'Rye', serif;">Pesan Dari Meja</h4>
-                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 0.95rem;">
+                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
                         Pindai kode QR di meja Anda dan nikmati kemudahan memesan menu secara digital tanpa perlu beranjak.
                     </p>
                 </div>
@@ -224,7 +224,7 @@
                         <i class="bi bi-moon-stars fs-2"></i>
                     </div>
                     <h4 class="text-white mb-3" style="font-family: 'Rye', serif;">Suasana Klasik</h4>
-                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 0.95rem;">
+                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
                         Ruangan bernuansa hangat dan temaram yang dirancang untuk memberikan kenyamanan maksimal saat berkumpul.
                     </p>
                 </div>
@@ -235,7 +235,7 @@
 </section>
 
 <!-- Tentang Kami Singkat -->
-<section class="py-5 border-top" style="background-color: #1a1d24; border-color: #2a2d32 !important;">
+<section class="py-5 border-top" style="background-color: #161b22; border-color: #21262d !important;">
     <div class="container text-center py-4">
         <h3 class="text-bronze mb-4" style="font-family: 'Rye', serif;">Tinggalkan Keramaian, Temukan Ketenangan.</h3>
         <p class="text-secondary mx-auto" style="max-width: 700px; line-height: 1.8;">
@@ -244,3 +244,4 @@
     </div>
 </section>
 @endsection
+

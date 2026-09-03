@@ -14,7 +14,7 @@
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table mb-0">
+                <table class="table table-dark text-white border-secondary mb-0">
                     <thead>
                         <tr>
                             <th>Judul</th>
@@ -31,7 +31,7 @@
                                 <td>{{ $p->title }}</td>
                                 <td>
                                     @if($p->type === 'discount')
-                                        <span class="badge bg-info text-dark">Diskon</span>
+                                        <span class="badge bg-info text-white">Diskon</span>
                                     @else
                                         <span class="badge bg-primary">Paket</span>
                                     @endif
@@ -50,7 +50,7 @@
                                     @elseif($p->ends_at && $p->ends_at < now())
                                         <span class="badge bg-secondary">Kadaluarsa</span>
                                     @elseif($p->starts_at && $p->starts_at > now())
-                                        <span class="badge bg-warning text-dark">Belum Mulai</span>
+                                        <span class="badge bg-warning text-white">Belum Mulai</span>
                                     @else
                                         <span class="badge bg-success">Berjalan</span>
                                     @endif

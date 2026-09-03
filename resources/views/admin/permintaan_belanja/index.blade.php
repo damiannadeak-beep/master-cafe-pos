@@ -5,10 +5,10 @@
     <div class="row mb-4 align-items-center">
         <div class="col-md-8">
             <h4 class="fw-bold text-accent mb-1"><i class="bi bi-cart-check-fill me-2"></i>Daftar Permintaan Belanja</h4>
-            <p class="text-muted mb-0">Kelola daftar barang atau bahan baku yang diminta oleh Kasir untuk dibeli.</p>
+            <p class="text-white-50 mb-0">Kelola daftar barang atau bahan baku yang diminta oleh Kasir untuk dibeli.</p>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
-            <button type="button" class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#adminBeliModal">
+            <button type="button" class="btn btn-primary rounded-pill shadow-sm d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#adminBeliModal">
                 <i class="bi bi-plus-circle me-1"></i> Catat Pembelian Baru
             </button>
         </div>
@@ -25,7 +25,7 @@
                 <form action="{{ route('admin.permintaan.store') }}" method="POST">
                     @csrf
                     <div class="modal-body p-4">
-                        <p class="text-muted small mb-4">Catat daftar belanjaan Anda secara bebas di sini. Data ini hanya berfungsi sebagai riwayat belanja dan <strong>tidak memengaruhi stok sistem</strong>.</p>
+                        <p class="text-white-50 small mb-4">Catat daftar belanjaan Anda secara bebas di sini. Data ini hanya berfungsi sebagai riwayat belanja dan <strong>tidak memengaruhi stok sistem</strong>.</p>
                         
                         <div id="dynamicBahanContainer">
                             <div class="row bahan-row mb-3 align-items-end">
@@ -52,7 +52,7 @@
                             <textarea class="form-control" name="catatan" rows="2" placeholder="Misal: Belanja bulanan di pasar induk..."></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light border-top-0 py-3">
+                    <div class="modal-footer  text-white border-top-0 py-3">
                         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary rounded-pill px-4">Simpan Catatan Belanja</button>
                     </div>
@@ -71,8 +71,8 @@
     <div class="card admin-card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="table-dark">
                         <tr>
                             <th class="ps-4">Tanggal</th>
                             <th>Kasir</th>
@@ -87,24 +87,24 @@
                             <tr class="{{ $req->status === 'menunggu' ? 'table-warning bg-opacity-10' : '' }}">
                                 <td class="ps-4">
                                     <div class="fw-medium">{{ $req->created_at->format('d/m/Y') }}</div>
-                                    <div class="small text-muted">{{ $req->created_at->format('H:i') }}</div>
+                                    <div class="small text-white-50">{{ $req->created_at->format('H:i') }}</div>
                                 </td>
                                 <td>
                                     <span class="badge bg-secondary rounded-pill">{{ $req->user->name ?? 'Unknown' }}</span>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark">{{ $req->nama_barang }}</div>
+                                    <div class="fw-bold text-white">{{ $req->nama_barang }}</div>
                                     @if($req->sisa_stok)
                                         <div class="small text-danger"><i class="bi bi-exclamation-triangle me-1"></i>Sisa: {{ $req->sisa_stok }}</div>
                                     @endif
                                     @if($req->catatan)
-                                        <div class="small text-muted mt-1 fst-italic">"{{ $req->catatan }}"</div>
+                                        <div class="small text-white-50 mt-1 fst-italic">"{{ $req->catatan }}"</div>
                                     @endif
                                 </td>
                                 <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1">{{ $req->jumlah_diminta }}</span></td>
                                 <td>
                                     @if($req->status === 'menunggu')
-                                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Menunggu</span>
+                                        <span class="badge bg-warning text-white"><i class="bi bi-hourglass-split me-1"></i>Menunggu</span>
                                     @elseif($req->status === 'sudah_dibeli')
                                         <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Sudah Dibeli</span>
                                     @else
@@ -137,7 +137,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-white-50">
                                     <i class="bi bi-emoji-smile fs-1 d-block mb-3 opacity-50"></i>
                                     Tidak ada permintaan belanja dari kasir.
                                 </td>
@@ -147,7 +147,7 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white border-top px-4 py-3">
+        <div class="card-footer text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" border-top px-4 py-3">
             {{ $permintaans->links() }}
         </div>
     </div>
@@ -189,3 +189,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+

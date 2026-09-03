@@ -26,7 +26,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Shift</label>
-                    <select class="form-select" name="shift" required>
+                    <select class="form-select text-white border-secondary " name="shift" required>
                         <option value="pagi" {{ old('shift', $kasir->shift) == 'pagi' ? 'selected' : '' }}>Pagi</option>
                         <option value="malam" {{ old('shift', $kasir->shift) == 'malam' ? 'selected' : '' }}>Malam</option>
                     </select>

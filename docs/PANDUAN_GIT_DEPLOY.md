@@ -17,7 +17,7 @@ git pull origin master
 # Format: fitur/nama-fitur  atau  fix/nama-bug
 git checkout -b fitur-stok-otomatis
 
-# 3. Bebas koding dan trial-error di local (http://mastercafe-pos.test)
+# 3. Bebas koding dan trial-error di local (http://master-cafe-pos.test)
 # Setelah fitur berhasil & lulus uji coba, simpan perubahan:
 git add -A
 git commit -m "feat: implementasi fitur stok otomatis"
@@ -50,7 +50,8 @@ git branch -d fitur-stok-otomatis
 
 ## 3. Deployment ke Server cPanel Live (Secure Architecture)
 
-**Arsitektur Baru:** File inti Laravel (pp, outes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/master-cafe-pos. Kita HANYA mengkopi folder public ke internet.
+**Arsitektur Baru:** File inti Laravel (pp, 
+outes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/master-cafe-pos. Kita HANYA mengkopi folder public ke internet.
 
 Buka **Terminal cPanel** pada server hosting:
 
