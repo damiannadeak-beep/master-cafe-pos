@@ -18,4 +18,8 @@
                                 <span class="badge  text-white border">{{ $pm->nama_menu }}</span>
                             @endforeach
                         </div>
-                    @endif
+                    @endif                </li>
+            @endforeach
+        </ul>
+    </div>
+@endif
