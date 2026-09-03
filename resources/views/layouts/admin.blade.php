@@ -7,7 +7,7 @@
     <title>Dashboard Admin - Master Cafe POS</title>
     @include("layouts.includes.head-assets")
             <style>
-        .admin-layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; margin: 0; padding: 0; }
+        .admin-layout { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; margin: 0; padding: 0; }
         .admin-topbar { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: var(--gradient-surface); z-index: 1050; flex-shrink: 0; }
         .admin-sidebar { width: 280px; flex-shrink: 0; background: var(--gradient-surface); border-right: 1px solid var(--border-subtle); height: 100%; overflow-y: auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; }
         .admin-sidebar .nav-link { color: var(--text-muted); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; }
@@ -16,7 +16,7 @@
         .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } 
         .admin-content { flex: 1; padding: 2rem; background: var(--bg-base); overflow-y: auto; }
         .nav-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin: 1.5rem 0 0.5rem 1rem; opacity: 0.7; }
-        @media (max-width: 991.98px) { .admin-sidebar { position: fixed; transform: translateX(-100%); z-index: 1040; transition: transform 0.3s ease; width: 280px; } .admin-sidebar.show { transform: translateX(0); } .admin-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1035; } .admin-overlay.show { display: block; } .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } .admin-content { padding: 1rem; } }
+        @media (max-width: 991.98px) { .admin-sidebar { position: fixed; transform: translateX(-100%); z-index: 1040; transition: transform 0.3s ease; width: 280px; top: 0; bottom: 0; height: 100%; padding-bottom: 5rem; } .admin-sidebar.show { transform: translateX(0); } .admin-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1035; } .admin-overlay.show { display: block; } .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } .admin-content { padding: 1rem; } }
     </style>
 </head>
 <body>
@@ -217,6 +217,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
