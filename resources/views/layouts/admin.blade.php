@@ -25,8 +25,7 @@
             <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-link text-white d-lg-none p-0 me-2" id="sidebarToggle"><i class="bi bi-list fs-3"></i></button>
                 <div class="brand">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 40px; width: 40px; object-fit: cover;"> Master Cafe POS
-                </div>
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 40px; width: 40px; object-fit: cover;"> <span class="d-none d-md-inline ms-2">Master Cafe POS</span></div>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <!-- Notification Bell -->
@@ -69,7 +68,7 @@
                 </div>
 
                 <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm d-inline-flex align-items-center" onclick="document.getElementById('logout-form').submit();">
-                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    <i class="bi bi-box-arrow-right me-md-2"></i> <span class="d-none d-md-inline">Logout</span>
                 </button>
             </div>
         </div>
@@ -218,6 +217,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 

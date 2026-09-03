@@ -1,9 +1,9 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 @php $users = $users ?? collect(); @endphp
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <h2>Dashboard Pemilik</h2>
             <p class="text-white-50 mb-0">Kelola penjualan, stok, dan pantau performa warung.</p>
