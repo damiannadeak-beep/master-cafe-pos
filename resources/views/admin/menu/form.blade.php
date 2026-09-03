@@ -32,14 +32,11 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Kategori</label>
-                    <input type="text" list="kategori_list" name="kategori" class="form-control" value="{{ old('kategori', $menu->kategori) }}" required placeholder="Contoh: Makanan, Minuman, Nasi Goreng, Kopi">
-                    <datalist id="kategori_list">
-                        <option value="Makanan">
-                        <option value="Minuman">
-                        <option value="Nasi Goreng">
-                        <option value="Mie">
-                        <option value="Coffee">
-                    </datalist>
+                    <select name="kategori" class="form-select" required>
+                        <option value="">-- Pilih Kategori Utama --</option>
+                        <option value="makanan" {{ strtolower(old('kategori', $menu->kategori)) == 'makanan' ? 'selected' : '' }}>Makanan</option>
+                        <option value="minuman" {{ strtolower(old('kategori', $menu->kategori)) == 'minuman' ? 'selected' : '' }}>Minuman</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Harga</label>

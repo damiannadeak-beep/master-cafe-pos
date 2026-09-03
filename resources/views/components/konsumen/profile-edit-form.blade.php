@@ -1,9 +1,9 @@
-﻿<form action="/konsumen/profil/update" method="POST" enctype="multipart/form-data">
+<form action="/konsumen/profil/update" method="POST" enctype="multipart/form-data">
                                                 @csrf
                                                 <div class="mb-5 text-center">
                                                     <div class="position-relative d-inline-block shadow-sm rounded-circle" style="width: 120px; height: 120px;">
                                                         <img id="foto-preview" src="{{ $user->foto ? asset('uploads/profil/' . $user->foto) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random&color=fff&size=120' }}" alt="Foto Profil" class="rounded-circle border border-4 border-white" style="width: 120px; height: 120px; object-fit: cover; cursor: pointer;" onclick="document.getElementById('foto-input').click();">
-                                                        <div class="position-absolute bottom-0 end-0 text-white" style="background: var(--gradient-bronze);" rounded-circle d-flex align-items-center justify-content-center border border-2 border-white" style="width: 35px; height: 35px; cursor: pointer; transform: translate(10%, 10%);" onclick="document.getElementById('foto-input').click();">
+                                                        <div class="position-absolute bottom-0 end-0 text-white rounded-circle d-flex align-items-center justify-content-center border border-2 border-white" style="background: var(--gradient-bronze); width: 35px; height: 35px; cursor: pointer; transform: translate(10%, 10%);" onclick="document.getElementById('foto-input').click();">
                                                             <i class="bi bi-camera-fill"></i>
                                                         </div>
                                                     </div>
@@ -25,7 +25,7 @@
                                                         <input type="text" name="no_hp" class="form-control  border-start-0" value="{{ $user->no_hp }}" placeholder="08xxxxxxxx">
                                                     </div>
                                                 </div>
-                                                <button type="submit" class="btn btn-auth-primary btn-touch" style="background: var(--gradient-bronze); color: white; border: none;"  w-100 fw-bold rounded-pill mb-4 shadow-sm">
+                                                <button type="submit" class="btn btn-auth-primary btn-touch w-100 fw-bold rounded-pill mb-4 shadow-sm" style="background: var(--gradient-bronze); color: white; border: none;">
                                                     Simpan Perubahan
                                                 </button>
                                             </form>

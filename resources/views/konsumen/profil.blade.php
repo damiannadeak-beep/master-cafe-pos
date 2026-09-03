@@ -45,17 +45,17 @@
                 <div class="card-header  border-bottom-0 p-0">
                     <ul class="nav nav-pills nav-justified" id="pills-tab" role="tablist" style="border-bottom: 2px solid #21262d;">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active rounded-0 fw-bold py-3" id="pills-aktif-tab" data-bs-toggle="pill" data-bs-target="#pills-aktif" type="button" role="tab" style="border-bottom: 3px solid transparent;">
+                            <button class="nav-link d-flex justify-content-center align-items-center active rounded-0 fw-bold py-3" id="pills-aktif-tab" data-bs-toggle="pill" data-bs-target="#pills-aktif" type="button" role="tab" style="border-bottom: 3px solid transparent;">
                                 <i class="bi bi-basket me-2"></i>Pesanan Aktif
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-0 fw-bold py-3 text-secondary" id="pills-riwayat-tab" data-bs-toggle="pill" data-bs-target="#pills-riwayat" type="button" role="tab" style="border-bottom: 3px solid transparent;" onclick="this.classList.remove('text-secondary');">
+                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-riwayat-tab" data-bs-toggle="pill" data-bs-target="#pills-riwayat" type="button" role="tab" style="border-bottom: 3px solid transparent;" onclick="this.classList.remove('text-secondary'); d-flex justify-content-center align-items-center">
                                 <i class="bi bi-clock-history me-2"></i>Riwayat
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-0 fw-bold py-3 text-secondary" id="pills-profil-tab" data-bs-toggle="pill" data-bs-target="#pills-profil" type="button" role="tab" style="border-bottom: 3px solid transparent;" onclick="this.classList.remove('text-secondary');">
+                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-profil-tab" data-bs-toggle="pill" data-bs-target="#pills-profil" type="button" role="tab" style="border-bottom: 3px solid transparent;" onclick="this.classList.remove('text-secondary'); d-flex justify-content-center align-items-center">
                                 <i class="bi bi-gear me-2"></i>Profil
                             </button>
                         </li>
@@ -67,13 +67,13 @@
                         
                         <!-- TAB PESANAN AKTIF -->
                         <div class="tab-pane fade show active" id="pills-aktif" role="tabpanel">
-                            <h5 class="fw-bold mb-4">Pesanan Sedang Berlangsung</h5>
+                            <h5 class="fw-bold mb-4 text-center">Pesanan Sedang Berlangsung</h5>
                             @include("components.konsumen.active-order-card")
                         </div>
 
                         <!-- TAB RIWAYAT -->
                         <div class="tab-pane fade" id="pills-riwayat" role="tabpanel">
-                            <h5 class="fw-bold mb-4">Riwayat Pesanan Saya</h5>
+                            <h5 class="fw-bold mb-4 text-center">Riwayat Pesanan Saya</h5>
                             @include("components.konsumen.order-history-card")
                         </div>
 

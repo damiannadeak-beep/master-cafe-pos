@@ -66,21 +66,10 @@
                 <div class="d-flex align-items-center gap-3">
                     
                     <div class="navbar-text small text-white">{{ auth()->user()->name ?? 'Kasir' }}</div>
-                    @php
-                        $isShiftOwner = \App\Models\KasirShift::where('user_id', auth()->id())->where('status', 'open')->exists();
-                    @endphp
-                    @if($isShiftOwner)
-                        {{-- Kasir 1 (Pemilik Laci) ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Wajib Tutup Shift --}}
-                        <a class="btn btn-danger btn-sm rounded-pill shadow-sm d-inline-flex align-items-center gap-1" style="padding: 6px 16px; line-height: 1;" href="{{ route('kasir.shift.tutup') }}">
-                            <i class="bi bi-x-circle" style="font-size: 16px; line-height: 1;"></i> <span style="line-height: 1;">Tutup Shift</span>
-                        </a>
-                    @else
-                        {{-- Kasir 2 (Bukan Pemilik Laci) ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Logout Biasa --}}
-                        <a class="btn btn-outline-light btn-sm rounded-pill" href="{{ route('logout') }}"
+                    <a class="btn btn-outline-light btn-sm rounded-pill" href="{{ route('logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="bi bi-box-arrow-right me-1"></i> Logout
                         </a>
-                    @endif
                 </div>
             </div>
         </nav>

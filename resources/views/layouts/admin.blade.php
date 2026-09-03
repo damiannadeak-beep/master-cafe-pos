@@ -16,7 +16,7 @@
         .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } 
         .admin-content { flex: 1; padding: 2rem; background: var(--bg-base); overflow-y: auto; }
         .nav-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin: 1.5rem 0 0.5rem 1rem; opacity: 0.7; }
-        @media (max-width: 991.98px) { .admin-sidebar { position: fixed; transform: translateX(-100%); z-index: 1040; transition: transform 0.3s ease; width: 280px; top: 0; bottom: 0; height: 100%; padding-bottom: 5rem; } .admin-sidebar.show { transform: translateX(0); } .admin-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1035; } .admin-overlay.show { display: block; } .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } .admin-content { padding: 1rem; } }
+        @media (max-width: 991.98px) { .admin-sidebar { position: fixed; transform: translateX(-100%); z-index: 1060; transition: transform 0.3s ease; width: 280px; top: 0; bottom: 0; height: 100dvh; padding-bottom: 2rem; } .admin-sidebar.show { transform: translateX(0); } .admin-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1055; } .admin-overlay.show { display: block; } .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } .admin-content { padding: 1rem; } }
     </style>
 </head>
 <body>

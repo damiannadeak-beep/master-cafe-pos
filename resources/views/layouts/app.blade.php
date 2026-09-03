@@ -19,6 +19,11 @@
             font-family: 'Great Vibes', cursive !important;
         }
         .app-navbar { background: var(--gradient-surface) !important; border-bottom: 1px solid var(--border-subtle); position: relative; z-index: 1050; box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25); }
+        /* Hide Microsoft Edge native password reveal icon to prevent double eyes */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
     </style>
 </head>
 <body class="text-light" data-bs-theme="dark" style="background-color: #0e1217 !important;">
@@ -74,20 +79,20 @@
                                 <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdown">
                                     
                                     @role('pemilik')
-                                        <a class="dropdown-item" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard Admin</a>
+                                        <a class="dropdown-item d-flex align-items-center" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard Admin</a>
                                     @endrole
 
                                     @role('kasir')
-                                        <a class="dropdown-item" href="/kasir/pos"><i class="bi bi-calculator me-2"></i> Mesin POS Kasir</a>
+                                        <a class="dropdown-item d-flex align-items-center" href="/kasir/pos"><i class="bi bi-calculator me-2"></i> Mesin POS Kasir</a>
                                     @endrole
 
                                     @role('konsumen')
-                                        <a class="dropdown-item" href="/konsumen/profil"><i class="bi bi-person-lines-fill me-2"></i> Profil & Pesanan Saya</a>
+                                        <a class="dropdown-item d-flex align-items-center" href="/konsumen/profil"><i class="bi bi-person-lines-fill me-2"></i> Profil & Pesanan Saya</a>
                                     @endrole
                                     
                                     <hr class="dropdown-divider">
 
-                                    <a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                                    <a class="dropdown-item text-danger d-flex align-items-center" href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="bi bi-box-arrow-right me-2"></i> Keluar
                                     </a>

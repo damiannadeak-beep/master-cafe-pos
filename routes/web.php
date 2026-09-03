@@ -92,20 +92,7 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleC
 Route::get('/staff/login', [App\Http\Controllers\Auth\LoginController::class, 'showStaffLoginForm'])->name('staff.login');
 Auth::routes(['verify' => true, 'middleware' => ['throttle:10,1']]);
 
-// Override logout: Kasir 1 (pemilik laci) tidak bisa logout biasa, harus Tutup Shift dulu
-Route::post('/logout', function (\Illuminate\Http\Request $request) {
-    $user = auth()->user();
-    if ($user && $user->hasRole('kasir')) {
-        $hasOpenShift = \App\Models\KasirShift::where('user_id', $user->id)->where('status', 'open')->exists();
-        if ($hasOpenShift) {
-            return redirect()->route('kasir.shift.tutup')->with('error', 'Anda adalah penanggung jawab laci kas. Silakan Tutup Shift dan hitung uang terlebih dahulu sebelum logout.');
-        }
-    }
-    auth()->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-    return redirect('/login');
-})->name('logout')->middleware('auth');
+
 
 // ================= AREA AUTENTIKASI =================
 // Semua route di dalam grup ini wajib login
@@ -145,7 +132,7 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('/backup', [AdminController::class, 'backupDatabase'])->name('backup');
 
-        // Route Bantuan (Clear Cache — hanya pemilik yang boleh)
+        // Route Bantuan (Clear Cache â€” hanya pemilik yang boleh)
         Route::get('/clear-cache', function() {
             \Illuminate\Support\Facades\Artisan::call('optimize:clear');
             return redirect()->back()->with('success', 'Cache berhasil dibersihkan.');
@@ -213,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Role: Kasir
-    Route::middleware(['role:kasir', 'ensure_shift_open'])->prefix('kasir')->group(function () {
+    Route::middleware(['role:kasir'])->prefix('kasir')->group(function () {
         Route::get('/pos', [PosController::class, 'index'])->name('kasir.pos');
         Route::get('/pesanan-aktif', [PosController::class, 'pesananAktif'])->name('kasir.pesanan_aktif');
         Route::post('/manual-order', [PosController::class, 'storeManualOrder']);

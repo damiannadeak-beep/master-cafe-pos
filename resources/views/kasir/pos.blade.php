@@ -1,6 +1,3 @@
-﻿@extends('layouts.kasir')
-
-@section('content')
 @extends('layouts.kasir')
 
 @section('content')

@@ -60,7 +60,7 @@
                             <tr>
                                 <td>
                                     @if($m->image)
-                                        <div class="text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" border rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                        <div class="text-white border rounded d-flex align-items-center justify-content-center" style="background-color: #161b22; border: 1px solid #21262d !important; width: 80px; height: 80px; overflow: hidden;">
                                             <img src="{{ $m->image_url }}" onerror="this.onerror=null; this.src='https://placehold.co/600x450/e9ecef/6c757d?text=Belum+Ada+Foto';" alt="{{ $m->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; padding: 4px;">
                                         </div>
                                     @else
