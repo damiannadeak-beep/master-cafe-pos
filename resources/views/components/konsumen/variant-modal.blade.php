@@ -23,8 +23,10 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-outline-secondary text-white fw-bold rounded-pill flex-fill btn-touch" style="white-space: nowrap;" onclick="addAnotherVariantSelection()"><i class="bi bi-plus-circle me-1"></i>Porsi Lain</button>
-                        <button type="button" class="btn btn-auth-primary btn-touch" style="background: var(--gradient-bronze); color: white; border: none;" fw-bold rounded-pill flex-fill" style="white-space: nowrap;" onclick="confirmVariantSelection()">Tambahkan</button>
+                        <button type="button" class="btn btn-auth-primary btn-touch fw-bold rounded-pill flex-fill" style="background: var(--gradient-bronze); color: white; border: none; white-space: nowrap;" onclick="confirmVariantSelection()">Tambahkan</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
