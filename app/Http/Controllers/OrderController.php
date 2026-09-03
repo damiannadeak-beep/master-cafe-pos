@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\{Pesanan, DetailPesanan, Pembayaran, Menu, Meja, Promo, Setting};
 use App\Http\Requests\Konsumen\{TambahPesananRequest, CallBellRequest};
+use App\Services\OrderService;
 
 class OrderController extends Controller
 {
