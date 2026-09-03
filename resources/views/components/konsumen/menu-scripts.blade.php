@@ -330,12 +330,20 @@
             items: cart
         };
 
-        fetch("{{ url('/konsumen/order/add') }}", {
+                fetch("{{ url('/konsumen/order/add') }}", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
             body: JSON.stringify(formData)
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(err => { throw err; });
+            }
+            return res.json();
+        })
         .then(data => {
             if (data.error) {
                 alert(data.error);
@@ -343,6 +351,20 @@
                 window.location.href = "/konsumen/checkout/" + data.id_pesanan;
             }
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            if (err.errors) {
+                let msg = "";
+                for (let key in err.errors) {
+                    msg += err.errors[key][0] + "\n";
+                }
+                alert("Kesalahan validasi:\n" + msg);
+            } else if (err.message) {
+                alert("Error: " + err.message);
+            } else {
+                alert("Terjadi kesalahan saat memproses pesanan.");
+                console.error(err);
+            }
+        });
     }
 </script>
+

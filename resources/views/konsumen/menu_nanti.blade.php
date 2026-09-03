@@ -26,5 +26,5 @@
 
 @include('components.konsumen.variant-modal')
 @include('components.konsumen.cart-bar')
-@include('components.konsumen.menu-scripts', ['orderType' => 'pesan-nanti'])
+@include('components.konsumen.menu-scripts', ['orderType' => 'dine_in'])
 @endsection
