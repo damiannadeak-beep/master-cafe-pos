@@ -22,7 +22,7 @@
 <body>
     <div id="app" class="admin-layout">
         <div class="admin-topbar">
-            <div class="brand">
+            <div class="d-flex align-items-center gap-2"><button class="btn btn-link text-white d-lg-none p-0 me-2" id="sidebarToggle"><i class="bi bi-list fs-3"></i></button><div class="brand">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 40px; width: 40px; object-fit: cover;"> Master Cafe POS
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <div class="admin-main-wrapper">
+        <div class="admin-main-wrapper"><div class="admin-overlay" id="sidebarOverlay"></div>
             <aside class="admin-sidebar">
                 <div class="mb-4">
                     <div class="brand-title d-flex align-items-center mb-1">
@@ -194,8 +194,29 @@
             };
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            if(toggleBtn && sidebar && overlay) {
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                    overlay.classList.toggle('show');
+                });
+                
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
+
+
 
 
 
