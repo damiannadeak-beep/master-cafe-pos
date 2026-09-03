@@ -2,8 +2,8 @@
 @foreach($menus as $menu)
 <div class="col-md-6 col-lg-4 mb-4 menu-item" data-kategori="{{ strtolower($menu->kategori) }}">
     <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="background-color: #161b22; border: 1px solid #21262d !important; display: flex; flex-direction: column;">
-        @if($menu->foto)
-            <img src="{{ asset('uploads/menu/'.$menu->foto) }}" class="card-img-top" alt="{{ $menu->nama_menu }}" style="height: 180px; object-fit: cover;">
+        @if($menu->image)
+            <img src="{{ $menu->image_url }}" class="card-img-top" alt="{{ $menu->nama_menu }}" style="height: 180px; object-fit: cover;">
         @else
             <div class="d-flex align-items-center justify-content-center bg-dark" style="height: 180px;">
                 <i class="bi bi-image text-secondary fs-1"></i>
@@ -40,3 +40,4 @@
     </div>
 </div>
 @endforeach
+
