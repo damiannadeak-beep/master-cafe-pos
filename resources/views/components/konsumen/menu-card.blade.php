@@ -5,8 +5,8 @@
         @if($menu->image)
             <img src="{{ $menu->image_url }}" class="card-img-top" alt="{{ $menu->nama_menu }}" style="height: 180px; object-fit: contain; width: 100%;">
         @else
-            <div class="d-flex align-items-center justify-content-center bg-dark" style="height: 180px;">
-                <i class="bi bi-image text-secondary fs-1"></i>
+            <div class="d-flex align-items-center justify-content-center" style="height: 180px; background-color: #14171c;">
+                <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow-sm" style="height: 64px; width: 64px; object-fit: cover;">
             </div>
         @endif
         <div class="card-body p-3 d-flex flex-column" style="flex: 1;">

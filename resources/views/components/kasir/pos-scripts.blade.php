@@ -86,13 +86,13 @@
         }
 
         menusToShow.forEach(menu => {
-            const imageHtml = (menu.image_url || menu.image) 
-                ? `<div class="bg-transparent text-center border-bottom" style="height: 150px;">
-                     <img src="${menu.image_url || ('/storage/' + menu.image)}" onerror="this.onerror=null; this.src='https://placehold.co/600x450/e9ecef/6c757d?text=Belum+Ada+Foto';" alt="${menu.nama_menu}" style="object-fit: contain; width: 100%; height: 100%;">
-                   </div>`
-                : `<div class="card-img-top  text-white d-flex justify-content-center align-items-center" style="height: 150px;">
-                       <i class="bi bi-image text-white-50 opacity-50" style="font-size: 2.5rem;"></i>
-                   </div>`;
+            const imageHtml = menu.image 
+                  ? `<div class="bg-transparent text-center border-bottom" style="height: 150px;">
+                       <img src="${menu.image_url}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="${menu.nama_menu}" style="object-fit: contain; width: 100%; height: 100%;">
+                     </div>`
+                  : `<div class="card-img-top d-flex justify-content-center align-items-center bg-light border-bottom" style="height: 150px;">
+                         <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow-sm" style="height: 64px; width: 64px; object-fit: cover;">
+                     </div>`;
                    
             const badgeCat = `<span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill shadow-sm bg-info text-white text-capitalize" style="backdrop-filter: blur(4px);">${menu.kategori}</span>`;
 
