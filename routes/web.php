@@ -206,6 +206,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/manual-order', [PosController::class, 'storeManualOrder']);
         Route::put('/order/{id_pesanan}/status', [PosController::class, 'updateOrderStatus']);
         Route::put('/order/{id_pesanan}/pay', [PosController::class, 'payOrder']);
+        Route::put('/order/{id_pesanan}/verify-payment', [PosController::class, 'verifyPayment']);
+        Route::put('/order/{id_pesanan}/reject-payment', [PosController::class, 'rejectPayment']);
         Route::put('/order/{id_pesanan}/void', [PosController::class, 'voidOrder'])->name('kasir.order.void');
         Route::post('/order/{id_pesanan}/split', [PosController::class, 'splitOrder'])->name('kasir.order.split');
         Route::get('/order/{id}/receipt', [PosController::class, 'printReceipt'])->name('kasir.order.receipt');
@@ -255,6 +257,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
         Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
         Route::get('/checkout/{id_pesanan}', [PaymentController::class, 'checkout']);
+        Route::post('/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
         Route::post('/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');
         
         // Fitur Baru: Profil, Riwayat & Rating

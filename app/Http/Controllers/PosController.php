@@ -179,6 +179,51 @@ class PosController extends Controller
     /**
      * Update status pembayaran dari kasir
      */
+    
+    public function verifyPayment($id_pesanan, PaymentService $paymentService)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $pesanan = $paymentService->processPayment(
+                $id_pesanan,
+                'qris', // Default to QRIS since it was uploaded
+                null,
+                auth()->id()
+            );
+
+            // Set status pesanan menjadi processing (dimasak) jika dine_in dan belum processing
+            if ($pesanan->status === 'pending') {
+                $pesanan->status = 'processing';
+                $pesanan->save();
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Pembayaran pesanan #'.$pesanan->id.' berhasil diverifikasi.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal verifikasi pembayaran: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memverifikasi pembayaran.');
+        }
+    }
+
+    public function rejectPayment($id_pesanan)
+    {
+        try {
+            $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
+            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'pending_verification') {
+                $pesanan->pembayaran->status = 'unpaid';
+                $pesanan->pembayaran->bukti_bayar = null;
+                $pesanan->pembayaran->save();
+                return redirect()->back()->with('success', 'Bukti pembayaran ditolak. Pesanan dikembalikan ke status belum bayar.');
+            }
+            return redirect()->back()->with('error', 'Pesanan tidak dalam status verifikasi.');
+        } catch (\Exception $e) {
+            Log::error('Gagal tolak pembayaran: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menolak pembayaran.');
+        }
+    }
+
     public function payOrder(PayOrderRequest $request, $id_pesanan, PaymentService $paymentService)
     {
         $validated = $request->validated();

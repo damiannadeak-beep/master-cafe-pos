@@ -24,8 +24,10 @@
                         <h5 class="fw-bold mb-1">{{ $meja->nama_meja_atau_nomor }}</h5>
                         <p class="text-white-50 small mb-3">{{ $meja->keterangan ?? 'Meja Pelanggan' }}</p>
                         
-                        <div class="d-flex align-items-center justify-content-center gap-2">
-                            <span class="small fw-bold {{ $meja->is_available ? 'text-success' : 'text-white-50' }}" id="label-on-{{ $meja->id }}">Tersedia</span>
+                        <div class="d-flex align-items-center justify-content-center gap-2 mt-3">
+                            <span class="fw-bold {{ $meja->is_available ? 'text-success' : 'text-danger' }}" id="label-on-{{ $meja->id }}">
+                                {{ $meja->is_available ? 'Tersedia' : 'Terisi' }}
+                            </span>
                             <div class="form-check form-switch fs-4 mb-0">
                                 <input class="form-check-input" type="checkbox" role="switch" 
                                        id="switch-meja-{{ $meja->id }}" 
@@ -33,11 +35,6 @@
                                        {{ $meja->is_available ? 'checked' : '' }}
                                        style="cursor: pointer;">
                             </div>
-                        </div>
-                        <div class="mt-2">
-                            <span class="badge rounded-pill {{ $meja->is_available ? 'bg-success' : 'bg-danger' }}" id="badge-meja-{{ $meja->id }}">
-                                {{ $meja->is_available ? 'Tersedia' : 'Terisi' }}
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -95,28 +92,23 @@
         const card = document.getElementById(`card-meja-${id}`);
         const icon = document.getElementById(`icon-meja-${id}`);
         const labelOn = document.getElementById(`label-on-${id}`);
-        const badge = document.getElementById(`badge-meja-${id}`);
 
         if (isAvailable) {
-            card.classList.remove(' text-white');
+            card.classList.remove('text-white');
             card.classList.add('bg-transparent');
             icon.style.backgroundColor = '#e8f5e9';
             icon.style.color = '#2e7d32';
-            labelOn.classList.remove('text-white-50');
+            labelOn.classList.remove('text-danger');
             labelOn.classList.add('text-success');
-            badge.classList.remove('bg-danger');
-            badge.classList.add('bg-success');
-            badge.innerText = 'Tersedia';
+            labelOn.innerText = 'Tersedia';
         } else {
             card.classList.remove('bg-transparent');
-            card.classList.add(' text-white');
+            card.classList.add('text-white');
             icon.style.backgroundColor = '#ffebee';
             icon.style.color = '#c62828';
             labelOn.classList.remove('text-success');
-            labelOn.classList.add('text-white-50');
-            badge.classList.remove('bg-success');
-            badge.classList.add('bg-danger');
-            badge.innerText = 'Terisi';
+            labelOn.classList.add('text-danger');
+            labelOn.innerText = 'Terisi';
         }
     }
 </script>

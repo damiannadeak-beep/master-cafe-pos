@@ -203,4 +203,24 @@
             }
         });
     }
+
+    function verifyPayment(id, imgUrl) {
+        document.getElementById('verify-order-id').innerText = id;
+        document.getElementById('verify-payment-image').src = imgUrl;
+        
+        let verifyForm = document.getElementById('verifyPaymentForm');
+        verifyForm.action = /kasir/order/ + id + /verify-payment;
+        
+        let rejectForm = document.getElementById('rejectPaymentForm');
+        rejectForm.action = /kasir/order/ + id + /reject-payment;
+        
+        let modal = new bootstrap.Modal(document.getElementById('verifyPaymentModal'));
+        modal.show();
+    }
+
+    function rejectPayment() {
+        if(confirm('Yakin menolak bukti pembayaran ini? Pesanan akan dikembalikan ke status belum dibayar.')) {
+            document.getElementById('rejectPaymentForm').submit();
+        }
+    }
 </script>

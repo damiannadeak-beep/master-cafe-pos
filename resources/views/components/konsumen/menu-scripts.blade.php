@@ -358,6 +358,8 @@
                     msg += err.errors[key][0] + "\n";
                 }
                 alert("Kesalahan validasi:\n" + msg);
+            } else if (err.error) {
+                alert('Error: ' + err.error);
             } else if (err.message) {
                 alert("Error: " + err.message);
             } else {

@@ -18,14 +18,17 @@ class OrderController extends Controller
         $meja = Meja::findOrFail($id_meja);
         
         // Cek apakah ada pesanan 'unpaid' aktif di meja ini (Konsep Open Bill)
-        $pesananAktif = Pesanan::where('id_meja', $id_meja)
-            ->where('status', '!=', 'completed')
-            ->whereHas('pembayaran', function($q) {
-                $q->where('status', 'unpaid');
-            })->first();
+        $pesananAktif = null;
+        if (!$meja->is_available) {
+            $pesananAktif = Pesanan::where('id_meja', $id_meja)
+                ->where('status', '!=', 'completed')
+                ->whereHas('pembayaran', function($q) {
+                    $q->where('status', 'unpaid');
+                })->first();
+        }
 
-        // Pengecekan Soft Warning (Jika meja tidak tersedia ATAU ada pesanan aktif dan user belum konfirmasi)
-        if ((!$meja->is_available || $pesananAktif) && $request->query('confirm') != '1') {
+        // Pengecekan Soft Warning (Jika meja tidak tersedia dan user belum konfirmasi)
+        if (!$meja->is_available && $request->query('confirm') != '1') {
             return view('konsumen.konfirmasi_meja', compact('meja'));
         }
 

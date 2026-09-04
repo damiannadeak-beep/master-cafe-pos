@@ -20,7 +20,7 @@ Dokumen ini berisi transkrip jawaban resmi dari pemilik Master Cafe terkait kebu
 ## 4. Efisiensi Pembayaran
 **Pertanyaan:** Bagaimana cara kasir mencatat dan memverifikasi pembayaran digital (seperti QRIS atau transfer)?
 **Jawaban Pemilik:** QRIS & TF sudah muncul sendiri di Aplikasi Kasir
-**Implikasi Sistem:** Pemilik menginginkan integrasi digital. Namun untuk skripsi, fitur ini akan diakali dengan metode unggah bukti bayar (manual verification) oleh kasir agar sistem berjalan tanpa potongan biaya admin pihak ketiga.
+**Implikasi Sistem:** Pemilik telah **RESMI MEMILIH** integrasi digital Jalur Manual (Opsi 1). Sistem akan menampilkan QRIS statis, dan pelanggan wajib mengunggah foto bukti transfer. Kasir kemudian akan memverifikasi foto tersebut secara manual. Hal ini dipilih untuk menghindari kerumitan dokumen legalitas dan potongan biaya admin 0,7%.
 
 ## 5. Solusi Pemesanan Mandiri (Self-Order)
 **Pertanyaan:** Jika ada sistem di mana pelanggan bisa memesan dan langsung membayar sendiri dari meja (via Scan QR), apakah menurut Bapak/Ibu itu akan sangat membantu?
@@ -33,3 +33,7 @@ Dokumen ini berisi transkrip jawaban resmi dari pemilik Master Cafe terkait kebu
 **Implikasi Sistem:** 
 - Laporan Pemasukan & Pengeluaran (Buku Kas).
 - Fitur Manajemen Stok Bahan Baku/Barang.
+## 7. Kebutuhan Perangkat Keras (Hardware)
+**Pertanyaan:** Ukuran printer kertas kasir (thermal) yang digunakan?
+**Jawaban Pemilik:** Menggunakan ukuran kecil (58mm).
+**Implikasi Sistem:** Desain cetak struk (*receipt*) harus dioptimalkan untuk lebar 58mm (menggunakan CSS print @media print dengan lebar spesifik) agar teks tidak terpotong saat dicetak.

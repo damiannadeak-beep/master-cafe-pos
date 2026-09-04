@@ -92,38 +92,44 @@
 
                         <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
                             @if($order->status === 'pending')
-                                <button class="btn btn-sm btn-primary w-100 fw-bold btn-touch" onclick="updateOrderStatus({{ $order->id }}, 'processing')">
+                                <button class="btn btn-sm btn-primary w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus({{ $order->id }}, 'processing')">
                                     <i class="bi bi-play-circle me-1"></i> Proses Masak
                                 </button>
                             @endif
                             
                             @if($order->status === 'processing')
-                                <button class="btn btn-sm btn-success w-100 fw-bold btn-touch" onclick="updateOrderStatus({{ $order->id }}, 'completed')">
+                                <button class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus({{ $order->id }}, 'completed')">
                                     <i class="bi bi-check2-all me-1"></i> Selesai Dimasak
                                 </button>
                             @endif
 
                             @if(!$order->pembayaran || $order->pembayaran->status !== 'paid')
-                                <button class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch" onclick="payOrder({{ $order->id }})">
-                                    <i class="bi bi-cash-stack me-1"></i> Terima Bayar
-                                </button>
-                                <button class="btn btn-sm btn-danger flex-grow-1 fw-bold btn-touch" onclick="voidOrder({{ $order->id }})">
+                                @if($order->pembayaran && $order->pembayaran->status === 'pending_verification')
+                                    <button class="btn btn-sm btn-warning text-dark flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="verifyPayment({{ $order->id }}, '{{ asset('storage/' . $order->pembayaran->bukti_bayar) }}')">
+                                        <i class="bi bi-image me-1"></i> Cek Bukti Bayar
+                                    </button>
+                                @else
+                                    <button class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="payOrder({{ $order->id }})">
+                                        <i class="bi bi-cash-stack me-1"></i> Terima Bayar
+                                    </button>
+                                @endif
+                                <button class="btn btn-sm btn-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="voidOrder({{ $order->id }})">
                                     <i class="bi bi-trash me-1"></i> Void
                                 </button>
                                 <div class="w-100 m-0 p-0"></div> <!-- Break line -->
                                 @if($order->detail_pesanan->sum('jumlah') > 1)
-                                <button class="btn btn-sm btn-outline-warning w-100 fw-bold mt-1 btn-touch" data-details="{{ json_encode($order->detail_pesanan) }}" onclick="openSplitModal({{ $order->id }}, this)">
+                                <button class="btn btn-sm btn-outline-warning w-100 fw-bold mt-1 btn-touch d-flex justify-content-center align-items-center" data-details="{{ json_encode($order->detail_pesanan) }}" onclick="openSplitModal({{ $order->id }}, this)">
                                     <i class="bi bi-layout-split me-1"></i> Pisah Bon (Split Bill)
                                 </button>
                                 @endif
                             @else
                                 @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
                                 @if($printerActive)
-                                    <button class="btn btn-sm btn-info text-white flex-grow-1 fw-bold btn-touch" onclick="printThermal({{ $order->id }})">
+                                    <button class="btn btn-sm btn-info text-white flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="printThermal({{ $order->id }})">
                                         <i class="bi bi-printer me-1"></i> Cetak Thermal
                                     </button>
                                 @endif
-                                <a href="{{ route('kasir.order.receipt', $order->id) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 fw-bold btn-touch">
+                                <a href="{{ route('kasir.order.receipt', $order->id) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center">
                                     <i class="bi bi-file-earmark-text me-1"></i> Cetak Browser
                                 </a>
                             @endif

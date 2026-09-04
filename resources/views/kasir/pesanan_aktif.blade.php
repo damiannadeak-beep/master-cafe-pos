@@ -20,6 +20,8 @@
 
 @include("components.kasir.split-bill-modal")
 
+@include("components.kasir.verification-modal")
+
 @include("components.kasir.pesanan-aktif-scripts")
 @endsection
 

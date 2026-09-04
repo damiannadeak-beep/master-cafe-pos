@@ -28,34 +28,34 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark shadow-sm border-0" aria-labelledby="navbarDropdown" style="background-color: var(--bg-surface); border: 1px solid var(--border-subtle) !important;">
                                 <li>
-                                    <a class="dropdown-item text-white {{ request()->routeIs('kasir.stok.*') ? 'active' : '' }}" href="{{ route('kasir.stok.index') }}">
-                                        <i class="bi bi-box-seam me-1"></i> Update Stok
+                                    <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.stok.*') ? 'active' : '' }}" href="{{ route('kasir.stok.index') }}">
+                                        <i class="bi bi-box-seam me-2"></i> Update Stok
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-white {{ request()->routeIs('kasir.permintaan.*') ? 'active' : '' }}" href="{{ route('kasir.permintaan.index') }}">
-                                        <i class="bi bi-bag-plus me-1"></i> Permintaan Belanja
+                                    <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.permintaan.*') ? 'active' : '' }}" href="{{ route('kasir.permintaan.index') }}">
+                                        <i class="bi bi-bag-plus me-2"></i> Permintaan Belanja
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-white {{ request()->routeIs('kasir.pengeluaran.*') ? 'active' : '' }}" href="{{ route('kasir.pengeluaran.index') }}">
-                                        <i class="bi bi-wallet2 me-1"></i> Pengeluaran
+                                    <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.pengeluaran.*') ? 'active' : '' }}" href="{{ route('kasir.pengeluaran.index') }}">
+                                        <i class="bi bi-wallet2 me-2"></i> Pengeluaran
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-white {{ request()->routeIs('kasir.shift_report') ? 'active' : '' }}" href="{{ route('kasir.shift_report') }}">
-                                        <i class="bi bi-journal-text me-1"></i> Laporan Shift
+                                    <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.shift_report') ? 'active' : '' }}" href="{{ route('kasir.shift_report') }}">
+                                        <i class="bi bi-journal-text me-2"></i> Laporan Shift
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider border-secondary"></li>
                                 <li>
-                                    <a class="dropdown-item text-white {{ request()->routeIs('kasir.meja.*') ? 'active' : '' }}" href="{{ route('kasir.meja.index') }}">
-                                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Manajemen Meja
+                                    <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.meja.*') ? 'active' : '' }}" href="{{ route('kasir.meja.index') }}">
+                                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> Manajemen Meja
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-white {{ request()->routeIs('kasir.absensi.*') ? 'active' : '' }}" href="{{ route('kasir.absensi.index') }}">
-                                        <i class="bi bi-geo-alt-fill me-1"></i> Absensi Shift
+                                    <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.absensi.*') ? 'active' : '' }}" href="{{ route('kasir.absensi.index') }}">
+                                        <i class="bi bi-geo-alt-fill me-2"></i> Absensi Shift
                                     </a>
                                 </li>
                             </ul>
@@ -66,7 +66,7 @@
                 <div class="d-flex align-items-center gap-3">
                     
                     <div class="navbar-text small text-white">{{ auth()->user()->name ?? 'Kasir' }}</div>
-                    <a class="btn btn-outline-light btn-sm rounded-pill" href="{{ route('logout') }}"
+                    <a class="btn btn-outline-light btn-sm rounded-pill d-inline-flex align-items-center" href="{{ route('logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="bi bi-box-arrow-right me-1"></i> Logout
                         </a>

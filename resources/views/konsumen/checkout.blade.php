@@ -1,73 +1,139 @@
-﻿@extends('layouts.app') 
+@extends('layouts.app') 
 
 @section('content')
-<div class="container mt-5 mb-5 pb-5">
+<style>
+    .upload-container {
+        border: 2px dashed #21262d;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        background: #0e1217;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .upload-container:hover {
+        border-color: #c08e5c;
+        background: #161b22;
+    }
+    .upload-preview {
+        max-height: 200px;
+        border-radius: 0.5rem;
+        display: none;
+        margin: 0 auto;
+    }
+</style>
+
+<div class="container mt-4 mb-5 pb-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-header border-0 py-4 text-center" style="background: var(--gradient-bronze); border-radius: 1rem 1rem 0 0;">
-                    <i class="bi bi-receipt text-white mb-2 d-block" style="font-size: 2.5rem;"></i>
-                    <h4 class="mb-0 text-white fw-bold" style="font-family: 'Rye', serif;">Ringkasan Pesanan</h4>
+                    <i class="bi bi-qr-code-scan text-white mb-2 d-block" style="font-size: 2.5rem;"></i>
+                    <h4 class="mb-0 text-white fw-bold" style="font-family: 'Rye', serif;">Pembayaran Pesanan</h4>
                     <p class="text-white-50 mb-0 small">ID Pesanan: #{{ $pesanan->id }}</p>
                 </div>
-                <div class="card-body p-4 p-md-5">
-                    <ul class="list-group list-group-flush mb-4">
-                        @foreach($pesanan->detail_pesanan as $detail)
-                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-secondary py-3 px-0">
-                            <div>
-                                <h6 class="my-0 text-white fw-bold">{{ $detail->menu->nama_menu }}</h6>
-                                <small class="text-secondary">{{ $detail->jumlah }}x @ Rp {{ number_format($detail->menu->harga, 0, ',', '.') }}</small>
-                            </div>
-                            <span class="text-white fw-semibold">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</span>
-                        </li>
-                        @endforeach
-                    </ul>
-                    
-                    <div class="p-4 rounded-4 mb-4" style="background-color: #0e1217; border: 1px dashed #21262d;">
-                        <div class="d-flex justify-content-between fw-bold fs-4">
-                            <span class="text-secondary">Total Bayar</span>
+                <div class="card-body p-4">
+                    <!-- Ringkasan Belanja -->
+                    <div class="p-3 rounded-4 mb-4" style="background-color: #0e1217; border: 1px solid #21262d;">
+                        <h6 class="text-secondary mb-3 fw-bold border-bottom border-secondary pb-2">Ringkasan Belanja</h6>
+                        <ul class="list-unstyled mb-3">
+                            @foreach($pesanan->detail_pesanan as $detail)
+                            <li class="d-flex justify-content-between mb-2 small text-white">
+                                <span>{{ $detail->jumlah }}x {{ $detail->menu->nama_menu }}</span>
+                                <span>Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</span>
+                            </li>
+                            @endforeach
+                        </ul>
+                        <div class="d-flex justify-content-between fw-bold fs-5 mt-3 pt-3 border-top border-secondary">
+                            <span class="text-secondary">Total Tagihan</span>
                             <span style="color: #c08e5c;">Rp {{ number_format($pembayaran->total_bayar, 0, ',', '.') }}</span>
                         </div>
                     </div>
-                    
-                    <div class="d-grid mt-4">
-                        @if($pembayaran->snap_token)
-                        <!-- Tombol Bayar Midtrans -->
-                        <button id="pay-button" class="btn btn-lg fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; padding: 12px 20px;">
-                            Bayar Sekarang <i class="bi bi-credit-card ms-2"></i>
-                        </button>
-                        @else
-                        <!-- Tombol Manual -->
-                        <a href="{{ url('/konsumen/profil') }}" class="btn btn-lg fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; padding: 12px 20px;">
-                            Tutup & Bayar di Kasir <i class="bi bi-check-circle ms-2"></i>
-                        </a>
-                        @endif
-                    </div>
+
+                    @if($pembayaran->status == 'pending_verification')
+                        <div class="alert alert-warning text-center rounded-4" style="background-color: #2b200b; color: #ffc107; border: 1px solid #c08e5c;">
+                            <i class="bi bi-hourglass-split d-block mb-2" style="font-size: 2rem;"></i>
+                            <h6 class="fw-bold">Menunggu Verifikasi Kasir</h6>
+                            <small>Bukti pembayaran Anda sedang dicek oleh kasir. Silakan tunggu di meja Anda.</small>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <a href="{{ url('/konsumen/profil') }}" class="btn btn-outline-secondary btn-lg fw-bold rounded-pill btn-touch">
+                                Kembali ke Profil <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    @else
+                        <!-- Area Pembayaran -->
+                        <div class="text-center mb-4">
+                            <p class="text-secondary small mb-3">Silakan pindai QRIS di bawah ini untuk membayar sesuai Total Tagihan.</p>
+                            <img src="{{ asset('storage/qris/E7fbrwtuYBtpOeuCIA6jOc0RB1NPQ24812gFJmre.jpg') }}" alt="QRIS Master Cafe" class="img-fluid rounded-4 shadow" style="max-width: 250px; border: 4px solid #c08e5c;">
+                            <p class="text-white mt-3 fw-bold">A.N. MASTER CAFE</p>
+                        </div>
+
+                        <!-- Form Upload Bukti -->
+                        <form action="{{ url('konsumen/order/' . $pesanan->id . '/upload-bukti') }}" method="POST" enctype="multipart/form-data" id="form-upload">
+                            @csrf
+                            <label class="form-label text-secondary fw-bold small">Unggah Bukti Transfer</label>
+                            
+                            <div class="upload-container mb-3" id="upload-box" onclick="document.getElementById('bukti_bayar').click()">
+                                <img id="preview-image" class="upload-preview mb-2" src="" alt="Preview">
+                                <div id="upload-placeholder">
+                                    <i class="bi bi-cloud-arrow-up text-secondary d-block mb-2" style="font-size: 2.5rem;"></i>
+                                    <span class="text-white fw-semibold">Klik untuk pilih gambar</span>
+                                    <br>
+                                    <small class="text-secondary">JPG, PNG (Max 2MB)</small>
+                                </div>
+                                <input type="file" id="bukti_bayar" name="bukti_bayar" class="d-none" accept="image/jpeg,image/png,image/jpg" required onchange="previewFile(this)">
+                            </div>
+                            
+                            @error('bukti_bayar')
+                                <div class="text-danger small fw-bold mb-3">{{ $message }}</div>
+                            @enderror
+
+                            <div class="d-grid mt-4 gap-2">
+                                <button type="submit" id="btn-submit" class="btn btn-lg fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none;" disabled>
+                                    Kirim Bukti Pembayaran <i class="bi bi-send ms-2"></i>
+                                </button>
+                                <a href="{{ url('/konsumen/profil') }}" class="btn btn-outline-secondary rounded-pill fw-bold">Bayar Langsung di Kasir</a>
+                            </div>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@if($pembayaran->snap_token)
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 <script>
-    document.getElementById('pay-button').onclick = function () {
-        snap.pay('{{ $pembayaran->snap_token }}', {
-            onSuccess: function (result) {
-                window.location.href = "{{ url('/konsumen/profil') }}";
-            },
-            onPending: function (result) {
-                window.location.href = "{{ url('/konsumen/profil') }}";
-            },
-            onError: function (result) {
-                alert("Pembayaran Gagal!");
-            },
-            onClose: function () {
-                console.log('User closed popup without finishing payment');
+    function previewFile(input) {
+        const file = input.files[0];
+        const preview = document.getElementById('preview-image');
+        const placeholder = document.getElementById('upload-placeholder');
+        const submitBtn = document.getElementById('btn-submit');
+        const uploadBox = document.getElementById('upload-box');
+        
+        if (file) {
+            // Validasi ukuran (max 2MB)
+            if(file.size > 2 * 1024 * 1024) {
+                alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                input.value = '';
+                return;
             }
-        });
-    };
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+                uploadBox.style.padding = '1rem';
+                submitBtn.disabled = false;
+            }
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+            placeholder.style.display = 'block';
+            uploadBox.style.padding = '2rem';
+            submitBtn.disabled = true;
+        }
+    }
 </script>
-@endif
 @endsection

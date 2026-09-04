@@ -12,7 +12,7 @@ class KonsumenController extends Controller
         $user = auth()->user();
 
         // 1. Ambil Pesanan Aktif (Pending / Processing, ATAU Completed tapi belum dibayar)
-        $pesananAktif = Pesanan::with(['detail_pesanan.menu', 'pembayaran'])
+        $pesananAktif = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja'])
             ->where('id_konsumen', $user->id)
             ->where(function($query) {
                 $query->whereIn('status', ['pending', 'processing'])
@@ -27,7 +27,7 @@ class KonsumenController extends Controller
             ->get();
 
         // 2. Ambil Riwayat Pesanan (Completed & Paid, atau Cancelled) beserta data Ratingnya
-        $riwayat = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'rating'])
+        $riwayat = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'rating', 'meja'])
             ->where('id_konsumen', $user->id)
             ->where(function($query) {
                 $query->where('status', 'cancelled')

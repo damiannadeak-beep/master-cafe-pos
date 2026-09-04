@@ -41,6 +41,41 @@ class PaymentController extends Controller
         return view('konsumen.checkout', compact('pesanan', 'pembayaran'));
     }
 
+    public function uploadBukti(Request $request, $id_pesanan)
+    {
+        $request->validate([
+            'bukti_bayar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
+
+        if ($pesanan->id_konsumen != auth()->id()) {
+            abort(403, 'Anda tidak berhak mengakses pesanan ini.');
+        }
+
+        $pembayaran = $pesanan->pembayaran;
+
+        if ($request->hasFile('bukti_bayar')) {
+            $file = $request->file('bukti_bayar');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('public/bukti_bayar', $filename);
+
+            $pembayaran->bukti_bayar = 'bukti_bayar/' . $filename;
+            $pembayaran->status = 'pending_verification';
+            $pembayaran->save();
+            
+            // Broadcast notification to cashier that there is a new payment to verify
+            \App\Models\Notification::create([
+                'user_id' => 1, // Assume admin/cashier
+                'title' => 'Bukti Pembayaran Baru',
+                'message' => 'Pesanan #' . $pesanan->id . ' menunggu verifikasi pembayaran.',
+                'link' => '/kasir/pesanan-aktif'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diunggah. Silakan tunggu verifikasi kasir.');
+    }
+
 
     public function webhook(Request $request)
     {
