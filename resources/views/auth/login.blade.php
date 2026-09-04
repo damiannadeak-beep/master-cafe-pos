@@ -135,7 +135,7 @@
                 </div>
                 <div class="input-group auth-input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input id="password" type="password" class="form-control @error('password') is-invalid @enderror border-end-0" name="password" required autocomplete="current-password" placeholder="••••••••" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                    <input id="password" type="password" class="form-control @error('password') is-invalid @enderror border-end-0" name="password" required autocomplete="current-password" placeholder="Masukkan password" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
                     <span class="input-group-text toggle-password" style="cursor: pointer; border-top-right-radius: 0.85rem; border-bottom-right-radius: 0.85rem; border-left: none; background: #0e1217; border-color: #21262d;" onclick="togglePasswordVisibility('password', this)"><i class="bi bi-eye-slash text-secondary"></i></span>
                 </div>
                 @error('password')
