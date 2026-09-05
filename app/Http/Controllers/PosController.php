@@ -415,78 +415,78 @@ class PosController extends Controller
     public function exportShiftReportExcel()
     {
         try {
-             = ->getShiftReportData();
-             = ["shift"];
-             = ->waktu_buka->format("Y-m-d");
-             = "laporan_shift_kasir_" .  . ".xls";
+            $data = $this->getShiftReportData();
+            $shift = $data["shift"];
+            $hariIni = $shift->waktu_buka->format("Y-m-d");
+            $filename = "laporan_shift_kasir_" . $hariIni . ".xls";
 
-             = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
-             .= '<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan Shift Kasir</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
-             .= '<body style="font-family: Arial, sans-serif; font-size: 10pt;">';
+            $html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            $html .= '<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan Shift Kasir</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
+            $html .= '<body style="font-family: Arial, sans-serif; font-size: 10pt;">';
             
             // Header
-             .= '<table border="0" cellpadding="3" cellspacing="0">';
-             .= '<tr><td colspan="4" style="font-size: 14pt; font-weight: bold; text-align: left;">MASTER CAFE POS</td></tr>';
-             .= '<tr><td colspan="4" style="font-size: 10pt; text-align: left;">Laporan Rekonsiliasi Tutup Shift Kasir</td></tr>';
-             .= '<tr><td colspan="4"></td></tr>';
-             .= '<tr><td colspan="2" style="text-align: left;">STAF KASIR: ' . strtoupper(auth()->user()->name) . '</td><td colspan="2" style="text-align: right;">Tanggal Shift: ' . \Carbon\Carbon::parse()->translatedFormat("d F Y") . '</td></tr>';
-             .= '<tr><td colspan="2"></td><td colspan="2" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
-             .= '<tr><td colspan="4"></td></tr>';
-             .= '</table>';
+            $html .= '<table border="0" cellpadding="3" cellspacing="0">';
+            $html .= '<tr><td colspan="4" style="font-size: 14pt; font-weight: bold; text-align: left;">MASTER CAFE POS</td></tr>';
+            $html .= '<tr><td colspan="4" style="font-size: 10pt; text-align: left;">Laporan Rekonsiliasi Tutup Shift Kasir</td></tr>';
+            $html .= '<tr><td colspan="4"></td></tr>';
+            $html .= '<tr><td colspan="2" style="text-align: left;">STAF KASIR: ' . strtoupper(auth()->user()->name) . '</td><td colspan="2" style="text-align: right;">Tanggal Shift: ' . \Carbon\Carbon::parse($hariIni)->translatedFormat("d F Y") . '</td></tr>';
+            $html .= '<tr><td colspan="2"></td><td colspan="2" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
+            $html .= '<tr><td colspan="4"></td></tr>';
+            $html .= '</table>';
 
             // KPI Grid
-             .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
-             .= '<tr>';
-             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Kas Tunai (Laci Kas)</td>';
-             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Non-Tunai (QRIS)</td>';
-             .= '<td colspan="2" style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Omzet Shift</td>';
-             .= '</tr>';
-             .= '<tr>';
-             .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format(["totalCash"], 0, ",", ".") . '</td>';
-             .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format(["totalQris"], 0, ",", ".") . '</td>';
-             .= '<td colspan="2" style="text-align: center; font-size: 12pt; font-weight: bold;">Rp ' . number_format(["totalSemua"], 0, ",", ".") . '</td>';
-             .= '</tr>';
-             .= '</table>';
+            $html .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
+            $html .= '<tr>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Kas Tunai (Laci Kas)</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Non-Tunai (QRIS)</td>';
+            $html .= '<td colspan="2" style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Omzet Shift</td>';
+            $html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format($data["totalCash"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format($data["totalQris"], 0, ",", ".") . '</td>';
+            $html .= '<td colspan="2" style="text-align: center; font-size: 12pt; font-weight: bold;">Rp ' . number_format($data["totalSemua"], 0, ",", ".") . '</td>';
+            $html .= '</tr>';
+            $html .= '</table>';
             
-             .= '<br>';
+            $html .= '<br>';
 
             // Menu Items Table
-             .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
-             .= '<tr>';
-             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">No</td>';
-             .= '<td style="font-weight: bold; text-align: left; background-color: #ffffff;">Nama Menu / Item</td>';
-             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Jumlah Terjual</td>';
-             .= '<td style="font-weight: bold; text-align: right; background-color: #ffffff;">Subtotal Penjualan</td>';
-             .= '</tr>';
+            $html .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
+            $html .= '<tr>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">No</td>';
+            $html .= '<td style="font-weight: bold; text-align: left; background-color: #ffffff;">Nama Menu / Item</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Jumlah Terjual</td>';
+            $html .= '<td style="font-weight: bold; text-align: right; background-color: #ffffff;">Subtotal Penjualan</td>';
+            $html .= '</tr>';
 
-             = 1;
-            if (empty(["rekapMenu"])) {
-                 .= '<tr><td colspan="4" style="text-align: center;">Belum ada item terjual pada shift ini.</td></tr>';
+            $no = 1;
+            if (empty($data["rekapMenu"])) {
+                $html .= '<tr><td colspan="4" style="text-align: center;">Belum ada item terjual pada shift ini.</td></tr>';
             } else {
-                foreach (["rekapMenu"] as  => ) {
-                     .= '<tr>';
-                     .= '<td style="text-align: center;">' . ++ . '</td>';
-                     .= '<td style="text-align: left;">' .  . '</td>';
-                     .= '<td style="text-align: center;">' . ["jumlah"] . ' porsi</td>';
-                     .= '<td style="text-align: right;">Rp ' . number_format(["subtotal"], 0, ",", ".") . '</td>';
-                     .= '</tr>';
+                foreach ($data["rekapMenu"] as $nama => $itemData) {
+                    $html .= '<tr>';
+                    $html .= '<td style="text-align: center;">' . $no++ . '</td>';
+                    $html .= '<td style="text-align: left;">' . $nama . '</td>';
+                    $html .= '<td style="text-align: center;">' . $itemData["jumlah"] . ' porsi</td>';
+                    $html .= '<td style="text-align: right;">Rp ' . number_format($itemData["subtotal"], 0, ",", ".") . '</td>';
+                    $html .= '</tr>';
                 }
                 
-                 .= '<tr style="font-weight: bold;">';
-                 .= '<td colspan="2" style="text-align: right;">TOTAL ITEM TERJUAL</td>';
-                 .= '<td style="text-align: center;">' . ["totalItemTerjual"] . ' porsi</td>';
-                 .= '<td style="text-align: right;">Rp ' . number_format(["totalSemua"], 0, ",", ".") . '</td>';
-                 .= '</tr>';
+                $html .= '<tr style="font-weight: bold;">';
+                $html .= '<td colspan="2" style="text-align: right;">TOTAL ITEM TERJUAL</td>';
+                $html .= '<td style="text-align: center;">' . $data["totalItemTerjual"] . ' porsi</td>';
+                $html .= '<td style="text-align: right;">Rp ' . number_format($data["totalSemua"], 0, ",", ".") . '</td>';
+                $html .= '</tr>';
             }
 
-             .= '</table></body></html>';
+            $html .= '</table></body></html>';
 
-            return response(, 200, [
+            return response($html, 200, [
                 "Content-Type" => "application/vnd.ms-excel",
-                "Content-Disposition" => "attachment; filename=\"{}\"",
+                "Content-Disposition" => "attachment; filename=\"{$filename}\"",
             ]);
-        } catch (\Exception ) {
-            return redirect()->back()->with("error", ->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->back()->with("error", $e->getMessage());
         }
     }
 
