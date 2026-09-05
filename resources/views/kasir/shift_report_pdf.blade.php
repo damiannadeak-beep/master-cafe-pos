@@ -1,72 +1,71 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <title>Laporan Shift Kasir - {{ $hariIni }}</title>
     <style>
         @page {
-            margin: 15mm 15mm 15mm 15mm;
+            margin: 15mm;
         }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 10pt;
-            color: #2d1a11;
+            color: #000;
             line-height: 1.4;
-            background: #ffffff;
+            background: #fff;
         }
         .kop-header {
             width: 100%;
-            border-bottom: 2px solid #3E2723;
+            border-bottom: 1px solid #000;
             padding-bottom: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
         .brand-title {
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: bold;
-            color: #3E2723;
+            color: #000;
             margin: 0;
+            text-transform: uppercase;
         }
         .brand-subtitle {
-            font-size: 9pt;
-            color: #6d4c41;
-            margin-top: 2px;
+            font-size: 10pt;
+            color: #333;
+            margin-top: 4px;
         }
         .report-meta {
             text-align: right;
             font-size: 9pt;
-            color: #5d4037;
+            color: #333;
         }
         .section-title {
             font-size: 11pt;
             font-weight: bold;
-            color: #3E2723;
-            background-color: #ebe6dd;
-            padding: 6px 10px;
-            margin-top: 16px;
-            margin-bottom: 8px;
-            border-left: 4px solid #3E2723;
+            color: #000;
+            text-transform: uppercase;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
-            font-size: 9.5pt;
+            margin-bottom: 15px;
+            font-size: 10pt;
         }
         th {
-            background-color: #3E2723;
-            color: #ffffff;
+            background-color: #fff;
+            color: #000;
             font-weight: bold;
-            padding: 7px 8px;
+            padding: 8px;
             text-align: left;
-            border: 0.5pt solid #3E2723;
+            border-bottom: 1px solid #000;
+            border-top: 1px solid #000;
         }
         td {
-            padding: 6px 8px;
-            border: 0.5pt solid #d0c7bc;
+            padding: 8px;
+            border-bottom: 1px dotted #ccc;
             vertical-align: middle;
-        }
-        tr:nth-child(even) td {
-            background-color: #faf8f5;
         }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
@@ -74,38 +73,31 @@
         
         .kpi-grid {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 6px;
-            margin-bottom: 16px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
-        .kpi-card {
-            background-color: #faf8f5;
-            border: 1pt solid #e0d7cb;
-            border-radius: 6px;
-            padding: 8px 10px;
+        .kpi-grid td {
+            border: 1px solid #000;
+            padding: 10px;
             text-align: center;
         }
         .kpi-label {
-            font-size: 8pt;
-            color: #6d4c41;
+            font-size: 9pt;
+            color: #555;
             text-transform: uppercase;
-            font-weight: bold;
         }
         .kpi-value {
-            font-size: 12pt;
+            font-size: 14pt;
             font-weight: bold;
-            margin-top: 3px;
+            color: #000;
+            margin-top: 5px;
         }
-        .val-success { color: #1b5e20; }
-        .val-info { color: #0d47a1; }
-        .val-cacao { color: #3E2723; }
-
         .footer-note {
-            margin-top: 24px;
-            border-top: 0.5pt solid #e0d7cb;
-            padding-top: 8px;
+            margin-top: 30px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
             font-size: 8pt;
-            color: #8d6e63;
+            color: #666;
             width: 100%;
         }
     </style>
@@ -130,23 +122,23 @@
     <!-- KPI SUMMARY GRID -->
     <table class="kpi-grid">
         <tr>
-            <td class="kpi-card" width="33%">
+            <td width="33%">
                 <div class="kpi-label">Kas Tunai (Laci Kas)</div>
-                <div class="kpi-value val-success">Rp {{ number_format($totalCash, 0, ',', '.') }}</div>
+                <div class="kpi-value">Rp {{ number_format($totalCash, 0, ',', '.') }}</div>
             </td>
-            <td class="kpi-card" width="33%">
+            <td width="33%">
                 <div class="kpi-label">Non-Tunai (QRIS)</div>
-                <div class="kpi-value val-info">Rp {{ number_format($totalQris, 0, ',', '.') }}</div>
+                <div class="kpi-value">Rp {{ number_format($totalQris, 0, ',', '.') }}</div>
             </td>
-            <td class="kpi-card" width="34%" style="background-color: #3E2723; border-color: #3E2723;">
-                <div class="kpi-label" style="color: #d7ccc8;">Total Omzet Shift</div>
-                <div class="kpi-value" style="color: #ffd54f;">Rp {{ number_format($totalSemua, 0, ',', '.') }}</div>
+            <td width="34%">
+                <div class="kpi-label">Total Omzet Shift</div>
+                <div class="kpi-value">Rp {{ number_format($totalSemua, 0, ',', '.') }}</div>
             </td>
         </tr>
     </table>
 
     <!-- ITEM PENJUALAN -->
-    <div class="section-title">REKAP ITEM MENU TERJUAL SHIFT INI</div>
+    <div class="section-title">Rekap Item Menu Terjual</div>
     <table>
         <thead>
             <tr>
@@ -171,10 +163,10 @@
             </tr>
             @endforelse
             @if($totalItemTerjual > 0)
-            <tr style="font-weight: bold; background-color: #f5f2ec;">
-                <td colspan="2" class="text-right" style="border-top: 1pt solid #3E2723; border-bottom: 2.25pt double #3E2723;">TOTAL ITEM TERJUAL</td>
-                <td class="text-center" style="border-top: 1pt solid #3E2723; border-bottom: 2.25pt double #3E2723;">{{ $totalItemTerjual }} porsi</td>
-                <td class="text-right val-success" style="border-top: 1pt solid #3E2723; border-bottom: 2.25pt double #3E2723;">Rp {{ number_format($totalSemua, 0, ',', '.') }}</td>
+            <tr style="font-weight: bold;">
+                <td colspan="2" class="text-right" style="border-top: 1px solid #000; border-bottom: 2px solid #000;">TOTAL ITEM TERJUAL</td>
+                <td class="text-center" style="border-top: 1px solid #000; border-bottom: 2px solid #000;">{{ $totalItemTerjual }} porsi</td>
+                <td class="text-right" style="border-top: 1px solid #000; border-bottom: 2px solid #000;">Rp {{ number_format($totalSemua, 0, ',', '.') }}</td>
             </tr>
             @endif
         </tbody>
@@ -194,5 +186,3 @@
 
 </body>
 </html>
-
-
