@@ -1,4 +1,4 @@
-
+﻿
 @foreach($menus as $menu)
 <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-4 menu-item" data-kategori="{{ strtolower($menu->kategori) }}">
     <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="background-color: #161b22; border: 1px solid #21262d !important; display: flex; flex-direction: column;">
@@ -15,7 +15,10 @@
                 <span class="badge rounded-pill fw-normal" style="background-color: rgba(226, 232, 240, 0.1); color: #e2e8f0; font-size: 0.75rem;">{{ $menu->kategori }}</span>
             </div>
             <p class="small mb-3" style="color: #8b949e;">{{ Str::limit($menu->deskripsi, 60) }}</p>
-            <h6 class="fw-bold mb-3" style="color: #c08e5c;">{{ $menu->is_dynamic_price ? 'Harga Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0" style="color: #c08e5c;">{{ $menu->is_dynamic_price ? 'Harga Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}</h6>
+                <small class="text-secondary" style="font-size: 0.75rem;">Sisa: {{ $menu->stok }}</small>
+            </div>
             
             <div class="d-flex justify-content-between align-items-center mt-auto">
                 <div class="d-flex align-items-center gap-3">
@@ -40,4 +43,5 @@
     </div>
 </div>
 @endforeach
+
 
