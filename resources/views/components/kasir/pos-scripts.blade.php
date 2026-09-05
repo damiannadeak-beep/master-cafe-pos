@@ -90,7 +90,7 @@
                   ? `<div class="bg-transparent text-center border-bottom" style="height: 150px;">
                        <img src="${menu.image_url}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="${menu.nama_menu}" style="object-fit: contain; width: 100%; height: 100%;">
                      </div>`
-                  : `<div class="card-img-top d-flex justify-content-center align-items-center bg-light border-bottom" style="height: 150px;">
+                  : `<div class="card-img-top d-flex justify-content-center align-items-center border-bottom" style="height: 150px; background-color: #14171c;">
                          <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow-sm" style="height: 64px; width: 64px; object-fit: cover;">
                      </div>`;
                    
