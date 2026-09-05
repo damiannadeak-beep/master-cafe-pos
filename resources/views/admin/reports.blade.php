@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('content')
 <div class="container">
@@ -24,7 +24,7 @@
                 <div class="col-md-6 d-flex gap-2 flex-wrap align-items-end">
                     <button type="submit" class="btn btn-primary">Tampilkan Grafik</button>
                     <a href="{{ route('admin.reports.csv', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel me-1"></i> Export Excel (.xls)
+                        <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
                     </a>
                     <a href="{{ route('admin.reports.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-danger" target="_blank">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Cetak PDF
@@ -331,3 +331,4 @@
     }
 </script>
 @endsection
+
