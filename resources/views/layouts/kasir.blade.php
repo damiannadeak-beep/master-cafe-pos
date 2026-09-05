@@ -58,28 +58,30 @@
 
         // --- Dark Mode Logic ---
         const darkModeToggle = document.getElementById('darkModeToggle');
-        const dmIcon = darkModeToggle.querySelector('i');
-        
-        function applyDarkMode(isDark) {
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-                dmIcon.classList.replace('bi-moon-stars', 'bi-sun');
-                localStorage.setItem('kasirDarkMode', 'true');
-            } else {
-                document.body.classList.remove('dark-mode');
-                dmIcon.classList.replace('bi-sun', 'bi-moon-stars');
-                localStorage.setItem('kasirDarkMode', 'false');
+        if (darkModeToggle) {
+            const dmIcon = darkModeToggle.querySelector('i');
+            
+            function applyDarkMode(isDark) {
+                if (isDark) {
+                    document.body.classList.add('dark-mode');
+                    if (dmIcon) dmIcon.classList.replace('bi-moon-stars', 'bi-sun');
+                    localStorage.setItem('kasirDarkMode', 'true');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    if (dmIcon) dmIcon.classList.replace('bi-sun', 'bi-moon-stars');
+                    localStorage.setItem('kasirDarkMode', 'false');
+                }
             }
-        }
 
-        if (localStorage.getItem('kasirDarkMode') === 'true') {
-            applyDarkMode(true);
-        }
+            if (localStorage.getItem('kasirDarkMode') === 'true') {
+                applyDarkMode(true);
+            }
 
-        darkModeToggle.addEventListener('click', () => {
-            const isCurrentlyDark = document.body.classList.contains('dark-mode');
-            applyDarkMode(!isCurrentlyDark);
-        });
+            darkModeToggle.addEventListener('click', () => {
+                const isCurrentlyDark = document.body.classList.contains('dark-mode');
+                applyDarkMode(!isCurrentlyDark);
+            });
+        }
 
         // --- Notification Sound ---
         const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
