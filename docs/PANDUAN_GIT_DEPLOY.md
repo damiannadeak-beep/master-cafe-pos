@@ -1,4 +1,4 @@
-# Panduan Workflow Git & Deployment cPanel (Master Cafe)
+﻿# Panduan Workflow Git & Deployment cPanel (Master Cafe)
 
 Dokumen ini berisi langkah-langkah standar untuk pengembangan fitur baru, perbaikan bug (trial-error di local), hingga deployment ke server cPanel live dengan **Keamanan Standar Industri**.
 
@@ -50,35 +50,40 @@ git branch -d fitur-stok-otomatis
 
 ## 3. Deployment ke Server cPanel Live (Secure Architecture)
 
-**Arsitektur Baru:** File inti Laravel (pp, 
-outes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/master-cafe-pos. Kita HANYA mengkopi folder public ke internet.
+**Arsitektur Baru:** File inti Laravel (app, routes, .env) **TIDAK AKAN** dipindahkan ke public_html. Mereka akan tetap terkunci aman di /home/nadp3189/repositories/master-cafe-pos. Kita HANYA mengkopi folder public ke internet.
 
-Buka **Terminal cPanel** pada server hosting:
+Buka **Terminal cPanel** pada server hosting, lalu salin dan jalankan seluruh blok perintah ini sekaligus (mulai dari cd sampai config:cache):
 
 `ash
 # 1. Masuk ke folder repository server
-cd /home/nadp3189/repositories/master-cafe-pos
+cd /home/nadp3189/repositories/master-cafe-pos && \
 
 # 2. Tarik kode terbaru dari GitHub
-git checkout master
-git pull origin master
+git checkout master && \
+git pull origin master && \
 
 # 3. Kopi HANYA isi folder public ke Document Root domain
-cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/ 2>/dev/null || true
+cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/ 2>/dev/null || true && \
 
-# 4. Suntikkan (Modifikasi) index.php agar mengarah ke folder repositories yang aman
-sed -i "s|__DIR__.'/../vendor/autoload.php'|__DIR__.'/../../repositories/master-cafe-pos/vendor/autoload.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
-sed -i "s|__DIR__.'/../bootstrap/app.php'|__DIR__.'/../../repositories/master-cafe-pos/bootstrap/app.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php
+# 4. [SANGAT PENTING] Suntikkan (Modifikasi) index.php agar mengarah ke folder repositories yang aman
+# Langkah ini WAJIB dijalankan setiap kali menyalin isi folder public, agar tidak muncul Error 500!
+sed -i "s|__DIR__.'/../vendor/autoload.php'|__DIR__.'/../../repositories/master-cafe-pos/vendor/autoload.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php && \
+sed -i "s|__DIR__.'/../bootstrap/app.php'|__DIR__.'/../../repositories/master-cafe-pos/bootstrap/app.php'|g" /home/nadp3189/public_html/mastercafe.nadeak.net/index.php && \
 
-# 5. Pastikan ijin folder storage & public tetap aman (0777)
-chmod -R 777 /home/nadp3189/repositories/master-cafe-pos/storage 2>/dev/null || true
-chmod -R 777 /home/nadp3189/public_html/mastercafe.nadeak.net/storage 2>/dev/null || true
+# 5. Pastikan izin keamanan standar cPanel terpenuhi (Bukan 777 agar tidak dicekal oleh suPHP)
+find storage bootstrap/cache -type d -exec chmod 755 {} \; && \
+find storage bootstrap/cache -type f -exec chmod 644 {} \; && \
+
+# 6. Kompilasi ulang Cache agar loading web sangat cepat dan menghindari permission error saat render
+php artisan view:cache && \
+php artisan route:cache && \
+php artisan config:cache
 `
 
 ---
 
 ## Catatan Penting
 - **Jangan pernah koding langsung di server live.** Selalu gunakan branch lokal untuk uji coba.
+- **Jangan pernah menggunakan chmod 777** pada cPanel/WHM karena akan memicu Security Violation (HTTP Error 500). Gunakan 755 untuk folder dan 644 untuk file.
+- **Perintah Deployment:** Selalu jalankan *satu blok perintah di atas secara utuh*, jangan dilewati satupun (terutama bagian sed -i).
 - **Folder Gambar:** Folder storage di server adalah folder fisik asli (bukan symlink) untuk menghindari pemblokiran keamanan CageFS cPanel.
-
-
