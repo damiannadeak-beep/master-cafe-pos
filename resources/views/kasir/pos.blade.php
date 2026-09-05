@@ -1,8 +1,8 @@
-@extends('layouts.kasir')
+﻿@extends('layouts.kasir')
 
 @section('content')
 <div class="container-fluid px-0" style="height: calc(100vh - 110px);">
-    <div class="row g-4 align-items-start" style="height: 100%;">
+    <div class="row gx-4 m-0 align-items-start" style="height: 100%;">
         <div class="col-lg-8 col-md-7" style="height: 100%; overflow-y: auto; padding-right: 1rem;">
             <x-pos.product-grid :menus="$menus" />
         </div>
@@ -30,4 +30,5 @@
     }
 </style>
 @endsection
+
 
