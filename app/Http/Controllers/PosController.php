@@ -415,63 +415,78 @@ class PosController extends Controller
     public function exportShiftReportExcel()
     {
         try {
-            $data = $this->getShiftReportData();
-            $shift = $data['shift'];
-            $hariIni = $shift->waktu_buka->format('Y-m-d');
-            $filename = 'laporan_shift_kasir_' . $hariIni . '.xls';
+             = ->getShiftReportData();
+             = ["shift"];
+             = ->waktu_buka->format("Y-m-d");
+             = "laporan_shift_kasir_" .  . ".xls";
 
-            $html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
-            $html .= '<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan Shift Kasir</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
-            $html .= '<body style="font-family: Arial, sans-serif; font-size: 10pt;">';
-            $html .= '<table border="0" cellpadding="5" cellspacing="0" style="font-family: Arial, sans-serif; font-size: 10pt; border-collapse: collapse;">';
+             = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+             .= '<head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Laporan Shift Kasir</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>';
+             .= '<body style="font-family: Arial, sans-serif; font-size: 10pt;">';
+            
+            // Header
+             .= '<table border="0" cellpadding="3" cellspacing="0">';
+             .= '<tr><td colspan="4" style="font-size: 14pt; font-weight: bold; text-align: left;">MASTER CAFE POS</td></tr>';
+             .= '<tr><td colspan="4" style="font-size: 10pt; text-align: left;">Laporan Rekonsiliasi Tutup Shift Kasir</td></tr>';
+             .= '<tr><td colspan="4"></td></tr>';
+             .= '<tr><td colspan="2" style="text-align: left;">STAF KASIR: ' . strtoupper(auth()->user()->name) . '</td><td colspan="2" style="text-align: right;">Tanggal Shift: ' . \Carbon\Carbon::parse()->translatedFormat("d F Y") . '</td></tr>';
+             .= '<tr><td colspan="2"></td><td colspan="2" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
+             .= '<tr><td colspan="4"></td></tr>';
+             .= '</table>';
 
-            // Title Bar
-            $html .= '<tr><td colspan="5" style="font-size: 11pt; font-weight: bold; text-align: center; height: 28px; vertical-align: middle; border: 0.5pt solid #000000; background-color: #ffffff;">LAPORAN SHIFT KASIR - ' . strtoupper(auth()->user()->name) . ' (' . $shift->waktu_buka->format('d/m/Y') . ')</td></tr>';
+            // KPI Grid
+             .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
+             .= '<tr>';
+             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Kas Tunai (Laci Kas)</td>';
+             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Non-Tunai (QRIS)</td>';
+             .= '<td colspan="2" style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Omzet Shift</td>';
+             .= '</tr>';
+             .= '<tr>';
+             .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format(["totalCash"], 0, ",", ".") . '</td>';
+             .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format(["totalQris"], 0, ",", ".") . '</td>';
+             .= '<td colspan="2" style="text-align: center; font-size: 12pt; font-weight: bold;">Rp ' . number_format(["totalSemua"], 0, ",", ".") . '</td>';
+             .= '</tr>';
+             .= '</table>';
+            
+             .= '<br>';
 
-            // Table Column Headers
-            $html .= '<tr style="font-weight: bold; text-align: center; background-color: #ffffff;">';
-            $html .= '<td style="border: 0.5pt solid #000000; font-weight: bold;">No. Invoice</td>';
-            $html .= '<td style="border: 0.5pt solid #000000; font-weight: bold;">Tanggal / Waktu</td>';
-            $html .= '<td style="border: 0.5pt solid #000000; font-weight: bold;">Tipe Pesanan</td>';
-            $html .= '<td style="border: 0.5pt solid #000000; font-weight: bold;">Metode Bayar</td>';
-            $html .= '<td style="border: 0.5pt solid #000000; font-weight: bold;">Total Tagihan (Rp)</td>';
-            $html .= '</tr>';
+            // Menu Items Table
+             .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
+             .= '<tr>';
+             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">No</td>';
+             .= '<td style="font-weight: bold; text-align: left; background-color: #ffffff;">Nama Menu / Item</td>';
+             .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Jumlah Terjual</td>';
+             .= '<td style="font-weight: bold; text-align: right; background-color: #ffffff;">Subtotal Penjualan</td>';
+             .= '</tr>';
 
-            $totalShiftSum = 0;
-            foreach ($data['pembayarans'] as $p) {
-                $invoiceNo = 'INV/' . ($p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->format('Ymd') : now()->format('Ymd')) . '/' . str_pad($p->id_pesanan, 5, '0', STR_PAD_LEFT);
-                $waktu = $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->format('d/m/Y H.i') : '-';
-                $tipe = ucfirst(str_replace('_', ' ', $p->pesanan->tipe_pesanan ?? 'Dine In'));
-                $metode = strtoupper($p->metode ?? 'CASH');
-                if ($metode === 'QRIS') {
-                    $metode = 'TRANSFER_BANK_QRIS';
+             = 1;
+            if (empty(["rekapMenu"])) {
+                 .= '<tr><td colspan="4" style="text-align: center;">Belum ada item terjual pada shift ini.</td></tr>';
+            } else {
+                foreach (["rekapMenu"] as  => ) {
+                     .= '<tr>';
+                     .= '<td style="text-align: center;">' . ++ . '</td>';
+                     .= '<td style="text-align: left;">' .  . '</td>';
+                     .= '<td style="text-align: center;">' . ["jumlah"] . ' porsi</td>';
+                     .= '<td style="text-align: right;">Rp ' . number_format(["subtotal"], 0, ",", ".") . '</td>';
+                     .= '</tr>';
                 }
-                $total = (float) $p->total_bayar;
-                $totalShiftSum += $total;
-
-                $html .= '<tr>';
-                $html .= '<td style="border: 0.5pt solid #b0b0b0;">' . $invoiceNo . '</td>';
-                $html .= '<td style="border: 0.5pt solid #b0b0b0; text-align: center;">' . $waktu . '</td>';
-                $html .= '<td style="border: 0.5pt solid #b0b0b0;">' . $tipe . '</td>';
-                $html .= '<td style="border: 0.5pt solid #b0b0b0;">' . $metode . '</td>';
-                $html .= '<td style="border: 0.5pt solid #b0b0b0; text-align: right;">' . number_format($total, 0, ',', '.') . '</td>';
-                $html .= '</tr>';
+                
+                 .= '<tr style="font-weight: bold;">';
+                 .= '<td colspan="2" style="text-align: right;">TOTAL ITEM TERJUAL</td>';
+                 .= '<td style="text-align: center;">' . ["totalItemTerjual"] . ' porsi</td>';
+                 .= '<td style="text-align: right;">Rp ' . number_format(["totalSemua"], 0, ",", ".") . '</td>';
+                 .= '</tr>';
             }
 
-            // Summary Total Row (Accounting Double Line)
-            $html .= '<tr style="font-weight: bold;">';
-            $html .= '<td colspan="4" style="text-align: right; border-top: 1pt solid #000000; border-bottom: 2.25pt double #000000; border-left: 0.5pt solid #000000; font-weight: bold;">TOTAL PENJUALAN SHIFT</td>';
-            $html .= '<td style="text-align: right; border-top: 1pt solid #000000; border-bottom: 2.25pt double #000000; border-right: 0.5pt solid #000000; font-weight: bold;">' . number_format($totalShiftSum, 0, ',', '.') . '</td>';
-            $html .= '</tr>';
+             .= '</table></body></html>';
 
-            $html .= '</table></body></html>';
-
-            return response($html, 200, [
-                'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            return response(, 200, [
+                "Content-Type" => "application/vnd.ms-excel",
+                "Content-Disposition" => "attachment; filename=\"{}\"",
             ]);
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+        } catch (\Exception ) {
+            return redirect()->back()->with("error", ->getMessage());
         }
     }
 
