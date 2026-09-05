@@ -1,4 +1,4 @@
-﻿@props(['menus'])
+@props(['menus'])
 
 <!-- Kolom Kiri: Daftar Menu -->
 <div>

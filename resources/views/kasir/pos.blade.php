@@ -1,4 +1,4 @@
-﻿@extends('layouts.kasir')
+@extends('layouts.kasir')
 
 @section('content')
 <div class="container-fluid px-0" style="height: calc(100vh - 110px);">

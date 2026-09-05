@@ -1,4 +1,4 @@
-﻿
+
 @foreach($menus as $menu)
 <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-4 menu-item" data-kategori="{{ strtolower($menu->kategori) }}">
     <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="background-color: #161b22; border: 1px solid #21262d !important; display: flex; flex-direction: column;">

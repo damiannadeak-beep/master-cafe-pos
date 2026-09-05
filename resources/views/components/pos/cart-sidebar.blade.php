@@ -1,4 +1,4 @@
-﻿@props(['mejas', 'promos'])
+@props(['mejas', 'promos'])
 
 <!-- Kolom Kanan: Detail Pesanan (Keranjang) -->
 <div>

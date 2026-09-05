@@ -1,4 +1,4 @@
-﻿@extends('layouts.kasir')
+@extends('layouts.kasir')
 
 @section('content')
 <div class="container-fluid px-0 py-5 d-flex justify-content-center align-items-center" style="min-height: 80vh;">

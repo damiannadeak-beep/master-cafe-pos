@@ -1,4 +1,4 @@
-﻿@extends('layouts.kasir')
+@extends('layouts.kasir')
 
 @section('content')
 <div class="row justify-content-center mt-5">
