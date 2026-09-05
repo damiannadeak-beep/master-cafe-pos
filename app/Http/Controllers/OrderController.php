@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -138,6 +138,9 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Trigger WebSocket Event (Reverb)
+            broadcast(new \App\Events\PesananBaru($pesanan));
+
             // Trigger Push Notification to Admin and Kasir
             $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->get();
             \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
@@ -237,3 +240,4 @@ class OrderController extends Controller
         return [$promos, $promoMenuIds];
     }
 }
+
