@@ -17,6 +17,8 @@
 @include("components.kasir.pos-scripts")
 
 <style>
+    .kasir-main { padding: 0 !important; }
+
     .item-menu:hover { background-color: #F0E9DD; transform: translateY(-3px); border: 1px solid #3E2723 !important; }
 
     /* Hilangkan panah atas/bawah pada input number agar angka benar-benar di tengah */
@@ -30,5 +32,6 @@
     }
 </style>
 @endsection
+
 
 
