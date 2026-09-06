@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kasir POS - Master Cafe</title>
     @include("layouts.includes.head-assets")
-                        <style>
+    <style>
         .kasir-layout { height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; overflow: hidden; }
         .kasir-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; padding: 1.5rem; }
         .kasir-container { flex: 1; overflow: hidden; max-width: 1360px; margin: 0 auto; padding: 0; width: 100%; }
@@ -40,8 +40,9 @@
     </form>
 
     <script>
+        // --- Utility: Fetch Active Orders Count Badge ---
         function fetchActiveOrdersCount() {
-            fetch('{{ route('kasir.active_orders_count') }}')
+            fetch('{{ route("kasir.active_orders_count") }}')
                 .then(response => response.json())
                 .then(data => {
                     const badge = document.getElementById('badge-active-orders');
@@ -55,73 +56,67 @@
                 .catch(err => console.error(err));
         }
 
-        // Dark Mode Logic
+        // --- Dark Mode Logic ---
         const darkModeToggle = document.getElementById('darkModeToggle');
-        const icon = darkModeToggle.querySelector('i');
-        
-        function applyDarkMode(isDark) {
-            if (isDark) {
-                document.body.classList.add('dark-mode');
-                icon.classList.replace('bi-moon-stars', 'bi-sun');
-                localStorage.setItem('kasirDarkMode', 'true');
-            } else {
-                document.body.classList.remove('dark-mode');
-                icon.classList.replace('bi-sun', 'bi-moon-stars');
-                localStorage.setItem('kasirDarkMode', 'false');
+        if (darkModeToggle) {
+            const dmIcon = darkModeToggle.querySelector('i');
+            
+            function applyDarkMode(isDark) {
+                if (isDark) {
+                    document.body.classList.add('dark-mode');
+                    if (dmIcon) dmIcon.classList.replace('bi-moon-stars', 'bi-sun');
+                    localStorage.setItem('kasirDarkMode', 'true');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    if (dmIcon) dmIcon.classList.replace('bi-sun', 'bi-moon-stars');
+                    localStorage.setItem('kasirDarkMode', 'false');
+                }
             }
+
+            if (localStorage.getItem('kasirDarkMode') === 'true') {
+                applyDarkMode(true);
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                const isCurrentlyDark = document.body.classList.contains('dark-mode');
+                applyDarkMode(!isCurrentlyDark);
+            });
         }
 
-        // Initialize from LocalStorage
-        if (localStorage.getItem('kasirDarkMode') === 'true') {
-            applyDarkMode(true);
-        }
-
-        darkModeToggle.addEventListener('click', () => {
-            const isCurrentlyDark = document.body.classList.contains('dark-mode');
-            applyDarkMode(!isCurrentlyDark);
-        });
-
-        // Setup audio element for notification
+        // --- Notification Sound ---
         const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
 
-        // Fetch Notifications
-        function fetchNotifications() {
-            fetch('{{ url("/kasir/api/notifications") }}')
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        // Play sound
-                        notifSound.play().catch(e => console.log('Autoplay prevented:', e));
-                        
-                        data.forEach(notif => {
-                            // Tampilkan alert dengan delay sedikit agar suara sempat diputar
-                            setTimeout(() => {
-                                alert('ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Notifikasi Baru:\n' + notif.message);
-                            }, 500);
-                            
-                            // Tandai sudah dibaca
-                            fetch('{{ url("/kasir/api/notifications") }}/' + notif.id + '/read', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                }
-                            });
-                        });
-                    }
-                })
-                .catch(error => console.error('Error fetching notifications:', error));
-        }
-
-        // Cek setiap 10 detik
-        setInterval(() => {
-            fetchActiveOrdersCount();
-            fetchNotifications();
-        }, 10000);
-        // Cek saat pertama load
+        // --- Real-Time WebSocket Listener (Laravel Echo / Reverb) ---
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
-            fetchNotifications();
+
+            // Wait a moment for Vite modules (Echo) to load
+            setTimeout(() => {
+                if (window.Echo) {
+                    console.log('[Reverb] Subscribing to kasir-notifications channel...');
+                    window.Echo.channel('kasir-notifications')
+                        .listen('PesananBaru', (e) => {
+                            console.log('[Reverb] Pesanan baru diterima:', e);
+
+                            // Play notification sound
+                            notifSound.play().catch(err => console.log('Autoplay prevented:', err));
+
+                            // Show toast notification
+                            if (window.showToast) {
+                                window.showToast(e.message, 'success');
+                            }
+
+                            // Update the active order badge count
+                            fetchActiveOrdersCount();
+                        });
+                } else {
+                    console.warn('[Reverb] Laravel Echo is not loaded. Falling back to polling.');
+                    // Fallback: use polling if Echo fails to load
+                    setInterval(() => {
+                        fetchActiveOrdersCount();
+                    }, 15000);
+                }
+            }, 1500);
         });
     </script>
     
@@ -141,20 +136,10 @@
                 })();
 
                 const toastId = 'toast-' + Date.now();
-                const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle';
-                const borderColor = type === 'success' ? '#986c43' : '#dc3545';
+                const iconCls = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle';
+                const borderClr = type === 'success' ? '#986c43' : '#dc3545';
                 
-                const toastHtml = 
-                    <div id=" + toastId + " class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid  + borderColor +  !important; background-color: #161b22; color: #fff;">
-                        <div class="d-flex">
-                            <div class="toast-body d-flex align-items-center">
-                                <i class="bi  + icon +  me-2" style="font-size: 20px; color:  + borderColor + ;"></i>
-                                <span style="font-size: 16px;"> + message + </span>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto btn-touch" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>
-                ;
+                const toastHtml = '<div id="' + toastId + '" class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid ' + borderClr + ' !important; background-color: #161b22; color: #fff;"><div class="d-flex"><div class="toast-body d-flex align-items-center"><i class="bi ' + iconCls + ' me-2" style="font-size: 20px; color: ' + borderClr + ';"></i><span style="font-size: 16px;">' + message + '</span></div><button type="button" class="btn-close btn-close-white me-2 m-auto btn-touch" data-bs-dismiss="toast" aria-label="Close"></button></div></div>';
                 
                 toastContainer.insertAdjacentHTML('beforeend', toastHtml);
                 const toastElement = document.getElementById(toastId);
@@ -166,7 +151,7 @@
                 });
             };
             
-            // Override native alert (Optional but useful for catching unmigrated alerts)
+            // Override native alert
             window.nativeAlert = window.alert;
             window.alert = function(msg) {
                 window.showToast(msg, 'warning');
@@ -175,15 +160,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-

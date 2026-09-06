@@ -138,8 +138,11 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Trigger WebSocket Event (Reverb)
+            broadcast(new \App\Events\PesananBaru($pesanan));
+
             // Trigger Push Notification to Admin and Kasir
-            $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->get();
+            $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
             \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
                 'Pesanan Baru Masuk!',
                 'Order #' . $pesanan->id . ' baru saja dibuat. Segera cek pesanan aktif.',
@@ -210,7 +213,7 @@ class OrderController extends Controller
         ]);
 
         // Trigger Push Notification to Admin and Kasir
-        $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->get();
+        $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
         \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
             'Panggilan Meja!',
             'Konsumen di Meja ' . $meja->nomor_meja . ' memanggil pelayan.',
@@ -237,3 +240,4 @@ class OrderController extends Controller
         return [$promos, $promoMenuIds];
     }
 }
+

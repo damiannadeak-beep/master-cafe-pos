@@ -2,7 +2,7 @@ const CACHE_NAME = 'mastercafe-pos-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/logo-mastercafe.png',
+  '/images/logo.png',
   '/js/pwa-offline.js'
 ];
 
