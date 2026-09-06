@@ -1,7 +1,7 @@
 @extends('layouts.kasir')
 
 @section('content')
-<div class="container-fluid px-0 py-3">
+<div class="container-fluid px-0 py-3" style="height: 100%; overflow-y: auto; overflow-x: hidden; padding-bottom: 5rem !important;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold mb-0">Pesanan Konsumen Aktif</h4>
         <button class="btn btn-outline-secondary btn-sm btn-touch" onclick="location.reload()">

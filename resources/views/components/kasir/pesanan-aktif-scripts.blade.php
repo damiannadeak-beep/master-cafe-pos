@@ -7,7 +7,8 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ status: status })
         })
@@ -34,17 +35,22 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ alasan: alasan, password: password })
         })
         .then(res => res.json())
         .then(data => {
             if(data.error) alert(data.error);
+            else if(data.errors) alert(Object.values(data.errors).flat().join('\n'));
             else {
-                alert(data.message);
+                alert(data.message || 'Berhasil');
                 location.reload();
             }
+        }).catch(err => {
+            alert('Terjadi kesalahan sistem/jaringan. Periksa console untuk detail.');
+            console.error(err);
         });
     }
 
@@ -84,7 +90,8 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ metode: method, email_pelanggan: emailVal })
         })
@@ -171,17 +178,22 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ split_items: itemsToSplit })
         })
         .then(res => res.json())
         .then(data => {
             if(data.error) alert(data.error);
+            else if(data.errors) alert(Object.values(data.errors).flat().join('\n'));
             else {
-                alert(data.message);
+                alert(data.message || 'Berhasil');
                 location.reload();
             }
+        }).catch(err => {
+            alert('Terjadi kesalahan sistem/jaringan. Periksa console untuk detail.');
+            console.error(err);
         });
     }
 
@@ -192,7 +204,8 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             }
         })
         .then(res => res.json())
@@ -209,10 +222,10 @@
         document.getElementById('verify-payment-image').src = imgUrl;
         
         let verifyForm = document.getElementById('verifyPaymentForm');
-        verifyForm.action = /kasir/order/ + id + /verify-payment;
+        verifyForm.action = '/kasir/order/' + id + '/verify-payment';
         
         let rejectForm = document.getElementById('rejectPaymentForm');
-        rejectForm.action = /kasir/order/ + id + /reject-payment;
+        rejectForm.action = '/kasir/order/' + id + '/reject-payment';
         
         let modal = new bootstrap.Modal(document.getElementById('verifyPaymentModal'));
         modal.show();

@@ -83,7 +83,7 @@ class Pesanan extends Model
             
             // Opsional: jika mau, ubah status pembayaran jadi failed/cancelled juga
             if ($this->pembayaran) {
-                $this->pembayaran->update(['status' => 'failed']);
+                $this->pembayaran->delete();
             }
 
             // Soft delete agar pesanan tidak muncul di list aktif
