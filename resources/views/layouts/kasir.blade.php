@@ -89,6 +89,10 @@
         // --- Real-Time WebSocket Listener (Laravel Echo / Reverb) ---
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
+                            
+                            if (window.location.pathname.includes('/pesanan-aktif')) {
+                                setTimeout(() => location.reload(), 1500);
+                            }
 
             // Wait a moment for Vite modules (Echo) to load
             setTimeout(() => {
@@ -108,12 +112,20 @@
 
                             // Update the active order badge count
                             fetchActiveOrdersCount();
+                            
+                            if (window.location.pathname.includes('/pesanan-aktif')) {
+                                setTimeout(() => location.reload(), 1500);
+                            }
                         });
                 } else {
                     console.warn('[Reverb] Laravel Echo is not loaded. Falling back to polling.');
                     // Fallback: use polling if Echo fails to load
                     setInterval(() => {
                         fetchActiveOrdersCount();
+                            
+                            if (window.location.pathname.includes('/pesanan-aktif')) {
+                                setTimeout(() => location.reload(), 1500);
+                            }
                     }, 15000);
                 }
             }, 1500);
