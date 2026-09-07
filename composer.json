@@ -19,6 +19,7 @@
         "midtrans/midtrans-php": "^2.6",
         "mike42/escpos-php": "^2.2",
         "pusher/pusher-php-server": "^7.3",
+        "spatie/laravel-activitylog": "*",
         "spatie/laravel-permission": "^6.25"
     },
     "require-dev": {

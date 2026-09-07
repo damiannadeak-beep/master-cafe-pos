@@ -4,6 +4,8 @@ namespace App\Models;
  
 use Illuminate\Database\Eloquent\Model; 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 use App\Models\DetailPesanan; 
 use App\Models\Pembayaran; 
 use App\Models\User; 
@@ -11,9 +13,19 @@ use App\Models\Meja;
  
 class Pesanan extends Model 
 { 
-    use SoftDeletes;
+    use SoftDeletes, LogsActivity;
     
     protected $table = 'pesanan'; 
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Pesanan has been {$eventName}");
+    }
+
     protected $fillable = [
         'id_konsumen', 'id_meja', 'id_kasir', 'tipe_pesanan', 'tanggal',
         'total', 'total_hpp', 'discount_amount', 'promo_id', 'status',

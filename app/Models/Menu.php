@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Menu extends Model
 {
+    use LogsActivity;
+
     protected $table = 'menu';
     protected $fillable = ['nama_menu', 'harga', 'stok', 'image', 'kategori', 'is_available', 'is_dynamic_price', 'variants_json', 'deskripsi'];
 
@@ -17,6 +21,15 @@ class Menu extends Model
     ];
 
     protected $appends = ['image_url'];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Menu has been {$eventName}");
+    }
 
     public function getImageUrlAttribute(): ?string
     {
