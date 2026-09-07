@@ -44,11 +44,7 @@ h3, h4, h5, h6 {
 }
 
 // Cards
-.card {
-  background-color: #161b22;
-  border-color: #21262d;
-  color: #ffffff;
-}
+.card { overflow: hidden; background-color: #161b22; border-color: #21262d; color: #ffffff; } .card .table-responsive { border-radius: inherit; }
 
 // Tables
 .table {
