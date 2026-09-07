@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\{DashboardService, ReportService, BackupService, SettingsService};
-use App\Models\{User, Rating, Setting, Absensi, ActivityLog};
+use App\Models\{User, Rating, Setting, Absensi};
+use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
