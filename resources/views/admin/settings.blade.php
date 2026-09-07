@@ -299,7 +299,7 @@
                                 </div>
                                 <div class="col-md-1 text-end">
                                     <input type="hidden" name="sosmed[icon][]" class="sosmed-icon-input" value="{{ $sosmed['icon'] ?? 'bi-link-45deg' }}">
-                                    <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" onclick="removeSosmedRow(this)" title="Hapus"><i class="bi bi-trash"></i><span class="d-md-none ms-1">Hapus</span></button>
+                                    <button type="button" class="btn btn-outline-danger btn-icon" onclick="removeSosmedRow(this)" title="Hapus"><i class="bi bi-trash"></i></button>
                                 </div>
                             </div>
                             @endforeach
@@ -373,7 +373,7 @@ function addSosmedRow() {
         </div>
         <div class="col-md-1 text-end">
             <input type="hidden" name="sosmed[icon][]" class="sosmed-icon-input" value="bi-link-45deg">
-            <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center" onclick="removeSosmedRow(this)" title="Hapus"><i class="bi bi-trash"></i><span class="d-md-none ms-1">Hapus</span></button>
+            <button type="button" class="btn btn-outline-danger btn-icon" onclick="removeSosmedRow(this)" title="Hapus"><i class="bi bi-trash"></i></button>
         </div>
     `;
     container.appendChild(row);
