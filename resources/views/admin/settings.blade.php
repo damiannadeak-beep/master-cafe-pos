@@ -311,23 +311,6 @@
                 </div>
             </div>
         </div>
-        <!-- Kolom Backup Database -->
-        <div class="col-12 mt-4">
-            <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-database-down me-2 text-primary"></i>Backup Database</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-white-50 small mb-3">Unduh salinan lengkap database sistem (transaksi, menu, dll) dalam format <code>.sql</code> untuk mengamankan data Anda.</p>
-                    <a href="{{ route('admin.backup') }}" class="btn btn-primary fw-bold">
-                        <i class="bi bi-download me-2"></i> Download Backup SQL
-                    </a>
-                    @if($errors->any())
-                        <div class="text-danger mt-3 small"><i class="bi bi-exclamation-triangle"></i> {{ $errors->first() }}</div>
-                    @endif
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 

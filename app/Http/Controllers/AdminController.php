@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\{DashboardService, ReportService, BackupService, SettingsService};
+use App\Services\{DashboardService, ReportService, SettingsService};
 use App\Models\{User, Rating, Setting, Absensi};
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Hash;
@@ -55,9 +55,9 @@ class AdminController extends Controller
         return $reportService->generateFullExcelReport($start, $end);
     }
 
-    public function backupDatabase(BackupService $backupService)
+    public function backupDatabase()
     {
-        return $backupService->runMysqldump();
+        return redirect()->route('admin.backups.index');
     }
 
     public function settings(SettingsService $settingsService)
