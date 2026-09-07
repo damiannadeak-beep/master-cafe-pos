@@ -19,7 +19,6 @@ class Pengeluaran extends Model
             ->setDescriptionForEvent(fn(string $eventName) => "Pengeluaran has been {$eventName}");
     }
 
-{
     protected $table = 'pengeluarans';
     protected $fillable = ['tanggal', 'deskripsi', 'nominal', 'keterangan', 'user_id'];
 
