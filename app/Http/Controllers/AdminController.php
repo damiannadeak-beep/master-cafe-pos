@@ -314,6 +314,58 @@ class AdminController extends Controller
         return view('admin.absensi.index', compact('absensis', 'startDate', 'endDate', 'rekapAbsensi'));
     }
 
+
+    public function backups()
+    {
+        $backupDir = storage_path('app/backups');
+        $files = [];
+
+        if (is_dir($backupDir)) {
+            $allFiles = scandir($backupDir, SCANDIR_SORT_DESCENDING);
+            foreach ($allFiles as $file) {
+                if ($file === '.' || $file === '..') continue;
+                $filePath = $backupDir . '/' . $file;
+                $files[] = [
+                    'name' => $file,
+                    'size' => round(filesize($filePath) / 1024, 2),
+                    'date' => date('d M Y, H:i', filemtime($filePath)),
+                    'timestamp' => filemtime($filePath),
+                ];
+            }
+        }
+
+        return view('admin.backups.index', compact('files'));
+    }
+
+    public function runBackup()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('db:backup');
+            return redirect()->route('admin.backups.index')->with('success', 'Backup database berhasil dibuat!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.backups.index')->with('error', 'Backup gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadBackup($filename)
+    {
+        $path = storage_path('app/backups/' . $filename);
+        if (!file_exists($path)) {
+            return redirect()->route('admin.backups.index')->with('error', 'File backup tidak ditemukan.');
+        }
+        return response()->download($path);
+    }
+
+    public function deleteBackup($filename)
+    {
+        $path = storage_path('app/backups/' . $filename);
+        if (file_exists($path)) {
+            unlink($path);
+            return redirect()->route('admin.backups.index')->with('success', 'File backup berhasil dihapus.');
+        }
+        return redirect()->route('admin.backups.index')->with('error', 'File backup tidak ditemukan.');
+    }
+
     public function activityLogs()
     {
         $logs = Activity::with('causer')->orderBy('created_at', 'desc')->paginate(20);

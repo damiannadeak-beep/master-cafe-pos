@@ -132,7 +132,7 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('/backup', [AdminController::class, 'backupDatabase'])->name('backup');
 
-        // Route Bantuan (Clear Cache â€” hanya pemilik yang boleh)
+        // Route Bantuan (Clear Cache Ã¢â‚¬â€ hanya pemilik yang boleh)
         Route::get('/clear-cache', function() {
             \Illuminate\Support\Facades\Artisan::call('optimize:clear');
             return redirect()->back()->with('success', 'Cache berhasil dibersihkan.');
@@ -147,6 +147,10 @@ Route::middleware(['auth'])->group(function () {
         
         // Log Aktivitas
         Route::get('/activity-logs', [AdminController::class, 'activityLogs'])->name('activity_logs.index');
+        Route::get('/backups', [AdminController::class, 'backups'])->name('backups.index');
+        Route::post('/backups/run', [AdminController::class, 'runBackup'])->name('backups.run');
+        Route::get('/backups/download/{filename}', [AdminController::class, 'downloadBackup'])->name('backups.download');
+        Route::delete('/backups/{filename}', [AdminController::class, 'deleteBackup'])->name('backups.delete');
 
         // Menu management (dikelompokkan)
         Route::get('/menu', [AdminMenuController::class, 'index'])->name('menu.index');
