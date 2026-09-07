@@ -1,4 +1,4 @@
-﻿// Fonts
+// Fonts
 @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat&family=Outfit:wght@300;400;600&family=Rye&display=swap');
 
 // Variables
@@ -44,7 +44,12 @@ h3, h4, h5, h6 {
 }
 
 // Cards
-.card { overflow: hidden; background-color: #161b22; border-color: #21262d; color: #ffffff; } .card .table-responsive { border-radius: inherit; }
+.card {
+  overflow: hidden;
+  background-color: #161b22;
+  border-color: #21262d;
+  color: #ffffff;
+}
 
 // Tables
 .table {

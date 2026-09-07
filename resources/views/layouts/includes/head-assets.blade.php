@@ -56,8 +56,8 @@
                 /* Bootstrap Dark Override */
         :root, [data-bs-theme="light"] { --bs-body-bg: var(--bg-base); --bs-body-color: var(--text-main); --bs-card-bg: var(--bg-surface); --bs-card-color: var(--text-main); --bs-card-border-color: var(--border-subtle); --bs-table-bg: var(--bg-surface); --bs-table-color: var(--text-main); --bs-border-color: var(--border-subtle); --bs-secondary-bg: var(--bg-surface); --bs-modal-bg: var(--bg-surface); --bs-dropdown-bg: var(--bg-surface); --bs-dropdown-color: var(--text-main); --bs-list-group-bg: var(--bg-surface); --bs-list-group-color: var(--text-main); --bs-list-group-border-color: var(--border-subtle); --bs-heading-color: var(--text-main); background-color: var(--bg-base) !important; color: var(--text-main) !important; }
         .card, .modal-content, .dropdown-menu { background-color: var(--bg-surface) !important; color: var(--text-main) !important; border-color: var(--border-subtle) !important; }
-        .card, .admin-card, .kasir-card { overflow: hidden; }
-        .card .table-responsive, .card .card-body { border-radius: inherit; }
+        .card, .admin-card, .kasir-card { overflow: hidden !important; }
+        .table-responsive { border-radius: 0 !important; }
         .table thead th { background-color: rgba(192, 142, 92, 0.15) !important; }
         
         /* Fix Inputs */
