@@ -8,8 +8,8 @@
     @include("layouts.includes.head-assets")
     <style>
         .kasir-layout { height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; overflow: hidden; }
-        .kasir-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; padding: 1.5rem; }
-        .kasir-container { flex: 1; overflow: hidden; max-width: 1360px; margin: 0 auto; padding: 0; width: 100%; }
+        .kasir-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-base); overflow: hidden; padding: 1.5rem; min-height: 0; }
+        .kasir-container { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; max-width: 1360px; margin: 0 auto; padding: 0 0.5rem 2rem 0.5rem; width: 100%; }
         .kasir-navbar { background: var(--gradient-surface) !important; border-bottom: 1px solid var(--border-subtle); position: relative; z-index: 1050; box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25); flex-shrink: 0; }
         .kasir-navbar .navbar-brand { color: #f0e9dd; font-weight: 700; font-size: 1.25rem; letter-spacing: 0.02em; }
         .kasir-navbar .navbar-text, .kasir-navbar .nav-link { color: #f0e9dd !important; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }

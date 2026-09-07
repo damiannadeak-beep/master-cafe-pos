@@ -18,6 +18,7 @@
 
 <style>
     .kasir-main { padding: 0 !important; }
+    .kasir-container { padding: 0 !important; overflow: hidden !important; }
 
     .item-menu:hover { background-color: #F0E9DD; transform: translateY(-3px); border: 1px solid #3E2723 !important; }
 
