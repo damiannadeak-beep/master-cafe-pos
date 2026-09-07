@@ -22,8 +22,9 @@ class DatabaseBackup extends Command
             $zipFilename = "backup_{$dbName}_{$timestamp}.zip";
 
             $backupDir = 'backups';
-            if (!Storage::exists($backupDir)) {
-                Storage::makeDirectory($backupDir);
+            $fullDir = storage_path('app/' . $backupDir);
+            if (!is_dir($fullDir)) {
+                mkdir($fullDir, 0755, true);
             }
 
             $sqlContent = $this->generateDump($dbName);
