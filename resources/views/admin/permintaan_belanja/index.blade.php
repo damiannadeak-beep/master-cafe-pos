@@ -84,7 +84,7 @@
                     </thead>
                     <tbody>
                         @forelse($permintaans as $req)
-                            <tr class="{{ $req->status === 'menunggu' ? 'table-warning bg-opacity-10' : '' }}">
+                            <tr>
                                 <td class="ps-4">
                                     <div class="fw-medium">{{ $req->created_at->format('d/m/Y') }}</div>
                                     <div class="small text-white-50">{{ $req->created_at->format('H:i') }}</div>
