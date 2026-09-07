@@ -1,3 +1,12 @@
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0e1217">
+    <style>
+        :root, html, body {
+            background-color: #0e1217 !important;
+            color: #ffffff !important;
+            color-scheme: dark;
+        }
+    </style>
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
@@ -7,7 +16,6 @@
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0d6efd">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <script src="/js/pwa-offline.js"></script>
     <style>
