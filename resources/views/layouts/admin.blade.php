@@ -74,7 +74,17 @@
         </div>
 
         <div class="admin-main-wrapper"><div class="admin-overlay" id="sidebarOverlay"></div>
-            <aside class="admin-sidebar">
+            <aside class="admin-sidebar" id="adminSidebar">
+                <script>
+                    (function() {
+                        try {
+                            var savedPos = sessionStorage.getItem('admin_sidebar_scroll');
+                            if (savedPos !== null) {
+                                document.getElementById('adminSidebar').scrollTop = parseInt(savedPos, 10);
+                            }
+                        } catch (e) {}
+                    })();
+                </script>
                 <div class="mb-4">
                     <div class="brand-title d-flex align-items-center mb-1">
                         <i class="bi bi-layout-text-sidebar-reverse me-2"></i>
@@ -201,7 +211,7 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.querySelector('.admin-sidebar');
+            const sidebar = document.getElementById('adminSidebar') || document.querySelector('.admin-sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const toggleBtn = document.getElementById('sidebarToggle');
             
@@ -214,6 +224,30 @@
                 overlay.addEventListener('click', function() {
                     sidebar.classList.remove('show');
                     overlay.classList.remove('show');
+                });
+            }
+
+            // Pertahankan posisi scroll sidebar saat navigasi menu
+            if (sidebar) {
+                const savedPos = sessionStorage.getItem('admin_sidebar_scroll');
+                if (savedPos !== null) {
+                    sidebar.scrollTop = parseInt(savedPos, 10);
+                } else {
+                    const activeLink = sidebar.querySelector('.nav-link.active');
+                    if (activeLink) {
+                        activeLink.scrollIntoView({ block: 'center' });
+                    }
+                }
+
+                // Simpan posisi scroll sidebar saat pengguna menggulir atau mengklik menu
+                sidebar.addEventListener('scroll', function() {
+                    sessionStorage.setItem('admin_sidebar_scroll', sidebar.scrollTop);
+                }, { passive: true });
+
+                sidebar.querySelectorAll('a.nav-link').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        sessionStorage.setItem('admin_sidebar_scroll', sidebar.scrollTop);
+                    });
                 });
             }
         });
