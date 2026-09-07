@@ -1,30 +1,102 @@
-﻿# Evaluasi Profesional & Saran Pengembangan Master Cafe POS
+# Evaluasi Profesional & Roadmap Pengembangan Master Cafe POS
 
-Dokumen ini berisi hasil audit teknis profesional terhadap sistem Master Cafe POS. Secara fondasi (UI, arsitektur MVC, database, dan logika dasar), aplikasi ini sudah sangat kokoh dan memiliki kualitas jauh di atas rata-rata untuk sebuah purwarupa (MVP) atau Tugas Akhir.
+Dokumen ini berisi hasil audit teknis profesional dan rencana pengembangan (*roadmap*) sistem Master Cafe POS. Secara fondasi (arsitektur MVC, database relasional, kalkulasi HPP bahan otomatis, manajemen shift kasir, dan antarmuka *Dark Bronze*), aplikasi ini sudah sangat solid dan berada jauh di atas rata-rata sistem POS standar.
 
-Namun, untuk mencapai skala **Enterprise** yang mampu menangani beban data masif dan skenario dunia nyata dengan keamanan tingkat tinggi, berikut adalah 5 pilar krusial yang direkomendasikan untuk pengembangan di fase selanjutnya:
+Untuk membawa sistem ini ke level **Enterprise F&B** yang tangguh menangani operasional jam sibuk (*rush hour*), efisiensi dapur, anti-kecurangan (*anti-fraud*), dan ketahanan jaringan, berikut adalah peta jalan pengembangan lanjutan:
 
-## 1. Integrasi Payment Gateway Otomatis (Midtrans)
-*   **Kondisi Saat Ini:** Pencatatan metode pembayaran Non-Tunai (QRIS / Transfer Bank) hanya sebatas validasi manual oleh Kasir/Admin.
-*   **Risiko:** Rentan terjadi *human error* atau penipuan (struk transfer palsu).
-*   **Saran Pengembangan:** Mengintegrasikan Core API / Snap API dari Midtrans (atau gateway lain). Dengan demikian, sistem akan memverifikasi mutasi bank atau e-Wallet secara otomatis dan *real-time*, kemudian memperbarui status pesanan menjadi 'Paid' tanpa campur tangan manusia.
+---
 
-## 2. Penggunaan WebSockets untuk Real-Time Sinkronisasi
-*   **Kondisi Saat Ini:** Fitur notifikasi pesanan aktif mengandalkan metode *HTTP Polling* via Javascript (mengirim request etch() ke server setiap 10 detik).
-*   **Risiko:** Menimbulkan *overhead* pada server (penggunaan RAM dan CPU melonjak) jika banyak tab kasir yang terbuka secara bersamaan, karena server dibombardir oleh ribuan request HTTP kosong.
-*   **Saran Pengembangan:** Menerapkan teknologi WebSockets menggunakan **Laravel Reverb**, **Pusher**, atau **Soketi**. WebSockets membuka koneksi persisten dua arah yang ringan, sehingga server hanya mengirimkan *event* secara *push* tepat pada detik di mana ada pesanan baru masuk.
+## Ringkasan Fitur yang Telah Selesai (Completed Milestones)
+- [x] **Manajemen Shift Kasir & Modal Awal/Akhir** (Buka shift, uang aktual, deteksi selisih kasir).
+- [x] **Kalkulasi HPP & Varian Produk Dinamis** (Level pedas, topping, dan pemotongan stok bahan baku otomatis).
+- [x] **Audit Trail & Log Keamanan** (Pencatatan log pembatalan transaksi / Void Logs & Activity Logs).
+- [x] **Pencadangan Database Terintegrasi** (Fitur backup database via web admin & CLI artisan).
+- [x] **UI/UX Polishing** (Penyempurnaan tema *Dark Bronze*, pencegahan *white flash*, sudut tabel presisi, dan persistensi scroll sidebar).
 
-## 3. Automated Testing (Pengujian Otomatis)
-*   **Kondisi Saat Ini:** Validasi fungsionalitas aplikasi dilakukan melalui metode pengujian manual (Manual QA).
-*   **Risiko:** Jika ada pembaruan fitur (contoh: update logika kalkulasi pajak), berisiko tinggi merusak fitur lama tanpa disadari *(regression bugs)*.
-*   **Saran Pengembangan:** Menulis kerangka pengujian otomatis mencakup *Unit Test* dan *Feature Test* menggunakan **PHPUnit** atau **Pest**. Skrip ini akan menyimulasikan ribuan klik dan transaksi dalam hitungan detik setiap kali ada *commit* baru ke sistem.
+---
 
-## 4. Audit Trail (Rekam Jejak Aktivitas Keamanan)
-*   **Kondisi Saat Ini:** Database hanya mencatat nama staf pembuat pesanan terakhir.
-*   **Risiko:** Tidak ada visibilitas historis jika terjadi *fraud* internal. Misalnya: kasir membatalkan pesanan yang sudah dibayar, atau admin secara diam-diam mengubah HPP bahan baku di masa lalu.
-*   **Saran Pengembangan:** Mengimplementasikan library seperti spatie/laravel-activitylog. Setiap aksi CREATE, UPDATE, dan DELETE pada tabel krusial akan terekam secara permanen *(immutable log)*. Log akan mencatat waktu, user ID, data lama *(old values)*, dan data baru *(new values)*.
+## 1. Efisiensi Kasir & Kecepatan Layanan (Checkout Speed)
 
-## 5. Automasi Backup Database (Disaster Recovery)
-*   **Kondisi Saat Ini:** Data bergantung sepenuhnya pada stabilitas server cPanel tunggal.
-*   **Risiko:** Kehilangan data bisnis secara total apabila terjadi kerusakan *hardware* pada data center penyedia hosting, penghapusan data secara tak sengaja *(human error)*, atau insiden keamanan siber.
-*   **Saran Pengembangan:** Mengonfigurasi *Laravel Task Scheduling (Cron Job)* yang mengeksekusi *dump* database otomatis setiap jam 03:00 pagi. File hasil *backup* tersebut harus langsung dikirim dan dienkripsi ke *cloud storage* eksternal seperti AWS S3 atau Google Drive melalui API.
+### 1.1. Direct Thermal Printing (Cetak Struk Instan Tanpa Dialog Browser)
+*   **Kondisi Saat Ini:** Pencetakan struk kasir menggunakan fungsi bawaan browser (`window.print()`).
+*   **Kendala di Lapangan:** Kasir harus menunggu dialog pop-up browser muncul lalu mengklik "Print" atau menekan Enter. Pada saat antrean panjang, jeda beberapa detik per transaksi ini memperlambat antrean kasir.
+*   **Rekomendasi:** Mengintegrasikan protokol pencetakan langsung **ESC/POS** via Web Bluetooth, WebUSB, atau perantara driver lokal (seperti RawBT / QZ Tray). Saat tombol bayar ditekan, printer thermal 58mm/80mm langsung mencetak struk seketika (< 1 detik), memotong kertas (*auto-cutter*), dan membuka laci kasir (*cash drawer kick-out*).
+
+### 1.2. Fitur Pindah Meja (*Move Table*) & Gabung Meja (*Merge Table*)
+*   **Kondisi Saat Ini:** Meja hanya memiliki status Tersedia atau Terisi.
+*   **Kendala di Lapangan:** Pelanggan sering meminta pindah meja (misal: pindah dari area luar ke area ber-AC) atau menggabungkan Meja 1 dan Meja 2 karena ada rombongan tambahan yang datang.
+*   **Rekomendasi:** Menambahkan fitur **Pindah Meja** (memindahkan tagihan pesanan aktif ke meja tujuan) dan **Gabung Meja** (menggabungkan tagihan dua meja menjadi satu struk pembayaran) di panel kasir.
+
+---
+
+## 2. Dapur & Bar (Kitchen Workflow)
+
+### 2.1. Kitchen Display System (KDS / Layar Antrean Dapur & Bar)
+*   **Kondisi Saat Ini:** Komunikasi ke dapur mengandalkan kertas struk fisik yang dicetak kasir.
+*   **Kendala di Lapangan:** Kertas struk rentan basah, kotor terkena minyak, hilang, atau urutan memasak menjadi acak saat jam sibuk.
+*   **Rekomendasi:** Membangun antarmuka khusus **KDS** yang dipasang pada tablet/monitor murah di dinding dapur. Pesanan yang dibayar langsung muncul sebagai kartu antrean dengan timer warna visual:
+    - **Hijau:** < 5 menit (Baru masuk)
+    - **Kuning:** 5 - 12 menit (Sedang disiapkan)
+    - **Merah:** > 15 menit (Kritis / harus segera diantar)
+    Koki/barista cukup menyentuh kartu untuk menandai *"Sedang Dimasak"* atau *"Siap Saji"*.
+
+---
+
+## 3. Keuangan, Akuntansi & Anti-Fraud (Pencegahan Kebocoran)
+
+### 3.1. Integrasi Payment Gateway Otomatis (QRIS Dinamis / Midtrans)
+*   **Kondisi Saat Ini:** Pembayaran non-tunai (QRIS / Transfer) diverifikasi manual oleh kasir melalui foto bukti bayar.
+*   **Risiko:** Rawan penipuan struk transfer palsu (hasil editan Canva/Photoshop), dan kasir di jam sibuk jarang sempat memeriksa mutasi m-Banking satu per satu.
+*   **Rekomendasi:** Mengintegrasikan **Midtrans Snap / Core API** (atau Xendit/Tripay). Sistem akan membuat kode QRIS Dinamis dengan nominal unik per transaksi. Begitu pelanggan memindai dan membayar via e-Wallet/M-Banking, sistem otomatis menerima notifikasi *webhook* dan mengubah status pesanan menjadi `Paid` tanpa verifikasi manual.
+
+### 3.2. Pencatatan Bahan Basi / Rusak (*Spoilage & Waste Log*)
+*   **Kondisi Saat Ini:** Pengurangan stok bahan baku hanya terjadi saat pesanan kasir, atau penyesuaian angka manual di menu Stok Opname.
+*   **Risiko:** Di industri cafe, selalu ada risiko es batu mencair, susu basi, atau bahan baku tumpah/rusak. Jika kasir hanya mengurangi stok manual tanpa pencatatan alasan, pemilik tidak dapat membedakan **apakah bahan tersebut rusak secara wajar atau dicuri oleh oknum staf**.
+*   **Rekomendasi:** Menambahkan modul **Catat Barang Rusak/Basi (Waste Log)** lengkap dengan alasan (Basi, Rusak, Tumpah, Expired) dan nominal rupiah kerugian yang langsung masuk ke kalkulasi keuangan.
+
+### 3.3. Laporan Laba Rugi Komprehensif (*P&L Statement*)
+*   **Kondisi Saat Ini:** Data penjualan, HPP bahan, dan pengeluaran operasional sudah tercatat rapi, namun laporannya masih terpisah.
+*   **Rekomendasi:** Menggabungkan seluruh data menjadi **Laporan Laba Rugi Standar Akuntansi** bulanan otomatis:
+    $$\text{Omzet Kotor (Gross Sales)} - \text{Total HPP (COGS)} = \text{Laba Kotor (Gross Profit)}$$
+    $$\text{Laba Kotor} - \text{Biaya Operasional (Bahan, Pengeluaran Kasir, Gaji, Sewa)} = \text{Laba Bersih (Net Profit)}$$
+
+---
+
+## 4. Pemasaran & Retensi Pelanggan (Customer Growth)
+
+### 4.1. Program Loyalitas & Member Berbasis Nomor HP
+*   **Kondisi Saat Ini:** Promo berupa potongan harga umum atau kupon diskon.
+*   **Rekomendasi:** Menerapkan sistem poin member yang sangat praktis tanpa perlu kartu fisik:
+    - Kasir cukup menanyakan nomor HP pelanggan saat pembayaran.
+    - Pelanggan otomatis mendapatkan 1 poin per kelipatan belanja (misal: tiap Rp 10.000).
+    - Saat mencapai jumlah poin tertentu, poin dapat ditukarkan dengan diskon atau 1 menu gratis.
+
+### 4.2. Struk Digital Otomatis via WhatsApp Gateway (*Paperless*)
+*   **Rekomendasi:** Mengintegrasikan WhatsApp API (seperti Fonnte / Wablas). Selain menghemat biaya kertas thermal, pelanggan dapat menerima struk digital langsung di WhatsApp mereka dalam format PDF atau link interaktif. Sistem sekaligus mengumpulkan database kontak pelanggan yang sah untuk keperluan *broadcast* promosi berkala.
+
+---
+
+## 5. Ketahanan Sistem & Keamanan Skala Enterprise
+
+### 5.1. Ketahanan Offline POS (Offline Resilience)
+*   **Risiko Saat Ini:** Sistem sepenuhnya bergantung pada koneksi internet cloud. Jika WiFi cafe putus mendadak selama 30 menit, kasir tidak dapat memproses pesanan.
+*   **Rekomendasi:** Memanfaatkan teknologi Service Worker PWA dan **Local Storage (IndexedDB)**. Jika internet terputus, kasir tetap bisa memasukkan pesanan dan mencetak struk secara offline. Begitu internet kembali terhubung, data transaksi lokal otomatis tersinkronisasi (*auto-sync*) ke server pusat.
+
+### 5.2. Automasi Backup Database ke Cloud Eksternal (Disaster Recovery)
+*   **Kondisi Saat Ini:** Fitur backup database via web admin dan artisan CLI sudah bekerja dengan sangat baik di penyimpanan server lokal.
+*   **Rekomendasi:** Mengonfigurasi *Cron Job / Task Scheduling* pada Laravel untuk menjalankan pencadangan otomatis (misal: setiap pukul 03.00 pagi) dan mengunggah file backup terenkripsi langsung ke penyimpanan cloud eksternal (Google Drive / AWS S3) melalui API.
+
+---
+
+## Matriks Prioritas Implementasi
+
+| Fase | Inisiatif Fitur | Dampak Bisnis | Estimasi Kompleksitas |
+| :--- | :--- | :--- | :--- |
+| **Fase 1 (Segera)** | **Pencatatan Bahan Rusak/Basi (*Waste Log*)** | Menutup celah kebocoran stok & fraud | Mudah - Sedang |
+| **Fase 1 (Segera)** | **Fitur Pindah Meja & Gabung Meja** | Kenyamanan dan kelancaran kasir | Mudah |
+| **Fase 2** | **Laporan Laba Rugi Komprehensif (P&L)** | Visibilitas keuntungan bersih cafe | Sedang |
+| **Fase 2** | **Direct Raw Thermal Printing (ESC/POS)** | Mempercepat antrean kasir hingga 2x lipat | Sedang |
+| **Fase 3** | **Integrasi QRIS Dinamis Otomatis (Midtrans)** | Mengeliminasi risiko struk transfer palsu | Sedang |
+| **Fase 3** | **Kitchen Display System (KDS Dapur & Bar)** | Mengurangi kesalahan masakan & tanpa kertas | Sedang - Lanjutan |
+| **Fase 4** | **Sistem Member / Poin WhatsApp** | Meningkatkan retensi pelanggan setia | Sedang |
+| **Fase 4** | **Ketahanan Transaksi Offline (PWA Sync)** | Operasional tetap jalan meski internet mati | Lanjutan |
