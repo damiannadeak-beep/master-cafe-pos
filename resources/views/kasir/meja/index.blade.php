@@ -92,25 +92,43 @@
         const card = document.getElementById(`card-meja-${id}`);
         const icon = document.getElementById(`icon-meja-${id}`);
         const labelOn = document.getElementById(`label-on-${id}`);
+        const switchBtn = document.getElementById(`switch-meja-${id}`);
 
-        if (isAvailable) {
-            card.classList.remove('text-white');
-            card.classList.add('bg-transparent');
-            icon.style.backgroundColor = '#e8f5e9';
-            icon.style.color = '#2e7d32';
-            labelOn.classList.remove('text-danger');
-            labelOn.classList.add('text-success');
-            labelOn.innerText = 'Tersedia';
-        } else {
-            card.classList.remove('bg-transparent');
-            card.classList.add('text-white');
-            icon.style.backgroundColor = '#ffebee';
-            icon.style.color = '#c62828';
-            labelOn.classList.remove('text-success');
-            labelOn.classList.add('text-danger');
-            labelOn.innerText = 'Terisi';
+        if (switchBtn) {
+            switchBtn.checked = isAvailable;
+        }
+
+        if (card && icon && labelOn) {
+            if (isAvailable) {
+                card.classList.remove('text-white');
+                card.classList.add('bg-transparent');
+                icon.style.backgroundColor = '#e8f5e9';
+                icon.style.color = '#2e7d32';
+                labelOn.classList.remove('text-danger');
+                labelOn.classList.add('text-success');
+                labelOn.innerText = 'Tersedia';
+            } else {
+                card.classList.remove('bg-transparent');
+                card.classList.add('text-white');
+                icon.style.backgroundColor = '#ffebee';
+                icon.style.color = '#c62828';
+                labelOn.classList.remove('text-success');
+                labelOn.classList.add('text-danger');
+                labelOn.innerText = 'Terisi';
+            }
         }
     }
+
+    // Dengarkan event real-time dari WebSocket
+    window.addEventListener('meja-status-updated', function(event) {
+        const data = event.detail;
+        if (data && data.id) {
+            updateUI(data.id, data.is_available);
+            if (window.showToast) {
+                window.showToast(`Status ${data.nama || 'Meja'} kini ${data.is_available ? 'Tersedia' : 'Terisi'}.`, 'info');
+            }
+        }
+    });
 </script>
 @endsection
 

@@ -90,34 +90,55 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
 
-            // Wait a moment for Vite modules (Echo) to load
+            // Wait for Vite modules (Echo) to load
             setTimeout(() => {
                 if (window.Echo) {
-                    console.log('[Reverb] Subscribing to kasir-notifications channel...');
-                    window.Echo.channel('kasir-notifications')
-                        .listen('PesananBaru', (e) => {
-                            console.log('[Reverb] Pesanan baru diterima:', e);
+                    console.log('[WebSocket] Subscribing to kasir-notifications channel...');
+                    const kasirChannel = window.Echo.channel('kasir-notifications');
 
-                            // Play notification sound
-                            notifSound.play().catch(err => console.log('Autoplay prevented:', err));
+                    const handlePesananBaru = (e) => {
+                        console.log('[WebSocket] Pesanan baru diterima:', e);
 
-                            // Show toast notification
-                            if (window.showToast) {
-                                window.showToast(e.message, 'success');
-                            }
+                        // Play audio chime
+                        notifSound.play().catch(err => console.log('Autoplay audio prevented:', err));
 
-                            // Update the active order badge count
-                            fetchActiveOrdersCount();
-                            if (window.location.pathname.includes('/pesanan-aktif')) { setTimeout(() => location.reload(), 1500); }
-                        });
+                        // Toast alert
+                        if (window.showToast) {
+                            window.showToast(e.message || 'Pesanan baru masuk!', 'success');
+                        }
+
+                        // Refresh active order badge
+                        fetchActiveOrdersCount();
+
+                        // If currently on pesanan-aktif page, reload list
+                        if (window.location.pathname.includes('/pesanan-aktif')) {
+                            setTimeout(() => location.reload(), 1200);
+                        }
+                    };
+
+                    const handleMejaStatus = (e) => {
+                        console.log('[WebSocket] Status meja diupdate:', e);
+                        // Forward event to page-specific handlers (e.g. Kasir Meja or POS)
+                        window.dispatchEvent(new CustomEvent('meja-status-updated', { detail: e }));
+                    };
+
+                    kasirChannel
+                        .listen('.PesananBaru', handlePesananBaru)
+                        .listen('PesananBaru', handlePesananBaru)
+                        .listen('.MejaStatusUpdated', handleMejaStatus)
+                        .listen('MejaStatusUpdated', handleMejaStatus);
+
+                    // Gentle background sync every 60s as redundancy safeguard
+                    setInterval(() => {
+                        fetchActiveOrdersCount();
+                    }, 60000);
                 } else {
-                    console.warn('[Reverb] Laravel Echo is not loaded. Falling back to polling.');
-                    // Fallback: use polling if Echo fails to load
+                    console.warn('[WebSocket] Laravel Echo is not loaded. Falling back to HTTP polling.');
                     setInterval(() => {
                         fetchActiveOrdersCount();
                     }, 15000);
                 }
-            }, 1500);
+            }, 1000);
         });
     </script>
     

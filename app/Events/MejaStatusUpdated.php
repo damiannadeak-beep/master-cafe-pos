@@ -2,30 +2,25 @@
 
 namespace App\Events;
 
-use App\Models\Pesanan;
+use App\Models\Meja;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PesananBaru implements ShouldBroadcastNow
+class MejaStatusUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $pesanan;
-    public $message;
+    public $meja;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Pesanan $pesanan)
+    public function __construct(Meja $meja)
     {
-        $this->pesanan = $pesanan;
-        $mejaStr = $pesanan->meja ? $pesanan->meja->nama_meja_atau_nomor : "Takeaway";
-        $this->message = "Pesanan Baru #$pesanan->id dari $mejaStr";
+        $this->meja = $meja;
     }
 
     /**
@@ -45,7 +40,7 @@ class PesananBaru implements ShouldBroadcastNow
      */
     public function broadcastAs(): string
     {
-        return 'PesananBaru';
+        return 'MejaStatusUpdated';
     }
 
     /**
@@ -53,13 +48,10 @@ class PesananBaru implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        $mejaStr = $this->pesanan->meja ? $this->pesanan->meja->nama_meja_atau_nomor : "Takeaway";
         return [
-            'id' => $this->pesanan->id,
-            'meja' => $mejaStr,
-            'total' => (float) $this->pesanan->total,
-            'message' => "Pesanan Baru #{$this->pesanan->id} ({$mejaStr})",
-            'created_at' => $this->pesanan->created_at ? $this->pesanan->created_at->format('H:i') : date('H:i'),
+            'id' => $this->meja->id,
+            'nama' => $this->meja->nama_meja_atau_nomor,
+            'is_available' => (bool) $this->meja->is_available,
         ];
     }
 }

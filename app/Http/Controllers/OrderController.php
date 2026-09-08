@@ -141,6 +141,13 @@ class OrderController extends Controller
             // Trigger WebSocket Event (Reverb)
             broadcast(new \App\Events\PesananBaru($pesanan));
 
+            if ($id_meja && $tipe_pesanan === 'dine_in') {
+                $mejaModel = \App\Models\Meja::find($id_meja);
+                if ($mejaModel) {
+                    broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
+                }
+            }
+
             // Trigger Push Notification to Admin and Kasir
             $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
             \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(

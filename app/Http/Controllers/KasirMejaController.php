@@ -28,6 +28,10 @@ class KasirMejaController extends Controller
             ]);
 
             $statusName = $meja->is_available ? 'Tersedia' : 'Terisi';
+
+            // Broadcast real-time event ke kasir lain
+            broadcast(new \App\Events\MejaStatusUpdated($meja));
+
             return response()->json([
                 'message' => 'Status meja berhasil diubah menjadi ' . $statusName,
                 'is_available' => $meja->is_available
