@@ -17,8 +17,8 @@
                         <div class="mb-3 d-flex justify-content-center">
                             <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
                                  id="icon-meja-{{ $meja->id }}"
-                                 style="width: 80px; height: 80px; background-color: {{ $meja->is_available ? '#e8f5e9' : '#ffebee' }}; color: {{ $meja->is_available ? '#2e7d32' : '#c62828' }};">
-                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 48px; width: 48px; object-fit: cover; margin-bottom: 8px;">
+                                 style="width: 80px; height: 80px; background-color: {{ $meja->is_available ? '#e8f5e9' : '#ffebee' }}; color: {{ $meja->is_available ? '#2e7d32' : '#c62828' }}; line-height: 0;">
+                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 48px; width: 48px; object-fit: cover; margin: 0; display: block;">
                             </div>
                         </div>
                         <h5 class="fw-bold mb-1">{{ $meja->nama_meja_atau_nomor }}</h5>

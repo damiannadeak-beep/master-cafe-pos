@@ -2,7 +2,7 @@
         <div class="col-lg-6">
             <div class="card admin-card border-0 shadow-sm h-100">
                 <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
-                    <h5 class="mb-0 fw-bold"><img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 48px; width: 48px; object-fit: cover; margin-bottom: 8px;">Profil Warung & Struk</h5>
+                    <h5 class="mb-0 fw-bold d-flex align-items-center"><img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm me-2" style="height: 36px; width: 36px; object-fit: cover;">Profil Warung & Struk</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.settings.profile') }}" method="POST">

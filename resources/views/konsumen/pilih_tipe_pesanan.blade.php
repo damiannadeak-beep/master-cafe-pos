@@ -6,7 +6,7 @@
         <div class="col-lg-6">
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-body p-5">
-                    <h2 class="fw-bold text-center mb-2 text-white" style="font-family: 'Rye', serif;">Pilih Jenis Pesanan</h2>
+                    <h2 class="fw-bold text-center mb-2 text-white" style="font-family: 'Outfit', sans-serif !important;">Pilih Jenis Pesanan</h2>
                     <p class="text-center text-secondary mb-5 small">Apakah Anda ingin memesan untuk dinikmati di tempat atau dibawa pulang?</p>
                     
                     <div class="row g-4">
@@ -15,12 +15,13 @@
                             <a href="{{ url('/konsumen/menu') }}" class="text-decoration-none">
                                 <div class="card h-100 border-0 text-center p-4 cursor-pointer hover-shadow rounded-4"
                                      style="background-color: #0e1217; border: 2px solid #21262d !important; transition: all 0.3s ease; cursor: pointer;">
-                                    <div class="mb-3">
-                                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(178, 122, 77, 0.15); border: 1px solid rgba(178, 122, 77, 0.3);">
-                                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 48px; width: 48px; object-fit: cover; margin-bottom: 8px;">
+                                    <div class="mb-3 d-flex justify-content-center">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                             style="width: 84px; height: 84px; background-color: rgba(178, 122, 77, 0.15); border: 1px solid rgba(178, 122, 77, 0.3); line-height: 0;">
+                                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="width: 54px; height: 54px; object-fit: cover; margin: 0 !important; display: block;">
                                         </div>
                                     </div>
-                                    <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif;">Makan di Tempat</h5>
+                                    <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Makan di Tempat</h5>
                                     <p class="text-secondary small mb-0">Dinikmati langsung di meja restoran</p>
                                 </div>
                             </a>
@@ -31,12 +32,13 @@
                             <a href="{{ url('/konsumen/menu-takeaway') }}" class="text-decoration-none">
                                 <div class="card h-100 border-0 text-center p-4 cursor-pointer hover-shadow rounded-4"
                                      style="background-color: #0e1217; border: 2px solid #21262d !important; transition: all 0.3s ease; cursor: pointer;">
-                                    <div class="mb-3">
-                                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: rgba(72, 187, 120, 0.15); border: 1px solid rgba(72, 187, 120, 0.3);">
-                                            <i class="bi bi-bag-check text-white" style="font-size: 36px; color: #48bb78 !important;"></i>
+                                    <div class="mb-3 d-flex justify-content-center">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                             style="width: 84px; height: 84px; background-color: rgba(72, 187, 120, 0.15); border: 1px solid rgba(72, 187, 120, 0.3); line-height: 0;">
+                                            <i class="bi bi-bag-check text-white" style="font-size: 38px; color: #48bb78 !important; line-height: 1; margin: 0;"></i>
                                         </div>
                                     </div>
-                                    <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif;">Dibawa Pulang</h5>
+                                    <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Dibawa Pulang</h5>
                                     <p class="text-secondary small mb-0">Pesan untuk dinikmati di rumah</p>
                                 </div>
                             </a>
