@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container pb-5 mb-5">
-    <div class="card border-0 rounded-4 shadow-sm p-3 p-md-4 mb-4" 
+<div class="container pt-3 pt-md-4 pb-5 mb-5">
+    <div class="card border-0 rounded-4 shadow-sm p-3 p-md-4 mb-4 mt-2 mt-md-3" 
          style="background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1px solid #21262d !important; border-left: 4px solid #c08e5c !important;">
         <div class="d-flex justify-content-between align-items-center">
             <div>
