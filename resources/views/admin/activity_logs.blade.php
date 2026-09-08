@@ -159,14 +159,9 @@
 
             <!-- Footer Pagination -->
             @if($logs->hasPages())
-            <div class="card-footer d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 px-4 py-3 border-top" 
+            <div class="card-footer px-4 py-3 border-top" 
                  style="background-color: #0e1217; border-color: #21262d !important;">
-                <div class="text-secondary small">
-                    Menampilkan <span class="text-white fw-bold">{{ $logs->firstItem() ?? 0 }}</span> - <span class="text-white fw-bold">{{ $logs->lastItem() ?? 0 }}</span> dari <span class="text-white fw-bold">{{ $logs->total() }}</span> aktivitas
-                </div>
-                <div class="pagination-wrapper mb-0">
-                    {{ $logs->links() }}
-                </div>
+                {{ $logs->links() }}
             </div>
             @endif
         </div>
