@@ -9,18 +9,9 @@ use Spatie\Activitylog\LogOptions;
 
 class Bahan extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory;
 
     protected $fillable = ['nama_bahan', 'satuan', 'stok', 'harga_beli'];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Bahan has been {$eventName}");
-    }
 
     public function menus()
     {

@@ -127,9 +127,6 @@
                     <a class="nav-link {{ request()->routeIs('admin.void_logs.index') ? 'active' : '' }}" href="{{ route('admin.void_logs.index') }}">
                         <i class="bi bi-journal-x me-2"></i> Log Void
                     </a>
-                    <a class="nav-link {{ request()->routeIs('admin.activity_logs.index') ? 'active' : '' }}" href="{{ route('admin.activity_logs.index') }}">
-                        <i class="bi bi-clock-history me-2"></i> Log Aktivitas
-                    </a>
                     <a class="nav-link {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" href="{{ route('admin.backups.index') }}">
                         <i class="bi bi-shield-check me-2"></i> Backup Database
                     </a>

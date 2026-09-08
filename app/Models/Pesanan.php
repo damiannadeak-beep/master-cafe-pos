@@ -13,18 +13,9 @@ use App\Models\Meja;
  
 class Pesanan extends Model 
 { 
-    use SoftDeletes, LogsActivity;
+    use SoftDeletes;
     
     protected $table = 'pesanan'; 
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Pesanan has been {$eventName}");
-    }
 
     protected $fillable = [
         'id_konsumen', 'id_meja', 'id_kasir', 'tipe_pesanan', 'tanggal',
