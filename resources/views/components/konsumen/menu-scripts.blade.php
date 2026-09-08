@@ -32,6 +32,43 @@
         currentModalQty = 1;
         document.getElementById('modal-qty-display').innerText = currentModalQty;
 
+        if (document.getElementById('variantModalCatatan')) {
+            document.getElementById('variantModalCatatan').value = '';
+        }
+
+        // Isi Data Preview Produk
+        const titleEl = document.getElementById('variantModalMenuTitle');
+        if (titleEl) titleEl.innerText = currentSelectedMenu.nama_menu;
+
+        const priceEl = document.getElementById('variantModalMenuPrice');
+        if (priceEl) priceEl.innerText = currentSelectedMenu.is_dynamic_price ? 'Timbangan' : 'Rp ' + Number(currentSelectedMenu.harga).toLocaleString('id-ID');
+
+        const descEl = document.getElementById('variantModalMenuDesc');
+        if (descEl) descEl.innerText = currentSelectedMenu.deskripsi || 'Hidangan istimewa racikan Master Cafe dengan kualitas bahan pilihan terbaik.';
+
+        const catEl = document.getElementById('variantModalCategoryBadge');
+        if (catEl) catEl.innerText = (currentSelectedMenu.kategori ? currentSelectedMenu.kategori.toUpperCase() : 'MENU');
+
+        const stockEl = document.getElementById('variantModalStockBadge');
+        if (stockEl) {
+            if (currentSelectedMenu.stok > 0) {
+                stockEl.style.background = 'rgba(72, 187, 120, 0.15)';
+                stockEl.style.color = '#48bb78';
+                stockEl.style.border = '1px solid rgba(72, 187, 120, 0.3)';
+                stockEl.innerHTML = `<i class="bi bi-check-circle me-1"></i> Sisa: ${currentSelectedMenu.stok}`;
+            } else {
+                stockEl.style.background = 'rgba(245, 101, 101, 0.15)';
+                stockEl.style.color = '#f56565';
+                stockEl.style.border = '1px solid rgba(245, 101, 101, 0.3)';
+                stockEl.innerHTML = `<i class="bi bi-x-circle me-1"></i> Stok Habis`;
+            }
+        }
+
+        const imgEl = document.getElementById('variantModalImg');
+        if (imgEl) {
+            imgEl.src = currentSelectedMenu.image_url || (currentSelectedMenu.image ? (currentSelectedMenu.image.startsWith('http') ? currentSelectedMenu.image : '/storage/' + currentSelectedMenu.image) : '/images/logo.png');
+        }
+
         let content = '';
         if (currentSelectedMenu.variants && currentSelectedMenu.variants.length > 0) {
             content += `<h6 class="fw-bold mb-3">Pilih Varian (Opsional)</h6>`;
@@ -74,7 +111,7 @@
 
         let container = document.getElementById('variantModalContent');
         if (content === '') {
-            container.innerHTML = '<p class="text-muted my-3 text-center">Tidak ada pilihan varian atau topping.</p>';
+            container.innerHTML = '<p class="text-muted my-2 text-center small"><i class="bi bi-check-circle me-1"></i> Menu siap disajikan tanpa tambahan varian khusus.</p>';
         } else {
             container.innerHTML = content;
         }
@@ -83,7 +120,11 @@
         if(alertContainer) alertContainer.innerHTML = '';
 
         calculateVariantPrice();
-        var myModal = new bootstrap.Modal(document.getElementById('variantModal'));
+        const modalEl = document.getElementById('variantModal');
+        let myModal = bootstrap.Modal.getInstance(modalEl);
+        if (!myModal) {
+            myModal = new bootstrap.Modal(modalEl);
+        }
         myModal.show();
     }
 
@@ -164,7 +205,8 @@
         let additional = selectedVariants.reduce((sum, v) => sum + (v.price * v.qty), 0);
         let finalPrice = currentSelectedMenu.harga + additional;
         
-        addToCart(currentSelectedMenu.id, currentSelectedMenu.nama_menu, finalPrice, selectedVariants, currentModalQty);
+        let catatan = document.getElementById('variantModalCatatan') ? document.getElementById('variantModalCatatan').value.trim() : '';
+        addToCart(currentSelectedMenu.id, currentSelectedMenu.nama_menu, finalPrice, selectedVariants, currentModalQty, catatan);
         
         document.querySelectorAll('.var-option-input').forEach(input => {
             if(input.type === 'radio' || input.type === 'checkbox') input.checked = false;
@@ -173,6 +215,10 @@
             input.value = 0;
             input.parentElement.parentElement.style.borderColor = '#21262d';
         });
+        
+        if (document.getElementById('variantModalCatatan')) {
+            document.getElementById('variantModalCatatan').value = '';
+        }
         
         currentModalQty = 1;
         document.getElementById('modal-qty-display').innerText = currentModalQty;
@@ -188,13 +234,13 @@
         }
     }
 
-    function addToCart(id, name, price, variants = [], qty = 1) {
+    function addToCart(id, name, price, variants = [], qty = 1, catatan = '') {
         const variantsString = JSON.stringify(variants);
-        let itemIndex = cart.findIndex(i => i.id_menu === id && JSON.stringify(i.variants) === variantsString);
+        let itemIndex = cart.findIndex(i => i.id_menu === id && JSON.stringify(i.variants) === variantsString && (i.catatan || '') === catatan);
         if (itemIndex !== -1) {
             cart[itemIndex].jumlah += qty;
         } else {
-            cart.push({ id_menu: id, nama: name, harga: price, jumlah: qty, catatan: '', variants: variants });
+            cart.push({ id_menu: id, nama: name, harga: price, jumlah: qty, catatan: catatan, variants: variants });
         }
         updateCartUI();
     }
@@ -243,6 +289,9 @@
                     return (v.qty && v.qty > 1) ? `${v.qty}x ${v.name}` : v.name;
                 }).join(', ');
                 variantsHtml = `<div class="small text-white mb-1"><i class="bi bi-tags me-1"></i>${varText}</div>`;
+            }
+            if (item.catatan) {
+                variantsHtml += `<div class="small fst-italic" style="color: #c08e5c;"><i class="bi bi-chat-text me-1 text-warning"></i>"${item.catatan}"</div>`;
             }
             aggregatedVariantsHtml[item.id_menu] += `<div class="mb-1">${item.jumlah}x: ${variantsHtml}</div>`;
         });

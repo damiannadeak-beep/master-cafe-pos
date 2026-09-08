@@ -80,6 +80,90 @@
         .btn-outline-primary:hover, .btn-outline-primary:focus { background-color: #c08e5c !important; color: #ffffff !important; }
         .btn-outline-secondary { color: var(--text-muted) !important; border-color: var(--border-subtle) !important; }
         .btn-outline-secondary:hover, .btn-outline-secondary:focus { background-color: var(--border-subtle) !important; color: #ffffff !important; }
+
+        /* ============================================================
+           MOBILE BOTTOM SHEET SYSTEM (<768px)
+           ============================================================ */
+        @media (max-width: 767.98px) {
+            body .modal.modal-bottom-sheet {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+            }
+            body .modal.modal-bottom-sheet .modal-dialog,
+            body .modal.modal-bottom-sheet .modal-dialog-bottom-sheet {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                height: auto !important;
+                display: flex !important;
+                align-items: flex-end !important;
+                justify-content: flex-end !important;
+                transform: translate3d(0, 100%, 0) !important;
+                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                pointer-events: auto !important;
+                z-index: 1060 !important;
+            }
+            body .modal.modal-bottom-sheet.show .modal-dialog,
+            body .modal.modal-bottom-sheet.show .modal-dialog-bottom-sheet {
+                transform: translate3d(0, 0, 0) !important;
+            }
+            body .modal.modal-bottom-sheet .modal-content {
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                border-top-left-radius: 1.5rem !important;
+                border-top-right-radius: 1.5rem !important;
+                border-left: none !important;
+                border-right: none !important;
+                border-bottom: none !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+                max-height: 88vh !important;
+                width: 100% !important;
+                box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.75) !important;
+                background-color: #161b22 !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .bottom-sheet-drag-handle-wrapper {
+                cursor: grab;
+                touch-action: none;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+            .bottom-sheet-drag-handle {
+                width: 48px;
+                height: 5px;
+                background: rgba(255, 255, 255, 0.38);
+                border-radius: 999px;
+                margin: 8px auto 4px auto;
+                cursor: grab;
+                flex-shrink: 0;
+                transition: background 0.2s ease, transform 0.2s ease;
+            }
+            .bottom-sheet-drag-handle:active,
+            .modal-drag-zone:active .bottom-sheet-drag-handle {
+                background: #c08e5c;
+                transform: scaleX(1.15);
+            }
+        }
+        @media (min-width: 768px) {
+            body .modal.modal-bottom-sheet .modal-dialog,
+            body .modal.modal-bottom-sheet .modal-dialog-bottom-sheet {
+                max-width: 500px;
+                margin: 1.75rem auto;
+                display: flex;
+                align-items: center;
+                min-height: calc(100% - 3.5rem);
+            }
+            body .modal.modal-bottom-sheet .bottom-sheet-drag-handle-wrapper {
+                display: none !important;
+            }
+        }
     </style>
 
 

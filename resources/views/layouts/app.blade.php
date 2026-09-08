@@ -147,17 +147,17 @@
                 const icon = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle';
                 const borderColor = type === 'success' ? '#986c43' : '#dc3545';
                 
-                const toastHtml = 
-                    <div id=" + toastId + " class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid  + borderColor +  !important; background-color: #161b22; color: #fff;">
+                const toastHtml = `
+                    <div id="${toastId}" class="toast toast-bronze align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-left: 4px solid ${borderColor} !important; background-color: #161b22; color: #fff;">
                         <div class="d-flex">
                             <div class="toast-body d-flex align-items-center">
-                                <i class="bi  + icon +  me-2" style="font-size: 20px; color:  + borderColor + ;"></i>
-                                <span style="font-size: 16px;"> + message + </span>
+                                <i class="bi ${icon} me-2" style="font-size: 20px; color: ${borderColor};"></i>
+                                <span style="font-size: 16px;">${message}</span>
                             </div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto btn-touch" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                     </div>
-                ;
+                `;
                 
                 toastContainer.insertAdjacentHTML('beforeend', toastHtml);
                 const toastElement = document.getElementById(toastId);

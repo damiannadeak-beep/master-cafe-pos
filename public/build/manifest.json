@@ -1,13 +1,13 @@
 {
-  "resources/js/app.js": {
-    "file": "assets/app-BrurriSB.js",
+  "../master-cafe-pos/resources/js/app.js": {
+    "file": "assets/app-DBtG6vQX.js",
     "name": "app",
-    "src": "resources/js/app.js",
+    "src": "../master-cafe-pos/resources/js/app.js",
     "isEntry": true
   },
-  "resources/sass/app.scss": {
+  "../master-cafe-pos/resources/sass/app.scss": {
     "file": "assets/app-NUJU54S-.css",
-    "src": "resources/sass/app.scss",
+    "src": "../master-cafe-pos/resources/sass/app.scss",
     "isEntry": true,
     "name": "app",
     "names": [
