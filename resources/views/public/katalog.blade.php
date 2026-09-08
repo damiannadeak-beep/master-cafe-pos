@@ -87,7 +87,7 @@
                     <!-- Gambar -->
                     @if($menu->image)
                         <div class="text-center w-100 p-3" style="background-color: #14171c; border-bottom: 1px solid #21262d; aspect-ratio: 4/3;">
-                            <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='https://placehold.co/600x450/14171c/4a5568?text=MASTER+CAFE';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
+                            <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='/images/logo.png';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
                         </div>
                     @else
                         <div class="d-flex align-items-center justify-content-center text-secondary w-100" style="background-color: #14171c; border-bottom: 1px solid #21262d; aspect-ratio: 4/3;">
@@ -181,7 +181,7 @@
             <div class="modal-body px-4 pb-4 pt-2" id="katalogModalScrollBody" style="overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: calc(88vh - 120px);">
                 <!-- Foto Menu Besar -->
                 <div class="rounded-4 overflow-hidden mb-3 text-center position-relative" style="background-color: #14171c; border: 1px solid #21262d; max-height: 240px;">
-                    <img id="katalogModalImg" src="" alt="Menu Image" style="width: 100%; height: 240px; object-fit: contain; padding: 12px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
+                    <img id="katalogModalImg" src="" alt="Menu Image" onerror="this.onerror=null; this.src='/images/logo.png';" style="width: 100%; height: 240px; object-fit: contain; padding: 12px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
                     <div id="katalogModalPromoBadge" class="position-absolute top-0 end-0 m-3" style="display: none;">
                         <span class="badge shadow-sm px-3 py-2 rounded-pill" style="background-color: #c08e5c;"><i class="bi bi-tag-fill me-1"></i> Promo Spesial</span>
                     </div>
@@ -262,6 +262,7 @@
 
         // Gambar
         const imgEl = document.getElementById('katalogModalImg');
+        imgEl.onerror = function() { this.onerror = null; this.src = '/images/logo.png'; };
         imgEl.src = menu.image_url || (menu.image ? (menu.image.startsWith('http') ? menu.image : '/storage/' + menu.image) : '/images/logo.png');
 
         // Promo badge

@@ -25,7 +25,7 @@
             <div class="modal-body px-4 py-2" id="variantModalScrollBody" style="overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: calc(88vh - 175px);">
                 <!-- Preview Foto Menu -->
                 <div class="rounded-4 overflow-hidden mb-3 text-center position-relative" style="background-color: #14171c; border: 1px solid #21262d; max-height: 180px;">
-                    <img id="variantModalImg" src="" alt="Menu Image" style="width: 100%; height: 180px; object-fit: contain; padding: 8px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));">
+                    <img id="variantModalImg" src="" alt="Menu Image" onerror="this.onerror=null; this.src='/images/logo.png';" style="width: 100%; height: 180px; object-fit: contain; padding: 8px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));">
                 </div>
 
                 <!-- Info Nama & Harga -->

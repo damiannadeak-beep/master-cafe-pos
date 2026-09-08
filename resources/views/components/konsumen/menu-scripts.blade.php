@@ -66,6 +66,7 @@
 
         const imgEl = document.getElementById('variantModalImg');
         if (imgEl) {
+            imgEl.onerror = function() { this.onerror = null; this.src = '/images/logo.png'; };
             imgEl.src = currentSelectedMenu.image_url || (currentSelectedMenu.image ? (currentSelectedMenu.image.startsWith('http') ? currentSelectedMenu.image : '/storage/' + currentSelectedMenu.image) : '/images/logo.png');
         }
 

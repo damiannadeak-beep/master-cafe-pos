@@ -77,9 +77,19 @@ Route::get('/storage/{path}', function ($path) {
         }
     }
     
-    // Fail-safe: jika gambar tidak ditemukan, kembalikan SVG placeholder
-    $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450"><rect width="600" height="450" fill="#f8f9fa"/><rect x="240" y="150" width="120" height="90" rx="12" stroke="#adb5bd" stroke-width="4" fill="none"/><circle cx="275" cy="180" r="10" fill="#adb5bd"/><path d="M248 225L275 198L298 220L318 192L352 225" stroke="#adb5bd" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="300" y="280" font-family="sans-serif" font-size="18" font-weight="600" fill="#6c757d" text-anchor="middle">Belum Ada Foto</text></svg>';
-    return response($svg, 200, ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'no-cache']);
+    // Fail-safe: jika gambar tidak ditemukan, kembalikan logo resmi Master Cafe
+    $logoPaths = [
+        public_path('images/logo.png'),
+        base_path('public/images/logo.png'),
+        $homeDir . '/public_html/mastercafe.nadeak.net/images/logo.png',
+        $homeDir . '/repositories/master-cafe-pos/public/images/logo.png',
+    ];
+    foreach ($logoPaths as $logo) {
+        if (file_exists($logo) && is_file($logo)) {
+            return response()->file($logo, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=86400']);
+        }
+    }
+    return redirect('/images/logo.png');
 })->where('path', '.*');
 
 

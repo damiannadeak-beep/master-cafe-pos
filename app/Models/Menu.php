@@ -34,7 +34,7 @@ class Menu extends Model
     public function getImageUrlAttribute(): ?string
     {
         if (!$this->image) {
-            return 'https://placehold.co/600x450/e9ecef/6c757d?text=Belum+Ada+Foto';
+            return '/images/logo.png';
         }
         if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
             return $this->image;
