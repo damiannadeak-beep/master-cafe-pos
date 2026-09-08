@@ -3,7 +3,13 @@
 @section('content')
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Manajemen User</h2>
+        <div>
+            <h2>Manajemen User</h2>
+            <p class="text-white-50 mb-0">Daftar seluruh akun terdaftar (Pemilik, Kasir, dan Konsumen).</p>
+        </div>
+        <a href="{{ route('admin.kasir.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Ke Manajemen Kasir
+        </a>
     </div>
 
     @if(session('success'))

@@ -100,17 +100,21 @@
                     <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                         <i class="bi bi-house-door-fill me-2"></i> Dashboard
                     </a>
+
+                    <div class="nav-section-title">Operasional</div>
                     <a class="nav-link {{ request()->routeIs('admin.meja.*') ? 'active' : '' }}" href="{{ route('admin.meja.index') }}">
                         <i class="bi bi-display me-2"></i> Meja & QR Code
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.menu.*') ? 'active' : '' }}" href="{{ route('admin.menu.index') }}">
-                        <i class="bi bi-list-ul me-2"></i> Produk
+                        <i class="bi bi-list-ul me-2"></i> Produk (Menu)
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.stok.*') ? 'active' : '' }}" href="{{ route('admin.stok.index') }}">
-                        <i class="bi bi-box-seam me-2"></i> Stok
+                        <i class="bi bi-box-seam me-2"></i> Stok Bahan Baku
                     </a>
-                    <a class="nav-link {{ request()->routeIs('admin.kasir.*') ? 'active' : '' }}" href="{{ route('admin.kasir.index') }}">
-                        <i class="bi bi-people-fill me-2"></i> Kasir
+
+                    <div class="nav-section-title">Keuangan</div>
+                    <a class="nav-link {{ request()->routeIs('admin.pengeluaran.*') ? 'active' : '' }}" href="{{ route('admin.pengeluaran.index') }}">
+                        <i class="bi bi-wallet2 me-2"></i> Pengeluaran
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.permintaan.*') ? 'active' : '' }}" href="{{ route('admin.permintaan.index') }}">
                         <i class="bi bi-cart-check-fill me-2"></i> Permintaan Belanja
@@ -121,32 +125,35 @@
                             <span class="badge bg-danger ms-auto rounded-pill">{{ $pendingReq }}</span>
                         @endif
                     </a>
-                    <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
-                        <i class="bi bi-person-lines-fill me-2"></i> Pengguna (User)
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('admin.void_logs.index') ? 'active' : '' }}" href="{{ route('admin.void_logs.index') }}">
-                        <i class="bi bi-journal-x me-2"></i> Log Void
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" href="{{ route('admin.backups.index') }}">
-                        <i class="bi bi-shield-check me-2"></i> Backup Database
-                    </a>
+
+                    <div class="nav-section-title">Laporan & Audit</div>
                     <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
-                        <i class="bi bi-graph-up-arrow me-2"></i> Laporan
+                        <i class="bi bi-graph-up-arrow me-2"></i> Laporan Penjualan
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.absensi.*') ? 'active' : '' }}" href="{{ route('admin.absensi.index') }}">
                         <i class="bi bi-calendar-check-fill me-2"></i> Laporan Absensi
                     </a>
-                    <a class="nav-link {{ request()->routeIs('admin.pengeluaran.*') ? 'active' : '' }}" href="{{ route('admin.pengeluaran.index') }}">
-                        <i class="bi bi-wallet2 me-2"></i> Pengeluaran
+                    <a class="nav-link {{ request()->routeIs('admin.void_logs.index') ? 'active' : '' }}" href="{{ route('admin.void_logs.index') }}">
+                        <i class="bi bi-journal-x me-2"></i> Log Void Kasir
+                    </a>
+
+                    <div class="nav-section-title">Staf & Pelanggan</div>
+                    <a class="nav-link {{ request()->routeIs('admin.kasir.*') ? 'active' : '' }}" href="{{ route('admin.kasir.index') }}">
+                        <i class="bi bi-people-fill me-2"></i> Kasir & Shift
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.promo.*') ? 'active' : '' }}" href="{{ route('admin.promo.index') }}">
                         <i class="bi bi-tag-fill me-2"></i> Promo
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}" href="{{ route('admin.reviews.index') }}">
-                        <i class="bi bi-chat-left-text-fill me-2"></i> Ulasan
+                        <i class="bi bi-chat-left-text-fill me-2"></i> Ulasan Pelanggan
                     </a>
+
+                    <div class="nav-section-title">Sistem</div>
                     <a class="nav-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}" href="{{ route('admin.settings') }}">
                         <i class="bi bi-gear-fill me-2"></i> Pengaturan
+                    </a>
+                    <a class="nav-link {{ request()->routeIs('admin.backups.*') ? 'active' : '' }}" href="{{ route('admin.backups.index') }}">
+                        <i class="bi bi-shield-check me-2"></i> Backup Database
                     </a>
                 </nav>
             </aside>
