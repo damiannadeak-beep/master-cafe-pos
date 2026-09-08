@@ -5,6 +5,13 @@
 
     RewriteEngine On
 
+    # Proxy WebSocket /app to Reverb
+    <IfModule mod_proxy.c>
+        RewriteCond %{HTTP:Upgrade} websocket [NC]
+        RewriteCond %{HTTP:Connection} upgrade [NC]
+        RewriteRule ^app/(.*) ws://127.0.0.1:8080/app/$1 [P,L]
+    </IfModule>
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

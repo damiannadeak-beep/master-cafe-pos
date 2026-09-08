@@ -63,9 +63,9 @@
                 window.showToast(message || 'Pesanan baru masuk!', 'success');
             }
 
-            // If currently on pesanan-aktif page, reload list
+            // If currently on pesanan-aktif page, reload list instantly
             if (window.location.pathname.includes('/pesanan-aktif')) {
-                setTimeout(() => location.reload(), 1200);
+                setTimeout(() => location.reload(), 300);
             }
         }
 
@@ -217,8 +217,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
 
-            // Default sync interval: 4 seconds for instant responsiveness
-            let syncInterval = setInterval(fetchActiveOrdersCount, 4000);
+            // Default sync interval: 1.5 seconds for instant responsiveness without delay
+            let syncInterval = setInterval(fetchActiveOrdersCount, 1500);
 
             // Wait for Vite modules (Echo) to load
             setTimeout(() => {
