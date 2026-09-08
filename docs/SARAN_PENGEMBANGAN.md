@@ -12,6 +12,7 @@ Dokumen ini memadukan **5 Pilar Fondasi Teknis Utama** dan **Inisiatif Operasion
 - [x] **Audit Trail & Rekam Jejak Keamanan** (Implementasi log pembatalan transaksi / *Void Logs* & tabel *Activity Logs*).
 - [x] **Pencadangan Database Terintegrasi** (Fitur backup database via web dashboard Admin & CLI artisan).
 - [x] **UI/UX Polishing** (Penyempurnaan tema *Dark Bronze*, pencegahan *white flash*, sudut tabel presisi, dan persistensi scroll sidebar).
+- [x] **WebSockets Real-Time Sinkronisasi** (Laravel Reverb & Echo untuk notifikasi pesanan baru, suara lonceng counter kafe instan, dan auto-update status meja tanpa beban polling).
 
 ---
 
