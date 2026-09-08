@@ -93,7 +93,20 @@ class Pesanan extends Model
             $this->update(['status' => 'cancelled']);
             $this->restoreStock();
             
-            // Opsional: jika mau, ubah status pembayaran jadi failed/cancelled juga
+            // Kembalikan status meja menjadi tersedia jika ada
+            if ($this->id_meja) {
+                $meja = Meja::find($this->id_meja);
+                if ($meja) {
+                    $meja->update(['is_available' => true]);
+                    try {
+                        broadcast(new \App\Events\MejaStatusUpdated($meja));
+                    } catch (\Throwable $e) {
+                        // ignore broadcast error if offline
+                    }
+                }
+            }
+
+            // Opsional: hapus record pembayaran jika ada
             if ($this->pembayaran) {
                 $this->pembayaran->delete();
             }
