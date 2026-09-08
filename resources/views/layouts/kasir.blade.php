@@ -45,6 +45,30 @@
         let isInitialSync = true;
         let lastNotifiedOrderId = null;
 
+        function refreshOrdersListDirectly() {
+            const container = document.getElementById('active-orders-container');
+            if (!container) {
+                if (window.location.pathname.includes('/pesanan-aktif')) {
+                    location.reload();
+                }
+                return;
+            }
+
+            // Quietly fetch fresh HTML in background and swap cards in 50ms without whole-page reload
+            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContainer = doc.getElementById('active-orders-container');
+                    if (newContainer && container) {
+                        container.innerHTML = newContainer.innerHTML;
+                        console.log('[UI] Kartu pesanan aktif langsung diperbarui seketika (0 detik jeda reload)!');
+                    }
+                })
+                .catch(() => location.reload());
+        }
+
         function triggerNewOrderNotification(orderId, message) {
             if (orderId && lastNotifiedOrderId === orderId) {
                 return; // Hindari duplikasi jika WebSocket dan Sync mendeteksi bersamaan
@@ -53,19 +77,19 @@
                 lastNotifiedOrderId = orderId;
             }
 
-            // Play crisp counter bell "Ting"
+            // 1. Play crisp counter bell "Ting" INSTANTLY (0 milidetik)
             if (window.playDingSound) {
                 window.playDingSound();
             }
 
-            // Toast alert
+            // 2. Toast alert INSTANTLY
             if (window.showToast) {
                 window.showToast(message || 'Pesanan baru masuk!', 'success');
             }
 
-            // If currently on pesanan-aktif page, reload list instantly
+            // 3. Update orders list INSTANTLY via AJAX DOM swap (Tanpa jeda reload layar)
             if (window.location.pathname.includes('/pesanan-aktif')) {
-                setTimeout(() => location.reload(), 300);
+                refreshOrdersListDirectly();
             }
         }
 
@@ -217,8 +241,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
 
-            // Default sync interval: 1.5 seconds for instant responsiveness without delay
-            let syncInterval = setInterval(fetchActiveOrdersCount, 1500);
+            // Default sync interval: 1 second for ultra-fast responsiveness without reload lag
+            let syncInterval = setInterval(fetchActiveOrdersCount, 1000);
 
             // Wait for Vite modules (Echo) to load
             setTimeout(() => {

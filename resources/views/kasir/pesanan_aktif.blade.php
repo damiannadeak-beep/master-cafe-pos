@@ -9,7 +9,7 @@
         </button>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4" id="active-orders-container">
         @include("components.kasir.active-order-card")
     </div>
 </div>
