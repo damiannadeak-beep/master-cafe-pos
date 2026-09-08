@@ -366,9 +366,24 @@ class AdminController extends Controller
         return redirect()->route('admin.backups.index')->with('error', 'File backup tidak ditemukan.');
     }
 
-    public function activityLogs()
+    public function activityLogs(\Illuminate\Http\Request $request)
     {
-        $logs = Activity::with('causer')->orderBy('created_at', 'desc')->paginate(20);
+        $query = Activity::with(['causer.roles'])->orderBy('created_at', 'desc');
+
+        if ($request->filled('event')) {
+            $query->where('event', $request->event);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhere('subject_type', 'like', "%{$search}%")
+                  ->orWhere('properties', 'like', "%{$search}%");
+            });
+        }
+
+        $logs = $query->paginate(20)->withQueryString();
         return view('admin.activity_logs', compact('logs'));
     }
 
