@@ -23,8 +23,11 @@ class PesananBaru implements ShouldBroadcastNow
      */
     public function __construct(Pesanan $pesanan)
     {
+        if ($pesanan->id_meja && !$pesanan->relationLoaded('meja')) {
+            $pesanan->load('meja');
+        }
         $this->pesanan = $pesanan;
-        $mejaStr = $pesanan->meja ? $pesanan->meja->nama_meja_atau_nomor : "Takeaway";
+        $mejaStr = ($pesanan->relationLoaded('meja') && $pesanan->meja) ? $pesanan->meja->nama_meja_atau_nomor : ($pesanan->id_meja ? 'Meja' : 'Takeaway');
         $this->message = "Pesanan Baru #$pesanan->id dari $mejaStr";
     }
 
@@ -53,7 +56,10 @@ class PesananBaru implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        $mejaStr = $this->pesanan->meja ? $this->pesanan->meja->nama_meja_atau_nomor : "Takeaway";
+        $mejaStr = ($this->pesanan->relationLoaded('meja') && $this->pesanan->meja) 
+            ? $this->pesanan->meja->nama_meja_atau_nomor 
+            : ($this->pesanan->id_meja ? (\App\Models\Meja::find($this->pesanan->id_meja)?->nama_meja_atau_nomor ?? 'Meja') : 'Takeaway');
+
         return [
             'id' => $this->pesanan->id,
             'meja' => $mejaStr,

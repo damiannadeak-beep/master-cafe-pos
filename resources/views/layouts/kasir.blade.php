@@ -82,6 +82,7 @@
                 applyDarkMode(!isCurrentlyDark);
             });
         }
+    </script>
 
     <!-- Local Audio Element (Honors Chrome Site Settings 'Sound: Allow') -->
     <audio id="kasirBellAudio" src="{{ asset('sounds/bell.wav') }}" preload="auto"></audio>
