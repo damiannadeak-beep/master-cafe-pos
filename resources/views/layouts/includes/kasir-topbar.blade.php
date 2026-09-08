@@ -64,13 +64,6 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
-                    <button type="button" 
-                            class="btn btn-sm btn-outline-warning rounded-pill d-inline-flex align-items-center px-2 py-1 text-nowrap" 
-                            onclick="if(window.playDingSound) window.playDingSound(true);" 
-                            title="Klik untuk menguji bunyi notifikasi ting">
-                        <i class="bi bi-volume-up-fill me-1"></i> <span class="d-none d-sm-inline">Tes Suara</span>
-                    </button>
-
                     <div class="navbar-text small text-white">{{ auth()->user()->name ?? 'Kasir' }}</div>
                     <a class="btn btn-outline-light btn-sm rounded-pill d-inline-flex align-items-center" href="{{ route('logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
