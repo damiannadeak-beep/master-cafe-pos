@@ -83,8 +83,74 @@
             });
         }
 
-        // --- Notification Sound ---
-        const notifSound = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        // --- High-Reliability Bell Synthesizer (Web Audio API) ---
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Unlock audio context on any user interaction with the page
+        ['click', 'touchstart', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, () => getAudioContext(), { once: false, passive: true });
+        });
+
+        // Play the iconic cafe counter bell "Ting~~~"
+        window.playDingSound = function(isTest = false) {
+            let played = false;
+            try {
+                const ctx = getAudioContext();
+                if (ctx) {
+                    const now = ctx.currentTime;
+                    // Dual harmonic oscillator for rich bell resonance
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+
+                    // Frequencies: High C6 (1046.5 Hz) and C7 shimmer (2093 Hz)
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(1046.5, now);
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(2093, now);
+
+                    // Bell strike and exponential fade
+                    gainNode.gain.setValueAtTime(0.8, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+
+                    osc1.connect(gainNode);
+                    osc2.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 1.4);
+                    osc2.stop(now + 1.4);
+                    played = true;
+                }
+            } catch (e) {
+                console.warn('[Audio] Web Audio synthesis error:', e);
+            }
+
+            // Fallback to HTML5 audio element if Web Audio failed
+            if (!played) {
+                try {
+                    const fallbackAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    fallbackAudio.play().catch(err => console.log('Autoplay audio prevented:', err));
+                } catch (_) {}
+            }
+
+            if (isTest && window.showToast) {
+                window.showToast('🔔 Bunyi "Ting" berhasil diputar! Notifikasi suara aktif.', 'success');
+            }
+        };
 
         // --- Real-Time WebSocket Listener (Laravel Echo / Reverb) ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -99,8 +165,8 @@
                     const handlePesananBaru = (e) => {
                         console.log('[WebSocket] Pesanan baru diterima:', e);
 
-                        // Play audio chime
-                        notifSound.play().catch(err => console.log('Autoplay audio prevented:', err));
+                        // Play crisp counter bell "Ting"
+                        window.playDingSound();
 
                         // Toast alert
                         if (window.showToast) {
@@ -118,7 +184,6 @@
 
                     const handleMejaStatus = (e) => {
                         console.log('[WebSocket] Status meja diupdate:', e);
-                        // Forward event to page-specific handlers (e.g. Kasir Meja or POS)
                         window.dispatchEvent(new CustomEvent('meja-status-updated', { detail: e }));
                     };
 
