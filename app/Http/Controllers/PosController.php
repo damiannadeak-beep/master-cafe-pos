@@ -69,7 +69,12 @@ class PosController extends Controller
                   });
         })->count();
 
-        return response()->json(['count' => $count]);
+        $latestId = Pesanan::max('id') ?? 0;
+
+        return response()->json([
+            'count' => $count,
+            'latest_id' => $latestId,
+        ]);
     }
 
     /**

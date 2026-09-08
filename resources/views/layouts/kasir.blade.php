@@ -40,7 +40,35 @@
     </form>
 
     <script>
-        // --- Utility: Fetch Active Orders Count Badge ---
+        // --- Utility: Fetch Active Orders Count Badge & Smart Auto-Sync ---
+        let lastKnownOrderId = null;
+        let isInitialSync = true;
+        let lastNotifiedOrderId = null;
+
+        function triggerNewOrderNotification(orderId, message) {
+            if (orderId && lastNotifiedOrderId === orderId) {
+                return; // Hindari duplikasi jika WebSocket dan Sync mendeteksi bersamaan
+            }
+            if (orderId) {
+                lastNotifiedOrderId = orderId;
+            }
+
+            // Play crisp counter bell "Ting"
+            if (window.playDingSound) {
+                window.playDingSound();
+            }
+
+            // Toast alert
+            if (window.showToast) {
+                window.showToast(message || 'Pesanan baru masuk!', 'success');
+            }
+
+            // If currently on pesanan-aktif page, reload list
+            if (window.location.pathname.includes('/pesanan-aktif')) {
+                setTimeout(() => location.reload(), 1200);
+            }
+        }
+
         function fetchActiveOrdersCount() {
             fetch('{{ route("kasir.active_orders_count") }}')
                 .then(response => response.json())
@@ -52,6 +80,15 @@
                     } else {
                         badge.style.display = 'none';
                     }
+
+                    if (data.latest_id) {
+                        if (!isInitialSync && lastKnownOrderId && data.latest_id > lastKnownOrderId) {
+                            console.log('[Sync] Pesanan baru terdeteksi via auto-sync:', data.latest_id);
+                            triggerNewOrderNotification(data.latest_id, 'Pesanan baru #' + data.latest_id + ' masuk!');
+                        }
+                        lastKnownOrderId = data.latest_id;
+                    }
+                    isInitialSync = false;
                 })
                 .catch(err => console.error(err));
         }
@@ -176,9 +213,12 @@
             }
         };
 
-        // --- Real-Time WebSocket Listener (Laravel Echo / Reverb) ---
+        // --- Real-Time Hybrid Engine (Laravel Echo / Reverb + Smart Auto-Sync) ---
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
+
+            // Default sync interval: 4 seconds for instant responsiveness
+            let syncInterval = setInterval(fetchActiveOrdersCount, 4000);
 
             // Wait for Vite modules (Echo) to load
             setTimeout(() => {
@@ -187,23 +227,9 @@
                     const kasirChannel = window.Echo.channel('kasir-notifications');
 
                     const handlePesananBaru = (e) => {
-                        console.log('[WebSocket] Pesanan baru diterima:', e);
-
-                        // Play crisp counter bell "Ting"
-                        window.playDingSound();
-
-                        // Toast alert
-                        if (window.showToast) {
-                            window.showToast(e.message || 'Pesanan baru masuk!', 'success');
-                        }
-
-                        // Refresh active order badge
+                        console.log('[WebSocket] Pesanan baru diterima via Reverb:', e);
                         fetchActiveOrdersCount();
-
-                        // If currently on pesanan-aktif page, reload list
-                        if (window.location.pathname.includes('/pesanan-aktif')) {
-                            setTimeout(() => location.reload(), 1200);
-                        }
+                        triggerNewOrderNotification(e.id, e.message || 'Pesanan baru masuk!');
                     };
 
                     const handleMejaStatus = (e) => {
@@ -217,15 +243,31 @@
                         .listen('.MejaStatusUpdated', handleMejaStatus)
                         .listen('MejaStatusUpdated', handleMejaStatus);
 
-                    // Gentle background sync every 60s as redundancy safeguard
-                    setInterval(() => {
-                        fetchActiveOrdersCount();
-                    }, 60000);
+                    // Dynamic sync optimization: slow down polling when WebSocket is connected
+                    if (window.Echo.connector && window.Echo.connector.pusher) {
+                        const pusherConn = window.Echo.connector.pusher.connection;
+                        pusherConn.bind('connected', () => {
+                            console.log('[WebSocket] Terhubung secara real-time! Mengurangi frekuensi background polling ke 30s.');
+                            clearInterval(syncInterval);
+                            syncInterval = setInterval(fetchActiveOrdersCount, 30000);
+                        });
+                        pusherConn.bind('unavailable', () => {
+                            console.warn('[WebSocket] Tidak tersedia, beralih ke smart auto-sync 4s.');
+                            clearInterval(syncInterval);
+                            syncInterval = setInterval(fetchActiveOrdersCount, 4000);
+                        });
+                        pusherConn.bind('failed', () => {
+                            console.warn('[WebSocket] Gagal koneksi, beralih ke smart auto-sync 4s.');
+                            clearInterval(syncInterval);
+                            syncInterval = setInterval(fetchActiveOrdersCount, 4000);
+                        });
+                        pusherConn.bind('disconnected', () => {
+                            clearInterval(syncInterval);
+                            syncInterval = setInterval(fetchActiveOrdersCount, 4000);
+                        });
+                    }
                 } else {
-                    console.warn('[WebSocket] Laravel Echo is not loaded. Falling back to HTTP polling.');
-                    setInterval(() => {
-                        fetchActiveOrdersCount();
-                    }, 15000);
+                    console.warn('[WebSocket] Laravel Echo is not loaded. Using smart auto-sync 4s.');
                 }
             }, 1000);
         });

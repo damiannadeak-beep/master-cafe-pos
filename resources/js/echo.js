@@ -4,9 +4,10 @@ import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
 const reverbKey = import.meta.env.VITE_REVERB_APP_KEY;
+const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
 const reverbHost = (typeof window !== 'undefined' && window.location.hostname) ? window.location.hostname : (import.meta.env.VITE_REVERB_HOST || 'localhost');
-const reverbPort = import.meta.env.VITE_REVERB_PORT || 8080;
-const reverbScheme = import.meta.env.VITE_REVERB_SCHEME || 'http';
+const reverbPort = isHttps ? 443 : (import.meta.env.VITE_REVERB_PORT || 8080);
+const reverbScheme = isHttps ? 'https' : (import.meta.env.VITE_REVERB_SCHEME || 'http');
 
 const useReverb = Boolean(reverbKey && !reverbKey.startsWith('${'));
 
@@ -15,9 +16,9 @@ if (useReverb) {
         broadcaster: 'reverb',
         key: reverbKey,
         wsHost: reverbHost,
-        wsPort: reverbPort ?? 80,
-        wssPort: reverbPort ?? 443,
-        forceTLS: reverbScheme === 'https',
+        wsPort: reverbPort ?? (isHttps ? 443 : 80),
+        wssPort: isHttps ? 443 : (reverbPort ?? 443),
+        forceTLS: isHttps || reverbScheme === 'https',
         enabledTransports: ['ws', 'wss'],
     });
 } else {
