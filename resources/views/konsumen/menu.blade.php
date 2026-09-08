@@ -2,33 +2,26 @@
 
 @section('content')
 <div class="container pb-5 mb-5">
-    <div class="alert border-0 rounded-4 d-flex justify-content-between align-items-center shadow-sm p-3 p-md-4 mb-4" 
-         style="background: var(--gradient-surface); border: 1px solid #21262d !important;">
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center justify-content-center rounded-3" 
-                 style="width: 48px; height: 48px; background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; flex-shrink: 0;">
-                <i class="bi bi-geo-alt-fill fs-4"></i>
-            </div>
+    <div class="card border-0 rounded-4 shadow-sm p-3 p-md-4 mb-4" 
+         style="background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1px solid #21262d !important; border-left: 4px solid #c08e5c !important;">
+        <div class="d-flex justify-content-between align-items-center">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="text-white fw-bold fs-5" style="font-family: 'Outfit', sans-serif !important;">
-                        Meja {{ ucwords($meja->nama_meja_atau_nomor) }}
-                    </span>
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                    <h5 class="text-white fw-bold mb-0 text-nowrap" style="font-family: 'Outfit', sans-serif !important;">
+                        <i class="bi bi-geo-alt-fill me-1" style="color: #c08e5c;"></i> Meja {{ ucwords($meja->nama_meja_atau_nomor) }}
+                    </h5>
                     <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.7rem;">
                         Dine In
                     </span>
                 </div>
                 @if($pesananAktif)
-                    <small class="fw-bold d-block" style="color: #f56565; font-size: 0.8rem;">
+                    <small class="fw-bold d-block text-danger" style="font-size: 0.8rem;">
                         <i class="bi bi-exclamation-circle me-1"></i> Ada Tagihan Belum Dibayar (Open Bill)
                     </small>
                 @else
                     <small class="text-secondary d-block" style="font-size: 0.82rem;">Silakan pilih menu pesanan Anda</small>
                 @endif
             </div>
-        </div>
-        <div>
-            <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow-sm" style="height: 44px; width: 44px; object-fit: cover; border: 1px solid rgba(192, 142, 92, 0.3);">
         </div>
     </div>
 
