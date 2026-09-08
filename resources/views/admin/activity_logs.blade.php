@@ -1,26 +1,30 @@
 @extends('layouts.admin')
 
+@php
+    use App\Helpers\ActivityLogHelper;
+@endphp
+
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
             <h2 class="fw-bold mb-1 text-white" style="font-family: 'Outfit', sans-serif !important;">
-                <i class="bi bi-clock-history me-2" style="color: #c08e5c;"></i> Log Aktivitas Sistem (Audit Trail)
+                <i class="bi bi-shield-check me-2" style="color: #c08e5c;"></i> Log Aktivitas Operasional
             </h2>
-            <p class="text-secondary small mb-0">Riwayat audit trail pencatatan aktivitas pengguna dan perubahan data sistem</p>
+            <p class="text-secondary small mb-0">Pantau seluruh riwayat transaksi, perubahan stok, dan aktivitas staf kafe secara transparan</p>
         </div>
         
         <!-- Search & Filter Controls -->
         <form action="{{ route('admin.activity_logs.index') }}" method="GET" class="d-flex align-items-center flex-wrap gap-2 w-100 w-md-auto">
             <div class="btn-group shadow-sm">
                 <a href="{{ request()->fullUrlWithQuery(['event' => null, 'page' => null]) }}" class="btn btn-sm {{ !request('event') ? 'btn-primary' : 'btn-outline-secondary' }}">Semua</a>
-                <a href="{{ request()->fullUrlWithQuery(['event' => 'created', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'created' ? 'btn-success' : 'btn-outline-secondary' }}">Created</a>
-                <a href="{{ request()->fullUrlWithQuery(['event' => 'updated', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'updated' ? 'btn-warning text-dark' : 'btn-outline-secondary' }}">Updated</a>
-                <a href="{{ request()->fullUrlWithQuery(['event' => 'deleted', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'deleted' ? 'btn-danger' : 'btn-outline-secondary' }}">Deleted</a>
+                <a href="{{ request()->fullUrlWithQuery(['event' => 'created', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'created' ? 'btn-success' : 'btn-outline-secondary' }}">Data Baru</a>
+                <a href="{{ request()->fullUrlWithQuery(['event' => 'updated', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'updated' ? 'btn-warning text-dark' : 'btn-outline-secondary' }}">Perubahan</a>
+                <a href="{{ request()->fullUrlWithQuery(['event' => 'deleted', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'deleted' ? 'btn-danger' : 'btn-outline-secondary' }}">Penghapusan</a>
             </div>
 
             <div class="input-group input-group-sm ms-md-2" style="max-width: 260px;">
-                <input type="text" name="search" class="form-control" placeholder="Cari deskripsi / target..." value="{{ request('search') }}" style="background-color: #0e1217; border-color: #21262d; color: white;">
+                <input type="text" name="search" class="form-control" placeholder="Cari aktivitas / staf..." value="{{ request('search') }}" style="background-color: #0e1217; border-color: #21262d; color: white;">
                 @if(request('event'))
                     <input type="hidden" name="event" value="{{ request('event') }}">
                 @endif
@@ -38,20 +42,49 @@
                 <table class="table table-hover align-middle mb-0" style="color: #e6edf3; border-color: #21262d;">
                     <thead style="background-color: #0e1217; border-bottom: 2px solid #21262d;">
                         <tr>
-                            <th class="ps-4 py-3 text-secondary text-uppercase fw-semibold" style="width: 16%; font-size: 0.78rem; letter-spacing: 0.5px;">Waktu</th>
-                            <th class="py-3 text-secondary text-uppercase fw-semibold" style="width: 18%; font-size: 0.78rem; letter-spacing: 0.5px;">User (Aktor)</th>
-                            <th class="py-3 text-secondary text-uppercase fw-semibold" style="width: 16%; font-size: 0.78rem; letter-spacing: 0.5px;">Aksi & Target</th>
-                            <th class="pe-4 py-3 text-secondary text-uppercase fw-semibold" style="width: 50%; font-size: 0.78rem; letter-spacing: 0.5px;">Detail Perubahan</th>
+                            <th class="ps-4 py-3 text-secondary text-uppercase fw-semibold" style="width: 17%; font-size: 0.78rem; letter-spacing: 0.5px;">Waktu</th>
+                            <th class="py-3 text-secondary text-uppercase fw-semibold" style="width: 20%; font-size: 0.78rem; letter-spacing: 0.5px;">Aktor / Pelaku</th>
+                            <th class="py-3 text-secondary text-uppercase fw-semibold" style="width: 20%; font-size: 0.78rem; letter-spacing: 0.5px;">Objek & Aksi</th>
+                            <th class="pe-4 py-3 text-secondary text-uppercase fw-semibold" style="width: 43%; font-size: 0.78rem; letter-spacing: 0.5px;">Keterangan & Rincian</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($logs as $log)
+                        @php
+                            $targetInfo = ActivityLogHelper::formatTarget($log);
+                            $eventInfo = ActivityLogHelper::formatEvent($log->event);
+                            $friendlyTitle = ActivityLogHelper::getFriendlyDescription($log);
+
+                            $hasOld = $log->properties->has('old');
+                            $hasNew = $log->properties->has('attributes');
+                            $old = $hasOld ? $log->properties['old'] : [];
+                            $new = $hasNew ? $log->properties['attributes'] : [];
+                            
+                            // Field teknis yang tidak perlu ditampilkan ke pemilik
+                            $ignoredKeys = ['id', 'created_at', 'updated_at', 'deleted_at', 'total_hpp', 'promo_id', 'id_konsumen', 'id_meja', 'id_kasir'];
+                            
+                            // Hitung field yang mengalami perubahan nyata
+                            $changedFields = [];
+                            if ($log->event === 'updated' && $hasNew) {
+                                foreach ($new as $k => $v) {
+                                    if (in_array($k, $ignoredKeys)) continue;
+                                    if (array_key_exists($k, $old) && $old[$k] != $v) {
+                                        $changedFields[$k] = [
+                                            'old' => $old[$k],
+                                            'new' => $v
+                                        ];
+                                    }
+                                }
+                            }
+                        @endphp
                         <tr style="border-bottom: 1px solid #21262d;">
                             <!-- WAKTU -->
                             <td class="ps-4 text-nowrap align-top py-3">
                                 <div class="fw-semibold text-white">{{ $log->created_at->format('d M Y') }}</div>
-                                <small class="text-secondary font-monospace">{{ $log->created_at->format('H:i:s') }}</small>
-                                <div class="small text-secondary" style="font-size: 0.75rem;">{{ $log->created_at->diffForHumans() }}</div>
+                                <small class="text-secondary font-monospace">{{ $log->created_at->format('H:i:s') }} WIB</small>
+                                <div class="small text-secondary mt-1" style="font-size: 0.75rem;">
+                                    <i class="bi bi-clock me-1"></i>{{ $log->created_at->diffForHumans() }}
+                                </div>
                             </td>
 
                             <!-- AKTOR -->
@@ -62,11 +95,11 @@
                                         {{ substr($log->causer->name ?? 'S', 0, 1) }}
                                     </div>
                                     <div class="overflow-hidden">
-                                        <div class="fw-bold text-white text-truncate" style="max-width: 140px;" title="{{ $log->causer->name ?? 'System' }}">
-                                            {{ $log->causer->name ?? 'System' }}
+                                        <div class="fw-bold text-white text-truncate" style="max-width: 150px;" title="{{ $log->causer->name ?? 'Sistem Otomatis' }}">
+                                            {{ $log->causer->name ?? 'Sistem Otomatis' }}
                                         </div>
                                         <span class="badge" style="background-color: #21262d; color: #8b949e; font-size: 0.72rem;">
-                                            {{ $log->causer->roles->first()->name ?? 'System' }}
+                                            {{ ucfirst($log->causer->roles->first()->name ?? 'Sistem') }}
                                         </span>
                                     </div>
                                 </div>
@@ -74,71 +107,61 @@
 
                             <!-- AKSI & TARGET -->
                             <td class="align-top py-3">
-                                @php
-                                    $badgeClass = match($log->event) {
-                                        'created' => 'bg-success text-white',
-                                        'updated' => 'bg-warning text-dark',
-                                        'deleted' => 'bg-danger text-white',
-                                        default => 'bg-secondary text-white'
-                                    };
-                                    $target = class_basename($log->subject_type);
-                                @endphp
-                                <span class="badge {{ $badgeClass }} mb-1 px-2 py-1 text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.5px;">
-                                    {{ $log->event }}
+                                <span class="badge {{ $eventInfo['badge'] }} mb-2 px-2 py-1 fw-bold" style="font-size: 0.72rem;">
+                                    <i class="bi {{ $eventInfo['icon'] }} me-1"></i>{{ $eventInfo['label'] }}
                                 </span>
-                                <div class="text-secondary small font-monospace mt-1">
-                                    {{ $target ?: 'Sistem' }}
-                                    @if($log->subject_id)
-                                        <span class="text-white-50">#{{ $log->subject_id }}</span>
+                                <div>
+                                    <span class="fw-semibold text-white">
+                                        <i class="bi {{ $targetInfo['icon'] }} me-1" style="color: #c08e5c;"></i>{{ $targetInfo['label'] }}
+                                    </span>
+                                    @if($targetInfo['id'])
+                                        <span class="badge ms-1" style="background-color: #0e1217; border: 1px solid #21262d; color: #c08e5c;">{{ $targetInfo['id'] }}</span>
                                     @endif
                                 </div>
                             </td>
 
-                            <!-- DETAIL PERUBAHAN -->
+                            <!-- DETAIL KETERANGAN -->
                             <td class="pe-4 align-top py-3">
-                                <div class="mb-2 text-light small fw-medium">{{ $log->description }}</div>
-                                
-                                @php
-                                    $hasOld = $log->properties->has('old');
-                                    $hasNew = $log->properties->has('attributes');
-                                    $old = $hasOld ? $log->properties['old'] : [];
-                                    $new = $hasNew ? $log->properties['attributes'] : [];
-                                    
-                                    // Hitung field yang benar-benar mengalami perubahan
-                                    $changedKeys = [];
-                                    if ($log->event === 'updated' && $hasNew) {
-                                        foreach ($new as $k => $v) {
-                                            if ($k === 'updated_at') continue;
-                                            if (array_key_exists($k, $old) && $old[$k] != $v) {
-                                                $changedKeys[] = $k;
-                                            }
-                                        }
-                                    }
-                                @endphp
+                                <!-- Judul Ringkasan Ramah Manusia -->
+                                <div class="text-white fw-medium mb-2" style="font-size: 0.92rem;">
+                                    {{ $friendlyTitle }}
+                                </div>
 
-                                @if($log->event === 'updated' && count($changedKeys) > 0)
-                                    <!-- Visual Diff untuk data Updated -->
-                                    <div class="rounded p-2 border" style="background-color: #090d12; border-color: #21262d !important; font-size: 0.8rem;">
-                                        @foreach($changedKeys as $key)
+                                <!-- Rincian Perubahan (jika ada) -->
+                                @if(count($changedFields) > 0)
+                                    <div class="rounded p-2 mb-2 border" style="background-color: #0e1217; border-color: #21262d !important; font-size: 0.82rem;">
+                                        @foreach($changedFields as $field => $data)
                                             <div class="d-flex align-items-center flex-wrap gap-2 py-1 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color: rgba(255,255,255,0.06) !important;">
-                                                <span class="badge text-secondary font-monospace" style="background-color: #161b22; border: 1px solid #21262d;">{{ $key }}</span>
-                                                <span class="text-danger small font-monospace text-decoration-line-through">
-                                                    {{ is_array($old[$key]) ? json_encode($old[$key]) : ($old[$key] === null ? 'null' : (string)$old[$key]) }}
+                                                <span class="text-secondary fw-semibold">{{ ActivityLogHelper::formatFieldName($field) }}:</span>
+                                                <span class="text-danger small text-decoration-line-through">
+                                                    {{ ActivityLogHelper::formatValue($field, $data['old']) }}
                                                 </span>
                                                 <i class="bi bi-arrow-right text-warning small"></i>
-                                                <span class="text-success small font-monospace fw-bold">
-                                                    {{ is_array($new[$key]) ? json_encode($new[$key]) : ($new[$key] === null ? 'null' : (string)$new[$key]) }}
+                                                <span class="text-success fw-bold small">
+                                                    {{ ActivityLogHelper::formatValue($field, $data['new']) }}
                                                 </span>
                                             </div>
                                         @endforeach
                                     </div>
-                                @elseif($hasOld || $hasNew)
-                                    <!-- Tampilan Attributes / Old Data yang rapi -->
-                                    <div class="rounded p-2 border" style="background-color: #090d12; border-color: #21262d !important;">
-                                        <pre class="mb-0 text-white-50" style="font-family: monospace; font-size: 0.76rem; max-height: 140px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;"><code>{{ json_encode($new ?: $old, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                                @endif
+
+                                <!-- Opsi Tersembunyi: Data Teknis untuk Debugging Developer -->
+                                @if($hasOld || $hasNew)
+                                    <div class="mt-1">
+                                        <button class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" 
+                                                style="font-size: 0.72rem;" 
+                                                type="button" 
+                                                data-bs-toggle="collapse" 
+                                                data-bs-target="#raw-{{ $log->id }}" 
+                                                aria-expanded="false">
+                                            <i class="bi bi-code-slash me-1"></i>Lihat Data Teknis (Dev)
+                                        </button>
+                                        <div class="collapse mt-2" id="raw-{{ $log->id }}">
+                                            <div class="rounded p-2 border" style="background-color: #090d12; border-color: #21262d !important;">
+                                                <pre class="mb-0 text-white-50" style="font-family: monospace; font-size: 0.72rem; max-height: 120px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;"><code>{{ json_encode($log->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                                            </div>
+                                        </div>
                                     </div>
-                                @else
-                                    <span class="text-secondary small fst-italic">Tidak ada metadata tambahan.</span>
                                 @endif
                             </td>
                         </tr>
@@ -146,9 +169,9 @@
                         <tr>
                             <td colspan="4" class="text-center py-5">
                                 <div class="py-4">
-                                    <i class="bi bi-journal-x text-secondary fs-1 d-block mb-2"></i>
-                                    <div class="text-white fw-bold">Belum ada log aktivitas</div>
-                                    <p class="text-secondary small mb-0">Aktivitas sistem dan perubahan data akan tercatat otomatis di sini.</p>
+                                    <i class="bi bi-journal-check text-secondary fs-1 d-block mb-2"></i>
+                                    <div class="text-white fw-bold">Belum ada aktivitas tercatat</div>
+                                    <p class="text-secondary small mb-0">Seluruh transaksi kasir, perubahan stok menu, dan aktivitas staf akan terekam rapi di sini.</p>
                                 </div>
                             </td>
                         </tr>
