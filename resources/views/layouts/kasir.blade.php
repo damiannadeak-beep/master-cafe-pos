@@ -42,32 +42,9 @@
     <script>
         // --- Utility: Fetch Active Orders Count Badge & Smart Auto-Sync ---
         let lastKnownOrderId = null;
+        let lastKnownCount = null;
         let isInitialSync = true;
         let lastNotifiedOrderId = null;
-
-        function refreshOrdersListDirectly() {
-            const container = document.getElementById('active-orders-container');
-            if (!container) {
-                if (window.location.pathname.includes('/pesanan-aktif')) {
-                    location.reload();
-                }
-                return;
-            }
-
-            // Quietly fetch fresh HTML in background and swap cards in 50ms without whole-page reload
-            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(res => res.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newContainer = doc.getElementById('active-orders-container');
-                    if (newContainer && container) {
-                        container.innerHTML = newContainer.innerHTML;
-                        console.log('[UI] Kartu pesanan aktif langsung diperbarui seketika (0 detik jeda reload)!');
-                    }
-                })
-                .catch(() => location.reload());
-        }
 
         function triggerNewOrderNotification(orderId, message) {
             if (orderId && lastNotifiedOrderId === orderId) {
@@ -77,7 +54,7 @@
                 lastNotifiedOrderId = orderId;
             }
 
-            // 1. Play crisp counter bell "Ting" INSTANTLY (0 milidetik)
+            // 1. Play crisp counter bell "Ting" INSTANTLY
             if (window.playDingSound) {
                 window.playDingSound();
             }
@@ -87,14 +64,18 @@
                 window.showToast(message || 'Pesanan baru masuk!', 'success');
             }
 
-            // 3. Update orders list INSTANTLY via AJAX DOM swap (Tanpa jeda reload layar)
-            if (window.location.pathname.includes('/pesanan-aktif')) {
-                refreshOrdersListDirectly();
+            // 3. Auto-reload daftar pesanan aktif
+            if (window.location.pathname.includes('pesanan-aktif')) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             }
         }
 
         function fetchActiveOrdersCount() {
-            fetch('{{ route("kasir.active_orders_count") }}')
+            fetch('{{ route("kasir.active_orders_count") }}?_t=' + Date.now(), {
+                headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+            })
                 .then(response => response.json())
                 .then(data => {
                     const badge = document.getElementById('badge-active-orders');
@@ -105,13 +86,22 @@
                         badge.style.display = 'none';
                     }
 
-                    if (data.latest_id) {
-                        if (!isInitialSync && lastKnownOrderId && data.latest_id > lastKnownOrderId) {
-                            console.log('[Sync] Pesanan baru terdeteksi via auto-sync:', data.latest_id);
-                            triggerNewOrderNotification(data.latest_id, 'Pesanan baru #' + data.latest_id + ' masuk!');
+                    const currentLatestId = parseInt(data.latest_id) || 0;
+                    const currentCount = parseInt(data.count) || 0;
+
+                    if (!isInitialSync) {
+                        // Deteksi jika ada pesanan baru: ID lebih tinggi ATAU jumlah pesanan bertambah
+                        const hasNewOrder = (currentLatestId > 0 && lastKnownOrderId > 0 && currentLatestId > lastKnownOrderId) ||
+                                           (lastKnownCount !== null && currentCount > lastKnownCount);
+
+                        if (hasNewOrder) {
+                            console.log('[Sync] Pesanan baru terdeteksi! ID:', currentLatestId, 'Count:', currentCount);
+                            triggerNewOrderNotification(currentLatestId, 'Pesanan baru masuk!');
                         }
-                        lastKnownOrderId = data.latest_id;
                     }
+
+                    lastKnownOrderId = currentLatestId;
+                    lastKnownCount = currentCount;
                     isInitialSync = false;
                 })
                 .catch(err => console.error(err));
