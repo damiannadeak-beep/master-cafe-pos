@@ -83,14 +83,18 @@
             });
         }
 
-        // --- High-Reliability Bell Synthesizer (Web Audio API) ---
+    <!-- Local Audio Element (Honors Chrome Site Settings 'Sound: Allow') -->
+    <audio id="kasirBellAudio" src="{{ asset('sounds/bell.wav') }}" preload="auto"></audio>
+
+    <script>
+        // --- High-Reliability Local Bell Audio Player ---
+        const bellAudio = document.getElementById('kasirBellAudio');
         let audioCtx = null;
+
         function getAudioContext() {
             if (!audioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    audioCtx = new AudioContextClass();
-                }
+                if (AudioContextClass) audioCtx = new AudioContextClass();
             }
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
@@ -98,57 +102,76 @@
             return audioCtx;
         }
 
-        // Unlock audio context on any user interaction with the page
-        ['click', 'touchstart', 'keydown'].forEach(evt => {
-            document.addEventListener(evt, () => getAudioContext(), { once: false, passive: true });
+        // Auto-unlock audio on any user interaction
+        function primeAudio() {
+            if (bellAudio) {
+                bellAudio.load();
+            }
+            getAudioContext();
+        }
+        ['click', 'pointerdown', 'keydown', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, primeAudio, { once: false, passive: true });
         });
 
-        // Play the iconic cafe counter bell "Ting~~~"
-        window.playDingSound = function(isTest = false) {
-            let played = false;
+        // Web Audio Synthesizer Fallback
+        function playWebAudioChime() {
             try {
                 const ctx = getAudioContext();
-                if (ctx) {
+                if (ctx && ctx.state !== 'suspended') {
                     const now = ctx.currentTime;
-                    // Dual harmonic oscillator for rich bell resonance
                     const osc1 = ctx.createOscillator();
                     const osc2 = ctx.createOscillator();
-                    const gainNode = ctx.createGain();
+                    const gain = ctx.createGain();
 
-                    // Frequencies: High C6 (1046.5 Hz) and C7 shimmer (2093 Hz)
                     osc1.type = 'sine';
                     osc1.frequency.setValueAtTime(1046.5, now);
                     osc2.type = 'sine';
-                    osc2.frequency.setValueAtTime(2093, now);
+                    osc2.frequency.setValueAtTime(2093.0, now);
 
-                    // Bell strike and exponential fade
-                    gainNode.gain.setValueAtTime(0.8, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+                    gain.gain.setValueAtTime(0.9, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
 
-                    osc1.connect(gainNode);
-                    osc2.connect(gainNode);
-                    gainNode.connect(ctx.destination);
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(ctx.destination);
 
                     osc1.start(now);
                     osc2.start(now);
                     osc1.stop(now + 1.4);
                     osc2.stop(now + 1.4);
-                    played = true;
                 }
             } catch (e) {
-                console.warn('[Audio] Web Audio synthesis error:', e);
+                console.warn('[Audio] WebAudio error:', e);
             }
+        }
 
-            // Fallback to HTML5 audio element if Web Audio failed
-            if (!played) {
-                try {
-                    const fallbackAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    fallbackAudio.play().catch(err => console.log('Autoplay audio prevented:', err));
-                } catch (_) {}
+        // Primary Ding Player (Plays local bell.wav, fallback to Web Audio)
+        window.playDingSound = function(isTest = false) {
+            let played = false;
+            try {
+                if (bellAudio) {
+                    bellAudio.currentTime = 0;
+                    const p = bellAudio.play();
+                    if (p !== undefined) {
+                        p.then(() => {
+                            played = true;
+                        }).catch(err => {
+                            console.warn('[Audio] HTML5 play error, trying WebAudio:', err);
+                            playWebAudioChime();
+                        });
+                    } else {
+                        played = true;
+                    }
+                } else {
+                    playWebAudioChime();
+                }
+            } catch (e) {
+                console.warn('[Audio] General error, trying WebAudio:', e);
+                playWebAudioChime();
             }
 
             if (isTest && window.showToast) {
-                window.showToast('🔔 Bunyi "Ting" berhasil diputar! Notifikasi suara aktif.', 'success');
+                window.showToast('🔔 Bunyi "Ting" berhasil diputar!', 'success');
             }
         };
 
