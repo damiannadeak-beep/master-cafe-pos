@@ -3,12 +3,13 @@
 @section('title', 'Log Void Pesanan')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h2 class="fw-bold mb-0 text-white"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Pusat Laporan & Audit</h2>
-        <p class="text-white-50 mb-0">Pantau ringkasan omset penjualan, kehadiran kasir, dan audit transaksi.</p>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Pusat Laporan & Audit</h2>
+            <p class="text-white-50 mb-0">Pantau ringkasan omset penjualan, kehadiran kasir, dan audit transaksi.</p>
+        </div>
     </div>
-</div>
 
 <!-- Tab Navigasi Pusat Laporan -->
 <ul class="nav nav-pills mb-4 border-bottom pb-3 gap-2">
@@ -67,5 +68,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
