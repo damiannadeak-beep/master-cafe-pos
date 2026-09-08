@@ -11,7 +11,7 @@
         </div>
         
         <!-- Search & Filter Controls -->
-        <form action="{{ route('admin.activity_logs') }}" method="GET" class="d-flex align-items-center flex-wrap gap-2 w-100 w-md-auto">
+        <form action="{{ route('admin.activity_logs.index') }}" method="GET" class="d-flex align-items-center flex-wrap gap-2 w-100 w-md-auto">
             <div class="btn-group shadow-sm">
                 <a href="{{ request()->fullUrlWithQuery(['event' => null, 'page' => null]) }}" class="btn btn-sm {{ !request('event') ? 'btn-primary' : 'btn-outline-secondary' }}">Semua</a>
                 <a href="{{ request()->fullUrlWithQuery(['event' => 'created', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'created' ? 'btn-success' : 'btn-outline-secondary' }}">Created</a>
@@ -26,7 +26,7 @@
                 @endif
                 <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
                 @if(request('search') || request('event'))
-                    <a href="{{ route('admin.activity_logs') }}" class="btn btn-outline-danger" title="Reset Filter"><i class="bi bi-x-lg"></i></a>
+                    <a href="{{ route('admin.activity_logs.index') }}" class="btn btn-outline-danger" title="Reset Filter"><i class="bi bi-x-lg"></i></a>
                 @endif
             </div>
         </form>
