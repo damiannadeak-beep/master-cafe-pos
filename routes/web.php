@@ -281,4 +281,32 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// Fallback Route untuk foto profil konsumen (mencegah 404 pada cPanel multi-root)
+Route::get('/uploads/profil/{filename}', function ($filename) {
+    $cleanName = basename($filename);
+    $searchPaths = [
+        public_path('uploads/profil/' . $cleanName),
+        base_path('public/uploads/profil/' . $cleanName),
+        '/home/nadp3189/repositories/master-cafe-pos/public/uploads/profil/' . $cleanName,
+        '/home/nadp3189/public_html/mastercafe.nadeak.net/uploads/profil/' . $cleanName,
+        '/home/nadp3189/public_html/uploads/profil/' . $cleanName,
+    ];
+
+    foreach ($searchPaths as $path) {
+        if (file_exists($path)) {
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $mimeType = match ($ext) {
+                'png' => 'image/png',
+                'webp' => 'image/webp',
+                'gif' => 'image/gif',
+                default => 'image/jpeg',
+            };
+            return response()->file($path, ['Content-Type' => $mimeType]);
+        }
+    }
+
+    $name = auth()->check() ? auth()->user()->name : 'User';
+    return redirect('https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=c08e5c&color=fff&size=120');
+})->where('filename', '[a-zA-Z0-9._-]+');
+
 

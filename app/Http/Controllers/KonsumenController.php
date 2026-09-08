@@ -52,7 +52,7 @@ class KonsumenController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'no_hp' => 'nullable|string|max:15',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
         $data = [
@@ -62,14 +62,60 @@ class KonsumenController extends Controller
         ];
 
         if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($user->foto && file_exists(public_path('uploads/profil/' . $user->foto))) {
-                unlink(public_path('uploads/profil/' . $user->foto));
-            }
-            
             $file = $request->file('foto');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/profil'), $filename);
+            $extension = $file->getClientOriginalExtension() ?: 'jpg';
+            $filename = time() . '_' . uniqid() . '.' . $extension;
+            $content = file_get_contents($file->getRealPath());
+
+            // Tulis secara fisik ke seluruh lokasi uploads profil cPanel & lokal
+            $destinations = [
+                public_path('uploads/profil/' . $filename),
+            ];
+
+            if (isset($_SERVER['DOCUMENT_ROOT'])) {
+                $destinations[] = rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/uploads/profil/' . $filename;
+            }
+
+            $homeDir = env('HOME') ?: getenv('HOME') ?: '/home/nadp3189';
+            if ($homeDir) {
+                $destinations[] = $homeDir . '/public_html/mastercafe.nadeak.net/uploads/profil/' . $filename;
+                $destinations[] = $homeDir . '/public_html/uploads/profil/' . $filename;
+                $destinations[] = $homeDir . '/repositories/master-cafe-pos/public/uploads/profil/' . $filename;
+            }
+
+            foreach (array_unique($destinations) as $dest) {
+                try {
+                    $dir = dirname($dest);
+                    if (!is_dir($dir)) {
+                        @mkdir($dir, 0755, true);
+                    }
+                    @file_put_contents($dest, $content);
+                    @chmod($dest, 0644);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Gagal menyimpan foto profil ke {$dest}: " . $e->getMessage());
+                }
+            }
+
+            // Hapus foto lama jika ada di seluruh destinasi
+            if ($user->foto) {
+                $oldDests = [
+                    public_path('uploads/profil/' . $user->foto),
+                ];
+                if (isset($_SERVER['DOCUMENT_ROOT'])) {
+                    $oldDests[] = rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/uploads/profil/' . $user->foto;
+                }
+                if ($homeDir) {
+                    $oldDests[] = $homeDir . '/public_html/mastercafe.nadeak.net/uploads/profil/' . $user->foto;
+                    $oldDests[] = $homeDir . '/public_html/uploads/profil/' . $user->foto;
+                    $oldDests[] = $homeDir . '/repositories/master-cafe-pos/public/uploads/profil/' . $user->foto;
+                }
+                foreach (array_unique($oldDests) as $oldFile) {
+                    if (file_exists($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
+            }
+
             $data['foto'] = $filename;
         }
 

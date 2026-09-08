@@ -69,9 +69,16 @@
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle fw-bold text-light d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     @if(Auth::user()->foto)
-                                        <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" alt="Foto" class="rounded-circle me-2 border border-primary" style="width: 32px; height: 32px; object-fit: cover;">
+                                        <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" 
+                                             alt="Foto" 
+                                             class="rounded-circle me-2" 
+                                             style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #c08e5c;"
+                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=c08e5c&color=fff&size=64';">
                                     @else
-                                        <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=c08e5c&color=fff&size=64" 
+                                             alt="Avatar" 
+                                             class="rounded-circle me-2" 
+                                             style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #c08e5c;">
                                     @endif
                                     {{ Auth::user()->name }}
                                 </a>

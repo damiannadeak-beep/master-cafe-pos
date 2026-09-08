@@ -5,14 +5,14 @@
     
     <div class="row mb-4">
         <div class="col-md-8 mx-auto text-center">
-            @if($user->foto)
-                <img src="{{ asset('uploads/profil/' . $user->foto) }}" alt="Foto Profil" class="rounded-circle mb-3 border border-4 border-white shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
-            @else
-                <div class="d-inline-block text-white p-3 rounded-circle mb-3" style="width: 100px; height: 100px; line-height: 70px;">
-                    <i class="bi bi-person-fill" style="font-size: 3rem;"></i>
-                </div>
-            @endif
-            <h2 class="fw-bold text-white" style="font-family: 'Rye', serif;">Halo, {{ $user->name }}!</h2>
+            <div class="mb-3 d-inline-block position-relative">
+                <img src="{{ $user->foto ? asset('uploads/profil/' . $user->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=c08e5c&color=fff&size=120' }}" 
+                     alt="Foto Profil" 
+                     class="rounded-circle border border-4 shadow-sm" 
+                     style="width: 100px; height: 100px; object-fit: cover; border-color: #c08e5c !important;"
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=c08e5c&color=fff&size=120';">
+            </div>
+            <h2 class="fw-bold text-white" style="font-family: 'Outfit', sans-serif !important;">Halo, {{ $user->name }}!</h2>
             <p class="text-secondary">Kelola profil dan pantau status pesanan Anda di sini.</p>
         </div>
     </div>
@@ -42,7 +42,7 @@
     <div class="row">
         <div class="col-md-10 mx-auto">
             <div class="card border-0 shadow-sm overflow-hidden rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                <div class="card-header  border-bottom-0 p-0">
+                <div class="card-header border-bottom-0 p-0">
                     <ul class="nav nav-pills nav-justified" id="pills-tab" role="tablist" style="border-bottom: 2px solid #21262d;">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link d-flex justify-content-center align-items-center active rounded-0 fw-bold py-3" id="pills-aktif-tab" data-bs-toggle="pill" data-bs-target="#pills-aktif" type="button" role="tab" style="border-bottom: 3px solid transparent;">
@@ -50,12 +50,12 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-riwayat-tab" data-bs-toggle="pill" data-bs-target="#pills-riwayat" type="button" role="tab" style="border-bottom: 3px solid transparent;" onclick="this.classList.remove('text-secondary'); d-flex justify-content-center align-items-center">
+                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-riwayat-tab" data-bs-toggle="pill" data-bs-target="#pills-riwayat" type="button" role="tab" style="border-bottom: 3px solid transparent;">
                                 <i class="bi bi-clock-history me-2"></i>Riwayat
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-profil-tab" data-bs-toggle="pill" data-bs-target="#pills-profil" type="button" role="tab" style="border-bottom: 3px solid transparent;" onclick="this.classList.remove('text-secondary'); d-flex justify-content-center align-items-center">
+                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-profil-tab" data-bs-toggle="pill" data-bs-target="#pills-profil" type="button" role="tab" style="border-bottom: 3px solid transparent;">
                                 <i class="bi bi-gear me-2"></i>Profil
                             </button>
                         </li>
@@ -135,7 +135,6 @@
         background-color: #0e1217 !important;
         color: white !important;
     }
-    . { background-color: #0e1217 !important; }
 </style>
 
 <script>

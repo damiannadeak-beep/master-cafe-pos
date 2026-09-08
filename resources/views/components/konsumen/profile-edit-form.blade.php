@@ -2,8 +2,16 @@
                                                 @csrf
                                                 <div class="mb-5 text-center">
                                                     <div class="position-relative d-inline-block shadow-sm rounded-circle" style="width: 120px; height: 120px;">
-                                                        <img id="foto-preview" src="{{ $user->foto ? asset('uploads/profil/' . $user->foto) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random&color=fff&size=120' }}" alt="Foto Profil" class="rounded-circle border border-4 border-white" style="width: 120px; height: 120px; object-fit: cover; cursor: pointer;" onclick="document.getElementById('foto-input').click();">
-                                                        <div class="position-absolute bottom-0 end-0 text-white rounded-circle d-flex align-items-center justify-content-center border border-2 border-white" style="background: var(--gradient-bronze); width: 35px; height: 35px; cursor: pointer; transform: translate(10%, 10%);" onclick="document.getElementById('foto-input').click();">
+                                                        <img id="foto-preview" 
+                                                             src="{{ $user->foto ? asset('uploads/profil/' . $user->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=c08e5c&color=fff&size=120' }}" 
+                                                             alt="Foto Profil" 
+                                                             class="rounded-circle border border-4" 
+                                                             style="width: 120px; height: 120px; object-fit: cover; cursor: pointer; border-color: #c08e5c !important;" 
+                                                             onclick="document.getElementById('foto-input').click();"
+                                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=c08e5c&color=fff&size=120';">
+                                                        <div class="position-absolute bottom-0 end-0 text-white rounded-circle d-flex align-items-center justify-content-center border border-2 border-dark" 
+                                                             style="background: var(--gradient-bronze); width: 36px; height: 36px; cursor: pointer; transform: translate(5%, 5%);" 
+                                                             onclick="document.getElementById('foto-input').click();" title="Ganti Foto">
                                                             <i class="bi bi-camera-fill"></i>
                                                         </div>
                                                     </div>
