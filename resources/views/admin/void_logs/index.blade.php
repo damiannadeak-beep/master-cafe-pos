@@ -3,10 +3,31 @@
 @section('title', 'Log Void Pesanan')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Riwayat Void Pesanan</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold mb-0 text-white"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Pusat Laporan & Audit</h2>
+        <p class="text-white-50 mb-0">Pantau ringkasan omset penjualan, kehadiran kasir, dan audit transaksi.</p>
     </div>
+</div>
+
+<!-- Tab Navigasi Pusat Laporan -->
+<ul class="nav nav-pills mb-4 border-bottom pb-3 gap-2">
+    <li class="nav-item">
+        <a class="nav-link text-white-50" href="{{ route('admin.reports.index') }}">
+            <i class="bi bi-bar-chart-fill me-1"></i> Laporan Penjualan
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-white-50" href="{{ route('admin.absensi.index') }}">
+            <i class="bi bi-calendar-check-fill me-1"></i> Absensi Kasir
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{{ route('admin.void_logs.index') }}">
+            <i class="bi bi-journal-x me-1"></i> Audit Void Kasir
+        </a>
+    </li>
+</ul>
 
     <div class="card shadow mb-4 border-0">
         <div class="card-header py-3 text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" border-bottom-0">

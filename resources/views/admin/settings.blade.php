@@ -310,6 +310,34 @@
                     </form>
                 </div>
             </div>
+        <!-- Kolom Backup & Pemeliharaan Database -->
+        <div class="col-12 mt-4">
+            <div class="card admin-card border-0 shadow-sm">
+                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #161b22; border: 1px solid #21262d !important;">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-shield-check me-2 text-info"></i>Cadangan & Pemeliharaan Database</h5>
+                    <a href="{{ route('admin.backups.index') }}" class="btn btn-sm btn-info text-white fw-bold">
+                        <i class="bi bi-folder2-open me-1"></i> Buka Manajemen File Backup
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="text-white-50 mb-1">
+                                Backup database otomatis dijalankan oleh server setiap hari pukul <strong>03:00 pagi</strong>. Anda juga dapat membuat file cadangan secara instan kapan saja untuk mengamankan data transaksi dan master cafe.
+                            </p>
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> File cadangan tersimpan rapi dan dapat langsung diunduh ke laptop/HP Anda.</small>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <form action="{{ route('admin.backups.run') }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-info fw-bold shadow-sm" onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Memproses...'; this.form.submit();">
+                                    <i class="bi bi-play-circle me-1"></i> Backup Sekarang
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

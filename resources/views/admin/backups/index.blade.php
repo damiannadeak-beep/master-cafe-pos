@@ -10,12 +10,17 @@
                 <h4 class="fw-bold text-accent"><i class="bi bi-shield-check me-2"></i>Backup Database</h4>
                 <p class="text-white-50 mb-0">Kelola cadangan data Anda. Backup otomatis berjalan setiap jam 03:00 pagi.</p>
             </div>
-            <form action="{{ route('admin.backups.run') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Memproses...'; this.form.submit();">
-                    <i class="bi bi-play-circle me-2"></i>Backup Sekarang
-                </button>
-            </form>
+            <div class="d-flex gap-2 align-items-center">
+                <a href="{{ route('admin.settings') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Ke Pengaturan
+                </a>
+                <form action="{{ route('admin.backups.run') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\'></span>Memproses...'; this.form.submit();">
+                        <i class="bi bi-play-circle me-2"></i>Backup Sekarang
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

@@ -1,12 +1,31 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <h2 class="fw-bold mb-0 text-white"><i class="bi bi-calendar-check-fill text-danger me-2"></i> Laporan Absensi Kasir</h2>
-        <p class="text-white-50 mb-0">Pantau kehadiran kasir berdasarkan shift dan lokasi GPS.</p>
+        <h2 class="fw-bold mb-0 text-white"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Pusat Laporan & Audit</h2>
+        <p class="text-white-50 mb-0">Pantau ringkasan omset penjualan, kehadiran kasir, dan audit transaksi.</p>
     </div>
 </div>
+
+<!-- Tab Navigasi Pusat Laporan -->
+<ul class="nav nav-pills mb-4 border-bottom pb-3 gap-2">
+    <li class="nav-item">
+        <a class="nav-link text-white-50" href="{{ route('admin.reports.index') }}">
+            <i class="bi bi-bar-chart-fill me-1"></i> Laporan Penjualan
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{{ route('admin.absensi.index') }}">
+            <i class="bi bi-calendar-check-fill me-1"></i> Absensi Kasir
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-white-50" href="{{ route('admin.void_logs.index') }}">
+            <i class="bi bi-journal-x me-1"></i> Audit Void Kasir
+        </a>
+    </li>
+</ul>
 
 <div class="card admin-card border-0 shadow-sm mb-4">
     @if(session('success'))
