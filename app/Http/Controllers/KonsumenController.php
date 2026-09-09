@@ -128,25 +128,43 @@ class KonsumenController extends Controller
     {
         $request->validate([
             'id_pesanan' => 'required|exists:pesanan,id',
+            'order_token' => 'nullable|string',
             'rating' => 'required|integer|min:1|max:5',
-            'komentar' => 'nullable|string'
+            'komentar' => 'nullable|string|max:500'
         ]);
 
-        // FIX #10: Validasi ownership — pastikan pesanan ini milik konsumen yang login
         $pesanan = \App\Models\Pesanan::findOrFail($request->id_pesanan);
-        if ($pesanan->id_konsumen != auth()->id()) {
+        $token = $request->input('order_token') ?? $request->query('token') ?? session('order_token');
+
+        $isAuthorized = false;
+        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
+            $isAuthorized = true;
+        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
+            $isAuthorized = true;
+        } elseif (!$pesanan->id_konsumen && session('active_order_id') == $pesanan->id) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Anda tidak berhak memberikan rating untuk pesanan ini.'], 403);
+            }
             return back()->withErrors(['id_pesanan' => 'Anda tidak berhak memberikan rating untuk pesanan ini.']);
         }
 
         Rating::updateOrCreate(
             ['id_pesanan' => $request->id_pesanan],
             [
-                'id_konsumen' => auth()->id(),
+                'id_konsumen' => auth()->id() ?? null,
                 'rating' => $request->rating,
                 'komentar' => $request->komentar,
                 'tanggal' => now(),
             ]
         );
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['message' => 'Terima kasih atas ulasan Anda!']);
+        }
 
         return back()->with('success', 'Terima kasih atas ulasan Anda!');
     }

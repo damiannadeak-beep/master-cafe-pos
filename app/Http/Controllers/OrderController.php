@@ -274,5 +274,51 @@ class OrderController extends Controller
 
         return [$promos, $promoMenuIds];
     }
+
+    /**
+     * Halaman Live Tracking Pesanan Tamu / Konsumen via order_token
+     */
+    public function tracking($order_token)
+    {
+        $pesanan = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
+            ->where('order_token', $order_token)
+            ->firstOrFail();
+
+        $pembayaran = $pesanan->pembayaran;
+        $meja = $pesanan->meja;
+
+        return view('konsumen.tracking', compact('pesanan', 'pembayaran', 'meja'));
+    }
+
+    /**
+     * Unduh / Cetak Struk Digital untuk Tamu
+     */
+    public function downloadReceipt($order_token)
+    {
+        $order = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'kasir'])
+            ->where('order_token', $order_token)
+            ->firstOrFail();
+
+        return view('kasir.receipt', compact('order'));
+    }
+
+    /**
+     * API Status Pesanan Real-Time Polling Fallback (JSON)
+     */
+    public function getOrderStatus($order_token)
+    {
+        $pesanan = Pesanan::with(['pembayaran'])
+            ->where('order_token', $order_token)
+            ->firstOrFail();
+
+        return response()->json([
+            'id' => $pesanan->id,
+            'status' => $pesanan->status,
+            'payment_status' => $pesanan->pembayaran?->status ?? 'unpaid',
+            'payment_method' => $pesanan->pembayaran?->metode ?? '-',
+            'total' => $pesanan->total,
+            'updated_at' => $pesanan->updated_at->toIso8601String(),
+        ]);
+    }
 }
 

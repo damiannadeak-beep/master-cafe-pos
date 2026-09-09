@@ -295,6 +295,12 @@ Route::group([], function () {
     // Rating & Review (Guest or Registered)
     Route::post('/rating/store', [KonsumenController::class, 'storeRating'])->name('konsumen.rating.store');
     Route::post('/konsumen/rating/store', [KonsumenController::class, 'storeRating']);
+
+    // Live Tracking, Status & E-Receipt Pesanan Tamu
+    Route::get('/tracking/{order_token}', [OrderController::class, 'tracking'])->name('order.tracking');
+    Route::get('/konsumen/tracking/{order_token}', [OrderController::class, 'tracking']);
+    Route::get('/tracking/{order_token}/receipt', [OrderController::class, 'downloadReceipt'])->name('order.receipt');
+    Route::get('/api/tracking/{order_token}/status', [OrderController::class, 'getOrderStatus'])->name('order.status.api');
 });
 
 // Fallback Route untuk foto profil konsumen (mencegah 404 pada cPanel multi-root)
