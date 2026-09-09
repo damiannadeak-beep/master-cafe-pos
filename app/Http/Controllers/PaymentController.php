@@ -49,7 +49,63 @@ class PaymentController extends Controller
             return redirect()->back()->with('error', 'Pesanan ini sudah lunas.');
         }
 
-        return view('konsumen.checkout', compact('pesanan', 'pembayaran'));
+        // Generate Midtrans Snap Token jika Server Key valid
+        $snapToken = $pembayaran->snap_token;
+        $clientKey = Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey'));
+        $serverKey = Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey'));
+        $isProduction = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction')) == '1';
+
+        \Midtrans\Config::$serverKey = $serverKey;
+        \Midtrans\Config::$isProduction = $isProduction;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        if (empty($snapToken) && !empty($serverKey) && !str_contains($serverKey, 'xxxxxx')) {
+            try {
+                $itemDetails = [];
+                foreach ($pesanan->detail_pesanan as $detail) {
+                    $itemDetails[] = [
+                        'id' => (string) $detail->id_menu,
+                        'price' => (int) round($detail->subtotal / max(1, $detail->jumlah)),
+                        'quantity' => (int) $detail->jumlah,
+                        'name' => mb_substr($detail->menu->nama_menu ?? 'Item Menu', 0, 50),
+                    ];
+                }
+
+                if ($pesanan->discount_amount > 0) {
+                    $itemDetails[] = [
+                        'id' => 'DISCOUNT',
+                        'price' => -(int) $pesanan->discount_amount,
+                        'quantity' => 1,
+                        'name' => 'Diskon Promo',
+                    ];
+                }
+
+                $customerName = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu Master Cafe');
+                $customerEmail = $pesanan->konsumen?->email ?? 'guest@mastercafe.local';
+
+                $midtransParams = [
+                    'transaction_details' => [
+                        'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
+                        'gross_amount' => (int) $pembayaran->total_bayar,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $customerName,
+                        'email' => $customerEmail,
+                    ],
+                    'item_details' => $itemDetails,
+                    'enabled_payments' => ['qris', 'gopay', 'shopeepay'],
+                ];
+
+                $snapToken = \Midtrans\Snap::getSnapToken($midtransParams);
+                $pembayaran->update(['snap_token' => $snapToken]);
+            } catch (\Throwable $e) {
+                Log::warning('[PaymentController] Midtrans getSnapToken notice: ' . $e->getMessage());
+                $snapToken = null;
+            }
+        }
+
+        return view('konsumen.checkout', compact('pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction'));
     }
 
     public function uploadBukti(Request $request, $id_pesanan)
@@ -100,7 +156,7 @@ class PaymentController extends Controller
 
     public function webhook(Request $request)
     {
-        // 1. Validasi Signature Key (Wajib untuk Keamanan Production)
+        // 1. Validasi Signature Key
         $serverKey = Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey'));
         $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
         
@@ -108,12 +164,14 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Invalid Signature'], 403);
         }
 
-        // 2. Ekstrak ID Pesanan dari order_id (ORDER-{id}-{time})
+        // 2. Ekstrak ID Pesanan dari order_id (ORDER-{id}-{time} atau {id})
         $orderIdParts = explode('-', $request->order_id);
-        $id_pesanan = $orderIdParts[1];
+        $id_pesanan = isset($orderIdParts[1]) ? $orderIdParts[1] : $orderIdParts[0];
 
         $pembayaran = Pembayaran::where('id_pesanan', $id_pesanan)->first();
         if (!$pembayaran) return response()->json(['message' => 'Not Found'], 404);
+
+        $pesanan = Pesanan::with(['meja', 'konsumen'])->find($id_pesanan);
 
         // 3. Update Status Berdasarkan Midtrans
         $transactionStatus = $request->transaction_status;
@@ -121,18 +179,30 @@ class PaymentController extends Controller
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             $pembayaran->update([
                 'status' => 'paid',
-                'metode' => $request->payment_type == 'qris' ? 'qris' : 'cash', // Sesuaikan
+                'metode' => $request->payment_type == 'qris' ? 'qris' : 'cash',
                 'tanggal' => now()
             ]);
             
-            
-            // Opsional: Update status pesanan langsung ke 'processing'
-            Pesanan::where('id', $id_pesanan)->update(['status' => 'processing']);
+            if ($pesanan) {
+                $pesanan->update(['status' => 'processing']);
+
+                // Trigger WebSocket Event (Reverb) ke POS Kasir & Layar Monitor Meja
+                try {
+                    broadcast(new \App\Events\PesananBaru($pesanan));
+
+                    if ($pesanan->id_meja && $pesanan->meja) {
+                        broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('[Midtrans Webhook] Gagal broadcast WebSocket: ' . $e->getMessage());
+                }
+            }
 
             // Beri notifikasi ke kasir
+            $namaKonsumen = $pesanan ? $pesanan->customer_name : 'Tamu';
             \App\Models\Notification::create([
                 'type' => 'new_order',
-                'message' => 'Pesanan Baru (Midtrans): Order #' . $id_pesanan . ' telah LUNAS.',
+                'message' => 'Pesanan Lunas QRIS: Order #' . $id_pesanan . ' (' . $namaKonsumen . ') telah lunas.',
                 'is_read' => false
             ]);
 
@@ -140,19 +210,11 @@ class PaymentController extends Controller
             $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->get();
             \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
                 'Pesanan Lunas (Midtrans)',
-                'Order #' . $id_pesanan . ' telah dibayar lunas via Midtrans.',
-                '/kasir/pesanan-aktif'
+                'Order #' . $id_pesanan . ' (' . $namaKonsumen . ') telah dibayar lunas via QRIS.',
+                '/kasir/pos'
             ));
 
-            $pesanan = Pesanan::with('konsumen')->find($id_pesanan);
-            if ($pesanan && $pesanan->konsumen) {
-                // Notify Customer via Web Push
-                $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
-                    'Pembayaran Berhasil!',
-                    'Pembayaran untuk Order #' . $pesanan->id . ' telah berhasil.',
-                    '/konsumen/profil'
-                ));
-            }
+            // Kirim E-Receipt ke email jika ada
             if ($pesanan && $pesanan->konsumen && $pesanan->konsumen->email) {
                 try {
                     Mail::to($pesanan->konsumen->email)->send(new ReceiptMail($pesanan));
@@ -162,8 +224,6 @@ class PaymentController extends Controller
             }
             
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
-            // Mengembalikan stok karena pembayaran gagal/batal
-            $pesanan = Pesanan::find($id_pesanan);
             if ($pesanan) {
                 $pesanan->cancelOrder();
             }
