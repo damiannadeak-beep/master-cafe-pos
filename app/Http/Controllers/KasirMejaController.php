@@ -12,7 +12,12 @@ class KasirMejaController extends Controller
      */
     public function index()
     {
-        $mejas = Meja::all();
+        $mejas = Meja::with(['pesanan' => function ($q) {
+            $q->whereIn('status', ['pending', 'processing', 'ready'])
+              ->with(['konsumen', 'pembayaran', 'detailPesanan.menu'])
+              ->latest();
+        }])->orderBy('nama_meja_atau_nomor')->get();
+
         return view('kasir.meja.index', compact('mejas'));
     }
 

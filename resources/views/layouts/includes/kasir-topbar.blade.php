@@ -50,7 +50,7 @@
                                 <li><hr class="dropdown-divider border-secondary"></li>
                                 <li>
                                     <a class="dropdown-item text-white d-flex align-items-center {{ request()->routeIs('kasir.meja.*') ? 'active' : '' }}" href="{{ route('kasir.meja.index') }}">
-                                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> Manajemen Meja
+                                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> Monitor Meja
                                     </a>
                                 </li>
                                 <li>
