@@ -8,7 +8,7 @@ class TambahPesananRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        return true;
     }
 
     public function rules(): array
@@ -16,6 +16,7 @@ class TambahPesananRequest extends FormRequest
         return [
             'id_meja' => 'nullable|integer',
             'tipe_pesanan' => 'nullable|in:dine_in,takeaway',
+            'guest_name' => 'nullable|string|max:100',
             'items' => 'required|array',
             'items.*.id_menu' => 'required|exists:menu,id',
             'items.*.jumlah' => 'required|integer|min:1',

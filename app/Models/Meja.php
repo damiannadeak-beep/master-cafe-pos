@@ -9,6 +9,11 @@ class Meja extends Model
     protected $table = 'meja';
     protected $fillable = ['nama_meja_atau_nomor', 'is_available', 'qr_code'];
 
+    public function getNomorMejaAttribute()
+    {
+        return $this->nama_meja_atau_nomor;
+    }
+
     public function pesanan()
     {
         return $this->hasMany(Pesanan::class, 'id_meja');

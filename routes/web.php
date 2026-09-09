@@ -253,25 +253,48 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/shift/tutup', [\App\Http\Controllers\ShiftController::class, 'storeTutupShift'])->name('kasir.shift.storeTutup');
     });
 
-    // Role: Konsumen
-    Route::middleware(['role:konsumen', 'verified'])->prefix('konsumen')->group(function () {
-        // Fitur Pemesanan via QR / Konsumen login
-        Route::get('/pilih-tipe', [OrderController::class, 'pilihTipePesanan'])->name('pilih_tipe');
-        Route::get('/menu', [OrderController::class, 'pilihMeja'])->name('pilih_meja');
-        Route::get('/menu-takeaway', [OrderController::class, 'menuTakeaway'])->name('menu_takeaway');
-        Route::get('/menu-nanti', [OrderController::class, 'menuNanti'])->name('menu_nanti');
-        Route::get('/menu/{id_meja}', [OrderController::class, 'showMenu'])->name('konsumen.menu.meja')->middleware('signed');
-        Route::post('/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
-        Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
-        Route::get('/checkout/{id_pesanan}', [PaymentController::class, 'checkout']);
-        Route::post('/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
-        Route::post('/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');
-        
-        // Fitur Baru: Profil, Riwayat & Rating
+    // Role: Konsumen (Akun Terdaftar)
+    Route::middleware(['role:konsumen'])->prefix('konsumen')->group(function () {
         Route::get('/profil', [KonsumenController::class, 'index']);
         Route::post('/profil/update', [KonsumenController::class, 'updateProfil']);
-        Route::post('/rating/store', [KonsumenController::class, 'storeRating']);
     });
+});
+
+// =========================================================================
+// AREA PEMESANAN MEJA GUEST (DINE-IN TANPA LOGIN / PUBLIC ORDERING)
+// =========================================================================
+Route::group([], function () {
+    // Akses Menu Meja via QR Code (Signed URL mencegah manipulasi nomor meja)
+    Route::get('/konsumen/menu/{id_meja}', [OrderController::class, 'showMenu'])->name('konsumen.menu.meja')->middleware('signed');
+    Route::get('/menu/{id_meja}', [OrderController::class, 'showMenu'])->middleware('signed');
+    
+    // Pemilihan Tipe & Info
+    Route::get('/konsumen/pilih-tipe', [OrderController::class, 'pilihTipePesanan'])->name('pilih_tipe');
+    Route::get('/konsumen/menu', [OrderController::class, 'pilihMeja'])->name('pilih_meja');
+    Route::get('/konsumen/menu-takeaway', [OrderController::class, 'menuTakeaway'])->name('menu_takeaway');
+    Route::get('/konsumen/menu-nanti', [OrderController::class, 'menuNanti'])->name('menu_nanti');
+
+    // Tambah Pesanan (Dine-in Guest / Konsumen)
+    Route::post('/konsumen/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
+    Route::post('/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
+
+    // Pembatalan Pesanan Sebelum Diproses
+    Route::post('/konsumen/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
+    Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
+
+    // Checkout & Pembayaran
+    Route::get('/konsumen/checkout/{id_pesanan}', [PaymentController::class, 'checkout'])->name('konsumen.checkout');
+    Route::get('/checkout/{id_pesanan}', [PaymentController::class, 'checkout']);
+    Route::post('/konsumen/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
+    Route::post('/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
+
+    // Panggil Pelayan (Call Bell) dari Meja
+    Route::post('/konsumen/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');
+    Route::post('/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');
+
+    // Rating & Review (Guest or Registered)
+    Route::post('/rating/store', [KonsumenController::class, 'storeRating'])->name('konsumen.rating.store');
+    Route::post('/konsumen/rating/store', [KonsumenController::class, 'storeRating']);
 });
 
 // Fallback Route untuk foto profil konsumen (mencegah 404 pada cPanel multi-root)

@@ -363,24 +363,71 @@
         document.getElementById('cart-qty').innerText = qty + ' Item';
     }
 
-    function submitCustomerOrder() {
-        if (cart.length === 0) return alert('Silakan pilih menu terlebih dahulu!');
-        if (!confirm('Apakah pesanan Anda sudah benar?')) return;
-        proceedToCheckout();
+    function openConfirmOrderModal() {
+        if (cart.length === 0) {
+            alert('Keranjang belanja masih kosong. Silakan pilih menu terlebih dahulu!');
+            return;
+        }
+
+        const inputName = document.getElementById('inputGuestName');
+        if (inputName && !inputName.value) {
+            const savedName = localStorage.getItem('master_cafe_guest_name');
+            if (savedName) inputName.value = savedName;
+        }
+
+        const modalQty = document.getElementById('modal-summary-qty');
+        const modalTotal = document.getElementById('modal-summary-total');
+        if (modalQty && document.getElementById('cart-qty')) {
+            modalQty.innerText = document.getElementById('cart-qty').innerText;
+        }
+        if (modalTotal && document.getElementById('cart-total')) {
+            modalTotal.innerHTML = document.getElementById('cart-total').innerHTML;
+        }
+
+        const modalEl = document.getElementById('modalConfirmGuestOrder');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        } else {
+            proceedToCheckout();
+        }
     }
 
-    function proceedToCheckout() {
+    function submitCustomerOrder() {
+        if (cart.length === 0) return alert('Silakan pilih menu terlebih dahulu!');
+        
+        const inputName = document.getElementById('inputGuestName');
+        let guestName = inputName ? inputName.value.trim() : '';
+
+        if (!guestName) {
+            alert('Mohon masukkan Nama Pemesan / Panggilan untuk memudahkan pelayan mengantar pesanan.');
+            if (inputName) inputName.focus();
+            return;
+        }
+
+        localStorage.setItem('master_cafe_guest_name', guestName);
+        proceedToCheckout(guestName);
+    }
+
+    function proceedToCheckout(guestName) {
+        const btnSubmit = document.getElementById('btnSubmitFinalOrder');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+        }
+
         let formData = {
             _token: "{{ csrf_token() }}",
             tipe_pesanan: '{{ $orderType ?? "dine_in" }}',
             @if(isset($meja))
             id_meja: "{{ $meja->id }}",
             @endif
+            guest_name: guestName || localStorage.getItem('master_cafe_guest_name') || 'Tamu',
             promo_id: document.getElementById('promo_id') ? document.getElementById('promo_id').value : null,
             items: cart
         };
 
-                fetch("{{ url('/konsumen/order/add') }}", {
+        fetch("{{ url('/konsumen/order/add') }}", {
             method: "POST",
             headers: { 
                 "Content-Type": "application/json",
@@ -397,11 +444,39 @@
         .then(data => {
             if (data.error) {
                 alert(data.error);
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+                }
             } else {
-                window.location.href = "/konsumen/checkout/" + data.id_pesanan;
+                // Simpan metadata pesanan aktif ke LocalStorage (TTL 12 Jam)
+                if (data.order_token) {
+                    const guestOrder = {
+                        token: data.order_token,
+                        id_pesanan: data.id_pesanan,
+                        guest_name: data.guest_name,
+                        id_meja: "{{ $meja->id ?? '' }}",
+                        created_at: Date.now(),
+                        expires_at: Date.now() + (12 * 60 * 60 * 1000)
+                    };
+                    localStorage.setItem('active_guest_order', JSON.stringify(guestOrder));
+                }
+
+                // Redirect ke Checkout atau Tracking
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else if (data.tracking_url) {
+                    window.location.href = data.tracking_url;
+                } else {
+                    window.location.href = "/konsumen/checkout/" + data.id_pesanan;
+                }
             }
         })
         .catch(err => {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+            }
             if (err.errors) {
                 let msg = "";
                 for (let key in err.errors) {

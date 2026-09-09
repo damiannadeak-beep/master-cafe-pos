@@ -57,8 +57,8 @@
                             <small>Bukti pembayaran Anda sedang dicek oleh kasir. Silakan tunggu di meja Anda.</small>
                         </div>
                         <div class="d-grid mt-4">
-                            <a href="{{ url('/konsumen/profil') }}" class="btn btn-outline-secondary btn-lg fw-bold rounded-pill btn-touch">
-                                Kembali ke Profil <i class="bi bi-arrow-right ms-2"></i>
+                            <a href="{{ $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : (auth()->check() ? url('/konsumen/profil') : url('/')) }}" class="btn btn-outline-secondary btn-lg fw-bold rounded-pill btn-touch">
+                                Lihat Status Pesanan <i class="bi bi-arrow-right ms-2"></i>
                             </a>
                         </div>
                     @else
@@ -70,8 +70,11 @@
                         </div>
 
                         <!-- Form Upload Bukti -->
-                        <form action="{{ url('konsumen/order/' . $pesanan->id . '/upload-bukti') }}" method="POST" enctype="multipart/form-data" id="form-upload">
+                        <form action="{{ url('konsumen/order/' . $pesanan->id . '/upload-bukti' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST" enctype="multipart/form-data" id="form-upload">
                             @csrf
+                            @if($pesanan->order_token)
+                                <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
+                            @endif
                             <label class="form-label text-secondary fw-bold small">Unggah Bukti Transfer</label>
                             
                             <div class="upload-container mb-3" id="upload-box" onclick="document.getElementById('bukti_bayar').click()">
@@ -93,7 +96,9 @@
                                 <button type="submit" id="btn-submit" class="btn btn-lg fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none;" disabled>
                                     Kirim Bukti Pembayaran <i class="bi bi-send ms-2"></i>
                                 </button>
-                                <a href="{{ url('/konsumen/profil') }}" class="btn btn-outline-secondary rounded-pill fw-bold">Bayar Langsung di Kasir</a>
+                                <a href="{{ $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : (auth()->check() ? url('/konsumen/profil') : url('/')) }}" class="btn btn-outline-secondary rounded-pill fw-bold">
+                                    Bayar Nanti di Kasir
+                                </a>
                             </div>
                         </form>
                     @endif

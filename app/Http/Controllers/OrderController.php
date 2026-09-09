@@ -86,9 +86,20 @@ class OrderController extends Controller
                 $id_meja = null;
             }
 
+            // Tentukan Nama Tamu / Konsumen
+            $mejaModel = $id_meja ? Meja::find($id_meja) : null;
+            $guestName = !empty($validated['guest_name']) ? trim($validated['guest_name']) : null;
+            if (empty($guestName)) {
+                $guestName = auth()->check() ? auth()->user()->name : ($mejaModel ? ('Tamu ' . $mejaModel->nama_meja_atau_nomor) : 'Tamu');
+            }
+
+            $orderToken = (string) \Illuminate\Support\Str::uuid();
+
             // Buat Pesanan & Pembayaran Baru
             $pesanan = Pesanan::create([
                 'id_konsumen' => auth()->id(),
+                'guest_name' => $guestName,
+                'order_token' => $orderToken,
                 'id_meja' => $id_meja,
                 'tipe_pesanan' => $tipe_pesanan,
                 'tanggal' => now(),
@@ -100,8 +111,8 @@ class OrderController extends Controller
                 'status' => 'unpaid'
             ]);
 
-            if ($id_meja && $tipe_pesanan === 'dine_in') {
-                Meja::where('id', $id_meja)->update(['is_available' => false]);
+            if ($id_meja && $tipe_pesanan === 'dine_in' && $mejaModel) {
+                $mejaModel->update(['is_available' => false]);
             }
 
             // Proses item pesanan via OrderService
@@ -130,15 +141,15 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Simpan token ke session perangkat konsumen
+            session(['order_token' => $orderToken, 'active_order_id' => $pesanan->id]);
+
             // Trigger WebSocket Event (Reverb) - Fail-Safe Non-Blocking
             try {
                 broadcast(new \App\Events\PesananBaru($pesanan));
 
-                if ($id_meja && $tipe_pesanan === 'dine_in') {
-                    $mejaModel = \App\Models\Meja::find($id_meja);
-                    if ($mejaModel) {
-                        broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
-                    }
+                if ($id_meja && $tipe_pesanan === 'dine_in' && $mejaModel) {
+                    broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal broadcast WebSocket: ' . $e->getMessage());
@@ -150,7 +161,7 @@ class OrderController extends Controller
                 if ($adminsAndKasirs->isNotEmpty()) {
                     \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
                         'Pesanan Baru Masuk!',
-                        'Order #' . $pesanan->id . ' baru saja dibuat. Segera cek pesanan aktif.',
+                        'Order #' . $pesanan->id . ' (' . $guestName . ') baru saja dibuat.',
                         '/kasir/pesanan-aktif'
                     ));
                 }
@@ -158,7 +169,14 @@ class OrderController extends Controller
                 \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal kirim Web Push: ' . $e->getMessage());
             }
 
-            return response()->json(['message' => 'Pesanan berhasil ditambahkan', 'id_pesanan' => $pesanan->id]);
+            return response()->json([
+                'message' => 'Pesanan berhasil ditambahkan',
+                'id_pesanan' => $pesanan->id,
+                'order_token' => $orderToken,
+                'guest_name' => $guestName,
+                'tracking_url' => url('/tracking/' . $orderToken),
+                'checkout_url' => url('/konsumen/checkout/' . $pesanan->id . '?token=' . $orderToken),
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -176,7 +194,15 @@ class OrderController extends Controller
 
             $pesanan = Pesanan::with(['pembayaran'])->findOrFail($id_pesanan);
 
-            if ($pesanan->id_konsumen != auth()->id()) {
+            $token = $request->input('token') ?? $request->header('X-Order-Token') ?? session('order_token');
+            $isOwner = false;
+            if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
+                $isOwner = true;
+            } elseif ($pesanan->order_token && $token && $pesanan->order_token === $token) {
+                $isOwner = true;
+            }
+
+            if (!$isOwner) {
                 throw new \Exception('Anda tidak berhak membatalkan pesanan ini.');
             }
 

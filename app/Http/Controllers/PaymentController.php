@@ -20,23 +20,34 @@ class PaymentController extends Controller
         \Midtrans\Config::$is3ds = config('services.midtrans.is3ds');
     }
 
-    public function checkout($id_pesanan)
+    public function checkout(Request $request, $id_pesanan)
     {
         $pesanan = Pesanan::with(['detail_pesanan.menu', 'pembayaran'])->findOrFail($id_pesanan);
         $pembayaran = $pesanan->pembayaran;
 
-        // FIX #8: Cek ownership — pastikan pesanan milik konsumen yang login
-        if ($pesanan->id_konsumen != auth()->id()) {
+        // Validasi kepemilikan pesanan (User login atau Guest dengan Token yang Cocok)
+        $token = $request->query('token') ?? session('order_token');
+        $isAuthorized = false;
+
+        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
+            $isAuthorized = true;
+        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
+            $isAuthorized = true;
+        } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
             abort(403, 'Anda tidak berhak mengakses pesanan ini.');
         }
 
         // Cegah generate ulang jika sudah lunas
-        if ($pembayaran->status === 'paid') {
+        if ($pembayaran && $pembayaran->status === 'paid') {
+            if ($pesanan->order_token) {
+                return redirect('/tracking/' . $pesanan->order_token)->with('info', 'Pesanan ini sudah lunas.');
+            }
             return redirect()->back()->with('error', 'Pesanan ini sudah lunas.');
         }
-
-        // Midtrans di-disable sesuai permintaan, langsung return ke view checkout manual
-
 
         return view('konsumen.checkout', compact('pesanan', 'pembayaran'));
     }
@@ -49,7 +60,18 @@ class PaymentController extends Controller
 
         $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
 
-        if ($pesanan->id_konsumen != auth()->id()) {
+        $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
+        $isAuthorized = false;
+
+        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
+            $isAuthorized = true;
+        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
+            $isAuthorized = true;
+        } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
             abort(403, 'Anda tidak berhak mengakses pesanan ini.');
         }
 
