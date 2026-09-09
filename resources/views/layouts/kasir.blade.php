@@ -22,6 +22,74 @@
         .kasir-container::-webkit-scrollbar-track { background: transparent; }
         .kasir-container::-webkit-scrollbar-thumb { background: #21262d; border-radius: 4px; }
         .kasir-container::-webkit-scrollbar-thumb:hover { background: rgba(152, 108, 67, 0.5); }
+
+        /* Modern Segmented Pill Navbar Styles */
+        .bg-surface-dark { background-color: rgba(14, 18, 23, 0.75); }
+        .nav-pill-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.42rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #d0d7de;
+            text-decoration: none;
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            background: transparent;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .nav-pill-btn:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+        .nav-pill-btn.active {
+            color: #ffffff !important;
+            background: var(--gradient-bronze, linear-gradient(135deg, #c08e5c 0%, #986c43 100%)) !important;
+            border-color: rgba(192, 142, 92, 0.6);
+            box-shadow: 0 2px 10px rgba(192, 142, 92, 0.35);
+        }
+        .kasir-dropdown {
+            background-color: #161b22 !important;
+            border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1)) !important;
+            border-radius: 12px;
+            padding: 0.4rem;
+            min-width: 210px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
+        }
+        .kasir-dropdown .dropdown-item {
+            color: #e6edf3;
+            padding: 0.55rem 0.85rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.15s ease;
+        }
+        .kasir-dropdown .dropdown-item:hover {
+            background-color: rgba(192, 142, 92, 0.15);
+            color: #ffffff;
+            transform: translateX(3px);
+        }
+        .kasir-dropdown .dropdown-item.active {
+            background-color: var(--primary-bronze, #c08e5c) !important;
+            color: #ffffff !important;
+        }
+        .kasir-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #2ea043;
+            box-shadow: 0 0 8px rgba(46, 160, 67, 0.8);
+            display: inline-block;
+            animation: kasirStatusPulse 2s infinite;
+        }
+        @keyframes kasirStatusPulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.6); }
+            70% { box-shadow: 0 0 0 6px rgba(46, 160, 67, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 160, 67, 0); }
+        }
     </style>
 </head>
 <body>
