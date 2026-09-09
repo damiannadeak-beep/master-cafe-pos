@@ -87,13 +87,37 @@ Route::get('/storage/{path}', function ($path) {
 
 
 
-// Route Socialite (Google Login)
-Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('google.login');
-Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+use App\Http\Controllers\Auth\OwnerLoginController;
+use App\Http\Controllers\Auth\KasirLoginController;
+use App\Http\Middleware\VerifySecretOwnerAccess;
 
-// Route Autentikasi bawaan Laravel UI (Login, Register, Logout, Verify)
-Route::get('/staff/login', [App\Http\Controllers\Auth\LoginController::class, 'showStaffLoginForm'])->name('staff.login');
-Auth::routes(['register' => false, 'verify' => false, 'middleware' => ['throttle:10,1']]);
+$ownerSlug = config('auth.owner_path', 'ruang-owner-x92k');
+$kasirSlug = config('auth.kasir_path', 'pos-kasir-gate-88');
+
+// ================= JALUR RAHASIA PEMILIK (OWNER) =================
+Route::prefix($ownerSlug)->middleware(['web', VerifySecretOwnerAccess::class])->group(function () {
+    Route::get('/login', [OwnerLoginController::class, 'showLoginForm'])->middleware('throttle:5,1')->name('owner.login');
+    Route::post('/login', [OwnerLoginController::class, 'login'])->middleware('throttle:3,1')->name('owner.login.submit');
+});
+
+// ================= JALUR RAHASIA KASIR (POS) =================
+Route::prefix($kasirSlug)->middleware(['web'])->group(function () {
+    Route::get('/login', [KasirLoginController::class, 'showLoginForm'])->middleware('throttle:5,1')->name('kasir.login');
+    Route::post('/login', [KasirLoginController::class, 'login'])->middleware('throttle:3,1')->name('kasir.login.submit');
+});
+
+// ================= DECOY & STEALTH ROUTES =================
+// Menyamarkan jalur umum menjadi 404 murni agar bot/hacker mengira tidak ada panel admin/kasir
+Route::any('/admin', fn() => abort(404));
+Route::any('/administrator', fn() => abort(404));
+Route::any('/owner', fn() => abort(404));
+Route::any('/kasir', fn() => abort(404));
+Route::any('/staff/login', fn() => abort(404));
+Route::any('/wp-admin', fn() => abort(404));
+
+// Logout dan decoy 404 untuk rute bawaan /login
+Route::get('/login', fn() => abort(404))->name('login');
+Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
 
 

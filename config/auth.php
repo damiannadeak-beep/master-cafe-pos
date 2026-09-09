@@ -114,4 +114,13 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Owner / Admin Custom Secret Route Configuration
+    |--------------------------------------------------------------------------
+    */
+    'owner_path' => env('OWNER_SECRET_PATH', 'ruang-owner-x92k'),
+    'owner_key'  => env('OWNER_SECRET_KEY', 'MasterCafeSecret2026!'),
+    'kasir_path' => env('KASIR_SECRET_PATH', 'pos-kasir-gate-88'),
+
 ];

@@ -56,13 +56,7 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
-                        @guest
-                            <li class="nav-item d-flex align-items-center">
-                                <a class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary" href="{{ route('login') }}" style="border-color: #30363d; font-size: 0.8rem;">
-                                    <i class="bi bi-person-badge me-1"></i> Staf Login
-                                </a>
-                            </li>
-                        @else
+                        @auth
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle fw-bold text-light d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     @if(Auth::user()->foto)
