@@ -12,23 +12,10 @@
             Temukan sajian istimewa yang dibuat dengan dedikasi tinggi. Silakan <strong>Scan QR Code</strong> di meja Anda untuk memulai pesanan.
         </p>
         
-        @guest
-            <div class="d-flex justify-content-center gap-3 mb-3">
-                <a href="/login" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill shadow-sm" style="background-color: #c08e5c; border: none;">Login / Masuk</a>
-                <a href="/register" class="btn btn-outline-light btn-sm fw-bold px-3 rounded-pill">Daftar Akun</a>
-            </div>
-            <p class="small text-light opacity-50 font-monospace">
-                <i class="bi bi-info-circle me-1"></i> Login diperlukan untuk memesan mandiri
-            </p>
-        @else
-            @role('konsumen')
-                <div class="d-flex justify-content-center">
-                    <a href="/konsumen/pilih-tipe" class="btn btn-primary fw-bold px-5 rounded-pill shadow-lg btn-lg btn-touch" style="background-color: #c08e5c; border: none; letter-spacing: 1px;">
-                        <i class="bi bi-cart-plus me-2"></i> Mulai Pesan
-                    </a>
-                </div>
-            @endrole
-        @endguest
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3);">
+            <i class="bi bi-qr-code-scan text-primary"></i>
+            <span class="small fw-semibold text-white">Scan QR di meja kafe untuk memesan langsung tanpa antre dan tanpa login</span>
+        </div>
     </div>
 </div>
 
@@ -203,32 +190,18 @@
                 </div>
             </div>
 
-            <!-- Footer Bawah Sticky dengan Jarak Bernapas Lega -->
+            <!-- Footer Bawah Sticky -->
             <div class="modal-footer border-top px-4 py-3" style="background-color: #161b22; border-color: rgba(255,255,255,0.08) !important; flex-shrink: 0; padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 16px));">
-                <div class="w-100">
-                    @role('konsumen')
-                        <a href="/konsumen/pilih-tipe" class="btn fw-bold rounded-pill w-100 d-flex align-items-center justify-content-center text-white shadow-lg btn-touch" style="height: 44px; min-height: 44px; background: var(--gradient-bronze); border: none;">
-                            <i class="bi bi-cart-plus me-2"></i> Pesan Sekarang
-                        </a>
-                    @else
-                        <a href="/login" class="btn fw-bold rounded-pill w-100 d-flex align-items-center justify-content-center text-white shadow-lg btn-touch" style="height: 44px; min-height: 44px; background: var(--gradient-bronze); border: none;">
-                            <i class="bi bi-box-arrow-in-right me-2"></i> Masuk / Pesan Menu Ini
-                        </a>
-                    @endrole
+                <div class="w-100 text-center">
+                    <div class="d-inline-flex align-items-center justify-content-center gap-2 text-white-50 small py-1">
+                        <i class="bi bi-qr-code-scan text-primary"></i>
+                        <span>Scan stiker QR di meja kafe untuk memesan menu ini</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@role('konsumen')
-<!-- Floating Action Button Mobile -->
-<div class="position-fixed bottom-0 start-50 translate-middle-x w-100 p-3 d-md-none" style="z-index: 1050;">
-    <a href="/konsumen/pilih-tipe" class="btn fw-bold w-100 rounded-pill shadow-lg py-3 fs-5 text-white btn-touch" style="background: var(--gradient-bronze); border: none;">
-        <i class="bi bi-cart-plus me-2"></i> Mulai Pesan Sekarang
-    </a>
-</div>
-@endrole
 
 <style>
     .hover-lift {
