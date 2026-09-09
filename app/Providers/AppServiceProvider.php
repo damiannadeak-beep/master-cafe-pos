@@ -26,8 +26,10 @@ class AppServiceProvider extends ServiceProvider
 
         \Illuminate\Database\Eloquent\Model::preventLazyLoading(!app()->isProduction());
 
-        if ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || str_contains(request()->url(), 'https://')) {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+        if ($this->app->bound('request')) {
+            if ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || str_contains(request()->url(), 'https://')) {
+                \Illuminate\Support\Facades\URL::forceScheme('https');
+            }
         }
 
         View::composer('layouts.admin', function ($view) {
