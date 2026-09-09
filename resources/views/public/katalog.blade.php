@@ -162,54 +162,56 @@
 
 <!-- Modal Detail Menu (Bottom Sheet di HP, Centered Glassmorphic Modal di Desktop) -->
 <div class="modal fade modal-bottom-sheet" id="katalogDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
-    <div class="modal-dialog modal-dialog-bottom-sheet">
-        <div class="modal-content border-0 shadow-lg overflow-hidden" id="katalogModalContentBox" style="background-color: #161b22; display: flex; flex-direction: column;">
+    <div class="modal-dialog modal-dialog-bottom-sheet" style="max-width: 420px; margin: auto;">
+        <div class="modal-content border-0 shadow-lg overflow-hidden" id="katalogModalContentBox" style="background-color: #161b22; display: flex; flex-direction: column; border-radius: 20px;">
             
             <!-- Area Header & Drag Handle (Bisa ditarik ke bawah untuk menutup di HP) -->
             <div class="modal-drag-zone" id="katalogModalDragZone" style="cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;">
                 <div class="bottom-sheet-drag-handle-wrapper pt-3 pb-1 text-center">
                     <div class="bottom-sheet-drag-handle" title="Tarik ke bawah untuk menutup"></div>
                 </div>
-                <div class="modal-header border-0 pb-0 px-4 pt-1 d-flex justify-content-between align-items-center">
-                    <span class="badge rounded-pill px-3 py-1 fw-semibold" id="katalogModalCategory" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.8rem;">
-                        Kategori
-                    </span>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="d-flex justify-content-between align-items-center px-4 pt-3 pt-md-4 pb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" id="katalogModalCategory" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.35); color: #c08e5c; font-size: 0.75rem; letter-spacing: 0.05em; line-height: 1.2;">
+                            Kategori
+                        </span>
+                        <div id="katalogModalStockContainer"></div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.85rem;"></button>
                 </div>
             </div>
 
-            <div class="modal-body px-4 pb-4 pt-2" id="katalogModalScrollBody" style="overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: calc(88vh - 120px);">
-                <!-- Foto Menu Besar -->
-                <div class="rounded-4 overflow-hidden mb-3 text-center position-relative" style="background-color: #14171c; border: 1px solid #21262d; max-height: 240px;">
-                    <img id="katalogModalImg" src="" alt="Menu Image" onerror="this.onerror=null; this.src='/images/logo.png';" style="width: 100%; height: 240px; object-fit: contain; padding: 12px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
-                    <div id="katalogModalPromoBadge" class="position-absolute top-0 end-0 m-3" style="display: none;">
-                        <span class="badge shadow-sm px-3 py-2 rounded-pill" style="background-color: #c08e5c;"><i class="bi bi-tag-fill me-1"></i> Promo Spesial</span>
+            <div class="modal-body px-4 py-3" id="katalogModalScrollBody" style="overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: calc(88vh - 160px);">
+                <!-- Foto Menu -->
+                <div class="rounded-4 overflow-hidden mb-3 text-center position-relative" style="background: radial-gradient(circle at center, rgba(192, 142, 92, 0.08) 0%, #14171c 100%); border: 1px solid #21262d; max-height: 170px;">
+                    <img id="katalogModalImg" src="" alt="Menu Image" onerror="this.onerror=null; this.src='/images/logo.png';" style="width: 100%; height: 170px; object-fit: contain; padding: 12px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));">
+                    <div id="katalogModalPromoBadge" class="position-absolute top-0 end-0 m-2" style="display: none;">
+                        <span class="badge shadow-sm px-3 py-1 rounded-pill" style="background-color: #c08e5c; font-size: 0.75rem;"><i class="bi bi-tag-fill me-1"></i> Promo Spesial</span>
                     </div>
                 </div>
 
-                <!-- Info Menu -->
-                <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
-                    <h4 class="fw-bold text-white mb-0" id="katalogModalTitle" style="font-family: 'Outfit', sans-serif;"></h4>
-                    <span class="fw-bold fs-4 text-nowrap" id="katalogModalPrice" style="color: #c08e5c;"></span>
+                <!-- Info Menu (Font Outfit Sans-Serif Modern) -->
+                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                    <h5 class="fw-bold text-white mb-0" id="katalogModalTitle" style="font-family: 'Outfit', sans-serif !important; font-size: 1.25rem;"></h5>
+                    <span class="fw-bold fs-4 text-nowrap" id="katalogModalPrice" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;"></span>
                 </div>
 
-                <!-- Status Stok -->
-                <div class="mb-3" id="katalogModalStockContainer"></div>
-
-                <!-- Deskripsi Lengkap -->
-                <div class="p-3 rounded-3 mb-4" style="background: rgba(255,255,255,0.03); border: 1px solid #21262d; max-height: 180px; overflow-y: auto;">
-                    <label class="text-secondary small fw-bold text-uppercase d-block mb-1" style="letter-spacing: 0.05em;">Deskripsi Hidangan</label>
-                    <p class="text-white-50 mb-0" id="katalogModalDesc" style="font-size: 0.95rem; line-height: 1.6;"></p>
+                <!-- Deskripsi Lengkap dengan Jarak Lega -->
+                <div class="p-3 px-3 rounded-4 mb-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); max-height: 130px; overflow-y: auto;">
+                    <label class="text-secondary small fw-bold text-uppercase d-block mb-2" style="letter-spacing: 0.05em; font-size: 0.72rem;">Deskripsi Hidangan</label>
+                    <p class="text-white-50 mb-0" id="katalogModalDesc" style="font-size: 0.875rem; line-height: 1.6;"></p>
                 </div>
+            </div>
 
-                <!-- Action Button -->
-                <div class="d-grid gap-2">
+            <!-- Footer Bawah Sticky dengan Jarak Bernapas Lega -->
+            <div class="modal-footer border-top px-4 py-3" style="background-color: #161b22; border-color: rgba(255,255,255,0.08) !important; flex-shrink: 0; padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 16px));">
+                <div class="w-100">
                     @role('konsumen')
-                        <a href="/konsumen/pilih-tipe" class="btn fw-bold rounded-pill py-3 text-white shadow-lg btn-touch" style="background: var(--gradient-bronze); border: none;">
+                        <a href="/konsumen/pilih-tipe" class="btn fw-bold rounded-pill w-100 d-flex align-items-center justify-content-center text-white shadow-lg btn-touch" style="height: 44px; min-height: 44px; background: var(--gradient-bronze); border: none;">
                             <i class="bi bi-cart-plus me-2"></i> Pesan Sekarang
                         </a>
                     @else
-                        <a href="/login" class="btn fw-bold rounded-pill py-3 text-white shadow-lg btn-touch" style="background: var(--gradient-bronze); border: none;">
+                        <a href="/login" class="btn fw-bold rounded-pill w-100 d-flex align-items-center justify-content-center text-white shadow-lg btn-touch" style="height: 44px; min-height: 44px; background: var(--gradient-bronze); border: none;">
                             <i class="bi bi-box-arrow-in-right me-2"></i> Masuk / Pesan Menu Ini
                         </a>
                     @endrole
@@ -276,9 +278,9 @@
         // Stok
         const stockContainer = document.getElementById('katalogModalStockContainer');
         if (menu.stok > 0) {
-            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-bold" style="background-color: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.8rem;"><i class="bi bi-check-circle me-1"></i> Tersedia (Sisa: ${menu.stok} porsi)</span>`;
+            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-check-circle me-1"></i> Tersedia (Sisa: ${menu.stok} porsi)</span>`;
         } else {
-            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-bold" style="background-color: rgba(245, 101, 101, 0.15); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3); font-size: 0.8rem;"><i class="bi bi-x-circle me-1"></i> Stok Habis</span>`;
+            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(245, 101, 101, 0.15); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-x-circle me-1"></i> Stok Habis</span>`;
         }
 
         const modalEl = document.getElementById('katalogDetailModal');

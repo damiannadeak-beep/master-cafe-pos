@@ -179,7 +179,7 @@
         @media (min-width: 768px) {
             body .modal.modal-bottom-sheet .modal-dialog,
             body .modal.modal-bottom-sheet .modal-dialog-bottom-sheet {
-                max-width: 500px;
+                max-width: 420px;
                 margin: 1.75rem auto;
                 display: flex;
                 align-items: center;
