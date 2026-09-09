@@ -259,95 +259,111 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const labels = @json($chartLabels);
-    const data = @json($chartData);
+(function() {
+    function initReportCharts() {
+        if (typeof Chart === 'undefined') {
+            setTimeout(initReportCharts, 50);
+            return;
+        }
 
-    const ctx = document.getElementById('salesReportChart');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total Penjualan',
-                    data: data,
-                    fill: true,
-                    backgroundColor: 'rgba(54, 162, 235, 0.12)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    tension: 0.35,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => 'Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-                        }
-                    }
+        const labels = @json($chartLabels);
+        const data = @json($chartData);
+
+        const ctx = document.getElementById('salesReportChart');
+        if (ctx) {
+            const existingSales = Chart.getChart(ctx);
+            if (existingSales) existingSales.destroy();
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Penjualan',
+                        data: data,
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.12)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        tension: 0.35,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
                 },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#495057' }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => 'Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                            }
+                        }
                     },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#e9ecef' },
-                        ticks: {
-                            color: '#495057',
-                            callback: (value) => 'Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#495057' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#e9ecef' },
+                            ticks: {
+                                color: '#495057',
+                                callback: (value) => 'Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        // Pie Chart Metode Pembayaran
+        const paymentMethods = @json($paymentMethods);
+        const pmLabels = paymentMethods.map(item => item.metode.toUpperCase());
+        const pmData = paymentMethods.map(item => item.total);
+        
+        const pmCtx = document.getElementById('paymentMethodChart');
+        if (pmCtx && pmLabels.length > 0) {
+            const existingPm = Chart.getChart(pmCtx);
+            if (existingPm) existingPm.destroy();
+
+            new Chart(pmCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: pmLabels,
+                    datasets: [{
+                        data: pmData,
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)', // QRIS (biasanya biru)
+                            'rgba(75, 192, 192, 0.8)', // Cash (hijau)
+                            'rgba(255, 206, 86, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => context.label + ': Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (pmCtx) {
+            // Fallback jika kosong
+            pmCtx.parentElement.innerHTML = '<p class="text-white-50 text-center w-100">Belum ada data pembayaran</p>';
+        }
     }
 
-    // Pie Chart Metode Pembayaran
-    const paymentMethods = @json($paymentMethods);
-    const pmLabels = paymentMethods.map(item => item.metode.toUpperCase());
-    const pmData = paymentMethods.map(item => item.total);
-    
-    const pmCtx = document.getElementById('paymentMethodChart');
-    if (pmCtx && pmLabels.length > 0) {
-        new Chart(pmCtx, {
-            type: 'doughnut',
-            data: {
-                labels: pmLabels,
-                datasets: [{
-                    data: pmData,
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.8)', // QRIS (biasanya biru)
-                        'rgba(75, 192, 192, 0.8)', // Cash (hijau)
-                        'rgba(255, 206, 86, 0.8)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => context.label + ': Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-                        }
-                    }
-                }
-            }
-        });
-    } else if (pmCtx) {
-        // Fallback jika kosong
-        pmCtx.parentElement.innerHTML = '<p class="text-white-50 text-center w-100">Belum ada data pembayaran</p>';
-    }
+    initReportCharts();
+})();
 </script>
 @endsection
 

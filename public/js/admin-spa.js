@@ -95,15 +95,27 @@
         }
     };
 
-    // Eksekusi skrip dalam konten yang baru dimasukkan
+    // Eksekusi skrip dalam konten yang baru dimasukkan secara aman
     function executeScripts(container) {
         const scripts = container.querySelectorAll('script');
         scripts.forEach(oldScript => {
+            // Hindari memuat ulang Chart.js jika sudah aktif di window
+            if (oldScript.src && oldScript.src.includes('chart.js') && typeof Chart !== 'undefined') {
+                oldScript.remove();
+                return;
+            }
+
             const newScript = document.createElement('script');
             Array.from(oldScript.attributes).forEach(attr => {
                 newScript.setAttribute(attr.name, attr.value);
             });
-            newScript.textContent = oldScript.textContent;
+
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                // Bungkus dalam IIFE try-catch agar variabel const/let tidak bertabrakan dengan navigasi sebelumnya
+                newScript.textContent = '(function(){\ntry {\n' + oldScript.textContent + '\n} catch(err) { console.warn("[Admin SPA Script]", err); }\n})();';
+            }
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
