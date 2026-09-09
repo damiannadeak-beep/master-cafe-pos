@@ -21,6 +21,8 @@
 
 @include("components.kasir.payment-modal")
 
+@include("components.kasir.void-modal")
+
 @include("components.kasir.qris-modal")
 
 @include("components.kasir.split-bill-modal")

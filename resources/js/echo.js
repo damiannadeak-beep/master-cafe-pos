@@ -9,6 +9,8 @@ const reverbHost = (typeof window !== 'undefined' && window.location.hostname) ?
 const reverbPort = isHttps ? 443 : (import.meta.env.VITE_REVERB_PORT || 8080);
 const reverbScheme = isHttps ? 'https' : (import.meta.env.VITE_REVERB_SCHEME || 'http');
 
+const useReverb = Boolean(reverbKey && !reverbKey.startsWith('${'));
+
 const shouldConnect = typeof window !== 'undefined' && (
     window.enableEcho === true ||
     window.location.pathname.startsWith('/kasir') ||
