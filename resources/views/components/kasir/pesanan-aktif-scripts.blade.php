@@ -182,20 +182,18 @@
         });
     }
 
+    // --- Helper Modal Bootstrap On-Demand (Aman & Pasti Terbuka) ---
+    function getModal(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return null;
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            return bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+        }
+        return null;
+    }
+
     // --- 4. Modal Pembayaran & Eksekusi Pembayaran ---
     document.addEventListener('DOMContentLoaded', function() {
-        const pModalEl = document.getElementById('paymentModal');
-        if (pModalEl) paymentModal = new bootstrap.Modal(pModalEl);
-
-        const qModalEl = document.getElementById('qrisScanModal');
-        if (qModalEl) qrisModal = new bootstrap.Modal(qModalEl);
-
-        const sModalEl = document.getElementById('splitModal');
-        if (sModalEl) splitModal = new bootstrap.Modal(sModalEl);
-
-        const vModalEl = document.getElementById('verifyPaymentModal');
-        if (vModalEl) verifyPaymentModal = new bootstrap.Modal(vModalEl);
-
         // Intercept Form Verifikasi Bukti Bayar agar tidak reload halaman
         const verifyForm = document.getElementById('verifyPaymentForm');
         if (verifyForm) {
@@ -216,7 +214,8 @@
                 })
                 .then(res => res.json())
                 .then(data => {
-                    if (verifyPaymentModal) verifyPaymentModal.hide();
+                    const vModal = getModal('verifyPaymentModal');
+                    if (vModal) vModal.hide();
                     if (window.showToast) window.showToast(data.message || 'Pembayaran berhasil diverifikasi!', 'success');
                     window.reloadActiveOrdersCards(true);
                 })
@@ -233,22 +232,35 @@
 
     function payOrder(id) {
         currentOrderId = id;
-        document.getElementById('email_pelanggan').value = '';
-        if (paymentModal) paymentModal.show();
+        const emailInput = document.getElementById('email_pelanggan');
+        if (emailInput) emailInput.value = '';
+        
+        const modal = getModal('paymentModal');
+        if (modal) {
+            modal.show();
+        } else {
+            console.error('Modal payment tidak dapat dibuka, ID element: paymentModal');
+        }
     }
 
     function processPayment(method) {
-        if (paymentModal) paymentModal.hide();
+        const pModal = getModal('paymentModal');
+        if (pModal) pModal.hide();
+        
         if (method === 'qris') {
-            if (qrisModal) qrisModal.show();
+            const qModal = getModal('qrisScanModal');
+            if (qModal) qModal.show();
         } else {
             executePayment('cash');
         }
     }
 
     function executePayment(method) {
-        if (qrisModal) qrisModal.hide();
-        let emailVal = document.getElementById('email_pelanggan').value;
+        const qModal = getModal('qrisScanModal');
+        if (qModal) qModal.hide();
+        
+        let emailInput = document.getElementById('email_pelanggan');
+        let emailVal = emailInput ? emailInput.value : '';
 
         fetch(`/kasir/order/${currentOrderId}/pay`, {
             method: 'PUT',
@@ -313,7 +325,8 @@
             });
         });
 
-        if (splitModal) splitModal.show();
+        const sModal = getModal('splitModal');
+        if (sModal) sModal.show();
     }
 
     function executeSplit() {
@@ -366,7 +379,8 @@
             } else if (data.errors) {
                 alert(Object.values(data.errors).flat().join('\n'));
             } else {
-                if (splitModal) splitModal.hide();
+                const sModal = getModal('splitModal');
+                if (sModal) sModal.hide();
                 if (window.showToast) window.showToast(data.message || 'Bon berhasil dipisah!', 'success');
                 window.reloadActiveOrdersCards(true);
             }
@@ -410,19 +424,20 @@
         document.getElementById('verify-payment-image').src = imgUrl;
         
         let verifyForm = document.getElementById('verifyPaymentForm');
-        verifyForm.action = '/kasir/order/' + id + '/verify-payment';
+        if (verifyForm) verifyForm.action = '/kasir/order/' + id + '/verify-payment';
         
         let rejectForm = document.getElementById('rejectPaymentForm');
-        rejectForm.action = '/kasir/order/' + id + '/reject-payment';
+        if (rejectForm) rejectForm.action = '/kasir/order/' + id + '/reject-payment';
         
-        if (verifyPaymentModal) verifyPaymentModal.show();
+        const vModal = getModal('verifyPaymentModal');
+        if (vModal) vModal.show();
     }
 
     function rejectPayment() {
         if (!confirm('Yakin menolak bukti pembayaran ini? Pesanan akan dikembalikan ke status belum dibayar.')) return;
         
         const rejectForm = document.getElementById('rejectPaymentForm');
-        const url = rejectForm.action;
+        const url = rejectForm ? rejectForm.action : '';
 
         fetch(url, {
             method: 'POST',
@@ -435,7 +450,8 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (verifyPaymentModal) verifyPaymentModal.hide();
+            const vModal = getModal('verifyPaymentModal');
+            if (vModal) vModal.hide();
             if (window.showToast) window.showToast(data.message || 'Bukti pembayaran ditolak.', 'info');
             window.reloadActiveOrdersCards(true);
         })
