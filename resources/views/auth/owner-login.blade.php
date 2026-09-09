@@ -69,61 +69,27 @@
             }
         }
 
-        /* Brand Logo Design adhering to DESIGN_SYSTEM.md */
-        .brand-badge {
+        /* Official Master Cafe Brand Logo */
+        .brand-logo-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            position: relative;
-            text-align: center;
-            width: 64px;
-            height: 64px;
+            margin-bottom: 20px;
+        }
+
+        .brand-logo-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--bronze-accent);
+            box-shadow: 0 8px 24px rgba(192, 142, 92, 0.35);
             background-color: #ffffff;
-            border-radius: 50%;
-            margin: 0 auto 16px auto;
-            box-shadow: 0 8px 24px rgba(192, 142, 92, 0.25);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
         }
 
-        .brand-badge .text-master {
-            font-family: 'Rye', serif;
-            font-size: 11px;
-            color: #000000;
-            letter-spacing: 1px;
-            margin-bottom: -4px;
-            z-index: 2;
-            line-height: 1;
-        }
-
-        .brand-badge .text-cafe {
-            font-family: 'Alex Brush', cursive;
-            font-size: 16px;
-            color: #000000;
-            margin-bottom: 0px;
-            z-index: 2;
-            line-height: 1;
-        }
-
-        .brand-badge .text-since {
-            font-family: 'Caveat', cursive;
-            font-size: 7px;
-            color: #000000;
-            letter-spacing: 0.5px;
-            z-index: 2;
-            line-height: 1;
-        }
-
-        .brand-badge .aksen-gradasi {
-            position: absolute;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            background: var(--gradient-bronze) border-box;
-            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: destination-out;
-            mask-composite: exclude;
-            clip-path: polygon(0 0, 100% 0, 100% 80%, 0 20%);
+        .brand-logo-img:hover {
+            transform: scale(1.06);
+            box-shadow: 0 12px 28px rgba(192, 142, 92, 0.5);
         }
 
         .portal-title {
@@ -324,12 +290,9 @@
     <div class="ambient-bg"></div>
 
     <div class="login-card">
-        <!-- Official Master Cafe Badge -->
-        <div class="brand-badge">
-            <div class="aksen-gradasi"></div>
-            <span class="text-master">MASTER</span>
-            <span class="text-cafe">Cafe</span>
-            <span class="text-since">SINCE 2020</span>
+        <!-- Official Master Cafe Logo Image -->
+        <div class="brand-logo-container">
+            <img src="{{ asset('images/logo.png') }}" alt="Master Cafe Logo" class="brand-logo-img">
         </div>
 
         <h1 class="portal-title">Portal Pemilik</h1>
