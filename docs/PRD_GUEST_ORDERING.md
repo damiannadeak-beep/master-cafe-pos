@@ -221,9 +221,9 @@ Project Master Cafe POS saat ini telah memiliki teknologi mutakhir yang sudah be
 
 ## 9. Rencana Tahapan Implementasi (Milestones)
 
-- [ ] **Fase 1 (Git & Database):** Buat branch `feature/guest-ordering-midtrans`, buat migration untuk menambahkan kolom `guest_name` dan `order_token` pada tabel `pesanan` (`id_konsumen` dan `tipe_pesanan` sudah ada).
-- [ ] **Fase 2 (Rute Publik & Form Menu Meja):** Buka rute `/meja/{id_meja}` dari middleware `auth`, lengkapi checkout tanpa login (hanya input nama), serta tambahkan indikator jam buka/tutup minimalis.
-- [ ] **Fase 3 (Integrasi Midtrans Snap & Webhook):** Sambungkan pop-up Midtrans QRIS dinamis dan tangani callback webhook otomatis (`settlement` &rarr; `paid` &rarr; trigger dapur & audio chime).
-- [ ] **Fase 4 (Layar Live Tracking, Call Bell, & E-Receipt):** Buat halaman `/tracking/{order_token}` dengan WebSocket Reverb live update, tombol panggil pelayan meja, tombol unduh struk digital, dan kartu rating bintang pasca-selesai.
-- [ ] **Fase 5 (Pembersihan Profil Konsumen & Penyatuan Login Staff):** Hapus rute profil konsumen, bersihkan navbar publik dari tombol login/register konsumen, dan alihkan rute `/login` khusus untuk karyawan.
-- [ ] **Fase 6 (Pengujian Lokal Menyeluruh):** Simulasi pemesanan tamu dari scan QR meja, pembayaran Midtrans Sandbox, notifikasi suara kasir, hingga rating pasca-selesai di komputer lokal.
+- [x] **Fase 1 (Git & Database):** Buat branch `feature/guest-ordering-midtrans`, buat migration untuk menambahkan kolom `guest_name` dan `order_token` pada tabel `pesanan` (`id_konsumen` dan `tipe_pesanan` sudah ada).
+- [x] **Fase 2 (Rute Publik & Form Menu Meja):** Buka rute `/meja/{id_meja}` dari middleware `auth`, lengkapi checkout tanpa login (hanya input nama), serta tambahkan indikator jam buka/tutup minimalis.
+- [x] **Fase 3 (Integrasi Midtrans Snap & Webhook):** Sambungkan pop-up Midtrans QRIS dinamis dan tangani callback webhook otomatis (`settlement` &rarr; `paid` &rarr; trigger dapur & audio chime).
+- [x] **Fase 4 (Layar Live Tracking, Call Bell, & E-Receipt):** Buat halaman `/tracking/{order_token}` dengan WebSocket Reverb live update, tombol panggil pelayan meja, tombol unduh struk digital, dan kartu rating bintang pasca-selesai.
+- [x] **Fase 5 (Pembersihan Profil Konsumen & Penyatuan Login Staff):** Hapus rute profil konsumen, bersihkan navbar publik dari tombol login/register konsumen, dan alihkan rute `/login` khusus untuk karyawan.
+- [x] **Fase 6 (Pengujian Lokal Menyeluruh):** Simulasi pemesanan tamu dari scan QR meja, pembayaran Midtrans Sandbox, notifikasi suara kasir, hingga rating pasca-selesai di komputer lokal.
