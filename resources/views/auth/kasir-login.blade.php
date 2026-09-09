@@ -321,7 +321,7 @@
                     <input type="password" id="password" name="password" class="form-input" 
                            placeholder="••••••••" required>
                     <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Lihat kata sandi">
-                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                        <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
                     </button>
                 </div>
             </div>
@@ -354,8 +354,15 @@
         if (toggleBtn && passwordInput && toggleIcon) {
             toggleBtn.addEventListener('click', function () {
                 const isPassword = passwordInput.getAttribute('type') === 'password';
-                passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-                toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+                if (isPassword) {
+                    passwordInput.setAttribute('type', 'text');
+                    toggleIcon.className = 'bi bi-eye';
+                    toggleBtn.setAttribute('aria-label', 'Sembunyikan kata sandi');
+                } else {
+                    passwordInput.setAttribute('type', 'password');
+                    toggleIcon.className = 'bi bi-eye-slash';
+                    toggleBtn.setAttribute('aria-label', 'Lihat kata sandi');
+                }
             });
         }
     </script>
