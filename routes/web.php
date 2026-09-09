@@ -178,6 +178,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Meja
         Route::get('/meja', [AdminMejaController::class, 'index'])->name('meja.index');
+        Route::get('/meja/print-all-qr', [AdminMejaController::class, 'printAllQr'])->name('meja.print_all_qr');
         Route::post('/meja', [AdminMejaController::class, 'store'])->name('meja.store');
         Route::put('/meja/{id}', [AdminMejaController::class, 'update'])->name('meja.update');
         Route::delete('/meja/{id}', [AdminMejaController::class, 'destroy'])->name('meja.destroy');

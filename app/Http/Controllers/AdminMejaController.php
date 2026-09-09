@@ -49,5 +49,15 @@ class AdminMejaController extends Controller
         
         return view('admin.meja.print_qr', compact('meja', 'url'));
     }
+
+    public function printAllQr()
+    {
+        $mejas = Meja::orderBy('nama_meja_atau_nomor')->get()->map(function ($meja) {
+            $meja->qr_url = URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]);
+            return $meja;
+        });
+
+        return view('admin.meja.print_all_qr', compact('mejas'));
+    }
 }
 
