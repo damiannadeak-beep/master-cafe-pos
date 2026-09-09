@@ -97,4 +97,36 @@ Gunakan tabel ini saat berdiskusi langsung dengan Pemilik Kafe untuk mencatat pe
 
 ---
 
+## 🧪 PANDUAN SIMULASI & DEMO LANGSUNG SAAT DISKUSI
+
+Agar Pemilik Kafe dapat melihat dan mencoba langsung kecanggihan sistem di laptop Anda saat rapat, berikut tautan dan akun pengujian yang telah disiapkan:
+
+### 1. Akun Login Staf (Kasir & Owner)
+
+| Peran | Pintu URL Login Rahasia | Akun Pengujian | Fungsi Utama yang Ditunjukkan |
+|---|---|---|---|
+| **Kasir (POS)** | `http://localhost:8000/pos-kasir-gate-88/login` | **Email:** `safik@gmail.com`<br>**Password:** `password123` | • Layar Pesanan Aktif (`/kasir/pesanan-aktif`)<br>• Lonceng audio (*chime*) saat pesanan meja masuk<br>• Tombol proses masak & selesaikan bayar<br>• Tombol cetak struk thermal |
+| **Owner (Admin)** | `http://localhost:8000/ruang-owner-x92k/login?key=MasterCafeSecret2026!`<br>*(Buka di Incognito/Private Window)* | **Email:** `damiannadeak@gmail.com`<br>**Password:** `password123` | • Dashboard omzet penjualan harian & laba<br>• Manajemen menu & promo kafe<br>• Generator & Cetak stiker QR meja (`/admin/meja`) |
+
+---
+
+### 2. Skenario Percobaan Langsung untuk Konsumen (Demo Tamu di Meja)
+
+Anda dapat memperagakan pengalaman pelanggan saat duduk di meja kafe:
+
+#### A. Melalui Browser Laptop (Simulasi Tab):
+1. Buka Tab Baru: **`http://localhost:8000/konsumen/menu/1`** (Simulasi Pelanggan di Meja 1).
+2. Tunjukkan ke Pemilik bahwa **tidak ada tombol login** dan menu langsung terbuka elegan.
+3. Klik menu (misal: Kopi / Lemon Tea), pilih varian/catatan (*Less sugar*), lalu klik **Pesan**.
+4. Masukkan nama pemesan: `Pak Hendra` (atau nama Pemilik Kafe).
+5. Klik **Kirim Pesanan**.
+6. **Momen WOW:** Buka tab Kasir, pesanan Meja 1 atas nama *Pak Hendra* langsung muncul seketika secara live disertai bunyi notifikasi bel!
+
+#### B. Melalui Kamera HP Sungguhan (Scan QR Asli):
+1. Di layar Owner, buka menu **Manajemen Meja** (`/admin/meja`) lalu klik **Cetak QR** pada Meja 1.
+2. Minta Pemilik Kafe mengarahkan kamera HP-nya ke layar laptop Anda untuk memindai QR code tersebut.
+3. Menu kafe akan langsung terbuka di layar HP Pemilik Kafe persis seperti pelanggan asli di meja!
+
+---
+
 *Dokumen ini dibuat secara khusus untuk membantu kelancaran rapat bersama Pemilik Master Cafe.*
