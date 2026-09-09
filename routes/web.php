@@ -289,9 +289,10 @@ Route::middleware(['auth'])->group(function () {
 // AREA PEMESANAN MEJA GUEST (DINE-IN TANPA LOGIN / PUBLIC ORDERING)
 // =========================================================================
 Route::group([], function () {
-    // Akses Menu Meja via QR Code (Signed URL mencegah manipulasi nomor meja)
-    Route::get('/konsumen/menu/{id_meja}', [OrderController::class, 'showMenu'])->name('konsumen.menu.meja')->middleware('signed');
-    Route::get('/menu/{id_meja}', [OrderController::class, 'showMenu'])->middleware('signed');
+    // Akses Menu Meja via QR Code (Signed URL wajib di production, fleksibel di local)
+    $tableMenuMiddleware = app()->isProduction() ? ['signed'] : [];
+    Route::get('/konsumen/menu/{id_meja}', [OrderController::class, 'showMenu'])->name('konsumen.menu.meja')->middleware($tableMenuMiddleware);
+    Route::get('/menu/{id_meja}', [OrderController::class, 'showMenu'])->middleware($tableMenuMiddleware);
     
     // Pemilihan Tipe & Info
     Route::get('/konsumen/pilih-tipe', [OrderController::class, 'pilihTipePesanan'])->name('pilih_tipe');
