@@ -22,6 +22,7 @@ class AdminBahanController extends Controller
             'harga_beli' => 'required|numeric|min:0',
         ]);
         Bahan::create($data);
+        cache()->forget('admin_layout_stok_data');
         return back()->with('success', 'Bahan berhasil ditambahkan.');
     }
 
@@ -35,12 +36,14 @@ class AdminBahanController extends Controller
             'harga_beli' => 'required|numeric|min:0',
         ]);
         $bahan->update($data);
+        cache()->forget('admin_layout_stok_data');
         return back()->with('success', 'Bahan berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         Bahan::findOrFail($id)->delete();
+        cache()->forget('admin_layout_stok_data');
         return back()->with('success', 'Bahan berhasil dihapus.');
     }
 }

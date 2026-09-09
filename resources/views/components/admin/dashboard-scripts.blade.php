@@ -1,22 +1,23 @@
 <script>
-    const dailyLabels = @json($chartDailyLabels);
-    const dailyData = @json($chartDailyData);
-    const dailyLaba = @json($chartDailyLaba);
-    const monthlyLabels = @json($chartMonthlyLabels);
-    const monthlyData = @json($chartMonthlyData);
-    const monthlyLaba = @json($chartMonthlyLaba);
+(function() {
+    var dailyLabels = @json($chartDailyLabels);
+    var dailyData = @json($chartDailyData);
+    var dailyLaba = @json($chartDailyLaba);
+    var monthlyLabels = @json($chartMonthlyLabels);
+    var monthlyData = @json($chartMonthlyData);
+    var monthlyLaba = @json($chartMonthlyLaba);
 
-    const createSalesChart = (elementId, labels, dataSales, dataLaba) => {
-        const ctx = document.getElementById(elementId);
+    function createSalesChart(elementId, labels, dataSales, dataLaba) {
+        var ctx = document.getElementById(elementId);
         if (!ctx) return;
         if (typeof Chart !== 'undefined') {
-            const existing = Chart.getChart(ctx);
+            var existing = Chart.getChart(ctx);
             if (existing) existing.destroy();
         }
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels,
+                labels: labels,
                 datasets: [
                     {
                         label: 'Penjualan (Kotor)',
@@ -47,7 +48,7 @@
                     legend: { display: true, position: 'top' },
                     tooltip: {
                         callbacks: {
-                            label: (context) => context.dataset.label + ': Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                            label: function(context) { return context.dataset.label + ': Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
                         }
                     }
                 },
@@ -61,28 +62,30 @@
                         grid: { color: '#e9ecef' },
                         ticks: {
                             color: '#495057',
-                            callback: (value) => 'Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                            callback: function(value) { return 'Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
                         }
                     }
                 }
             }
         });
-    };
+    }
 
-    const initDashboardCharts = () => {
+    function initDashboardCharts() {
         if (typeof Chart === 'undefined') {
             setTimeout(initDashboardCharts, 50);
             return;
         }
         createSalesChart('dailySalesChart', dailyLabels, dailyData, dailyLaba);
         createSalesChart('monthlySalesChart', monthlyLabels, monthlyData, monthlyLaba);
-    };
+    }
     initDashboardCharts();
 
-    function getAiAnalysis() {
-        const btn = document.getElementById('btn-analyze');
-        const content = document.getElementById('ai-analysis-content');
-        
+    // Expose getAiAnalysis to window for onclick handler (SPA-safe)
+    window.getAiAnalysis = function() {
+        var btn = document.getElementById('btn-analyze');
+        var content = document.getElementById('ai-analysis-content');
+        if (!btn || !content) return;
+
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sedang Menganalisis...';
         content.innerHTML = '<div class="text-center py-4"><div class="spinner-grow text-primary mb-3" role="status"><span class="visually-hidden">Loading...</span></div><p class="text-white-50 small">Gemini AI sedang membaca dan menyimpulkan data penjualan Anda...</p></div>';
@@ -94,22 +97,23 @@
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(res => res.json())
-        .then(data => {
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Analisis';
-            
+
             if (data.error) {
-                content.innerHTML = `<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle"></i> ${data.error}</div>`;
+                content.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle"></i> ' + data.error + '</div>';
             } else if (data.analysis) {
                 content.classList.remove('text-center', 'text-white-50');
-                content.innerHTML = `<div class="fs-6 lh-lg text-white">${data.analysis}</div>`;
+                content.innerHTML = '<div class="fs-6 lh-lg text-white">' + data.analysis + '</div>';
             }
         })
-        .catch(err => {
+        .catch(function(err) {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-lightning-charge"></i> Coba Lagi';
-            content.innerHTML = `<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle"></i> Gagal terhubung ke server AI.</div>`;
+            content.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle"></i> Gagal terhubung ke server AI.</div>';
         });
-    }
+    };
+})();
 </script>

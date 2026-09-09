@@ -16,6 +16,10 @@
         const href = anchor.getAttribute('href');
         if (!href || href === '#' || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return false;
         if (anchor.target === '_blank' || anchor.hasAttribute('download') || anchor.hasAttribute('data-no-spa')) return false;
+        // Jangan intercept elemen Bootstrap (modal, dropdown, collapse, tab, dll)
+        if (anchor.hasAttribute('data-bs-toggle') || anchor.hasAttribute('data-bs-dismiss')) return false;
+        // Jangan intercept tombol dalam form
+        if (anchor.closest('form')) return false;
 
         try {
             const url = new URL(anchor.href, window.location.origin);
@@ -201,6 +205,16 @@
                 history.pushState({ url }, newTitle, url);
             }
 
+            // Bersihkan modal backdrop dan modal orphan dari halaman sebelumnya
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.querySelectorAll('body > .modal').forEach(el => {
+                try { bootstrap.Modal.getInstance(el)?.dispose(); } catch(e) {}
+                el.remove();
+            });
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+
             // Ganti konten
             contentContainer.innerHTML = newContent.innerHTML;
             contentContainer.scrollTop = 0;
@@ -215,10 +229,16 @@
             // Eksekusi skrip bawaan konten baru
             executeScripts(contentContainer);
 
-            // Re-init Bootstrap tooltips/popovers jika ada
+            // Re-init Bootstrap komponen (tooltips, modals, popovers)
             if (window.bootstrap) {
                 const tooltipTriggerList = [].slice.call(contentContainer.querySelectorAll('[data-bs-toggle="tooltip"]'));
                 tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+                // Pastikan modals bisa di-trigger kembali
+                contentContainer.querySelectorAll('.modal').forEach(modalEl => {
+                    // Dispose existing instance jika ada
+                    try { bootstrap.Modal.getInstance(modalEl)?.dispose(); } catch(e) {}
+                });
             }
 
             // Dispatch global event
@@ -275,12 +295,21 @@
 
         // 3. Tangani Tombol Back / Forward di Browser
         window.addEventListener('popstate', function(e) {
-            if (isEligibleAdminLink({ href: window.location.href, tagName: 'A', getAttribute: () => window.location.href })) {
+            var currentPath = window.location.pathname;
+            if (currentPath.startsWith('/admin')) {
                 navigateTo(window.location.href, false);
             } else {
                 window.location.reload();
             }
         });
+
+        // 4. Bersihkan cache SPA ketika form disubmit (POST/PUT/DELETE)
+        document.body.addEventListener('submit', function(e) {
+            pageCache.clear();
+        }, { capture: true });
+
+        // 5. Expose fungsi clear cache secara global
+        window.adminSpaClearCache = function() { pageCache.clear(); };
 
         // Prefetch seluruh menu sidebar utama saat admin pertama kali membuka dashboard
         setTimeout(() => {
