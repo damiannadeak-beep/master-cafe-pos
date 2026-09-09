@@ -166,14 +166,18 @@ class PosController extends Controller
                 'id_kasir' => auth()->id() // Kasir yang memproses pesanan
             ]);
 
-            // Notify Customer via Web Push
+            // Notify Customer via Web Push (non-blocking)
             if ($pesanan->konsumen) {
-                $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
-                $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
-                    'Pesanan ' . $statusText,
-                    'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
-                    '/konsumen/profil'
-                ));
+                try {
+                    $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
+                    $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
+                        'Pesanan ' . $statusText,
+                        'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
+                        '/konsumen/profil'
+                    ));
+                } catch (\Throwable $notifyErr) {
+                    \Illuminate\Support\Facades\Log::warning('WebPush gagal dikirim: ' . $notifyErr->getMessage());
+                }
             }
 
             return response()->json([

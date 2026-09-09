@@ -53,22 +53,40 @@
         });
     };
 
-    // Auto-sync berkala tiap 5 detik jika kasir sedang di tab aktif
+    // Auto-sync berkala tiap 6 detik jika kasir sedang di tab aktif dan idle
     setInterval(() => {
-        if (!document.hidden && !document.querySelector('.modal.show')) {
+        if (!document.hidden && !document.querySelector('.modal.show') && !isReloadingCards) {
             window.reloadActiveOrdersCards(true);
         }
-    }, 5000);
+    }, 6000);
 
-    // --- 2. Update Status Pesanan (Proses Masak / Selesai) ---
+    // --- 2. Update Status Pesanan (Optimistic Update: 0 Detik Instan!) ---
     function updateOrderStatus(id, status, btnElement) {
-        let originalHtml = '';
-        if (btnElement) {
-            originalHtml = btnElement.innerHTML;
-            btnElement.disabled = true;
-            btnElement.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Memproses...';
+        const card = document.getElementById('order-card-' + id);
+        const badgeContainer = card ? card.querySelector('.card-header .badge') : null;
+
+        // ⚡ OPTIMISTIC UPDATE: Langsung ubah badge & tombol di layar kasir dalam 0 milidetik!
+        if (status === 'processing') {
+            if (badgeContainer) {
+                badgeContainer.outerHTML = '<span class="badge bg-primary"><i class="bi bi-fire"></i> DIMASAK</span>';
+            }
+            if (btnElement) {
+                btnElement.outerHTML = `<button class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus(${id}, 'completed', this)">
+                    <i class="bi bi-check2-all me-1"></i> Selesai Dimasak
+                </button>`;
+            }
+            if (window.showToast) window.showToast(`Pesanan #${id} sedang dimasak!`, 'success');
+        } else if (status === 'completed') {
+            if (badgeContainer) {
+                badgeContainer.outerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> SIAP DIHIDANGKAN</span>';
+            }
+            if (btnElement) {
+                btnElement.remove();
+            }
+            if (window.showToast) window.showToast(`Pesanan #${id} selesai dimasak!`, 'success');
         }
 
+        // Kirim permintaan ke server di background tanpa menghalangi kasir
         fetch(`/kasir/order/${id}/status`, {
             method: 'PUT',
             headers: {
@@ -81,28 +99,20 @@
         .then(res => res.json())
         .then(data => {
             if (data.error) {
+                // Revert jika ada error dari server
                 if (window.showToast) window.showToast(data.error, 'danger');
                 else alert(data.error);
-                if (btnElement) {
-                    btnElement.disabled = false;
-                    btnElement.innerHTML = originalHtml;
-                }
-            } else {
-                const label = status === 'processing' ? 'sedang dimasak' : 'siap dihidangkan';
-                if (window.showToast) {
-                    window.showToast(`Pesanan #${id} ${label}!`, 'success');
-                }
-                // Update kartu realtime tanpa reload halaman
                 window.reloadActiveOrdersCards(true);
+            } else {
+                if (typeof fetchActiveOrdersCount === 'function') {
+                    fetchActiveOrdersCount();
+                }
             }
         })
         .catch(err => {
             console.error(err);
-            if (window.showToast) window.showToast('Gagal mengupdate status pesanan.', 'danger');
-            if (btnElement) {
-                btnElement.disabled = false;
-                btnElement.innerHTML = originalHtml;
-            }
+            if (window.showToast) window.showToast('Gagal sinkron status pesanan ke server.', 'danger');
+            window.reloadActiveOrdersCards(true);
         });
     }
 
