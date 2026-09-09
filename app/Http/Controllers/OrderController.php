@@ -130,23 +130,33 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Trigger WebSocket Event (Reverb)
-            broadcast(new \App\Events\PesananBaru($pesanan));
+            // Trigger WebSocket Event (Reverb) - Fail-Safe Non-Blocking
+            try {
+                broadcast(new \App\Events\PesananBaru($pesanan));
 
-            if ($id_meja && $tipe_pesanan === 'dine_in') {
-                $mejaModel = \App\Models\Meja::find($id_meja);
-                if ($mejaModel) {
-                    broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
+                if ($id_meja && $tipe_pesanan === 'dine_in') {
+                    $mejaModel = \App\Models\Meja::find($id_meja);
+                    if ($mejaModel) {
+                        broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
+                    }
                 }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal broadcast WebSocket: ' . $e->getMessage());
             }
 
-            // Trigger Push Notification to Admin and Kasir
-            $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
-            \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
-                'Pesanan Baru Masuk!',
-                'Order #' . $pesanan->id . ' baru saja dibuat. Segera cek pesanan aktif.',
-                '/kasir/pesanan-aktif'
-            ));
+            // Trigger Push Notification to Admin and Kasir - Fail-Safe Non-Blocking
+            try {
+                $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
+                if ($adminsAndKasirs->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
+                        'Pesanan Baru Masuk!',
+                        'Order #' . $pesanan->id . ' baru saja dibuat. Segera cek pesanan aktif.',
+                        '/kasir/pesanan-aktif'
+                    ));
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal kirim Web Push: ' . $e->getMessage());
+            }
 
             return response()->json(['message' => 'Pesanan berhasil ditambahkan', 'id_pesanan' => $pesanan->id]);
 

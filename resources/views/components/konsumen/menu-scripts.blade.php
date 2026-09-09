@@ -372,7 +372,7 @@
     function proceedToCheckout() {
         let formData = {
             _token: "{{ csrf_token() }}",
-            tipe_pesanan: '{{ $orderType ?? "dine-in" }}',
+            tipe_pesanan: '{{ $orderType ?? "dine_in" }}',
             @if(isset($meja))
             id_meja: "{{ $meja->id }}",
             @endif
