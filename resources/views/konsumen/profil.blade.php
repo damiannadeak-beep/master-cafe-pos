@@ -42,38 +42,50 @@
     <div class="row">
         <div class="col-md-10 mx-auto">
             <div class="card border-0 shadow-sm overflow-hidden rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                <div class="card-header border-bottom-0 p-0">
-                    <ul class="nav nav-pills nav-justified" id="pills-tab" role="tablist" style="border-bottom: 2px solid #21262d;">
+                <div class="card-header border-bottom-0 p-0" style="background-color: #11151a;">
+                    <ul class="nav nav-pills nav-justified" id="pills-tab" role="tablist" style="border-bottom: 1px solid #21262d;">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex justify-content-center align-items-center active rounded-0 fw-bold py-3" id="pills-aktif-tab" data-bs-toggle="pill" data-bs-target="#pills-aktif" type="button" role="tab" style="border-bottom: 3px solid transparent;">
-                                <i class="bi bi-basket me-2"></i>Pesanan Aktif
+                            <button class="nav-link d-flex justify-content-center align-items-center active rounded-0 fw-semibold py-3 px-2 px-md-3" id="pills-aktif-tab" data-bs-toggle="pill" data-bs-target="#pills-aktif" type="button" role="tab" style="font-family: 'Outfit', sans-serif !important;">
+                                <i class="bi bi-basket me-2 fs-6"></i>
+                                <span class="text-nowrap">Pesanan Aktif</span>
+                                @if(isset($pesananAktif) && $pesananAktif->count() > 0)
+                                    <span class="badge rounded-pill bg-warning text-dark ms-2" style="font-size: 0.7rem; padding: 0.25em 0.55em;">{{ $pesananAktif->count() }}</span>
+                                @endif
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-riwayat-tab" data-bs-toggle="pill" data-bs-target="#pills-riwayat" type="button" role="tab" style="border-bottom: 3px solid transparent;">
-                                <i class="bi bi-clock-history me-2"></i>Riwayat
+                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-semibold py-3 px-2 px-md-3 text-secondary" id="pills-riwayat-tab" data-bs-toggle="pill" data-bs-target="#pills-riwayat" type="button" role="tab" style="font-family: 'Outfit', sans-serif !important;">
+                                <i class="bi bi-clock-history me-2 fs-6"></i>
+                                <span class="text-nowrap">Riwayat</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-bold py-3 text-secondary" id="pills-profil-tab" data-bs-toggle="pill" data-bs-target="#pills-profil" type="button" role="tab" style="border-bottom: 3px solid transparent;">
-                                <i class="bi bi-gear me-2"></i>Profil
+                            <button class="nav-link d-flex justify-content-center align-items-center rounded-0 fw-semibold py-3 px-2 px-md-3 text-secondary" id="pills-profil-tab" data-bs-toggle="pill" data-bs-target="#pills-profil" type="button" role="tab" style="font-family: 'Outfit', sans-serif !important;">
+                                <i class="bi bi-gear me-2 fs-6"></i>
+                                <span class="text-nowrap">Profil</span>
                             </button>
                         </li>
                     </ul>
                 </div>
 
-                <div class="card-body p-4 p-md-5 ">
+                <div class="card-body p-4 p-md-5">
                     <div class="tab-content" id="pills-tabContent">
                         
                         <!-- TAB PESANAN AKTIF -->
                         <div class="tab-pane fade show active" id="pills-aktif" role="tabpanel">
-                            <h5 class="fw-bold mb-4 text-center">Pesanan Sedang Berlangsung</h5>
+                            <div class="text-center mb-4">
+                                <h5 class="fw-bold text-white mb-1" style="font-family: 'Outfit', sans-serif !important; font-size: 1.25rem;">Pesanan Sedang Berlangsung</h5>
+                                <p class="text-secondary small mb-0" style="font-family: 'Outfit', sans-serif !important;">Pantau progres pesanan makanan dan minuman Anda secara langsung</p>
+                            </div>
                             @include("components.konsumen.active-order-card")
                         </div>
 
                         <!-- TAB RIWAYAT -->
                         <div class="tab-pane fade" id="pills-riwayat" role="tabpanel">
-                            <h5 class="fw-bold mb-4 text-center">Riwayat Pesanan Saya</h5>
+                            <div class="text-center mb-4">
+                                <h5 class="fw-bold text-white mb-1" style="font-family: 'Outfit', sans-serif !important; font-size: 1.25rem;">Riwayat Pesanan Saya</h5>
+                                <p class="text-secondary small mb-0" style="font-family: 'Outfit', sans-serif !important;">Daftar seluruh transaksi dan pesanan yang pernah Anda buat</p>
+                            </div>
                             @include("components.konsumen.order-history-card")
                         </div>
 
@@ -83,17 +95,20 @@
                                 <div class="col-md-8 mx-auto">
                                     <div class="card border-0 shadow-sm rounded-4" style="background-color: #0e1217; border: 1px solid #21262d !important;">
                                         <div class="card-body p-4 p-md-5">
-                                            <h5 class="fw-bold mb-4 text-center">Informasi Akun</h5>
+                                            <div class="text-center mb-4">
+                                                <h5 class="fw-bold text-white mb-1" style="font-family: 'Outfit', sans-serif !important; font-size: 1.25rem;">Informasi Akun</h5>
+                                                <p class="text-secondary small mb-0" style="font-family: 'Outfit', sans-serif !important;">Perbarui profil dan nomor kontak akun Anda</p>
+                                            </div>
                                             
                                             @include("components.konsumen.profile-edit-form")
                                             
-                                            <hr class="mb-4 border-light">
+                                            <hr class="mb-4" style="border-color: #21262d !important;">
                                             
                                             <div class="text-center">
                                                 <p class="text-secondary small mb-3">Ingin keluar dari akun ini?</p>
                                                 <form action="{{ route('logout') }}" method="POST">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-outline-danger px-4 rounded-pill fw-bold btn-touch">
+                                                    <button type="submit" class="btn btn-outline-danger px-4 rounded-pill fw-bold btn-touch" style="font-family: 'Outfit', sans-serif !important;">
                                                         <i class="bi bi-box-arrow-right me-1"></i> Keluar
                                                     </button>
                                                 </form>
@@ -114,24 +129,28 @@
 <style>
     /* Styling Tabs */
     .nav-pills .nav-link {
-        color: #6c757d;
+        color: #8b949e;
         background: transparent;
-        transition: 0.3s;
+        transition: all 0.2s ease-in-out;
+        border-bottom: 2px solid transparent !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-size: 0.95rem;
     }
     .nav-pills .nav-link:hover {
-        color: #c08e5c;
+        color: #e6edf3;
+        background: rgba(255, 255, 255, 0.02);
     }
     .nav-pills .nav-link.active {
         color: #c08e5c !important;
-        background: transparent;
-        border-bottom: 3px solid #c08e5c !important;
+        background: rgba(192, 142, 92, 0.06) !important;
+        border-bottom: 2px solid #c08e5c !important;
     }
     .rounded-4 {
         border-radius: 1rem !important;
     }
     .form-control:focus {
-        box-shadow: none;
-        border-color: #c08e5c;
+        box-shadow: 0 0 0 0.2rem rgba(192, 142, 92, 0.15) !important;
+        border-color: #c08e5c !important;
         background-color: #0e1217 !important;
         color: white !important;
     }
