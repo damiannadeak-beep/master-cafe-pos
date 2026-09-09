@@ -333,6 +333,10 @@ class PosController extends Controller
                 throw new \Exception('Pesanan sudah dibayar dan tidak dapat divoid.');
             }
 
+            if ($pesanan->status === 'completed') {
+                throw new \Exception('Pesanan sudah selesai dan tidak dapat divoid.');
+            }
+
             if ($pesanan->status === 'cancelled') {
                 throw new \Exception('Pesanan sudah dibatalkan sebelumnya.');
             }

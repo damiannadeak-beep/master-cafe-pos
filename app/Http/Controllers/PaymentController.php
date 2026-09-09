@@ -66,10 +66,9 @@ class PaymentController extends Controller
             
             // Broadcast notification to cashier that there is a new payment to verify
             \App\Models\Notification::create([
-                'user_id' => 1, // Assume admin/cashier
-                'title' => 'Bukti Pembayaran Baru',
+                'type' => 'payment_verification',
                 'message' => 'Pesanan #' . $pesanan->id . ' menunggu verifikasi pembayaran.',
-                'link' => '/kasir/pesanan-aktif'
+                'id_meja' => $pesanan->id_meja,
             ]);
         }
 

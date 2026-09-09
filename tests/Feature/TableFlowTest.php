@@ -93,7 +93,7 @@ class TableFlowTest extends TestCase
         $response->assertSee('Live Monitor Meja');
         $response->assertSee('Total Meja Terdaftar');
         $response->assertSee('Meja Sedang Ada Pesanan');
-        $response->assertSee('Meja Luang / Bersih');
+        $response->assertSee('Meja Tersedia / Bersih');
         // Pastikan saklar on/off switch sudah tidak ada
         $response->assertDontSee('form-switch');
         $response->assertDontSee('toggleMeja');

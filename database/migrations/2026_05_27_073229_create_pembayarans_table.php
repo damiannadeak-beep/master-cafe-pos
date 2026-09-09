@@ -15,7 +15,7 @@ return new class extends Migration
     $table->id();
     $table->foreignId('id_pesanan')->constrained('pesanan')->onDelete('cascade');
     $table->enum('metode', ['cash', 'qris'])->nullable();
-    $table->enum('status', ['unpaid', 'paid'])->default('unpaid');
+    $table->string('status', 50)->default('unpaid');
     $table->decimal('total_bayar', 12, 2)->default(0);
     $table->string('snap_token')->nullable();
     $table->dateTime('tanggal')->nullable();

@@ -60,11 +60,9 @@ class AdminPromoController extends Controller
             }
         }
         
-        \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'Create Promo',
-            'description' => 'Membuat promo baru: ' . $promo->title
-        ]);
+        if (function_exists('activity')) {
+            activity()->causedBy(auth()->user())->performedOn($promo)->log('Membuat promo baru: ' . $promo->title);
+        }
 
         return redirect()->route('admin.promo.index')->with('success','Promo dibuat.');
     }
@@ -119,11 +117,9 @@ class AdminPromoController extends Controller
             }
         }
         
-        \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'Update Promo',
-            'description' => 'Memperbarui promo: ' . $promo->title
-        ]);
+        if (function_exists('activity')) {
+            activity()->causedBy(auth()->user())->performedOn($promo)->log('Memperbarui promo: ' . $promo->title);
+        }
 
         return redirect()->route('admin.promo.index')->with('success','Promo diperbarui.');
     }
