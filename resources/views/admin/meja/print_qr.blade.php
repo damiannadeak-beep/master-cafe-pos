@@ -17,65 +17,46 @@
         .qr-card {
             background-color: #fff;
             padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             text-align: center;
-            max-width: 360px;
-            border: 3px solid #c08e5c;
+            max-width: 350px;
+            border: 2px dashed #b34b63;
         }
         .qr-card h1 {
-            color: #1a1a1a;
+            color: #b34b63;
             margin-top: 0;
-            margin-bottom: 4px;
             font-size: 24px;
-            letter-spacing: 2px;
-        }
-        .qr-card .cafe-tag {
-            color: #c08e5c;
-            font-size: 13px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
         }
         .qr-card h2 {
-            margin: 10px 0 15px;
-            font-size: 30px;
-            color: #1a1a1a;
-            font-weight: 800;
+            margin: 10px 0 20px;
+            font-size: 32px;
+            color: #333;
         }
         .qr-image {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #fafafa;
-            border-radius: 12px;
-            display: inline-block;
-            border: 1px solid #eee;
+            margin-bottom: 20px;
         }
         .qr-image img {
-            width: 230px;
-            height: 230px;
-            display: block;
+            width: 250px;
+            height: 250px;
         }
         .footer-text {
-            font-size: 13px;
-            color: #555;
+            font-size: 14px;
+            color: #666;
             line-height: 1.5;
         }
         .print-btn {
             margin-top: 20px;
-            background: linear-gradient(135deg, #c08e5c, #986c43);
+            background-color: #b34b63;
             color: white;
             border: none;
-            padding: 10px 24px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(192, 142, 92, 0.3);
         }
         .print-btn:hover {
-            opacity: 0.9;
+            background-color: #8c3a4d;
         }
         @media print {
             body {
@@ -95,7 +76,6 @@
 
     <div class="qr-card">
         <h1>MASTER CAFE</h1>
-        <div class="cafe-tag">Self-Service Dine-In</div>
         <h2>{{ $meja->nama_meja_atau_nomor }}</h2>
         
         <div class="qr-image">
@@ -103,11 +83,11 @@
         </div>
         
         <div class="footer-text">
-            <strong>Scan untuk Pesan</strong><br>
-            Buka kamera HP Anda, pesan makanan & minuman, dan pesanan akan langsung diantar ke meja ini!
+            <strong>Scan QR Code</strong><br>
+            Untuk melihat menu dan memesan langsung dari HP Anda.
         </div>
         
-        <button class="print-btn" onclick="window.print()">Cetak QR Code</button>
+        <button class="print-btn" onclick="window.print()">Cetak (Print)</button>
     </div>
 
 </body>
