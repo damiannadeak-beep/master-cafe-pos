@@ -90,6 +90,14 @@
             70% { box-shadow: 0 0 0 6px rgba(46, 160, 67, 0); }
             100% { box-shadow: 0 0 0 0 rgba(46, 160, 67, 0); }
         }
+        .spin-animation {
+            animation: spinRotate 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spinRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -132,11 +140,15 @@
                 window.showToast(message || 'Pesanan baru masuk!', 'success');
             }
 
-            // 3. Auto-reload daftar pesanan aktif
+            // 3. Auto-reload daftar pesanan aktif (prioritaskan pembaruan kartu realtime tanpa reload halaman)
             if (window.location.pathname.includes('pesanan-aktif')) {
-                setTimeout(() => {
-                    window.location.reload();
-                }, 500);
+                if (typeof window.reloadActiveOrdersCards === 'function') {
+                    window.reloadActiveOrdersCards(true);
+                } else {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                }
             }
         }
 

@@ -59,6 +59,16 @@ class AuthRoleTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /** TEST 4b: Kasir bisa memuat kartu pesanan aktif via AJAX cards_only tanpa reload halaman */
+    public function test_kasir_bisa_memuat_kartu_pesanan_aktif_via_ajax()
+    {
+        $kasir = User::factory()->create();
+        $kasir->assignRole('kasir');
+        $response = $this->actingAs($kasir)->get('/kasir/pesanan-aktif?cards_only=1');
+        $response->assertStatus(200);
+        $response->assertSee('Pesanan');
+    }
+
     /** TEST 5: Pemilik TIDAK bisa mengakses route kasir (role middleware) */
     public function test_pemilik_tidak_bisa_akses_route_kasir()
     {

@@ -1,5 +1,5 @@
 @forelse($orders as $order)
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4" id="order-card-{{ $order->id }}">
                 <div class="card shadow-sm border-0 h-100 rounded-4">
                     <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center rounded-top-4">
                         <div>
@@ -92,13 +92,13 @@
 
                         <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
                             @if($order->status === 'pending')
-                                <button class="btn btn-sm btn-primary w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus({{ $order->id }}, 'processing')">
+                                <button class="btn btn-sm btn-primary w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus({{ $order->id }}, 'processing', this)">
                                     <i class="bi bi-play-circle me-1"></i> Proses Masak
                                 </button>
                             @endif
                             
                             @if($order->status === 'processing')
-                                <button class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus({{ $order->id }}, 'completed')">
+                                <button class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="updateOrderStatus({{ $order->id }}, 'completed', this)">
                                     <i class="bi bi-check2-all me-1"></i> Selesai Dimasak
                                 </button>
                             @endif

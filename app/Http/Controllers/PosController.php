@@ -36,7 +36,7 @@ class PosController extends Controller
     /**
      * Menampilkan Halaman Pesanan Aktif Konsumen
      */
-    public function pesananAktif()
+    public function pesananAktif(Request $request)
     {
         $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
             ->where(function ($query) {
@@ -50,6 +50,10 @@ class PosController extends Controller
             })
             ->orderBy('created_at', 'asc')
             ->get();
+
+        if ($request->ajax() || $request->wantsJson() || $request->query('cards_only')) {
+            return view('components.kasir.active-order-card', compact('orders'))->render();
+        }
 
         return view('kasir.pesanan_aktif', compact('orders'));
     }
@@ -204,10 +208,19 @@ class PosController extends Controller
             }
 
             DB::commit();
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran pesanan #'.$pesanan->id.' berhasil diverifikasi.'
+                ]);
+            }
             return redirect()->back()->with('success', 'Pembayaran pesanan #'.$pesanan->id.' berhasil diverifikasi.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Gagal verifikasi pembayaran: ' . $e->getMessage());
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json(['error' => 'Gagal memverifikasi pembayaran.'], 422);
+            }
             return redirect()->back()->with('error', 'Gagal memverifikasi pembayaran.');
         }
     }
@@ -220,11 +233,23 @@ class PosController extends Controller
                 $pesanan->pembayaran->status = 'unpaid';
                 $pesanan->pembayaran->bukti_bayar = null;
                 $pesanan->pembayaran->save();
+                if (request()->ajax() || request()->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Bukti pembayaran ditolak. Pesanan dikembalikan ke status belum bayar.'
+                    ]);
+                }
                 return redirect()->back()->with('success', 'Bukti pembayaran ditolak. Pesanan dikembalikan ke status belum bayar.');
+            }
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json(['error' => 'Pesanan tidak dalam status verifikasi.'], 422);
             }
             return redirect()->back()->with('error', 'Pesanan tidak dalam status verifikasi.');
         } catch (\Exception $e) {
             Log::error('Gagal tolak pembayaran: ' . $e->getMessage());
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json(['error' => 'Gagal menolak pembayaran.'], 422);
+            }
             return redirect()->back()->with('error', 'Gagal menolak pembayaran.');
         }
     }
