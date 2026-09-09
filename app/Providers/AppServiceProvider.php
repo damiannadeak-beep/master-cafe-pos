@@ -31,11 +31,15 @@ class AppServiceProvider extends ServiceProvider
         }
 
         View::composer('layouts.admin', function ($view) {
-            $menuMenipis = Menu::where('stok', '<', 10)->where('is_available', true)->get();
-            $bahanMenipis = Bahan::where('stok', '<', 10)->get();
-            $stokMenipisCount = $menuMenipis->count() + $bahanMenipis->count();
+            $data = cache()->remember('admin_layout_stok_data', 15, function() {
+                $menuMenipis = Menu::where('stok', '<', 10)->where('is_available', true)->get();
+                $bahanMenipis = Bahan::where('stok', '<', 10)->get();
+                $stokMenipisCount = $menuMenipis->count() + $bahanMenipis->count();
+                $pendingReq = \App\Models\PermintaanBelanja::where('status', 'menunggu')->count();
+                return compact('menuMenipis', 'bahanMenipis', 'stokMenipisCount', 'pendingReq');
+            });
 
-            $view->with(compact('menuMenipis', 'bahanMenipis', 'stokMenipisCount'));
+            $view->with($data);
         });
 
         View::composer('layouts.app', function ($view) {

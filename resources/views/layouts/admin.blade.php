@@ -6,17 +6,17 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Admin - Master Cafe POS</title>
     @include("layouts.includes.head-assets")
-            <style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <style>
         .admin-layout { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; margin: 0; padding: 0; }
         .admin-topbar { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: var(--gradient-surface); z-index: 1050; flex-shrink: 0; }
         .admin-sidebar { width: 280px; flex-shrink: 0; background: var(--gradient-surface); border-right: 1px solid var(--border-subtle); height: 100%; overflow-y: auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; }
-        .admin-sidebar .nav-link { color: var(--text-muted); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; transition: all 0.2s ease; display: flex; align-items: center; }
+        .admin-sidebar .nav-link { color: var(--text-muted); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; transition: background 0.18s ease, color 0.18s ease; display: flex; align-items: center; }
         .admin-sidebar .nav-link.active { background: var(--gradient-bronze) !important; color: #ffffff !important; box-shadow: 0 4px 16px rgba(192, 142, 92, 0.25); font-weight: 600; }
         .admin-sidebar .nav-link i { font-size: 1.25rem; width: 24px; margin-right: 16px; }
         .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } 
-        .admin-content { flex: 1; padding: 2rem; background: var(--bg-base); overflow-y: auto; animation: adminContentFadeIn 0.15s ease-out; }
-        @keyframes adminContentFadeIn { from { opacity: 0.4; } to { opacity: 1; } }
-        #adminProgressBar { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--gradient-bronze); z-index: 99999; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease; pointer-events: none; opacity: 0; box-shadow: 0 0 10px rgba(192, 142, 92, 0.8); }
+        .admin-content { flex: 1; padding: 2rem; background: var(--bg-base); overflow-y: auto; transition: opacity 0.1s cubic-bezier(0.16, 1, 0.3, 1), transform 0.1s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform; }
+        #adminProgressBar { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--gradient-bronze); z-index: 99999; transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease; pointer-events: none; opacity: 0; box-shadow: 0 0 10px rgba(192, 142, 92, 0.8); }
         .nav-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin: 1.5rem 0 0.5rem 1rem; opacity: 0.7; }
         @media (max-width: 991.98px) { .admin-sidebar { position: fixed; transform: translateX(-100%); z-index: 1060; transition: transform 0.3s ease; width: 280px; top: 0; bottom: 0; height: 100dvh; padding-bottom: 2rem; } .admin-sidebar.show { transform: translateX(0); } .admin-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1055; } .admin-overlay.show { display: block; } .admin-main-wrapper { display: flex; flex: 1; overflow: hidden; } .admin-content { padding: 1rem; } }
     </style>
@@ -118,10 +118,7 @@
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.permintaan.*') ? 'active' : '' }}" href="{{ route('admin.permintaan.index') }}">
                         <i class="bi bi-cart-check-fill me-2"></i> Permintaan Belanja
-                        @php
-                            $pendingReq = \App\Models\PermintaanBelanja::where('status', 'menunggu')->count();
-                        @endphp
-                        @if($pendingReq > 0)
+                        @if(!empty($pendingReq) && $pendingReq > 0)
                             <span class="badge bg-danger ms-auto rounded-pill">{{ $pendingReq }}</span>
                         @endif
                     </a>
@@ -246,37 +243,9 @@
                     });
                 });
             }
-
-            // Transisi halus & Bronze Loading Progress Bar saat navigasi menu
-            const progressBar = document.getElementById('adminProgressBar');
-            const adminContent = document.querySelector('.admin-content');
-
-            document.querySelectorAll('.admin-sidebar a.nav-link, .admin-topbar a:not([data-bs-toggle])').forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    const href = link.getAttribute('href');
-                    if (!href || href === '#' || href.startsWith('javascript:') || link.target === '_blank') return;
-
-                    if (progressBar) {
-                        progressBar.style.width = '70%';
-                        progressBar.style.opacity = '1';
-                    }
-                    if (adminContent) {
-                        adminContent.style.opacity = '0.5';
-                        adminContent.style.transition = 'opacity 0.15s ease';
-                    }
-                });
-            });
-
-            // Selesaikan progress bar saat halaman selesai termuat
-            if (progressBar) {
-                progressBar.style.width = '100%';
-                setTimeout(function() {
-                    progressBar.style.opacity = '0';
-                    setTimeout(function() { progressBar.style.width = '0%'; }, 300);
-                }, 100);
-            }
         });
     </script>
+    <script src="{{ asset('js/admin-spa.js') }}"></script>
 </body>
 </html>
 

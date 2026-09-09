@@ -9,6 +9,10 @@
     const createSalesChart = (elementId, labels, dataSales, dataLaba) => {
         const ctx = document.getElementById(elementId);
         if (!ctx) return;
+        if (typeof Chart !== 'undefined') {
+            const existing = Chart.getChart(ctx);
+            if (existing) existing.destroy();
+        }
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -65,8 +69,15 @@
         });
     };
 
-    createSalesChart('dailySalesChart', dailyLabels, dailyData, dailyLaba);
-    createSalesChart('monthlySalesChart', monthlyLabels, monthlyData, monthlyLaba);
+    const initDashboardCharts = () => {
+        if (typeof Chart === 'undefined') {
+            setTimeout(initDashboardCharts, 50);
+            return;
+        }
+        createSalesChart('dailySalesChart', dailyLabels, dailyData, dailyLaba);
+        createSalesChart('monthlySalesChart', monthlyLabels, monthlyData, monthlyLaba);
+    };
+    initDashboardCharts();
 
     function getAiAnalysis() {
         const btn = document.getElementById('btn-analyze');
