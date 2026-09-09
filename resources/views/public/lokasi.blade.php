@@ -15,7 +15,7 @@
 
 <div class="container mb-5 pb-5">
     
-    <div class="row g-4 align-items-center mb-5">
+    <div class="row g-4 align-items-start mb-5">
         <!-- Info Cards -->
         <div class="col-lg-4">
             <div class="d-flex flex-column gap-4">

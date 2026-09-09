@@ -35,10 +35,21 @@
 
                     <div class="mb-2">
                         <label class="form-label text-white-50 small fw-bold mb-1">Password Akun Kasir (Otorisasi)</label>
-                        <div class="input-group input-group-sm">
-                            <input type="password" id="void-password-input" class="form-control text-white border-secondary" placeholder="Masukkan password Anda" required autocomplete="current-password" style="background-color: #0e1217;">
-                            <button class="btn btn-outline-secondary" type="button" onclick="window.toggleVoidPasswordVisibility(this)">
-                                <i class="bi bi-eye"></i>
+                        <div class="position-relative">
+                            <input type="password" 
+                                   id="void-password-input" 
+                                   class="form-control text-white form-control-sm" 
+                                   placeholder="Masukkan password Anda" 
+                                   required 
+                                   autocomplete="current-password" 
+                                   style="background-color: #0e1217; border: 1px solid #30363d; border-radius: 8px; padding-right: 2.75rem !important; height: 38px;">
+                            <button type="button" 
+                                    class="btn p-0 position-absolute top-50 end-0 translate-middle-y me-3 text-secondary d-flex align-items-center justify-content-center void-toggle-eye" 
+                                    style="border: none; background: transparent; z-index: 5; cursor: pointer; color: #8b949e !important;"
+                                    onclick="window.toggleVoidPasswordVisibility(this)"
+                                    tabindex="-1"
+                                    title="Tampilkan / Sembunyikan Password">
+                                <i class="bi bi-eye-slash fs-6"></i>
                             </button>
                         </div>
                         <small class="text-white-50" style="font-size: 11px;">Wajib diisi sebagai verifikasi otorisasi kasir.</small>
@@ -57,3 +68,19 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Hilangkan tombol reveal bawaan Edge / Chromium agar tidak dobel mata */
+    #void-password-input::-ms-reveal,
+    #void-password-input::-ms-clear {
+        display: none !important;
+    }
+    #void-password-input:focus {
+        border-color: #c08e5c !important;
+        box-shadow: 0 0 0 2px rgba(192, 142, 92, 0.25) !important;
+        outline: none;
+    }
+    .void-toggle-eye:hover {
+        color: #ffffff !important;
+    }
+</style>

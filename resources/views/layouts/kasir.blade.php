@@ -23,6 +23,12 @@
         .kasir-container::-webkit-scrollbar-thumb { background: #21262d; border-radius: 4px; }
         .kasir-container::-webkit-scrollbar-thumb:hover { background: rgba(152, 108, 67, 0.5); }
 
+        /* Sembunyikan tombol mata default browser Edge/IE agar tidak bertumpuk */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none !important;
+        }
+
         /* Modern Segmented Pill Navbar Styles */
         .bg-surface-dark { background-color: rgba(14, 18, 23, 0.75); }
         .nav-pill-btn {
@@ -153,11 +159,21 @@
         }
 
         function fetchActiveOrdersCount() {
+            if (document.hidden) return; // Prevent background requests and ERR_FAILED when tab is sleeping
             fetch('{{ route("kasir.active_orders_count") }}?_t=' + Date.now(), {
-                headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Cache-Control': 'no-cache', 
+                    'Pragma': 'no-cache' 
+                }
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) return null;
+                    return response.json();
+                })
                 .then(data => {
+                    if (!data) return;
                     const badge = document.getElementById('badge-active-orders');
                     if (data.count > 0) {
                         badge.innerText = data.count;
@@ -184,7 +200,9 @@
                     lastKnownCount = currentCount;
                     isInitialSync = false;
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    // Ignore aborted network requests during tab sleep or page navigation
+                });
         }
 
         // --- Dark Mode Logic ---
@@ -311,8 +329,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
 
-            // Default sync interval: 1 second for ultra-fast responsiveness without reload lag
-            let syncInterval = setInterval(fetchActiveOrdersCount, 1000);
+            // Default fallback interval: 5 seconds (not 1s, preventing CPU spike before WebSocket loads)
+            let syncInterval = setInterval(fetchActiveOrdersCount, 5000);
+
+            // Immediate refresh when tab becomes visible again
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    fetchActiveOrdersCount();
+                }
+            });
 
             // Wait for Vite modules (Echo) to load
             setTimeout(() => {

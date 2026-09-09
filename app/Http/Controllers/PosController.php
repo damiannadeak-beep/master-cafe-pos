@@ -43,8 +43,11 @@ class PosController extends Controller
                 $query->whereIn('status', ['pending', 'processing'])
                       ->orWhere(function ($q) {
                           $q->where('status', 'completed')
-                            ->whereHas('pembayaran', function ($p) {
-                                $p->where('status', '!=', 'paid');
+                            ->where(function ($sub) {
+                                $sub->whereDoesntHave('pembayaran')
+                                    ->orWhereHas('pembayaran', function ($p) {
+                                        $p->where('status', '!=', 'paid');
+                                    });
                             });
                       });
             })
@@ -67,8 +70,11 @@ class PosController extends Controller
             $query->whereIn('status', ['pending', 'processing'])
                   ->orWhere(function ($q) {
                       $q->where('status', 'completed')
-                        ->whereHas('pembayaran', function ($p) {
-                            $p->where('status', '!=', 'paid');
+                        ->where(function ($sub) {
+                            $sub->whereDoesntHave('pembayaran')
+                                ->orWhereHas('pembayaran', function ($p) {
+                                    $p->where('status', '!=', 'paid');
+                                });
                         });
                   });
         })->count();
@@ -323,8 +329,12 @@ class PosController extends Controller
                 throw new \Exception('Password yang dimasukkan salah.');
             }
 
-            if ($pesanan->status === 'completed') {
-                throw new \Exception('Pesanan sudah selesai dan tidak dapat divoid.');
+            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
+                throw new \Exception('Pesanan sudah dibayar dan tidak dapat divoid.');
+            }
+
+            if ($pesanan->status === 'cancelled') {
+                throw new \Exception('Pesanan sudah dibatalkan sebelumnya.');
             }
 
             // Simpan log void
@@ -540,7 +550,7 @@ class PosController extends Controller
 
             $pesananAsli = Pesanan::with('detail_pesanan')->findOrFail($id_pesanan);
 
-            if ($pesananAsli->status === 'completed' || ($pesananAsli->pembayaran && $pesananAsli->pembayaran->status === 'paid')) {
+            if ($pesananAsli->pembayaran && $pesananAsli->pembayaran->status === 'paid') {
                 throw new \Exception('Pesanan sudah dibayar, tidak bisa dipisah.');
             }
 

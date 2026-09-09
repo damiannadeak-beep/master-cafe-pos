@@ -4,9 +4,11 @@
 <div>
     <form id="order-form">
         @csrf
-        <div class="kasir-card hover-lift card bg-transparent">
-            <div class="card-header border-bottom-0 pt-4 pb-0 px-4">
-                <h5 class="mb-0 fw-bold text-accent"><i class="bi bi-cart3 me-2"></i>Detail Pesanan</h5>
+        <div class="kasir-card card rounded-4 shadow-sm" style="background-color: #161b22; border: 1px solid #21262d !important;">
+            <div class="card-header pt-3 pb-3 px-4" style="background-color: transparent; border-bottom: 1px solid #21262d !important;">
+                <h5 class="mb-0 fw-bold d-flex align-items-center" style="color: #c08e5c;">
+                    <i class="bi bi-cart3 me-2" style="font-size: 1.25rem;"></i> Detail Pesanan
+                </h5>
             </div>
             <div class="card-body p-4">
                 

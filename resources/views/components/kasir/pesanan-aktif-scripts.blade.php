@@ -200,7 +200,15 @@
         }
 
         const passInput = document.getElementById('void-password-input');
-        if (passInput) passInput.value = '';
+        if (passInput) {
+            passInput.value = '';
+            passInput.type = 'password';
+        }
+
+        const eyeBtnIcon = document.querySelector('.void-toggle-eye i');
+        if (eyeBtnIcon) {
+            eyeBtnIcon.className = 'bi bi-eye-slash fs-6';
+        }
 
         const submitBtn = document.getElementById('btn-submit-void');
         if (submitBtn) {
@@ -232,10 +240,10 @@
         const icon = btn.querySelector('i');
         if (input.type === 'password') {
             input.type = 'text';
-            if (icon) icon.className = 'bi bi-eye-slash';
+            if (icon) icon.className = 'bi bi-eye fs-6';
         } else {
             input.type = 'password';
-            if (icon) icon.className = 'bi bi-eye';
+            if (icon) icon.className = 'bi bi-eye-slash fs-6';
         }
     };
 

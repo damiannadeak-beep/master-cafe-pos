@@ -13,8 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="manifest" href="/manifest.json">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <script src="/js/pwa-offline.js"></script>
@@ -35,14 +34,40 @@
             --bs-primary: #c08e5c;
             --bs-primary-rgb: 178, 122, 77;
         }
-        /* Anti-lag touch */
+        /* 60fps Native Touch & Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            background: #0e1217;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overscroll-behavior-y: contain;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
         button, a, input, select, textarea {
             touch-action: manipulation;
+        }
+        /* Hardware Acceleration for Interactive Elements */
+        .btn, .nav-link, .card, .badge, .form-control, .form-select {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        .overflow-auto, .overflow-y-auto, .cart-list, .table-responsive {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+        .hover-lift {
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
         body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
-        body { background: #0e1217; color: #ffffff; }
         
         /* Core Shared Utilities */
         .toast-bronze { background-color: #161b22; border: 1px solid #986c43; color: #ffffff; }

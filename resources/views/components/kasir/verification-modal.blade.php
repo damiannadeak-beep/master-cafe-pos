@@ -3,7 +3,7 @@
         <div class="modal-content" style="background-color: #161b22; border: 1px solid #21262d;">
             <div class="modal-header border-bottom border-secondary">
                 <h5 class="modal-title text-white fw-bold" id="verifyPaymentModalLabel"><i class="bi bi-shield-check text-warning me-2"></i>Verifikasi Bukti Transfer</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="window.closeModalById('verifyPaymentModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-4">
                 <p class="text-white-50 mb-3">Pesanan #<span id="verify-order-id" class="text-white fw-bold"></span></p>
@@ -17,7 +17,7 @@
                     @method('PUT')
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                        <button type="button" class="btn btn-outline-danger px-4 fw-bold" onclick="rejectPayment()">
+                        <button type="button" class="btn btn-outline-danger px-4 fw-bold" onclick="window.rejectPayment()">
                             <i class="bi bi-x-circle me-1"></i> Tolak (Palsu)
                         </button>
                         <button type="submit" class="btn btn-success px-4 fw-bold" style="background: #2ea043; border: none;">

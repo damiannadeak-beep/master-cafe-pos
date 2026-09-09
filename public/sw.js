@@ -43,6 +43,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Bypass Service Worker completely for dynamic API calls, live sync, and internal operational routes
+  const reqUrl = event.request.url;
+  if (
+    reqUrl.includes('/api/') ||
+    reqUrl.includes('/kasir/') ||
+    reqUrl.includes('/admin/') ||
+    reqUrl.includes('_t=') ||
+    (event.request.headers.get('accept') && event.request.headers.get('accept').includes('application/json')) ||
+    event.request.headers.get('x-requested-with') === 'XMLHttpRequest'
+  ) {
+    return; // Pass-through directly to network
+  }
+
   // Handle HTML navigation requests
   if (event.request.mode === 'navigate' || (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
     event.respondWith(

@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow text-center">
             <div class="modal-header border-0 pb-0">
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="window.closeModalById('qrisScanModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 pt-3 text-center">
                 <div class="mb-3 mt-2">
@@ -11,7 +11,7 @@
                         <i class="bi bi-qr-code-scan fs-2"></i>
                     </div>
                 </div>
-                <h5 class="fw-bold mb-2">Pembayaran QRIS</h5>
+                <h5 class="fw-bold mb-2 text-white">Pembayaran QRIS</h5>
                 <p class="text-white-50 small mb-4">Minta pelanggan memindai kode QR di bawah ini menggunakan aplikasi e-Wallet / M-Banking mereka.</p>
                 
                 @php $qrisImage = \App\Models\Setting::getVal('qris_image'); @endphp
@@ -32,7 +32,7 @@
                     @endif
                 </div>
 
-                <button type="button" class="btn btn-primary w-100 fw-bold py-3 rounded-pill shadow-sm" onclick="executePayment('qris')">
+                <button type="button" class="btn btn-primary w-100 fw-bold py-3 rounded-pill shadow-sm" onclick="window.executePayment('qris')">
                     <i class="bi bi-check-circle-fill me-2"></i> Sudah Dibayar & Selesai
                 </button>
             </div>

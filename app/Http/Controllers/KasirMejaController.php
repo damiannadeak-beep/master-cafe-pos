@@ -10,15 +10,34 @@ class KasirMejaController extends Controller
     /**
      * Menampilkan daftar meja untuk dikelola Kasir
      */
-    public function index()
+    public function index(Request $request)
     {
         $mejas = Meja::with(['pesanan' => function ($q) {
-            $q->whereIn('status', ['pending', 'processing', 'ready'])
-              ->with(['konsumen', 'pembayaran', 'detailPesanan.menu'])
-              ->latest();
+            $q->where(function ($sub) {
+                $sub->whereIn('status', ['pending', 'processing', 'ready'])
+                    ->orWhere(function ($comp) {
+                        $comp->where('status', 'completed')
+                             ->where(function ($pSub) {
+                                 $pSub->whereDoesntHave('pembayaran')
+                                      ->orWhereHas('pembayaran', function ($p) {
+                                          $p->where('status', '!=', 'paid');
+                                      });
+                             });
+                    });
+            })
+            ->with(['konsumen', 'pembayaran', 'detailPesanan.menu'])
+            ->latest();
         }])->orderBy('nama_meja_atau_nomor')->get();
 
-        return view('kasir.meja.index', compact('mejas'));
+        $totalMeja = $mejas->count();
+        $mejaAdaPesanan = $mejas->filter(fn($m) => $m->pesanan->isNotEmpty())->count();
+        $mejaKosong = $totalMeja - $mejaAdaPesanan;
+
+        if ($request->ajax() || $request->wantsJson() || $request->query('grid_only')) {
+            return view('kasir.meja.grid', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'))->render();
+        }
+
+        return view('kasir.meja.index', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'));
     }
 
     /**
@@ -35,7 +54,11 @@ class KasirMejaController extends Controller
             $statusName = $meja->is_available ? 'Tersedia' : 'Terisi';
 
             // Broadcast real-time event ke kasir lain
-            broadcast(new \App\Events\MejaStatusUpdated($meja));
+            try {
+                broadcast(new \App\Events\MejaStatusUpdated($meja));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[KasirMejaController] Gagal broadcast WebSocket: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'message' => 'Status meja berhasil diubah menjadi ' . $statusName,

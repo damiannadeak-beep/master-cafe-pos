@@ -12,8 +12,8 @@
             <div class="card border-0 shadow-lg p-4 p-md-5 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="row g-4">
                     
-                    <div class="col-md-5 border-end border-secondary">
-                        <h5 class="fw-bold mb-4 text-white" style="font-family: 'Outfit', sans-serif;">Informasi Kontak</h5>
+                    <div class="col-md-5 border-end pe-md-4" style="border-color: #21262d !important;">
+                        <h5 class="fw-bold mb-4 text-white">Informasi Kontak</h5>
                         
                         @php
                             $waRaw = \App\Models\Setting::getVal('kontak_wa') ?? '+62 812-3456-7890';
@@ -76,8 +76,8 @@
                         @endforeach
                     </div>
 
-                    <div class="col-md-7 ps-md-4 mt-4 mt-md-0 pt-2">
-                        <h5 class="fw-bold mb-4 text-white" style="font-family: 'Outfit', sans-serif;">Kirim Pesan</h5>
+                    <div class="col-md-7 ps-md-4">
+                        <h5 class="fw-bold mb-4 text-white">Kirim Pesan</h5>
                         <form>
                             <div class="mb-4">
                                 <label class="form-label fw-bold text-white mb-2" style="font-size: 0.9rem;">Nama Lengkap</label>
