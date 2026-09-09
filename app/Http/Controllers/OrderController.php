@@ -40,11 +40,11 @@ class OrderController extends Controller
 
     /**
      * Menampilkan daftar meja untuk konsumen sebelum memesan.
+     * Dialihkan ke pilih_tipe karena meja hanya dapat dibuka via scan QR fisik di meja.
      */
     public function pilihMeja()
     {
-        $mejas = Meja::all();
-        return view('konsumen.pilih_meja', compact('mejas'));
+        return redirect()->route('pilih_tipe')->with('info', 'Pemesanan Makan di Tempat (Dine-In) hanya dapat dilakukan dengan memindai (scan) stiker QR di atas meja Master Cafe.');
     }
 
     /**

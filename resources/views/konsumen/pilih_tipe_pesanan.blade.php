@@ -3,28 +3,34 @@
 @section('content')
 <div class="container mt-5 mb-5 pb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-7">
+            @if(session('info'))
+                <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4 p-3 d-flex align-items-center" style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3) !important;">
+                    <i class="bi bi-info-circle fs-4 me-3"></i>
+                    <div>{{ session('info') }}</div>
+                </div>
+            @endif
+
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                <div class="card-body p-5">
+                <div class="card-body p-4 p-md-5">
                     <h2 class="fw-bold text-center mb-2 text-white" style="font-family: 'Outfit', sans-serif !important;">Pilih Jenis Pesanan</h2>
                     <p class="text-center text-secondary mb-5 small">Apakah Anda ingin memesan untuk dinikmati di tempat atau dibawa pulang?</p>
                     
                     <div class="row g-4">
-                        <!-- Dine In Option -->
+                        <!-- Dine In Option: Membuka Modal Informasi Scan QR -->
                         <div class="col-md-6">
-                            <a href="{{ url('/konsumen/menu') }}" class="text-decoration-none">
-                                <div class="card h-100 border-0 text-center p-4 cursor-pointer hover-shadow rounded-4"
-                                     style="background-color: #0e1217; border: 2px solid #21262d !important; transition: all 0.3s ease; cursor: pointer;">
-                                    <div class="mb-3 d-flex justify-content-center">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                                             style="width: 84px; height: 84px; background-color: rgba(178, 122, 77, 0.15); border: 1px solid rgba(178, 122, 77, 0.3); line-height: 0;">
-                                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="width: 54px; height: 54px; object-fit: cover; margin: 0 !important; display: block;">
-                                        </div>
+                            <div class="card h-100 border-0 text-center p-4 cursor-pointer hover-shadow rounded-4"
+                                 data-bs-toggle="modal" data-bs-target="#modalDineInInfo"
+                                 style="background-color: #0e1217; border: 2px solid #21262d !important; transition: all 0.3s ease; cursor: pointer;">
+                                <div class="mb-3 d-flex justify-content-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                         style="width: 84px; height: 84px; background-color: rgba(178, 122, 77, 0.15); border: 1px solid rgba(178, 122, 77, 0.3); line-height: 0;">
+                                        <i class="bi bi-qr-code-scan" style="font-size: 38px; color: #c08e5c !important;"></i>
                                     </div>
-                                    <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Makan di Tempat</h5>
-                                    <p class="text-secondary small mb-0">Dinikmati langsung di meja restoran</p>
                                 </div>
-                            </a>
+                                <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Makan di Tempat</h5>
+                                <p class="text-secondary small mb-0">Khusus scan stiker QR di meja kafe</p>
+                            </div>
                         </div>
 
                         <!-- Takeaway Option -->
@@ -39,12 +45,43 @@
                                         </div>
                                     </div>
                                     <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Dibawa Pulang</h5>
-                                    <p class="text-secondary small mb-0">Pesan untuk dinikmati di rumah</p>
+                                    <p class="text-secondary small mb-0">Pesan dari mana saja untuk diambil</p>
                                 </div>
                             </a>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Panduan Scan QR Dine-In -->
+<div class="modal fade" id="modalDineInInfo" tabindex="-1" aria-labelledby="modalDineInInfoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 text-center p-4" style="background-color: #161b22; border: 1px solid #21262d !important; color: white;">
+            <div class="modal-body p-3">
+                <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle" 
+                     style="width: 80px; height: 80px; background-color: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3);">
+                    <i class="bi bi-qr-code-scan fs-1 text-accent"></i>
+                </div>
+                <h4 class="fw-bold mb-2 text-white" id="modalDineInInfoLabel" style="font-family: 'Outfit', sans-serif;">Makan di Tempat (Dine-In)</h4>
+                <p class="text-white-50 small mb-4">
+                    Untuk pemesanan Makan di Tempat, silakan <strong>pindai (scan) stiker QR yang terpasang di atas meja</strong> saat Anda tiba di Master Cafe. Menu pesanan akan otomatis terhubung ke meja Anda dan langsung diantar oleh pelayan.
+                </p>
+
+                <div class="d-grid gap-2 mb-3">
+                    <a href="{{ url('/katalog') }}" class="btn btn-outline-warning rounded-pill py-2 fw-bold btn-touch">
+                        <i class="bi bi-book-half me-1"></i> Lihat Katalog Menu
+                    </a>
+                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn fw-bold py-2 rounded-pill btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
+                        <i class="bi bi-bag-check me-1"></i> Pesan Bawa Pulang (Takeaway)
+                    </a>
+                </div>
+                
+                <button type="button" class="btn btn-link text-secondary text-decoration-none small" data-bs-dismiss="modal">
+                    Tutup
+                </button>
             </div>
         </div>
     </div>
