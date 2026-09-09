@@ -101,9 +101,9 @@
 <div class="auth-wrapper">
     <div class="auth-card">
         <div class="text-center mb-4">
-            <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow" style="height: 80px; width: 80px; object-fit: cover; margin-bottom: 1rem;">
-            <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Masuk ke Master Cafe</h3>
-            <p class="text-secondary small">Pesan hidangan istimewa langsung dari meja Anda</p>
+            <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow" style="height: 76px; width: 76px; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid #c08e5c;">
+            <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Portal Staf & Kasir</h3>
+            <p class="text-secondary small mb-0">Sistem Kasir POS & Manajemen Operasional</p>
         </div>
 
         @if (session('error'))
@@ -116,10 +116,10 @@
             @csrf
             
             <div class="mb-3">
-                <label for="email" class="form-label fw-bold small text-secondary">Email Address</label>
+                <label for="email" class="form-label fw-bold small text-secondary">Email Staf / Kasir</label>
                 <div class="input-group auth-input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="nama@email.com">
+                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="staf@mastercafe.com">
                 </div>
                 @error('email')
                     <span class="text-danger small mt-1 d-block fw-bold">{{ $message }}</span>
@@ -147,24 +147,22 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }} style="background-color: #0e1217; border-color: #21262d;">
                     <label class="form-check-label text-secondary fw-semibold small" for="remember">
-                        Ingat Saya
+                        Ingat Sesi Ini
                     </label>
                 </div>
             </div>
 
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-auth-primary btn-touch">
-                    Masuk Sekarang <i class="bi bi-arrow-right-circle ms-2"></i>
+                    Masuk ke Sistem <i class="bi bi-arrow-right-circle ms-2"></i>
                 </button>
-                <a href="{{ route('google.login') }}" class="btn btn-google-auth d-flex align-items-center justify-content-center btn-touch">
-                    <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" class="me-2" style="width: 20px; height: 20px;">
-                    Masuk dengan Google
-                </a>
             </div>
         </form>
         
-        <div class="text-center mt-4 pt-3 border-top border-secondary">
-            <p class="text-secondary small mb-0">Belum punya akun? <a href="{{ route('register') }}" class="fw-bold text-decoration-none" style="color: #c08e5c;">Daftar Sekarang</a></p>
+        <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+            <small class="text-secondary d-block" style="font-size: 0.78rem;">
+                <i class="bi bi-info-circle me-1"></i> Pelanggan meja tidak perlu login. Cukup scan kode QR di meja untuk memesan hidangan.
+            </small>
         </div>
     </div>
 </div>

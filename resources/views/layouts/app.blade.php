@@ -58,12 +58,9 @@
                     <ul class="navbar-nav ms-auto">
                         @guest
                             <li class="nav-item d-flex align-items-center">
-                                @if (Route::has('login'))
-                                    <a class="nav-link py-1" href="{{ route('login') }}">Masuk</a>
-                                @endif
-                                @if (Route::has('register'))
-                                    <a class="btn btn-primary btn-sm rounded-pill px-3 ms-2 fw-semibold py-1" href="{{ route('register') }}">Daftar</a>
-                                @endif
+                                <a class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary" href="{{ route('login') }}" style="border-color: #30363d; font-size: 0.8rem;">
+                                    <i class="bi bi-person-badge me-1"></i> Staf Login
+                                </a>
                             </li>
                         @else
                             <li class="nav-item dropdown">
@@ -72,32 +69,31 @@
                                         <img src="{{ asset('uploads/profil/' . Auth::user()->foto) }}" 
                                              alt="Foto" 
                                              class="rounded-circle me-2" 
-                                             style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #c08e5c;"
+                                             style="width: 30px; height: 30px; object-fit: cover; border: 2px solid #c08e5c;"
                                              onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=c08e5c&color=fff&size=64';">
                                     @else
                                         <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=c08e5c&color=fff&size=64" 
                                              alt="Avatar" 
                                              class="rounded-circle me-2" 
-                                             style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #c08e5c;">
+                                             style="width: 30px; height: 30px; object-fit: cover; border: 2px solid #c08e5c;">
                                     @endif
-                                    {{ Auth::user()->name }}
+                                    <span>{{ Auth::user()->name }}</span>
+                                    <span class="badge ms-2 rounded-pill px-2 py-1" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c; font-size: 0.7rem;">
+                                        {{ Auth::user()->roles->first()?->name ? ucfirst(Auth::user()->roles->first()->name) : 'Staf' }}
+                                    </span>
                                 </a>
 
-                                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdown">
-                                    
+                                <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdown" style="background: #161b22; border: 1px solid #21262d !important;">
                                     @role('pemilik')
-                                        <a class="dropdown-item d-flex align-items-center" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard Admin</a>
+                                        <a class="dropdown-item text-light d-flex align-items-center" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2 text-warning"></i> Dashboard Admin</a>
                                     @endrole
 
                                     @role('kasir')
-                                        <a class="dropdown-item d-flex align-items-center" href="/kasir/pos"><i class="bi bi-calculator me-2"></i> Mesin POS Kasir</a>
-                                    @endrole
-
-                                    @role('konsumen')
-                                        <a class="dropdown-item d-flex align-items-center" href="/konsumen/profil"><i class="bi bi-person-lines-fill me-2"></i> Profil & Pesanan Saya</a>
+                                        <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/pos"><i class="bi bi-calculator me-2 text-success"></i> Mesin POS Kasir</a>
+                                        <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/meja"><i class="bi bi-grid-3x3-gap me-2 text-info"></i> Monitor Meja</a>
                                     @endrole
                                     
-                                    <hr class="dropdown-divider">
+                                    <hr class="dropdown-divider border-secondary">
 
                                     <a class="dropdown-item text-danger d-flex align-items-center" href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

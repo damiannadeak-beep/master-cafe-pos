@@ -93,7 +93,7 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleC
 
 // Route Autentikasi bawaan Laravel UI (Login, Register, Logout, Verify)
 Route::get('/staff/login', [App\Http\Controllers\Auth\LoginController::class, 'showStaffLoginForm'])->name('staff.login');
-Auth::routes(['verify' => true, 'middleware' => ['throttle:10,1']]);
+Auth::routes(['register' => false, 'verify' => false, 'middleware' => ['throttle:10,1']]);
 
 
 
@@ -103,11 +103,12 @@ Route::middleware(['auth'])->group(function () {
     
     // Halaman Redirect Default setelah login (jika user mengakses /home secara manual)
     Route::get('/home', function () {
-        // Jika yang login adalah konsumen, arahkan ke beranda
-        if (auth()->user()->hasRole('konsumen')) {
-            return redirect('/');
+        if (auth()->user()->hasRole('pemilik')) {
+            return redirect()->route('admin.dashboard');
         }
-        // Jika bukan konsumen, kembalikan ke root
+        if (auth()->user()->hasRole('kasir')) {
+            return redirect()->route('kasir.pos');
+        }
         return redirect('/');
     });
 
