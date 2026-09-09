@@ -264,15 +264,10 @@
                         </span>
                     </div>
                 </div>
-
-                <div class="d-grid mt-4 gap-2">
-                    <a href="{{ route('order.receipt', $pesanan->order_token) }}" target="_blank" class="btn btn-outline-light rounded-pill fw-bold py-2 btn-touch">
-                        <i class="bi bi-printer me-1"></i> Cetak / Unduh Nota Digital (E-Receipt)
-                    </a>
-                </div>
             </div>
 
-            <!-- Card Rating & Feedback Tamu -->
+            <!-- Card Rating & Feedback Tamu (Hanya Tampil Saat Pesanan Selesai / Completed) -->
+            @if($pesanan->status === 'completed')
             <div class="card tracking-card shadow-sm p-4 mb-4 text-center" id="rating-container">
                 <h6 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">
                     Bagaimana Pengalaman Anda?
@@ -317,6 +312,7 @@
                     </form>
                 @endif
             </div>
+            @endif
 
         </div>
     </div>
