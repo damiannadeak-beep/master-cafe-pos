@@ -178,15 +178,15 @@
                                 - Rp {{ number_format($p->nominal, 0, ',', '.') }}
                             </td>
                             <td class="text-center pe-3">
-                                <div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-outline-warning" onclick="editPengeluaran({{ json_encode($p) }})" title="Edit">
-                                        <i class="bi bi-pencil"></i>
+                                <div class="d-inline-flex align-items-center justify-content-center gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center justify-content-center rounded-2" style="width: 32px; height: 32px; padding: 0;" onclick="editPengeluaran({{ json_encode($p) }})" title="Edit">
+                                        <i class="bi bi-pencil" style="font-size: 0.85rem; margin: 0 !important;"></i>
                                     </button>
-                                    <form action="{{ route('admin.pengeluaran_bisnis.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data pengeluaran ini?');">
+                                    <form action="{{ route('admin.pengeluaran_bisnis.destroy', $p->id) }}" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Hapus data pengeluaran ini?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger" title="Hapus">
-                                            <i class="bi bi-trash"></i>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center rounded-2" style="width: 32px; height: 32px; padding: 0;" title="Hapus">
+                                            <i class="bi bi-trash" style="font-size: 0.85rem; margin: 0 !important;"></i>
                                         </button>
                                     </form>
                                 </div>
