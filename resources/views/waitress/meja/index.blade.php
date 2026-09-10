@@ -21,7 +21,7 @@
 
     <!-- Container Dinamis yang Di-update Secara Real-Time Tanpa Reload Halaman -->
     <div id="meja-monitor-container">
-        @include('kasir.meja.grid')
+        @include('waitress.meja.grid')
     </div>
 </div>
 
