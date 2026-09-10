@@ -291,8 +291,8 @@ Route::middleware(['auth'])->group(function () {
 Route::group([], function () {
     // Akses Menu Meja via QR Code (Signed URL wajib di production, fleksibel di local)
     $tableMenuMiddleware = app()->isProduction() ? ['signed'] : [];
-    Route::get('/konsumen/menu/{id_meja}', [OrderController::class, 'showMenu'])->name('konsumen.menu.meja')->middleware($tableMenuMiddleware);
-    Route::get('/menu/{id_meja}', [OrderController::class, 'showMenu'])->middleware($tableMenuMiddleware);
+    Route::get('/konsumen/menu/{id_meja?}', [OrderController::class, 'showMenu'])->name('konsumen.menu.meja')->middleware($tableMenuMiddleware);
+    Route::get('/menu/{id_meja?}', [OrderController::class, 'showMenu'])->middleware($tableMenuMiddleware);
     
     // Pemilihan Tipe & Info
     Route::get('/konsumen/pilih-tipe', [OrderController::class, 'pilihTipePesanan'])->name('pilih_tipe');

@@ -14,9 +14,16 @@ class OrderController extends Controller
     /**
      * Menampilkan Menu berdasarkan scan QR Meja
      */
-    public function showMenu(Request $request, $id_meja)
+    public function showMenu(Request $request, $id_meja = null)
     {
-        $meja = Meja::findOrFail($id_meja);
+        if (empty($id_meja)) {
+            return redirect()->route('pilih_tipe')->with('info', 'Pemesanan Makan di Tempat (Dine-In) hanya dapat dilakukan dengan memindai (scan) stiker QR di atas meja Master Cafe.');
+        }
+
+        $meja = Meja::find($id_meja);
+        if (!$meja) {
+            return redirect()->route('pilih_tipe')->with('error', 'Meja dengan ID #' . $id_meja . ' tidak ditemukan. Silakan pindai ulang stiker QR di atas meja Anda.');
+        }
         
         // Cek apakah ada pesanan 'unpaid' aktif di meja ini (Konsep Open Bill)
         $pesananAktif = Pesanan::where('id_meja', $id_meja)
