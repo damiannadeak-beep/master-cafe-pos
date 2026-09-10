@@ -82,7 +82,11 @@
                             Order #{{ $pesanan->id }}
                         </h4>
                         <p class="text-secondary small mb-0">
-                            Atas Nama: <strong class="text-white">{{ $pesanan->customer_name }}</strong> &bull; {{ $pesanan->created_at->translatedFormat('d M Y, H:i') }}
+                            Atas Nama: <strong class="text-white">{{ $pesanan->customer_name }}</strong>
+                            @if(!empty($pesanan->guest_phone))
+                                &bull; <i class="bi bi-whatsapp text-success me-1"></i><strong class="text-white">{{ $pesanan->guest_phone }}</strong>
+                            @endif
+                            &bull; {{ $pesanan->created_at->translatedFormat('d M Y, H:i') }}
                         </p>
                     </div>
 

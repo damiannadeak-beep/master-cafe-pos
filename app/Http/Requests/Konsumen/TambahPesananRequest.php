@@ -17,6 +17,7 @@ class TambahPesananRequest extends FormRequest
             'id_meja' => 'nullable|integer',
             'tipe_pesanan' => 'nullable|in:dine_in,takeaway',
             'guest_name' => 'nullable|string|max:100',
+            'guest_phone' => 'nullable|string|max:30',
             'items' => 'required|array',
             'items.*.id_menu' => 'required|exists:menu,id',
             'items.*.jumlah' => 'required|integer|min:1',

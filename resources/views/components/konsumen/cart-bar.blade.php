@@ -60,12 +60,22 @@
                            placeholder="Contoh: Budi / Sarah" 
                            style="background-color: #0e1217; border: 1px solid #30363d; font-size: 1rem;" 
                            value="{{ auth()->check() ? auth()->user()->name : '' }}" required maxlength="50">
-                    <small class="text-muted" style="font-size: 0.78rem;">
-                        <i class="bi bi-info-circle me-1"></i>
+                </div>
+
+                <div class="mb-3">
+                    <label for="inputGuestPhone" class="form-label text-white small fw-bold">
+                        No. WhatsApp / HP @if(!isset($meja))<span class="text-danger">* (Wajib untuk Takeaway)</span>@else<span class="text-secondary">(Opsional)</span>@endif
+                    </label>
+                    <input type="tel" id="inputGuestPhone" class="form-control form-control-lg rounded-3 text-white" 
+                           placeholder="Contoh: 081234567890" 
+                           style="background-color: #0e1217; border: 1px solid #30363d; font-size: 1rem;" 
+                           maxlength="20" @if(!isset($meja)) required @endif>
+                    <small class="text-muted d-block mt-1" style="font-size: 0.78rem;">
+                        <i class="bi bi-whatsapp me-1 text-success"></i>
                         @if(isset($meja))
-                            Nama ini digunakan pelayan untuk mengantar pesanan ke Meja {{ $meja->nama_meja_atau_nomor }}.
+                            Digunakan pelayan untuk mengantar pesanan ke Meja {{ $meja->nama_meja_atau_nomor }}.
                         @else
-                            Nama ini digunakan kasir & dapur untuk memanggil Anda saat pesanan siap dibungkus.
+                            Digunakan kasir & dapur untuk memberi tahu via WhatsApp saat pesanan selesai dibungkus.
                         @endif
                     </small>
                 </div>

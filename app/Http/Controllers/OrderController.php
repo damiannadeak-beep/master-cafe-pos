@@ -101,6 +101,7 @@ class OrderController extends Controller
             if (empty($guestName)) {
                 $guestName = auth()->check() ? auth()->user()->name : ($mejaModel ? ('Tamu ' . $mejaModel->nama_meja_atau_nomor) : 'Tamu');
             }
+            $guestPhone = !empty($validated['guest_phone']) ? trim($validated['guest_phone']) : null;
 
             $orderToken = (string) \Illuminate\Support\Str::uuid();
 
@@ -108,6 +109,7 @@ class OrderController extends Controller
             $pesanan = Pesanan::create([
                 'id_konsumen' => auth()->id(),
                 'guest_name' => $guestName,
+                'guest_phone' => $guestPhone,
                 'order_token' => $orderToken,
                 'id_meja' => $id_meja,
                 'tipe_pesanan' => $tipe_pesanan,

@@ -397,19 +397,31 @@
         if (cart.length === 0) return alert('Silakan pilih menu terlebih dahulu!');
         
         const inputName = document.getElementById('inputGuestName');
+        const inputPhone = document.getElementById('inputGuestPhone');
+
         let guestName = inputName ? inputName.value.trim() : '';
+        let guestPhone = inputPhone ? inputPhone.value.trim() : '';
 
         if (!guestName) {
-            alert('Mohon masukkan Nama Pemesan / Panggilan untuk memudahkan pelayan mengantar pesanan.');
+            alert('Mohon masukkan Nama Pemesan / Panggilan terlebih dahulu.');
             if (inputName) inputName.focus();
             return;
         }
 
+        const isTakeaway = '{{ $orderType ?? "dine_in" }}' === 'takeaway' || !{{ isset($meja) ? 'true' : 'false' }};
+        if (isTakeaway && !guestPhone) {
+            alert('Mohon masukkan Nomor WhatsApp / HP untuk memudahkan informasi saat pesanan Takeaway siap.');
+            if (inputPhone) inputPhone.focus();
+            return;
+        }
+
         localStorage.setItem('master_cafe_guest_name', guestName);
-        proceedToCheckout(guestName);
+        if (guestPhone) localStorage.setItem('master_cafe_guest_phone', guestPhone);
+
+        proceedToCheckout(guestName, guestPhone);
     }
 
-    function proceedToCheckout(guestName) {
+    function proceedToCheckout(guestName, guestPhone) {
         const btnSubmit = document.getElementById('btnSubmitFinalOrder');
         if (btnSubmit) {
             btnSubmit.disabled = true;
@@ -423,6 +435,7 @@
             id_meja: "{{ $meja->id }}",
             @endif
             guest_name: guestName || localStorage.getItem('master_cafe_guest_name') || 'Tamu',
+            guest_phone: guestPhone || localStorage.getItem('master_cafe_guest_phone') || null,
             promo_id: document.getElementById('promo_id') ? document.getElementById('promo_id').value : null,
             items: cart
         };
