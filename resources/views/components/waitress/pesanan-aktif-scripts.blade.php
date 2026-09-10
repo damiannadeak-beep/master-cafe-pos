@@ -93,9 +93,9 @@
         })
         .then(res => res.text())
         .then(html => {
-            // Hindari menimpa jika kasir sedang membuka modal input/pembayaran/void
+            // Hindari menimpa jika kasir sedang membuka modal apa pun atau sedang melihat dialog selesai
             const anyModalOpen = document.querySelector('.modal.show');
-            if (!anyModalOpen) {
+            if (!anyModalOpen && !window.activeCompletedOrderId) {
                 container.innerHTML = html;
             }
             if (typeof fetchActiveOrdersCount === 'function') {
@@ -115,12 +115,103 @@
         });
     };
 
-    // Auto-sync berkala tiap 6 detik jika kasir sedang di tab aktif dan idle
+    // Auto-sync berkala tiap 6 detik jika kasir sedang di tab aktif dan idle (tidak ada modal terbuka)
     setInterval(() => {
-        if (!document.hidden && !document.querySelector('.modal.show') && !isReloadingCards) {
+        if (!document.hidden && !document.querySelector('.modal.show') && !window.activeCompletedOrderId && !isReloadingCards) {
             window.reloadActiveOrdersCards(true);
         }
     }, 6000);
+
+    // --- Modal Selesai & Cetak Struk Controller ---
+    window.activeCompletedOrderId = null;
+
+    window.showOrderCompletedModal = function(id) {
+        window.activeCompletedOrderId = id;
+        const card = document.getElementById('order-card-' + id);
+
+        let customerName = 'Pelanggan';
+        let orderType = 'Dine-In';
+        let isPaid = true;
+
+        if (card) {
+            const customerEl = card.querySelector('.small.text-white.fw-bold span.text-white');
+            if (customerEl) customerName = customerEl.innerText.trim();
+
+            const typeEl = card.querySelector('.badge.rounded-pill.text-bg-warning, .badge.rounded-pill.text-bg-secondary');
+            if (typeEl) orderType = typeEl.innerText.trim();
+
+            const unpaidBadge = card.querySelector('.badge.bg-danger.border-danger');
+            if (unpaidBadge && unpaidBadge.innerText.includes('Belum Lunas')) {
+                isPaid = false;
+            }
+        }
+
+        const subTitle = document.getElementById('orderCompletedSubtitle');
+        if (subTitle) subTitle.innerText = `Pesanan #${id}`;
+
+        const custEl = document.getElementById('orderCompletedCustomer');
+        if (custEl) custEl.innerText = customerName;
+
+        const typeEl = document.getElementById('orderCompletedType');
+        if (typeEl) typeEl.innerText = orderType;
+
+        const payBadge = document.getElementById('orderCompletedPayBadge');
+        const promptText = document.getElementById('orderCompletedPromptText');
+        const actionsContainer = document.getElementById('orderCompletedActions');
+
+        const browserBtn = document.getElementById('btnOrderCompletedBrowser');
+        if (browserBtn) {
+            browserBtn.href = `/kasir/order/${id}/receipt`;
+        }
+
+        const thermalBtn = document.getElementById('btnOrderCompletedThermal');
+        if (thermalBtn) {
+            thermalBtn.onclick = function() {
+                window.printThermal(id);
+            };
+        }
+
+        if (!isPaid) {
+            if (payBadge) {
+                payBadge.className = 'badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1';
+                payBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i>Belum Lunas';
+            }
+            if (promptText) {
+                promptText.innerHTML = '<span class="text-warning fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Pesanan telah selesai dimasak, namun belum lunas.</span><br><small class="text-white-50">Silakan terima pembayaran terlebih dahulu dari konsumen.</small>';
+            }
+            if (actionsContainer) {
+                actionsContainer.innerHTML = `
+                    <button type="button" class="btn btn-warning text-dark fw-bold py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" onclick="window.closeModalById('orderCompletedModal'); window.payOrder(${id});">
+                        <i class="bi bi-cash-stack fs-5"></i> Terima Pembayaran Sekarang
+                    </button>
+                    <button type="button" class="btn btn-secondary fw-semibold py-2 rounded-3 mt-1" data-bs-dismiss="modal">
+                        Tutup
+                    </button>
+                `;
+            }
+        } else {
+            if (payBadge) {
+                payBadge.className = 'badge bg-success bg-opacity-10 text-success border border-success px-2 py-1';
+                payBadge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Lunas';
+            }
+            if (promptText) {
+                promptText.innerText = 'Pesanan telah selesai disiapkan! Apakah ingin mencetak struk transaksi sekarang?';
+            }
+        }
+
+        window.openModalById('orderCompletedModal');
+    };
+
+    // Inisialisasi event saat modal selesai ditutup
+    document.addEventListener('DOMContentLoaded', function() {
+        const completedModalEl = document.getElementById('orderCompletedModal');
+        if (completedModalEl) {
+            completedModalEl.addEventListener('hidden.bs.modal', function() {
+                window.activeCompletedOrderId = null;
+                window.reloadActiveOrdersCards(false);
+            });
+        }
+    });
 
     // --- 2. Update Status Pesanan (Optimistic Update: 0 Detik Instan!) ---
     window.updateOrderStatus = function(id, status, btnElement) {
@@ -142,30 +233,15 @@
             if (badgeContainer) {
                 badgeContainer.outerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> SELESAI</span>';
             }
-            // Tampilkan tombol cetak struk sebelum kartu hilang
-            const footerActions = card ? card.querySelector('.d-flex.flex-wrap.gap-2') : null;
-            if (footerActions) {
-                @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
-                footerActions.innerHTML = `
-                    <div class="w-100 text-center">
-                        <p class="text-success fw-bold small mb-2"><i class="bi bi-check-circle-fill me-1"></i> Pesanan selesai! Cetak struk jika konsumen meminta.</p>
-                        <div class="d-flex gap-2 justify-content-center">
-                            @if($printerActive)
-                            <button type="button" class="btn btn-sm btn-info text-white fw-bold btn-touch" onclick="window.printThermal(${id})">
-                                <i class="bi bi-printer me-1"></i> Cetak Thermal
-                            </button>
-                            @endif
-                            <a href="/kasir/order/${id}/receipt" target="_blank" class="btn btn-sm btn-outline-primary fw-bold btn-touch">
-                                <i class="bi bi-file-earmark-text me-1"></i> Cetak Browser
-                            </a>
-                            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold btn-touch" onclick="document.getElementById('order-card-${id}')?.remove()">
-                                <i class="bi bi-x-lg me-1"></i> Tutup
-                            </button>
-                        </div>
-                    </div>
-                `;
+            if (btnElement) {
+                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.showOrderCompletedModal(${id})">
+                    <i class="bi bi-printer me-1"></i> Cetak Struk
+                </button>`;
             }
-            if (window.showToast) window.showToast(`Pesanan #${id} selesai! Struk bisa dicetak.`, 'success');
+            if (window.showToast) window.showToast(`Pesanan #${id} selesai!`, 'success');
+
+            // Buka modal dialog konfirmasi selesai & opsi cetak struk
+            window.showOrderCompletedModal(id);
         }
 
         // Kirim permintaan ke server di background tanpa menghalangi kasir
