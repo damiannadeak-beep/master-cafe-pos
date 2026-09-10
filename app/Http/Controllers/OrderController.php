@@ -43,7 +43,8 @@ class OrderController extends Controller
      */
     public function pilihTipePesanan()
     {
-        return view('konsumen.pilih_tipe_pesanan');
+        $mejas = Meja::where('is_active', true)->orderBy('nomor_meja', 'asc')->get();
+        return view('konsumen.pilih_tipe_pesanan', compact('mejas'));
     }
 
     /**

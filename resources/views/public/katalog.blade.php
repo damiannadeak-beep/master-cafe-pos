@@ -9,12 +9,16 @@
     <div class="container text-center position-relative z-index-1 mt-4">
         <h1 class="display-5 fw-bold mb-3 text-white" style="font-family: 'Rye', serif;">Katalog Menu</h1>
         <p class="fs-6 text-light opacity-75 mx-auto mb-4" style="max-width: 600px; font-weight: 300;">
-            Temukan sajian istimewa yang dibuat dengan dedikasi tinggi. Silakan <strong>Scan QR Code</strong> di meja Anda untuk memulai pesanan.
+            Jelajahi sajian lezat Master Cafe. Siap untuk memesan hidangan favorit Anda?
         </p>
         
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3);">
-            <i class="bi bi-qr-code-scan text-primary"></i>
-            <span class="small fw-semibold text-white">Scan QR di meja kafe untuk memesan langsung tanpa antre dan tanpa login</span>
+        <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
+            <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn rounded-pill px-4 py-2 fw-bold text-white shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.9rem;">
+                <i class="bi bi-bag-check me-2"></i> Pesan Bawa Pulang (Takeaway)
+            </a>
+            <button type="button" class="btn btn-outline-warning rounded-pill px-4 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modalPilihMejaKatalog" style="font-size: 0.9rem;">
+                <i class="bi bi-shop me-2"></i> Pesan Makan di Tempat (Dine-In)
+            </button>
         </div>
     </div>
 </div>
@@ -192,11 +196,50 @@
 
             <!-- Footer Bawah Sticky -->
             <div class="modal-footer border-top px-4 py-3" style="background-color: #161b22; border-color: rgba(255,255,255,0.08) !important; flex-shrink: 0; padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 16px));">
-                <div class="w-100 text-center">
-                    <div class="d-inline-flex align-items-center justify-content-center gap-2 text-white-50 small py-1">
-                        <i class="bi bi-qr-code-scan text-primary"></i>
-                        <span>Scan stiker QR di meja kafe untuk memesan menu ini</span>
-                    </div>
+                <div class="w-100 text-center d-flex justify-content-center gap-2">
+                    <button class="btn btn-sm btn-outline-warning rounded-pill px-4 py-2 fw-bold" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalPilihMejaKatalog">
+                        <i class="bi bi-shop me-1"></i> Pesan Makan di Tempat
+                    </button>
+                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-white" style="background: var(--gradient-bronze);">
+                        <i class="bi bi-bag-check me-1"></i> Pesan Takeaway
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pilih Meja untuk Dine-In dari Katalog -->
+<div class="modal fade" id="modalPilihMejaKatalog" tabindex="-1" aria-labelledby="modalPilihMejaKatalogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 p-4" style="background-color: #161b22; border: 1px solid #21262d !important; color: white;">
+            <div class="modal-header border-0 pb-0 justify-content-between">
+                <h5 class="fw-bold text-white mb-0" id="modalPilihMejaKatalogLabel" style="font-family: 'Outfit', sans-serif;">Pilih Nomor Meja Anda</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3 text-center">
+                <p class="text-white-50 small mb-4">
+                    Silakan klik nomor meja Anda di bawah ini untuk langsung membuka menu & melakukan pemesanan:
+                </p>
+
+                <div class="row g-3 justify-content-center mb-4" style="max-height: 250px; overflow-y: auto;">
+                    @forelse($mejas ?? [] as $m)
+                        <div class="col-4 col-sm-3">
+                            <a href="{{ url('/konsumen/menu/' . $m->id) }}" class="btn btn-outline-warning w-100 rounded-3 py-2 fw-bold d-flex flex-column align-items-center justify-content-center shadow-sm" style="border-color: rgba(192, 142, 92, 0.4);">
+                                <i class="bi bi-shop fs-4 mb-1" style="color: #c08e5c;"></i>
+                                <span style="font-size: 0.85rem;">Meja {{ $m->nomor_meja }}</span>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="col-12 text-secondary small">
+                            Scan stiker QR di atas meja kafe untuk membuka menu meja Anda.
+                        </div>
+                    @endforelse
+                </div>
+
+                <div class="p-3 rounded-3 text-start small mb-1" style="background: rgba(192, 142, 92, 0.1); border: 1px solid rgba(192, 142, 92, 0.2);">
+                    <i class="bi bi-qr-code-scan me-1 text-warning"></i>
+                    <span class="text-white-50">Atau langsung pindai (scan) stiker QR yang tertempel di atas meja kafe Anda.</span>
                 </div>
             </div>
         </div>

@@ -66,16 +66,28 @@
                     <i class="bi bi-qr-code-scan fs-1 text-accent"></i>
                 </div>
                 <h4 class="fw-bold mb-2 text-white" id="modalDineInInfoLabel" style="font-family: 'Outfit', sans-serif;">Makan di Tempat (Dine-In)</h4>
-                <p class="text-white-50 small mb-4">
-                    Untuk pemesanan Makan di Tempat, silakan <strong>pindai (scan) stiker QR yang terpasang di atas meja</strong> saat Anda tiba di Master Cafe. Menu pesanan akan otomatis terhubung ke meja Anda dan langsung diantar oleh pelayan.
+                <p class="text-white-50 small mb-3">
+                    Silakan <strong>pindai (scan) stiker QR di atas meja</strong> atau klik nomor meja Anda di bawah ini untuk memulai pesanan:
                 </p>
 
+                <div class="row g-2 justify-content-center mb-4" style="max-height: 200px; overflow-y: auto;">
+                    @forelse($mejas ?? [] as $m)
+                        <div class="col-4 col-sm-3">
+                            <a href="{{ url('/konsumen/menu/' . $m->id) }}" class="btn btn-outline-warning w-100 rounded-3 py-2 fw-bold d-flex flex-column align-items-center justify-content-center shadow-sm" style="border-color: rgba(192, 142, 92, 0.4);">
+                                <i class="bi bi-shop fs-5 mb-1" style="color: #c08e5c;"></i>
+                                <span style="font-size: 0.8rem;">Meja {{ $m->nomor_meja }}</span>
+                            </a>
+                        </div>
+                    @empty
+                        <div class="col-12 text-secondary small">
+                            Scan stiker QR di atas meja kafe untuk membuka menu meja Anda.
+                        </div>
+                    @endforelse
+                </div>
+
                 <div class="d-grid gap-2 mb-3">
-                    <a href="{{ url('/katalog') }}" class="btn btn-outline-warning rounded-pill py-2 fw-bold btn-touch">
-                        <i class="bi bi-book-half me-1"></i> Lihat Katalog Menu
-                    </a>
                     <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn fw-bold py-2 rounded-pill btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
-                        <i class="bi bi-bag-check me-1"></i> Pesan Bawa Pulang (Takeaway)
+                        <i class="bi bi-bag-check me-1"></i> Atau Pesan Bawa Pulang (Takeaway)
                     </a>
                 </div>
                 

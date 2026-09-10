@@ -32,7 +32,9 @@ class PublicController extends Controller
             }
         }
 
-        return view('public.katalog', compact('menus', 'promos', 'promoMenuIds'));
+        $mejas = \App\Models\Meja::where('is_active', true)->orderBy('nomor_meja', 'asc')->get();
+
+        return view('public.katalog', compact('menus', 'promos', 'promoMenuIds', 'mejas'));
     }
 
     public function lokasi() {
