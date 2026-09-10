@@ -72,17 +72,17 @@
         <div class="col-lg-7 col-md-9">
 
             @if($pesanan->status === 'completed')
-                <!-- Banner Pesanan Selesai & Tombol Pesan Lagi -->
-                <div class="alert border-0 rounded-4 p-3 mb-4 text-center shadow-sm" style="background: rgba(35, 134, 54, 0.15); border: 1px solid rgba(46, 160, 67, 0.3) !important;">
+                <!-- Banner Pesanan Selesai & Tombol Selesai Utama -->
+                <div class="alert border-0 rounded-4 p-4 mb-4 text-center shadow-lg" style="background: rgba(35, 134, 54, 0.15); border: 1px solid rgba(46, 160, 67, 0.35) !important;">
                     <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
-                    <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Anda Telah Selesai!</h5>
-                    <p class="text-secondary small mb-3">Terima kasih sudah memesan di Master Cafe. Selamat menikmati hidangan Anda!</p>
+                    <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Selesai & Pembayaran Lunas</h5>
+                    <p class="text-secondary small mb-3">Terima kasih telah berkunjung ke Master Cafe. Klik tombol di bawah untuk menyelesaikan sesi pesanan Anda.</p>
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        <a href="{{ url('/katalog') }}" class="btn btn-sm rounded-pill px-3 py-2 fw-bold" style="background: var(--gradient-bronze); color: white;">
-                            <i class="bi bi-plus-circle me-1"></i> Buat Pesanan Baru
-                        </a>
-                        <button onclick="window.print()" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-bold">
-                            <i class="bi bi-printer me-1"></i> Cetak Struk Digital
+                        <button onclick="finishCustomerSession()" class="btn btn-md rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--gradient-bronze); color: white; border: none;">
+                            <i class="bi bi-check2-circle me-1"></i> Selesai
+                        </button>
+                        <button onclick="window.print()" class="btn btn-md btn-outline-light rounded-pill px-3 py-2 fw-bold">
+                            <i class="bi bi-printer me-1"></i> Cetak Struk
                         </button>
                     </div>
                 </div>
@@ -110,9 +110,9 @@
                     <div class="text-end">
                         <div id="badge-status-container">
                             @if($pesanan->status === 'completed')
-                                <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 rounded-pill fs-6">
+                                <button onclick="finishCustomerSession()" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-bold shadow-sm">
                                     <i class="bi bi-check-all me-1"></i> Selesai
-                                </span>
+                                </button>
                             @elseif($pesanan->status === 'processing')
                                 <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill fs-6 pulse-animation">
                                     <i class="bi bi-cup-hot-fill me-1"></i> Sedang Disiapkan
@@ -331,10 +331,15 @@
                                       style="background-color: #0e1217; border: 1px solid #30363d; font-size: 0.9rem;"></textarea>
                         </div>
 
-                        <button type="submit" id="btnSubmitRating" class="btn btn-sm rounded-pill px-4 fw-bold shadow-sm" 
-                                style="background: var(--gradient-bronze); color: white; border: none;">
-                            Kirim Ulasan <i class="bi bi-send-fill ms-1"></i>
-                        </button>
+                        <div class="d-flex justify-content-center gap-2 align-items-center">
+                            <button type="submit" id="btnSubmitRating" class="btn btn-sm rounded-pill px-4 fw-bold shadow-sm" 
+                                    style="background: var(--gradient-bronze); color: white; border: none;">
+                                Kirim Ulasan <i class="bi bi-send-fill ms-1"></i>
+                            </button>
+                            <button type="button" onclick="finishCustomerSession()" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+                                Nanti Saja / Selesai
+                            </button>
+                        </div>
                     </form>
                 @endif
             </div>
@@ -348,6 +353,14 @@
     const orderToken = "{{ $pesanan->order_token }}";
     const pesananId = {{ $pesanan->id }};
     let bellCooldown = 0;
+
+    // Fungsi Utama: Menyelesaikan Sesi Pesanan Konsumen & Kembali ke Katalog
+    function finishCustomerSession() {
+        try {
+            localStorage.removeItem('active_guest_order');
+        } catch(e) {}
+        window.location.href = "{{ url('/katalog') }}";
+    }
 
     // 1. Fungsi Panggil Pelayan dengan Cooldown 2 Menit
     function callWaiter(mejaId) {
@@ -443,7 +456,10 @@
                 <div class="p-3 rounded-3" style="background-color: #0e1217; border: 1px solid #21262d;">
                     <i class="bi bi-check-circle-fill text-success fs-2 mb-2 d-block"></i>
                     <h6 class="text-white fw-bold">Ulasan Terkirim!</h6>
-                    <p class="text-secondary small mb-0">${data.message || 'Terima kasih banyak atas feedback Anda untuk Master Cafe.'}</p>
+                    <p class="text-secondary small mb-2">${data.message || 'Terima kasih banyak atas feedback Anda untuk Master Cafe.'}</p>
+                    <button onclick="finishCustomerSession()" class="btn btn-sm btn-success rounded-pill px-4 fw-bold mt-2">
+                        <i class="bi bi-check2-circle me-1"></i> Selesai & Kembali ke Menu
+                    </button>
                 </div>`;
         })
         .catch(err => {
