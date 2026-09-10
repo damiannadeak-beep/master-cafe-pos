@@ -247,9 +247,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/meja', [WaitressMejaController::class, 'index'])->name('kasir.meja.index');
         Route::put('/meja/{id}/toggle', [WaitressMejaController::class, 'toggle'])->name('kasir.meja.toggle');
 
-        // Stok Opname Waitress
+        // Ketersediaan Menu Waitress
         Route::get('/stok', [\App\Http\Controllers\WaitressStokController::class, 'index'])->name('kasir.stok.index');
         Route::post('/stok', [\App\Http\Controllers\WaitressStokController::class, 'update'])->name('kasir.stok.update');
+        Route::put('/stok/{id}/toggle', [\App\Http\Controllers\WaitressStokController::class, 'toggle'])->name('kasir.stok.toggle');
 
         // Absensi Geolocation
         Route::get('/absensi', [\App\Http\Controllers\AbsensiController::class, 'index'])->name('kasir.absensi.index');

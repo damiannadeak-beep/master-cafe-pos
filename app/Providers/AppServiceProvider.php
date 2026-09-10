@@ -33,9 +33,9 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.admin', function ($view) {
             $data = cache()->remember('admin_layout_stok_data', 15, function() {
-                $menuMenipis = Menu::where('stok', '<', 10)->where('is_available', true)->get();
-                $stokMenipisCount = $menuMenipis->count();
-                return compact('menuMenipis', 'stokMenipisCount');
+                $menuHabis = Menu::where('is_available', false)->get();
+                $menuHabisCount = $menuHabis->count();
+                return compact('menuHabis', 'menuHabisCount');
             });
 
             $view->with($data);

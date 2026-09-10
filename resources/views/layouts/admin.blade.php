@@ -37,27 +37,27 @@
                 <div class="dropdown">
                     <button class="btn btn-link text-white text-decoration-none position-relative p-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-bell-fill fs-5" style="color: #c08e5c;"></i>
-                        @if(isset($stokMenipisCount) && $stokMenipisCount > 0)
+                        @if(isset($menuHabisCount) && $menuHabisCount > 0)
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
-                                {{ $stokMenipisCount }}
+                                {{ $menuHabisCount }}
                             </span>
                         @endif
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0  text-white" aria-labelledby="notificationDropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                        <li><h6 class="dropdown-header fw-bold text-white">Notifikasi Stok Menipis</h6></li>
-                        @if(isset($stokMenipisCount) && $stokMenipisCount > 0)
-                            @foreach($menuMenipis as $menu)
+                        <li><h6 class="dropdown-header fw-bold text-white">Menu Sedang Habis</h6></li>
+                        @if(isset($menuHabisCount) && $menuHabisCount > 0)
+                            @foreach($menuHabis as $menu)
                                 <li>
                                     <a class="dropdown-item d-flex text-white justify-content-between align-items-center py-2" href="{{ route('admin.menu.index') }}">
                                         <div>
-                                            <i class="bi bi-box-seam text-warning me-2"></i> {{ $menu->nama_menu }}
+                                            <i class="bi bi-x-circle text-danger me-2"></i> {{ $menu->nama_menu }}
                                         </div>
-                                        <span class="badge bg-danger rounded-pill">{{ $menu->stok }}</span>
+                                        <span class="badge bg-danger rounded-pill">Habis</span>
                                     </a>
                                 </li>
                             @endforeach
                         @else
-                            <li><span class="dropdown-item text-secondary small text-center py-3">Semua stok aman</span></li>
+                            <li><span class="dropdown-item text-secondary small text-center py-3">Semua menu tersedia</span></li>
                         @endif
                     </ul>
                 </div>

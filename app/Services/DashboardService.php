@@ -30,11 +30,11 @@ class DashboardService
         $totalCash = $pendapatanPerMetode->get('cash', 0);
         $totalQris = $pendapatanPerMetode->get('qris', 0);
 
-        // 3. Stok Menipis
-        $stokMenipis = Menu::where('stok', '<', 10)
-            ->where('is_available', true)
-            ->orderBy('stok', 'asc')
+        // 3. Menu Sedang Habis (Status Non-Aktif oleh Waitress)
+        $menuHabis = Menu::where('is_available', false)
+            ->orderBy('nama_menu', 'asc')
             ->get();
+        $stokMenipis = $menuHabis;
 
         // 4. Metrik Bulanan
         $startBulan = Carbon::now()->startOfMonth();

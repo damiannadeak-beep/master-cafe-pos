@@ -8,40 +8,53 @@ use App\Models\Menu;
 class WaitressStokController extends Controller
 {
     /**
-     * Tampilkan halaman update stok produk waitress
+     * Tampilkan halaman status ketersediaan menu untuk waitress
      */
     public function index()
     {
-        $menus = Menu::orderBy('nama_menu')->get();
+        $menus = Menu::orderBy('kategori')->orderBy('nama_menu')->get();
 
         return view('waitress.stok.index', compact('menus'));
     }
 
     /**
-     * Update stok menu berdasarkan input form
+     * Update ketersediaan menu secara massal
      */
     public function update(Request $request)
     {
         $request->validate([
-            'menu' => 'nullable|array',
-            'menu.*' => 'integer|min:0',
+            'menu_available' => 'nullable|array',
+            'menu_available.*' => 'in:0,1',
         ]);
 
-        if ($request->has('menu')) {
-            foreach ($request->menu as $id => $stok) {
-                $is_available = isset($request->menu_available[$id]) && $request->menu_available[$id] == '1' ? true : false;
-                
-                if ($stok <= 0) {
-                    $is_available = false;
-                }
-
+        if ($request->has('menu_available')) {
+            foreach ($request->menu_available as $id => $isAvailable) {
                 Menu::where('id', $id)->update([
-                    'stok' => $stok,
-                    'is_available' => $is_available
+                    'is_available' => (bool)$isAvailable
                 ]);
             }
         }
 
-        return redirect()->back()->with('success', 'Stok produk berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Status ketersediaan menu berhasil diperbarui.');
+    }
+
+    /**
+     * Toggle cepat ketersediaan 1 menu via AJAX atau tombol
+     */
+    public function toggle($id)
+    {
+        $menu = Menu::findOrFail($id);
+        $menu->is_available = !$menu->is_available;
+        $menu->save();
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_available' => $menu->is_available,
+                'message' => 'Status menu ' . $menu->nama_menu . ' diubah menjadi ' . ($menu->is_available ? 'Tersedia' : 'Habis')
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Status ' . $menu->nama_menu . ' berhasil diubah.');
     }
 }

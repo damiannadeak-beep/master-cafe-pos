@@ -40,17 +40,9 @@ class OrderService
         foreach ($items as $item) {
             $menu = $menus->get($item['id_menu']);
 
-            // 3a. Validasi stok menu langsung
-            if ($menu->stok < $item['jumlah']) {
-                throw new \Exception("Gagal: Stok produk {$menu->nama_menu} tidak mencukupi (Sisa: {$menu->stok}).");
-            }
-
-            // 3b. Kurangi stok menu
-            $menu->decrement('stok', $item['jumlah']);
-            $menu->stok -= $item['jumlah']; // Sync in-memory
-
-            if ($menu->stok <= 0) {
-                $menu->update(['is_available' => false]);
+            // 3a. Validasi ketersediaan menu
+            if (!$menu->is_available) {
+                throw new \Exception("Gagal: Menu {$menu->nama_menu} saat ini sedang habis.");
             }
 
             // 3c. Hitung harga varian

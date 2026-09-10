@@ -46,13 +46,11 @@
                     <input type="checkbox" name="is_dynamic_price" value="1" class="form-check-input" id="is_dynamic_price" {{ old('is_dynamic_price', $menu->is_dynamic_price) ? 'checked' : '' }}>
                     <label class="form-check-label fw-bold text-primary" for="is_dynamic_price">Harga Dinamis (Input manual harga saat transaksi. Contoh: Sesuai berat ikan)</label>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Stok</label>
-                    <input type="number" name="stok" class="form-control" value="{{ old('stok', $menu->stok) }}" required>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" name="is_available" value="1" class="form-check-input" id="is_available" {{ old('is_available', $menu->is_available) ? 'checked' : '' }}>
-                    <label class="form-check-label" for="is_available">Tersedia</label>
+                <div class="mb-3 p-3 rounded-3" style="background: rgba(192, 142, 92, 0.08); border: 1px dashed rgba(192, 142, 92, 0.3);">
+                    <div class="small text-white-50">
+                        <i class="bi bi-info-circle text-warning me-1"></i>
+                        Status ketersediaan produk (<strong>Tersedia / Habis</strong>) dikontrol langsung secara operasional oleh staf Waitress.
+                    </div>
                 </div>
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">

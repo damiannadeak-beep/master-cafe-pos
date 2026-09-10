@@ -156,7 +156,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100 border-top border-danger border-3">
                 <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" class="pt-3 pb-2">
-                    <h6 class="fw-bold text-danger mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i> Peringatan Stok Produk Menipis</h6>
+                    <h6 class="fw-bold text-danger mb-0"><i class="bi bi-x-circle-fill me-2"></i> Menu Sedang Habis (Status Waitress)</h6>
                 </div>
                 <div class="card-body p-0">
                     @if($stokMenipis->count() > 0)
@@ -165,16 +165,20 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th class="ps-4">Nama Produk</th>
-                                        <th>Sisa Stok</th>
-                                        <th>Status</th>
+                                        <th class="text-center">Kategori</th>
+                                        <th class="text-end pe-4">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($stokMenipis as $menu)
                                     <tr>
-                                        <td class="ps-4">{{ $menu->nama_menu }}</td>
-                                        <td class="text-danger fw-bold fs-5">{{ $menu->stok }}</td>
-                                        <td><span class="badge bg-warning text-white">Perlu Restock</span></td>
+                                        <td class="ps-4 fw-semibold">{{ $menu->nama_menu }}</td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $menu->kategori == 'makanan' ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                                {{ ucfirst($menu->kategori) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4"><span class="badge bg-danger">Habis</span></td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -183,7 +187,7 @@
                     @else
                         <div class="p-5 text-center">
                             <div class="text-success mb-2"><i class="bi bi-check-circle fs-1"></i></div>
-                            <h6 class="text-white-50 mb-0">Semua stok produk dalam kondisi aman.</h6>
+                            <h6 class="text-white-50 mb-0">Semua menu saat ini tersedia untuk dipesan.</h6>
                         </div>
                     @endif
                 </div>

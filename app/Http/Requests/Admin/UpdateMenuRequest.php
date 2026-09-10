@@ -16,7 +16,7 @@ class UpdateMenuRequest extends FormRequest
         return [
             'nama_menu' => 'required|string|max:255',
             'harga' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:0',
+            'stok' => 'nullable|integer',
             'kategori' => 'required|string|max:100',
             'is_available' => 'nullable|boolean',
             'is_dynamic_price' => 'nullable|boolean',

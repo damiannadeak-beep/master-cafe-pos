@@ -35,9 +35,6 @@
                         <a href="{{ request()->fullUrlWithQuery(['category' => 'minuman', 'page' => null]) }}" class="btn btn-sm {{ request('category') == 'minuman' ? 'btn-primary' : 'btn-outline-primary' }}">Minuman</a>
                     </div>
                     
-                    <span class="fw-bold ms-3 me-2">Stok:</span>
-                    <a href="{{ request()->fullUrlWithQuery(['filter' => 'low', 'page' => null]) }}" class="btn btn-sm {{ request('filter') == 'low' ? 'btn-warning' : 'btn-outline-warning' }} shadow-sm">Tampilkan Stok Menipis</a>
-                    
                     <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary ms-auto">Reset Filter</a>
                 </div>
                 <table class="table table-dark text-white border-secondary mb-0">
@@ -47,8 +44,7 @@
                             <th>Nama Produk</th>
                             <th>Kategori</th>
                             <th>Harga</th>
-                            <th>Stok</th>
-                            <th>Tersedia</th>
+                            <th class="text-center">Ketersediaan</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -64,20 +60,24 @@
                                         -
                                     @endif
                                 </td>
-                                <td>{{ $m->nama_menu }}</td>
-                                <td>{{ ucfirst($m->kategori) }}</td>
-                                <td class="text-nowrap">Rp {{ number_format($m->harga,0,',','.') }}</td>
+                                <td class="fw-semibold">{{ $m->nama_menu }}</td>
                                 <td>
-                                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
-                                        <span class="fw-bold">{{ $m->stok }}</span>
-                                        <form class="d-flex gap-1" action="{{ route('admin.menu.stock', $m->id) }}" method="POST">
-                                            @csrf
-                                            <input type="number" name="stok" value="{{ $m->stok }}" min="0" class="form-control text-white border-secondary  form-control-sm text-center" style="width:65px;">
-                                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="Update"><i class="bi bi-check-lg"></i> <span class="d-none d-xl-inline">Update</span></button>
-                                        </form>
-                                    </div>
+                                    <span class="badge {{ $m->kategori == 'makanan' ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                        {{ ucfirst($m->kategori) }}
+                                    </span>
                                 </td>
-                                <td>{{ $m->is_available ? 'Ya' : 'Tidak' }}</td>
+                                <td class="text-nowrap fw-bold" style="color: #c08e5c;">Rp {{ number_format($m->harga,0,',','.') }}</td>
+                                <td class="text-center">
+                                    @if($m->is_available)
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
+                                            <i class="bi bi-check-circle me-1"></i> Tersedia
+                                        </span>
+                                    @else
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill">
+                                            <i class="bi bi-x-circle me-1"></i> Habis
+                                        </span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="d-flex justify-content-start gap-1 flex-wrap flex-md-nowrap">
                                         <a href="{{ route('admin.menu.edit', $m->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">

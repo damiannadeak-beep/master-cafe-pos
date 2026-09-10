@@ -57,7 +57,7 @@
                         <ul class="dropdown-menu dropdown-menu-dark kasir-dropdown shadow-lg border-0" aria-labelledby="dropdownAlatStok">
                             <li>
                                 <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('kasir.stok.*') ? 'active' : '' }}" href="{{ route('kasir.stok.index') }}">
-                                    <i class="bi bi-box-seam me-2 text-success"></i> Update Stok
+                                    <i class="bi bi-check2-circle me-2 text-success"></i> Ketersediaan Menu
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider border-secondary opacity-25"></li>

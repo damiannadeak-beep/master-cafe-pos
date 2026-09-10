@@ -1,12 +1,11 @@
-
 @foreach($menus as $menu)
 <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-3 mb-md-4 menu-item" data-kategori="{{ strtolower($menu->kategori) }}">
-    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-lift d-flex flex-column" 
-         style="background-color: #161b22; border: 1px solid #21262d !important; transition: all 0.25s ease;">
+    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column {{ $menu->is_available ? 'hover-lift' : '' }}" 
+         style="background-color: #161b22; border: 1px solid #21262d !important; transition: all 0.25s ease; {{ !$menu->is_available ? 'opacity: 0.65; filter: grayscale(40%);' : '' }}">
         
         <!-- Area Gambar dengan Overlay Badge -->
         <div class="position-relative cursor-pointer" 
-             onclick="{{ $menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')' }}"
+             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')') }}"
              style="cursor: pointer;"
              title="Sentuh untuk melihat detail & varian">
             
@@ -39,34 +38,28 @@
                 @endif
             </div>
 
-            <!-- Badge Stok Floating di Kanan Atas -->
-            <div class="position-absolute top-0 end-0 m-2">
-                @if($menu->stok > 0)
-                    <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(72, 187, 120, 0.4); color: #48bb78; font-size: 0.65rem;">
-                        Sisa: {{ $menu->stok }}
+            <!-- Badge Status Ketersediaan di Kanan Atas -->
+            @if(!$menu->is_available)
+                <div class="position-absolute top-0 end-0 m-2">
+                    <span class="badge bg-danger rounded-pill px-2 py-1 shadow-sm" style="font-size: 0.65rem; font-weight: bold;">
+                        <i class="bi bi-x-circle"></i> Habis
                     </span>
-                @else
-                    <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(245, 101, 101, 0.4); color: #f56565; font-size: 0.65rem;">
-                        Habis
-                    </span>
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
 
         <!-- Body Kartu -->
         <div class="card-body p-2 p-md-3 d-flex flex-column" style="flex: 1;">
             <div class="cursor-pointer mb-2" 
-                 onclick="{{ $menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')' }}"
-                 style="cursor: pointer;"
-                 title="Sentuh untuk melihat detail & varian">
-                
-                <!-- Judul Menu -->
+                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')') }}"
+                 style="cursor: pointer;">
+                <!-- Nama Menu -->
                 <h6 class="fw-bold text-white mb-1" 
-                    style="font-family: 'Outfit', sans-serif !important; font-size: 0.95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.4em;">
+                    style="font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em;">
                     {{ $menu->nama_menu }}
                 </h6>
 
-                <!-- Deskripsi Singkat -->
+                <!-- Deskripsi Pendek -->
                 <p class="small text-secondary mb-2" 
                    style="font-size: 0.75rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2em;">
                     {{ $menu->deskripsi ?? 'Racikan istimewa Master Cafe.' }}
@@ -83,29 +76,38 @@
                 </div>
             </div>
 
-            <!-- Bagian Aksi Tombol di Bawah (Responsif, Tidak Bertabrakan) -->
+            <!-- Bagian Aksi Tombol di Bawah -->
             <div class="mt-auto pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
                 <div class="d-flex align-items-center justify-content-between gap-1">
-                    <!-- Stepper Tombol - / 0 / + Sempurna di HP -->
-                    <div class="d-flex align-items-center justify-content-center w-100 gap-2 p-1 rounded-pill" 
-                         style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
-                        <button class="btn btn-outline-danger rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
-                                onclick="removeFromCart({{ $menu->id }})"
-                                style="width: 28px; height: 28px; transition: all 0.2s; border-color: rgba(220, 53, 69, 0.4);"
-                                title="Kurangi porsi">
-                            <i class="bi bi-dash fs-5"></i>
-                        </button>
-                        <span id="qty-{{ $menu->id }}" class="fw-bold mb-0 text-white" 
-                              style="font-size: 0.95rem; min-width: 20px; text-align: center; font-family: 'Outfit', sans-serif;">
-                            0
-                        </span>
-                        <button class="btn btn-primary rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
-                                onclick="{{ $menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')' }}"
-                                style="width: 28px; height: 28px; transition: all 0.2s; background: var(--gradient-bronze); border: none;"
-                                title="Tambah porsi / varian">
-                            <i class="bi bi-plus fs-5"></i>
-                        </button>
-                    </div>
+                    @if(!$menu->is_available)
+                        <!-- Jika Menu Habis -->
+                        <div class="w-100 py-1 text-center rounded-pill" style="background: rgba(220, 53, 69, 0.12); border: 1px solid rgba(220, 53, 69, 0.25);">
+                            <span class="text-danger small fw-semibold" style="font-size: 0.8rem;">
+                                <i class="bi bi-slash-circle me-1"></i> Sedang Habis
+                            </span>
+                        </div>
+                    @else
+                        <!-- Stepper Tombol - / 0 / + jika Tersedia -->
+                        <div class="d-flex align-items-center justify-content-center w-100 gap-2 p-1 rounded-pill" 
+                             style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                            <button class="btn btn-outline-danger rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
+                                    onclick="removeFromCart({{ $menu->id }})"
+                                    style="width: 28px; height: 28px; transition: all 0.2s; border-color: rgba(220, 53, 69, 0.4);"
+                                    title="Kurangi porsi">
+                                <i class="bi bi-dash fs-5"></i>
+                            </button>
+                            <span id="qty-{{ $menu->id }}" class="fw-bold mb-0 text-white" 
+                                  style="font-size: 0.95rem; min-width: 20px; text-align: center; font-family: 'Outfit', sans-serif;">
+                                0
+                            </span>
+                            <button class="btn btn-primary rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
+                                    onclick="{{ $menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')' }}"
+                                    style="width: 28px; height: 28px; transition: all 0.2s; background: var(--gradient-bronze); border: none;"
+                                    title="Tambah porsi / varian">
+                                <i class="bi bi-plus fs-5"></i>
+                            </button>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Kontainer Catatan / Varian Aktif -->
@@ -117,5 +119,3 @@
     </div>
 </div>
 @endforeach
-
-

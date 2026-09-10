@@ -32,7 +32,9 @@ class MenuService
      */
     public function createMenu(array $data, array $requestData): Menu
     {
-        $data['is_available'] = !empty($requestData['is_available']);
+        // Produk baru otomatis berstatus Tersedia dan stok dummy
+        $data['is_available'] = true;
+        $data['stok'] = 999;
 
         $imageFile = $requestData['image'] ?? request()->file('image');
         if ($imageFile && $imageFile instanceof \Illuminate\Http\UploadedFile && $imageFile->isValid()) {
@@ -49,7 +51,9 @@ class MenuService
      */
     public function updateMenu(Menu $menu, array $data, array $requestData): Menu
     {
-        $data['is_available'] = !empty($requestData['is_available']);
+        // Pertahankan status ketersediaan yang dikelola oleh waitress
+        unset($data['is_available']);
+        unset($data['stok']);
 
         $imageFile = $requestData['image'] ?? request()->file('image');
         if ($imageFile && $imageFile instanceof \Illuminate\Http\UploadedFile && $imageFile->isValid()) {
