@@ -12,8 +12,8 @@ class PublicController extends Controller
     }
 
     public function katalog() {
-        // Menampilkan semua menu yang tersedia (Read-only)
-        $menus = Menu::where('is_available', true)->get();
+        // Menampilkan semua menu (Read-only), menu tersedia tampil di atas
+        $menus = Menu::orderBy('is_available', 'desc')->orderBy('nama_menu', 'asc')->get();
         $promos = \App\Models\Promo::with('menus')->where('is_active', true)
             ->where(function($q) {
                 $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());

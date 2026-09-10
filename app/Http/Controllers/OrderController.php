@@ -32,7 +32,7 @@ class OrderController extends Controller
                 $q->where('status', 'unpaid');
             })->first();
 
-        $menus = Menu::where('is_available', true)->where('stok', '>', 0)->get();
+        $menus = Menu::orderBy('is_available', 'desc')->orderBy('nama_menu', 'asc')->get();
         [$promos, $promoMenuIds] = $this->getActivePromosWithMenuIds();
 
         return view('konsumen.menu', compact('meja', 'menus', 'pesananAktif', 'promos', 'promoMenuIds'));
@@ -61,7 +61,7 @@ class OrderController extends Controller
      */
     public function menuTakeaway()
     {
-        $menus = Menu::where('is_available', true)->where('stok', '>', 0)->get();
+        $menus = Menu::orderBy('is_available', 'desc')->orderBy('nama_menu', 'asc')->get();
         [$promos, $promoMenuIds] = $this->getActivePromosWithMenuIds();
             
         return view('konsumen.menu_takeaway', compact('menus', 'promos', 'promoMenuIds'));
@@ -72,7 +72,7 @@ class OrderController extends Controller
      */
     public function menuNanti()
     {
-        $menus = Menu::where('is_available', true)->where('stok', '>', 0)->get();
+        $menus = Menu::orderBy('is_available', 'desc')->orderBy('nama_menu', 'asc')->get();
         [$promos, $promoMenuIds] = $this->getActivePromosWithMenuIds();
             
         return view('konsumen.menu_nanti', compact('menus', 'promos', 'promoMenuIds'));

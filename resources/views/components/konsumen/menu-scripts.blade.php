@@ -28,6 +28,10 @@
     function openVariantModal(id) {
         currentSelectedMenu = allMenus.find(m => m.id === id);
         if (!currentSelectedMenu) return;
+        if (!currentSelectedMenu.is_available) {
+            alert('Mohon maaf, menu ' + currentSelectedMenu.nama_menu + ' sedang habis.');
+            return;
+        }
 
         currentModalQty = 1;
         document.getElementById('modal-qty-display').innerText = currentModalQty;

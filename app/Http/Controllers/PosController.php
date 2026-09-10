@@ -26,7 +26,7 @@ class PosController extends Controller
      */
     public function index()
     {
-        $menus = Menu::where('is_available', true)->get();
+        $menus = Menu::orderBy('is_available', 'desc')->orderBy('nama_menu', 'asc')->get();
         $mejas = Meja::all();
         $promos = Promo::active()->get();
 
