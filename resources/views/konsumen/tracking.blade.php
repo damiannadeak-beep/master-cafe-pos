@@ -71,6 +71,23 @@
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
 
+            @if($pesanan->status === 'completed')
+                <!-- Banner Pesanan Selesai & Tombol Pesan Lagi -->
+                <div class="alert border-0 rounded-4 p-3 mb-4 text-center shadow-sm" style="background: rgba(35, 134, 54, 0.15); border: 1px solid rgba(46, 160, 67, 0.3) !important;">
+                    <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
+                    <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Anda Telah Selesai!</h5>
+                    <p class="text-secondary small mb-3">Terima kasih sudah memesan di Master Cafe. Selamat menikmati hidangan Anda!</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="{{ url('/katalog') }}" class="btn btn-sm rounded-pill px-3 py-2 fw-bold" style="background: var(--gradient-bronze); color: white;">
+                            <i class="bi bi-plus-circle me-1"></i> Buat Pesanan Baru
+                        </a>
+                        <button onclick="window.print()" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-bold">
+                            <i class="bi bi-printer me-1"></i> Cetak Struk Digital
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <!-- Card Header Status Meja -->
             <div class="card tracking-card shadow-lg p-3 p-md-4 mb-4">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
@@ -461,8 +478,16 @@
     // Jalankan background polling setiap 5 detik
     setInterval(pollOrderStatus, 5000);
 
-    // WebSocket Listener jika Echo / Reverb aktif
+    // Cleanup active order LocalStorage jika status sudah completed / cancelled
     document.addEventListener('DOMContentLoaded', () => {
+        if (currentStatus === 'completed' || currentStatus === 'cancelled') {
+            try {
+                localStorage.removeItem('active_guest_order');
+                const banner = document.getElementById('active-order-recovery-banner');
+                if (banner) banner.style.display = 'none';
+            } catch(e) {}
+        }
+
         if (window.Echo) {
             window.Echo.channel('kasir-notifications')
                 .listen('.PesananBaru', (e) => {
