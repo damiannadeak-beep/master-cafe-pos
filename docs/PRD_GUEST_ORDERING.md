@@ -228,3 +228,30 @@ Project Master Cafe POS saat ini telah memiliki teknologi mutakhir yang sudah be
 - [x] **Fase 4 (Layar Live Tracking, Call Bell, & E-Receipt):** Buat halaman `/tracking/{order_token}` dengan WebSocket Reverb live update, tombol panggil pelayan meja, tombol unduh struk digital, dan kartu rating bintang pasca-selesai.
 - [x] **Fase 5 (Pembersihan Profil Konsumen & Penyatuan Login Staff):** Hapus rute profil konsumen, bersihkan navbar publik dari tombol login/register konsumen, dan alihkan rute `/login` khusus untuk karyawan.
 - [x] **Fase 6 (Pengujian Lokal Menyeluruh):** Simulasi pemesanan tamu dari scan QR meja, pembayaran Midtrans Sandbox, notifikasi suara kasir, hingga rating pasca-selesai di komputer lokal.
+
+---
+
+## 10. Standar Sistem Desain & Identitas Visual (Official Dark Bronze Design System)
+
+Seluruh antarmuka aplikasi **Master Cafe Smart Self-Ordering System** (Public Guest, Tablet Waitress/Kasir, dan Owner Dashboard) wajib mematuhi standar desain baku yang telah ditetapkan pada [docs/DESIGN_SYSTEM.md](file:///c:/xampp/htdocs/angkringan-pos/docs/DESIGN_SYSTEM.md):
+
+### 🎨 10.1. Palet Warna Utama (Dark Bronze Palette):
+- **Background Utama (Level 0):** `#0e1217` (Hitam Gelap Elegan).
+- **Surface & Kartu (Level 1):** `#161b22` (Gelap Timbul Kontras).
+- **Border & Pembatas (Level 2):** `#21262d` (Garis Batas Halus 1px).
+- **Aksen Perunggu (Bronze Gradient):** `linear-gradient(135deg, #986c43 0%, #c08e5c 100%)`.
+- **Teks Utama & Redup:** `#ffffff` (Putih Murni) & `#a0aab2` (Abu-abu Kebiruan Kontras Tinggi).
+
+### ✒️ 10.2. Tipografi Baku (Google Fonts):
+- **Rye (Serif):** Judul utama & elemen branding.
+- **Alex Brush (Cursive) & Caveat:** Sentuhan artistik logo & slogan.
+- **Outfit / Plus Jakarta Sans:** Teks badan, daftar menu, tabel harga, & UI operasional.
+
+### 📐 10.3. Grid 8-Point & Target Sentuh (Touch Target):
+- Seluruh margin, padding, border-radius (16px), dan ukuran tombol menggunakan kelipatan **8px**.
+- Ukuran tombol interaktif pada perangkat sentuh minimal **40px - 48px** agar mudah dan akurat ditekan dengan jari.
+
+### 🖼️ 10.4. Aset Brand Resmi & Notifikasi:
+- **Logo Resmi:** Wajib menggunakan file aset gambar asli `public/images/logo.png` (dilarang menggunakan badge teks dummy).
+- **Notifikasi/Toast:** Menggunakan toast custom *Dark Bronze* (`showToast()`), tanpa `alert()` bawaan browser yang kaku.
+- **Single Theme Approach:** Menggunakan 1 tema baku *Dark Bronze* di seluruh modul tanpa toggle light mode agar konsisten dan pekat.
