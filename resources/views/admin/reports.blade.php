@@ -53,6 +53,44 @@
         </div>
     </div>
 
+    <!-- Summary Cards Laporan Finansial -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #3b82f6 !important;">
+                <div class="card-body">
+                    <span class="text-white-50 small d-block mb-1">Total Omzet Penjualan</span>
+                    <h4 class="fw-bold mb-0" style="color: #60a5fa;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #eab308 !important;">
+                <div class="card-body">
+                    <span class="text-white-50 small d-block mb-1">Pengeluaran Kasir (Laci)</span>
+                    <h4 class="fw-bold mb-0 text-warning">- Rp {{ number_format($totalPengeluaranKasir ?? 0, 0, ',', '.') }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #ef4444 !important;">
+                <div class="card-body">
+                    <span class="text-white-50 small d-block mb-1">Pengeluaran Bisnis (Owner)</span>
+                    <h4 class="fw-bold mb-0 text-danger">- Rp {{ number_format($totalPengeluaranBisnis ?? 0, 0, ',', '.') }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #22c55e !important;">
+                <div class="card-body">
+                    <span class="text-white-50 small d-block mb-1">Pendapatan Bersih Owner</span>
+                    <h4 class="fw-bold mb-0 {{ ($labaBersih ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
+                        Rp {{ number_format($labaBersih, 0, ',', '.') }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-12">
             <div class="card shadow-sm mb-4">

@@ -136,25 +136,23 @@
     <!-- 1. KPI SUMMARY GRID -->
     <table class="kpi-grid">
         <tr>
-            <td width="20%">
+            <td width="25%">
                 <div class="kpi-label">Pendapatan Omzet</div>
-                <div class="kpi-value">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
+                <div class="kpi-value" style="color: #0d6efd;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
             </td>
-            <td width="20%">
-                <div class="kpi-label">Modal Bahan (HPP)</div>
-                <div class="kpi-value">Rp {{ number_format($totalHpp, 0, ',', '.') }}</div>
+            <td width="25%">
+                <div class="kpi-label">Pengeluaran Kasir</div>
+                <div class="kpi-value" style="color: #dc3545;">- Rp {{ number_format($totalPengeluaranKasir ?? 0, 0, ',', '.') }}</div>
             </td>
-            <td width="20%">
-                <div class="kpi-label">Laba Kotor</div>
-                <div class="kpi-value">Rp {{ number_format($labaKotor, 0, ',', '.') }}</div>
+            <td width="25%">
+                <div class="kpi-label">Pengeluaran Bisnis</div>
+                <div class="kpi-value" style="color: #dc3545;">- Rp {{ number_format($totalPengeluaranBisnis ?? 0, 0, ',', '.') }}</div>
             </td>
-            <td width="20%">
-                <div class="kpi-label">Pengeluaran</div>
-                <div class="kpi-value">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</div>
-            </td>
-            <td width="20%">
-                <div class="kpi-label">Laba Bersih</div>
-                <div class="kpi-value">Rp {{ number_format($labaBersih, 0, ',', '.') }}</div>
+            <td width="25%">
+                <div class="kpi-label">Pendapatan Bersih Owner</div>
+                <div class="kpi-value" style="color: {{ ($labaBersih ?? 0) >= 0 ? '#198754' : '#dc3545' }};">
+                    Rp {{ number_format($labaBersih, 0, ',', '.') }}
+                </div>
             </td>
         </tr>
     </table>

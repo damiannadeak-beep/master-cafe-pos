@@ -3,34 +3,55 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Pengeluaran;
+use App\Models\{Pengeluaran, User};
+use Carbon\Carbon;
 
 class AdminPengeluaranController extends Controller
 {
+    /**
+     * Menampilkan Riwayat / Log Pengeluaran Kasir (Kas Kecil Waitress).
+     * Halaman ini Read-Only untuk Owner (tidak ada form input).
+     */
     public function index(Request $request)
     {
-        $pengeluarans = Pengeluaran::orderBy('tanggal', 'desc')->paginate(10);
-        return view('admin.pengeluaran.index', compact('pengeluarans'));
+        $startDate = $request->query('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->query('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $waitressId = $request->query('waitress_id');
+
+        $query = Pengeluaran::with('user')
+            ->whereBetween('tanggal', [$startDate, $endDate]);
+
+        if ($waitressId) {
+            $query->where('user_id', $waitressId);
+        }
+
+        $totalNominal = (clone $query)->sum('nominal');
+        $totalTransaksi = (clone $query)->count();
+
+        $pengeluarans = $query->orderBy('tanggal', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        $waitresses = User::whereHas('roles', fn($q) => $q->where('name', 'kasir'))->orderBy('name')->get();
+
+        return view('admin.pengeluaran.index', compact(
+            'pengeluarans',
+            'startDate',
+            'endDate',
+            'waitressId',
+            'totalNominal',
+            'totalTransaksi',
+            'waitresses'
+        ));
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'tanggal' => 'required|date',
-            'deskripsi' => 'required|string|max:255',
-            'nominal' => 'required|numeric|min:0',
-            'keterangan' => 'nullable|string',
-        ]);
-
-        $data['user_id'] = auth()->id();
-
-        Pengeluaran::create($data);
-        return redirect()->route('admin.pengeluaran.index')->with('success', 'Data pengeluaran berhasil ditambahkan.');
-    }
-
+    /**
+     * Hapus pencatatan jika terjadi kesalahan input oleh waitress (Hak Akses Owner).
+     */
     public function destroy($id)
     {
         Pengeluaran::findOrFail($id)->delete();
-        return redirect()->route('admin.pengeluaran.index')->with('success', 'Data pengeluaran berhasil dihapus.');
+        return redirect()->route('admin.pengeluaran.index')->with('success', 'Data pengeluaran kasir berhasil dihapus.');
     }
 }

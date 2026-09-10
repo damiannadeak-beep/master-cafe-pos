@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{Pembayaran, Menu, DetailPesanan, Pengeluaran, Setting};
+use App\Models\{Pembayaran, Menu, DetailPesanan, Pengeluaran, PengeluaranBisnis, Setting};
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -50,11 +50,16 @@ class DashboardService
             ->where('pembayaran.status', 'paid')
             ->sum('pesanan.total_hpp');
 
-        $totalPengeluaranBulan = Pengeluaran::whereBetween('tanggal', [$startBulan, $endBulan])
+        // Pengeluaran Kasir (Laci Kasir) & Pengeluaran Bisnis (Modal/Gaji/Bahan Owner)
+        $totalPengeluaranKasirBulan = Pengeluaran::whereBetween('tanggal', [$startBulan, $endBulan])
             ->sum('nominal');
 
-        $labaKotorBulan = $totalPenjualanBulan - $totalHppBulan;
-        $labaBersihBulan = $labaKotorBulan - $totalPengeluaranBulan;
+        $totalPengeluaranBisnisBulan = PengeluaranBisnis::whereBetween('tanggal', [$startBulan, $endBulan])
+            ->sum('nominal');
+
+        $totalPengeluaranBulan = $totalPengeluaranKasirBulan + $totalPengeluaranBisnisBulan;
+        $labaKotorBulan = $totalPenjualanBulan;
+        $labaBersihBulan = $totalPenjualanBulan - $totalPengeluaranBulan;
 
         // 5. Data Chart Harian
         $dailySalesQuery = Pembayaran::selectRaw('DATE(tanggal) AS day, SUM(total_bayar) AS total')
@@ -173,6 +178,8 @@ class DashboardService
             'stokMenipis',
             'totalPenjualanBulan',
             'totalHppBulan',
+            'totalPengeluaranKasirBulan',
+            'totalPengeluaranBisnisBulan',
             'totalPengeluaranBulan',
             'labaKotorBulan',
             'labaBersihBulan',

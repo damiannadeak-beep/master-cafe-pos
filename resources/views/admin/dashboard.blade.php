@@ -30,55 +30,73 @@
 
     <!-- Row 1: Summary Cards -->
     <div class="row g-3 mb-4">
+        <!-- Card 1: Omzet Penjualan -->
         <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" class="h-100 border-start border-primary border-4">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #3b82f6 !important;">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Pendapatan Bulan Ini</h6>
+                        <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Omzet Penjualan</h6>
                         <div class="text-primary bg-primary bg-opacity-10 p-2 rounded">
-                            <i class="bi bi-wallet2 fs-5"></i>
+                            <i class="bi bi-graph-up-arrow fs-5"></i>
                         </div>
                     </div>
-                    <h4 class="fw-bold mb-0 text-truncate">Rp {{ number_format($totalPenjualanBulan ?? 0, 0, ',', '.') }}</h4>
+                    <h4 class="fw-bold mb-1 text-truncate" style="color: #60a5fa;">Rp {{ number_format($totalPenjualanBulan ?? 0, 0, ',', '.') }}</h4>
+                    <small class="text-white-50" style="font-size: 0.72rem;">Bulan Ini (Paid)</small>
                 </div>
             </div>
         </div>
+
+        <!-- Card 2: Pengeluaran Kasir (Kas Laci) -->
         <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" class="h-100 border-start border-warning border-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Total HPP (Modal)</h6>
-                        <div class="text-warning bg-warning bg-opacity-10 p-2 rounded">
-                            <i class="bi bi-box-seam fs-5"></i>
+            <a href="{{ route('admin.pengeluaran.index') }}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #eab308 !important;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Pengeluaran Kasir</h6>
+                            <div class="text-warning bg-warning bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-receipt fs-5"></i>
+                            </div>
                         </div>
+                        <h4 class="fw-bold mb-1 text-truncate text-warning">- Rp {{ number_format($totalPengeluaranKasirBulan ?? 0, 0, ',', '.') }}</h4>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Kas kecil laci kasir</small>
                     </div>
-                    <h4 class="fw-bold mb-0 text-truncate">Rp {{ number_format($totalHppBulan ?? 0, 0, ',', '.') }}</h4>
                 </div>
-            </div>
+            </a>
         </div>
+
+        <!-- Card 3: Pengeluaran Bisnis (Modal Owner) -->
         <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" class="h-100 border-start border-danger border-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Pengeluaran Lain</h6>
-                        <div class="text-danger bg-danger bg-opacity-10 p-2 rounded">
-                            <i class="bi bi-cart-dash fs-5"></i>
+            <a href="{{ route('admin.pengeluaran_bisnis.index') }}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #ef4444 !important;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Pengeluaran Bisnis</h6>
+                            <div class="text-danger bg-danger bg-opacity-10 p-2 rounded">
+                                <i class="bi bi-wallet-fill fs-5"></i>
+                            </div>
                         </div>
+                        <h4 class="fw-bold mb-1 text-truncate text-danger">- Rp {{ number_format($totalPengeluaranBisnisBulan ?? 0, 0, ',', '.') }}</h4>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Gaji, stok bahan, utilitas</small>
                     </div>
-                    <h4 class="fw-bold mb-0 text-truncate">Rp {{ number_format($totalPengeluaranBulan ?? 0, 0, ',', '.') }}</h4>
                 </div>
-            </div>
+            </a>
         </div>
+
+        <!-- Card 4: Pendapatan Bersih Owner -->
         <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" class="h-100 border-start border-success border-4">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #22c55e !important;">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Laba Bersih Murni</h6>
+                        <h6 class="text-white-50 mb-0 text-truncate" style="max-width: 80%;">Pendapatan Bersih Owner</h6>
                         <div class="text-success bg-success bg-opacity-10 p-2 rounded">
                             <i class="bi bi-cash-coin fs-5"></i>
                         </div>
                     </div>
-                    <h4 class="fw-bold mb-0 text-truncate">Rp {{ number_format($labaBersihBulan ?? 0, 0, ',', '.') }}</h4>
+                    @php $isProfit = ($labaBersihBulan ?? 0) >= 0; @endphp
+                    <h4 class="fw-bold mb-1 text-truncate {{ $isProfit ? 'text-success' : 'text-danger' }}">
+                        Rp {{ number_format($labaBersihBulan ?? 0, 0, ',', '.') }}
+                    </h4>
+                    <small class="text-white-50" style="font-size: 0.72rem;">Omzet - Total Pengeluaran</small>
                 </div>
             </div>
         </div>

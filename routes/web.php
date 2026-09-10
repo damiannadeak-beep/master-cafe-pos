@@ -16,6 +16,7 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\KonsumenController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminPengeluaranController;
+use App\Http\Controllers\AdminPengeluaranBisnisController;
 use App\Http\Controllers\AdminMejaController;
 use App\Http\Controllers\WaitressPengeluaranController;
 use App\Http\Controllers\PushSubscriptionController;
@@ -188,10 +189,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/menu/{id}/stock', [AdminMenuController::class, 'updateStock'])->name('menu.stock');
         Route::post('/menu/ai-description', [AdminMenuController::class, 'generateAiDescription'])->name('menu.ai_description');
 
-        // Pengeluaran
+        // Pengeluaran Kasir (Read-only Audit Kasir)
         Route::get('/pengeluaran', [AdminPengeluaranController::class, 'index'])->name('pengeluaran.index');
-        Route::post('/pengeluaran', [AdminPengeluaranController::class, 'store'])->name('pengeluaran.store');
         Route::delete('/pengeluaran/{id}', [AdminPengeluaranController::class, 'destroy'])->name('pengeluaran.destroy');
+
+        // Pengeluaran Bisnis / Usaha (Owner)
+        Route::get('/pengeluaran-bisnis', [AdminPengeluaranBisnisController::class, 'index'])->name('pengeluaran_bisnis.index');
+        Route::post('/pengeluaran-bisnis', [AdminPengeluaranBisnisController::class, 'store'])->name('pengeluaran_bisnis.store');
+        Route::put('/pengeluaran-bisnis/{id}', [AdminPengeluaranBisnisController::class, 'update'])->name('pengeluaran_bisnis.update');
+        Route::delete('/pengeluaran-bisnis/{id}', [AdminPengeluaranBisnisController::class, 'destroy'])->name('pengeluaran_bisnis.destroy');
 
         // Meja
         Route::get('/meja', [AdminMejaController::class, 'index'])->name('meja.index');

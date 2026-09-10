@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{Pembayaran, DetailPesanan, Pengeluaran, KasirShift};
+use App\Models\{Pembayaran, DetailPesanan, Pengeluaran, PengeluaranBisnis, KasirShift};
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -79,11 +79,16 @@ class ReportService
             ->where('pembayaran.status', 'paid')
             ->sum('pesanan.total_hpp');
 
-        $totalPengeluaran = Pengeluaran::whereBetween('tanggal', [$startDate, $endDate])
+        // Pengeluaran Kasir (Laci Kasir) & Pengeluaran Bisnis (Modal/Gaji/Bahan Owner)
+        $totalPengeluaranKasir = Pengeluaran::whereBetween('tanggal', [$startDate, $endDate])
             ->sum('nominal');
 
-        $labaKotor = $totalPendapatan - $totalHpp;
-        $labaBersih = $labaKotor - $totalPengeluaran;
+        $totalPengeluaranBisnis = PengeluaranBisnis::whereBetween('tanggal', [$startDate, $endDate])
+            ->sum('nominal');
+
+        $totalPengeluaran = $totalPengeluaranKasir + $totalPengeluaranBisnis;
+        $labaKotor = $totalPendapatan;
+        $labaBersih = $totalPendapatan - $totalPengeluaran;
 
         $kasirShifts = KasirShift::with('user')
             ->whereBetween('waktu_buka', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
@@ -102,6 +107,8 @@ class ReportService
             'totalPendapatan',
             'totalHpp',
             'labaKotor',
+            'totalPengeluaranKasir',
+            'totalPengeluaranBisnis',
             'totalPengeluaran',
             'labaBersih',
             'kasirShifts'
