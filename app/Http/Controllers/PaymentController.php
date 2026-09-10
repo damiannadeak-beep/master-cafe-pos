@@ -105,7 +105,59 @@ class PaymentController extends Controller
             }
         }
 
-        return view('konsumen.checkout', compact('pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction'));
+        $isSandboxMock = empty($snapToken) && (empty($serverKey) || str_contains($serverKey, 'xxxxxx'));
+
+        return view('konsumen.checkout', compact('pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock'));
+    }
+
+    public function simulateMidtransPay(Request $request, $id_pesanan)
+    {
+        $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
+
+        $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
+        $isAuthorized = false;
+
+        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
+            $isAuthorized = true;
+        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
+            $isAuthorized = true;
+        } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
+            abort(403, 'Anda tidak berhak mengakses pesanan ini.');
+        }
+
+        $pembayaran = $pesanan->pembayaran;
+        if ($pembayaran) {
+            $pembayaran->update([
+                'status' => 'paid',
+                'metode' => 'qris',
+                'tanggal' => now(),
+            ]);
+
+            $pesanan->update(['status' => 'processing']);
+
+            try {
+                broadcast(new \App\Events\PesananBaru($pesanan));
+                if ($pesanan->id_meja && $pesanan->meja) {
+                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('[PaymentController] Gagal broadcast WebSocket: ' . $e->getMessage());
+            }
+
+            $namaKonsumen = $pesanan->customer_name;
+            \App\Models\Notification::create([
+                'type' => 'new_order',
+                'message' => 'Pesanan Lunas QRIS: Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas.',
+                'is_read' => false
+            ]);
+        }
+
+        $targetUrl = $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?paid=1') : url('/');
+        return redirect($targetUrl)->with('success', 'Pembayaran QRIS Midtrans berhasil diselesaikan (LUNAS).');
     }
 
     public function uploadBukti(Request $request, $id_pesanan)

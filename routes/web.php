@@ -308,11 +308,11 @@ Route::group([], function () {
     Route::post('/konsumen/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
     Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
 
-    // Checkout & Pembayaran
+    // Checkout & Pembayaran (Pay-First Policy)
     Route::get('/konsumen/checkout/{id_pesanan}', [PaymentController::class, 'checkout'])->name('konsumen.checkout');
     Route::get('/checkout/{id_pesanan}', [PaymentController::class, 'checkout']);
-    Route::post('/konsumen/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
-    Route::post('/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
+    Route::post('/konsumen/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
+    Route::post('/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
 
     // Panggil Pelayan (Call Bell) dari Meja
     Route::post('/konsumen/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');

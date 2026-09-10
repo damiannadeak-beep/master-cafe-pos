@@ -29,27 +29,22 @@ Saat pelanggan membuka menu dari meja dan menekan tombol **"Pesan"**, sistem mem
 
 ---
 
-## 📌 TOPIK 2: Integrasi Pembayaran Midtrans & Alur Kasir
+## 📌 TOPIK 2: Integrasi Pembayaran Midtrans (Kebijakan Pay-First Lunas di Depan)
 
-Sistem saat ini telah terintegrasi dengan **Midtrans Payment Gateway** untuk pembayaran non-tunai otomatis.
+Sistem saat ini sepenuhnya menerapkan **Kebijakan Wajib Bayar Lunas di Depan (Pay-First Policy)** via **Midtrans Payment Gateway** untuk membebaskan kafe dari risiko pesanan kabur/tidak dibayar.
 
-### 1. Dua Jalur Pembayaran untuk Tamu di Meja:
-1. **⚡ Bayar Sekarang via Midtrans QRIS (Otomatis):**
-   - Muncul kode QRIS dinamis di layar HP tamu (mendukung GoPay, OVO, ShopeePay, DANA, BCA, Mandiri, dll.).
-   - Begitu tamu membayar lewat m-Banking/e-Wallet mereka, tagihan **langsung lunas otomatis dalam hitungan detik** tanpa perlu kasir mengecek mutasi rekening manual.
-   - Layar kasir dan dapur langsung berbunyi lonceng (*audio chime*) tanda pesanan lunas dan mulai dimasak.
-2. **💵 Bayar Nanti di Kasir (Tunai / Open Bill):**
-   - Tamu memesan terlebih dahulu, pesanan langsung masuk ke dapur/barista.
-   - Tamu membayar tunai/kartu di kasir saat hidangan diantar atau saat hendak pulang.
+### 1. Pembayaran Cepat Mandiri dari HP Tamu:
+- Muncul kode QRIS Dinamis & Virtual Account (VA) langsung di layar HP tamu (mendukung GoPay, OVO, ShopeePay, DANA, BCA, Mandiri, BRI, dll.).
+- Begitu tamu membayar lewat m-Banking/e-Wallet mereka, tagihan **langsung lunas otomatis dalam hitungan detik** tanpa perlu pemeriksaan manual.
+- Layar **Tablet Waitress** dan dapur langsung membunyikan lonceng (*audio chime*) tanda pesanan lunas dan dapat langsung diproses dimasak oleh chef.
 
 ### 2. Kebutuhan untuk Mengaktifkan Midtrans:
-- Saat ini di server lokal masih menggunakan mode simulasi (*sandbox*).
+- Saat ini di server lokal telah siap dengan mode simulasi (*sandbox*).
 - Untuk mengaktifkan pembayaran uang sungguhan saat kafe buka, dibutuhkan **Server Key** dan **Client Key** dari akun Midtrans resmi Master Cafe (`https://dashboard.midtrans.com`).
 - Biaya transaksi resmi QRIS Midtrans adalah **0.7%** (standar Bank Indonesia). Misalnya untuk transaksi kopi Rp 15.000, biaya gerbang pembayaran hanya sekitar Rp 105.
 
-> 💬 **Pertanyaan untuk Pemilik:**  
-> 1. *"Apakah Pemilik sudah memiliki akun Midtrans bisnis Master Cafe, atau perlu kami bantu proses pendaftaran dan verifikasinya?"*  
-> 2. *"Apakah tamu kafe diperbolehkan memilih 'Bayar Nanti di Kasir' (Open Bill), atau seluruh pesanan wajib bayar lunas di depan sebelum dimasak?"*
+> 💬 **Penyampaian ke Pemilik:**  
+> *"Sistem telah diset 100% Wajib Bayar Lunas di Depan via Midtrans QRIS/VA sehingga pesanan baru masuk ke dapur setelah lunas, menghilangkan risiko rugi akibat meja kabur."*
 
 ---
 

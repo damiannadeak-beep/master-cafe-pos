@@ -51,8 +51,7 @@ Waitress mengonfirmasi pesanan di Tablet Waitress, mencetak struk pesanan (tiket
 [LANGKAH 5]
 Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan langsung ke meja konsumen (Selesai ✅)
 ```
-
-*(Catatan: Untuk pilihan bayar tunai di kasir tetap didukung sebagai opsi fleksibel jika disetujui Pemilik Kafe).*
+*(Catatan: Kebijakan 100% Wajib Bayar Lunas di Depan (Pay-First Policy) diberlakukan secara penuh via Midtrans QRIS/VA untuk membebaskan kafe dari risiko pesanan tidak dibayar).*
 
 ### 🛍️ Alur B: Bawa Pulang (Takeaway via Web Luar / Pre-Order)
 ```
@@ -71,8 +70,6 @@ Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan lang
 [Dapur Mulai Memasak Otomatis → Konsumen Tinggal Ambil di Cafe]
 ```
 
-*(Catatan: Untuk pembeli bungkus yang datang langsung ke meja kasir / walk-in, tetap bisa memesan secara langsung ke kasir seperti biasa).*
-
 ---
 
 ## 4. Spesifikasi Fitur Utama
@@ -84,14 +81,12 @@ Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan lang
   - Indikator jam buka/tutup minimalis di sudut atas: `🟢 Buka (16.00 - 23.00)`.
   - Daftar katalog menu lengkap dengan foto, harga, dan opsi varian.
 
-### 4.2. Formulir Checkout Cepat
+### 4.2. Formulir Checkout Cepat (Strict Pay-First)
 - **Nomor Meja:** Terkunci otomatis sesuai QR yang dipindai (untuk Dine-In).
 - **Nomor Antrean:** Terbit otomatis format `#TK-xx` (untuk Takeaway).
 - **Nama Pemesan:** Wajib (misal: "Budi").
 - **No. WhatsApp:** Wajib untuk takeaway web, opsional untuk meja.
-- **Pilihan Metode Bayar:**
-  - *Midtrans QRIS / E-Wallet (Auto-Settlement)*.
-  - *Bayar Tunai di Kasir / Open Bill* (khusus Dine-In).
+- **Pilihan Metode Bayar:** *Midtrans QRIS Dinamis & Virtual Account (Auto-Settlement Lunas di Depan)*.
 
 ### 4.3. Integrasi Midtrans Payment Gateway
 - **Engine:** Menggunakan package `midtrans/midtrans-php` (sudah terpasang di project).

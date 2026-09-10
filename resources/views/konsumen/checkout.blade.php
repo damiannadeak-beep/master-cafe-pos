@@ -62,79 +62,37 @@
                             </a>
                         </div>
                     @else
-                        <!-- Pilihan Pembayaran Utama: Midtrans Snap QRIS (Jika Aktif) -->
-                        @if(!empty($snapToken))
-                            <div class="p-3 rounded-4 mb-3" style="background: linear-gradient(135deg, rgba(192, 142, 92, 0.12) 0%, rgba(22, 27, 34, 0.9) 100%); border: 1px solid rgba(192, 142, 92, 0.4);">
-                                <div class="d-flex align-items-center gap-3 mb-3">
-                                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: var(--gradient-bronze); width: 44px; height: 44px; color: white;">
-                                        <i class="bi bi-qr-code-scan" style="font-size: 1.35rem;"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="text-white fw-bold mb-0">Pembayaran Cepat QRIS</h6>
-                                        <small class="text-secondary">GoPay, ShopeePay, OVO, DANA, BCA & E-Wallet</small>
-                                    </div>
+                        <!-- Pembayaran Utama: Midtrans Snap QRIS & VA (Strict Pay-First Policy) -->
+                        <div class="p-3 rounded-4 mb-3" style="background: linear-gradient(135deg, rgba(192, 142, 92, 0.12) 0%, rgba(22, 27, 34, 0.9) 100%); border: 1px solid rgba(192, 142, 92, 0.4);">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: var(--gradient-bronze); width: 44px; height: 44px; color: white;">
+                                    <i class="bi bi-qr-code-scan" style="font-size: 1.35rem;"></i>
                                 </div>
-                                <button id="pay-button" onclick="payWithSnap()" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1.05rem;">
-                                    ⚡ Bayar Sekarang via QRIS <i class="bi bi-arrow-right ms-1"></i>
-                                </button>
+                                <div>
+                                    <h6 class="text-white fw-bold mb-0">Pembayaran Cepat QRIS & VA</h6>
+                                    <small class="text-secondary">GoPay, ShopeePay, OVO, DANA, BCA, Mandiri & E-Wallet</small>
+                                </div>
                             </div>
-                        @endif
 
-                        <!-- Tombol Bayar Nanti di Kasir -->
-                        <div class="d-grid mb-4">
-                            <a href="{{ $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : (auth()->check() ? url('/konsumen/profil') : url('/')) }}" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold py-2 btn-touch">
-                                💵 Bayar Nanti di Kasir
-                            </a>
-                            <small class="text-muted text-center mt-1" style="font-size: 0.76rem;">
-                                Pesanan Anda langsung masuk ke dapur/bar. Pembayaran dapat diselesaikan di kasir nanti.
-                            </small>
+                            @if(!empty($snapToken))
+                                <button id="pay-button" onclick="payWithSnap()" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1.05rem;">
+                                    ⚡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            @else
+                                <form action="{{ url('konsumen/order/' . $pesanan->id . '/simulate-midtrans-pay' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
+                                    @csrf
+                                    @if($pesanan->order_token)
+                                        <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
+                                    @endif
+                                    <button type="submit" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1.05rem;">
+                                        ⚡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
 
-                        <!-- Opsi Tambahan: Transfer Bank / QRIS Statis Manual -->
-                        <div class="accordion" id="manualPaymentAccordion">
-                            <div class="accordion-item border-0 rounded-3 overflow-hidden" style="background-color: #0e1217; border: 1px solid #21262d !important;">
-                                <h2 class="accordion-header" id="headingManual">
-                                    <button class="accordion-button collapsed py-2 px-3 text-secondary small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManual" aria-expanded="false" aria-controls="collapseManual" style="background-color: #0e1217; color: #8b949e !important;">
-                                        <i class="bi bi-receipt me-2"></i> Pilihan Lain: Transfer Manual & Unggah Bukti
-                                    </button>
-                                </h2>
-                                <div id="collapseManual" class="accordion-collapse collapse" aria-labelledby="headingManual" data-bs-parent="#manualPaymentAccordion">
-                                    <div class="accordion-body p-3 border-top border-secondary">
-                                        <div class="text-center mb-3">
-                                            <p class="text-secondary small mb-2">Pindai QRIS Master Cafe di bawah ini:</p>
-                                            <img src="{{ asset('storage/qris/E7fbrwtuYBtpOeuCIA6jOc0RB1NPQ24812gFJmre.jpg') }}" alt="QRIS Master Cafe" class="img-fluid rounded-3 shadow-sm" style="max-width: 200px; border: 3px solid #c08e5c;">
-                                            <p class="text-white mt-2 small fw-bold mb-0">A.N. MASTER CAFE</p>
-                                        </div>
-
-                                        <form action="{{ url('konsumen/order/' . $pesanan->id . '/upload-bukti' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST" enctype="multipart/form-data" id="form-upload">
-                                            @csrf
-                                            @if($pesanan->order_token)
-                                                <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
-                                            @endif
-                                            <label class="form-label text-secondary fw-bold small">Unggah Bukti Transfer</label>
-                                            
-                                            <div class="upload-container mb-3" id="upload-box" onclick="document.getElementById('bukti_bayar').click()">
-                                                <img id="preview-image" class="upload-preview mb-2" src="" alt="Preview">
-                                                <div id="upload-placeholder">
-                                                    <i class="bi bi-cloud-arrow-up text-secondary d-block mb-2" style="font-size: 2rem;"></i>
-                                                    <span class="text-white fw-semibold small">Klik untuk pilih gambar struk</span>
-                                                    <br>
-                                                    <small class="text-secondary" style="font-size: 0.72rem;">JPG, PNG (Max 2MB)</small>
-                                                </div>
-                                                <input type="file" id="bukti_bayar" name="bukti_bayar" class="d-none" accept="image/jpeg,image/png,image/jpg" required onchange="previewFile(this)">
-                                            </div>
-                                            
-                                            @error('bukti_bayar')
-                                                <div class="text-danger small fw-bold mb-3">{{ $message }}</div>
-                                            @enderror
-
-                                            <button type="submit" id="btn-submit" class="btn w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none;" disabled>
-                                                Kirim Bukti Pembayaran <i class="bi bi-send ms-2"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="alert alert-info border-0 rounded-4 text-center mb-0" style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2) !important; color: #93c5fd;">
+                            <small><i class="bi bi-shield-check me-1"></i> Pesanan otomatis diproses dan diteruskan ke dapur setelah pembayaran lunas.</small>
                         </div>
                     @endif
                 </div>
