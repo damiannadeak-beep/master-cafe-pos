@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Edit Kasir</h2>
+        <h2>Edit Staf Waitress</h2>
         <a href="{{ route('admin.kasir.index') }}" class="btn btn-secondary">Kembali</a>
     </div>
 

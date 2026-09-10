@@ -190,7 +190,7 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3">Koordinat Pusat Warung</h6>
-                                <p class="text-white-50 small mb-3">Tentukan titik kordinat (Latitude & Longitude) warung. Kasir hanya bisa melakukan absensi jika berada dalam radius tertentu dari titik ini.</p>
+                                <p class="text-white-50 small mb-3">Tentukan titik kordinat (Latitude & Longitude) warung. Staf Waitress hanya bisa melakukan absensi jika berada dalam radius tertentu dari titik ini.</p>
                                 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Latitude</label>

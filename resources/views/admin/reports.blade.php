@@ -18,12 +18,12 @@
         </li>
         <li class="nav-item">
             <a class="nav-link text-white-50" href="{{ route('admin.absensi.index') }}">
-                <i class="bi bi-calendar-check-fill me-1"></i> Absensi Kasir
+                <i class="bi bi-calendar-check-fill me-1"></i> Absensi Waitress
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link text-white-50" href="{{ route('admin.void_logs.index') }}">
-                <i class="bi bi-journal-x me-1"></i> Audit Void Kasir
+                <i class="bi bi-journal-x me-1"></i> Audit Void Waitress
             </a>
         </li>
     </ul>
@@ -121,14 +121,14 @@
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                    <i class="bi bi-person-badge text-primary me-2"></i> Kinerja Kasir per Shift
+                    <i class="bi bi-person-badge text-primary me-2"></i> Kinerja Waitress per Shift
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-dark table-hover align-middle">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Nama Kasir</th>
+                                    <th>Nama Waitress</th>
                                     <th>Shift</th>
                                     <th>Transaksi</th>
                                     <th>Pendapatan</th>
@@ -149,7 +149,7 @@
                                     <td class="text-success fw-bold">Rp {{ number_format($kasir->total_pendapatan, 0, ',', '.') }}</td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="4" class="text-center text-white-50">Belum ada data kasir.</td></tr>
+                                <tr><td colspan="4" class="text-center text-white-50">Belum ada data staf waitress.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -193,18 +193,18 @@
         <div class="col-md-12">
             <div class="card shadow-sm h-100">
                 <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                    <i class="bi bi-safe text-danger me-2"></i> Riwayat Rekonsiliasi Kasir (Buka/Tutup Laci)
+                    <i class="bi bi-safe text-danger me-2"></i> Riwayat Rekonsiliasi Waitress (Buka/Tutup Laci)
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-dark table-hover align-middle">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Kasir</th>
+                                    <th>Waitress</th>
                                     <th>Waktu Shift</th>
                                     <th>Modal Awal</th>
                                     <th>Pemasukan Tunai Sistem</th>
-                                    <th>Uang Fisik Kasir</th>
+                                    <th>Uang Fisik Waitress</th>
                                     <th>Selisih Laci</th>
                                     <th>Status</th>
                                 </tr>

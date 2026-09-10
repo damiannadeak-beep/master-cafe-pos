@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Gerbang Kasir POS — Master Cafe</title>
+    <title>Gerbang Tablet Waitress — Master Cafe</title>
     
     <!-- Google Fonts as per DESIGN_SYSTEM.md -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -292,8 +292,8 @@
             <img src="{{ asset('images/logo.png') }}" alt="Master Cafe Logo" class="brand-logo-img">
         </div>
 
-        <h1 class="portal-title">Gerbang Kasir</h1>
-        <p class="portal-subtitle">Terminal Operasional Kasir & Layanan POS</p>
+        <h1 class="portal-title">Gerbang Tablet Waitress</h1>
+        <p class="portal-subtitle">Terminal Operasional Waitress Station</p>
 
         @if ($errors->any())
             <div class="alert-error">
@@ -306,11 +306,11 @@
             @csrf
             
             <div class="form-group">
-                <label class="form-label" for="email">Email Akun Kasir</label>
+                <label class="form-label" for="email">Email Akun Waitress</label>
                 <div class="input-wrapper">
                     <i class="bi bi-person-badge input-icon"></i>
                     <input type="email" id="email" name="email" class="form-input" 
-                           placeholder="kasir@mastercafe.com" required autofocus value="{{ old('email') }}">
+                           placeholder="waitress@mastercafe.com" required autofocus value="{{ old('email') }}">
                 </div>
             </div>
 
@@ -329,19 +329,19 @@
             <div class="remember-row">
                 <label class="checkbox-label">
                     <input type="checkbox" name="remember" class="checkbox-input" {{ old('remember') ? 'checked' : '' }}>
-                    <span>Ingat sesi perangkat kasir ini</span>
+                    <span>Ingat sesi perangkat waitress ini</span>
                 </label>
             </div>
 
             <button type="submit" class="btn-submit">
-                <i class="bi bi-calculator"></i>
-                Buka Terminal Kasir
+                <i class="bi bi-display"></i>
+                Buka Terminal Waitress
             </button>
         </form>
 
         <div class="footer-badge">
             <span class="pulse-dot"></span>
-            <span>Terminal Kasir Terproteksi</span>
+            <span>Terminal Waitress Terproteksi</span>
         </div>
     </div>
 

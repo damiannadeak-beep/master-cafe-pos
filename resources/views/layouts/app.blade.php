@@ -94,11 +94,11 @@
 
                                 <div class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="navbarDropdown" style="background: #161b22; border: 1px solid #21262d !important;">
                                     @role('pemilik')
-                                        <a class="dropdown-item text-light d-flex align-items-center" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2 text-warning"></i> Dashboard Admin</a>
+                                        <a class="dropdown-item text-light d-flex align-items-center" href="/admin/dashboard"><i class="bi bi-speedometer2 me-2 text-warning"></i> Dashboard Executive Owner</a>
                                     @endrole
 
                                     @role('kasir')
-                                        <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/pos"><i class="bi bi-calculator me-2 text-success"></i> Mesin POS Kasir</a>
+                                        <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/pos"><i class="bi bi-display me-2 text-success"></i> Tablet Waitress Station</a>
                                         <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/meja"><i class="bi bi-grid-3x3-gap me-2 text-info"></i> Monitor Meja</a>
                                     @endrole
                                     

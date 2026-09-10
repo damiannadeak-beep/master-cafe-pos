@@ -89,8 +89,8 @@
         <div class="staff-brand-icon">
             <i class="bi bi-shield-lock-fill fs-2"></i>
         </div>
-        <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Portal Staf & Kasir</h3>
-        <p class="text-secondary small mb-4">Masuk ke sistem Mesin POS atau Dashboard Admin</p>
+        <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Portal Staf & Waitress</h3>
+        <p class="text-secondary small mb-4">Masuk ke sistem Tablet Waitress atau Dashboard Owner</p>
 
         @if (session('error'))
             <div class="alert alert-danger shadow-sm border-0 rounded-3 text-center mb-4 small" style="background-color: rgba(245, 101, 101, 0.1); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.2) !important;">
@@ -102,7 +102,7 @@
             @csrf
             
             <div class="mb-3">
-                <label for="email" class="form-label fw-bold small text-secondary">Email Staf / Kasir</label>
+                <label for="email" class="form-label fw-bold small text-secondary">Email Staf / Karyawan</label>
                 <div class="input-group staff-input-group">
                     <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
                     <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus placeholder="staf@mastercafe.com">
@@ -141,7 +141,7 @@
         </form>
         
         <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-50">
-            <p class="text-secondary small mb-0">Bukan Staf/Kasir? <a href="{{ route('login') }}" class="fw-bold text-decoration-none" style="color: #c08e5c;">Login Konsumen</a></p>
+            <p class="text-secondary small mb-0">Sistem Akses Resmi Karyawan Master Cafe</p>
         </div>
     </div>
 </div>

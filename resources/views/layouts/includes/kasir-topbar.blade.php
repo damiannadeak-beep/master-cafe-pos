@@ -77,16 +77,16 @@
             </div>
         </div>
 
-        <!-- Right Side: Kasir Status & Logout -->
+        <!-- Right Side: Waitress Status & Logout -->
         <div class="d-flex align-items-center gap-2">
             <div class="d-none d-sm-flex align-items-center gap-2 px-3 py-1 bg-surface-dark border border-subtle rounded-pill">
                 <span class="kasir-status-dot"></span>
                 <span class="small fw-semibold text-light text-truncate" style="max-width: 140px;">
-                    {{ auth()->user()->name ?? 'Kasir' }}
+                    {{ auth()->user()->name ?? 'Waitress' }}
                 </span>
             </div>
             <a class="btn btn-outline-danger btn-sm rounded-pill px-3 d-inline-flex align-items-center shadow-sm" href="{{ route('logout') }}"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();" title="Keluar dari sesi Kasir">
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();" title="Keluar dari sesi Waitress">
                 <i class="bi bi-box-arrow-right me-1"></i> Logout
             </a>
         </div>

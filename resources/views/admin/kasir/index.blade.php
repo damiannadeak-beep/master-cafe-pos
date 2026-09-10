@@ -70,20 +70,20 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan: Form Tambah Kasir -->
+        <!-- Kolom Kanan: Form Tambah Waitress -->
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold">Tambah Akun Kasir</div>
+                <div class="card-header fw-bold">Tambah Akun Staf Waitress</div>
                 <div class="card-body">
                     <form action="{{ route('admin.kasir.store') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="col-12 mb-3">
-                                <label for="name" class="form-label">Nama Kasir</label>
+                                <label for="name" class="form-label">Nama Staf Waitress</label>
                                 <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
                             </div>
                             <div class="col-12 mb-3">
-                                <label for="email" class="form-label">Email Kasir</label>
+                                <label for="email" class="form-label">Email Staf Waitress</label>
                                 <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
                             </div>
                             <div class="col-12 mb-3">
@@ -102,7 +102,7 @@
                                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Buat Akun Kasir</button>
+                        <button type="submit" class="btn btn-primary w-100">Buat Akun Waitress</button>
                     </form>
                 </div>
             </div>

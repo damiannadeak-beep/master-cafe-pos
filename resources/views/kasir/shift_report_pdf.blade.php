@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Shift Kasir - {{ $hariIni }}</title>
+    <title>Laporan Shift Waitress - {{ $hariIni }}</title>
     <style>
         @page {
             margin: 15mm;
@@ -109,10 +109,10 @@
         <tr>
             <td style="border: none; padding: 0;">
                 <h1 class="brand-title">MASTER CAFE POS</h1>
-                <div class="brand-subtitle">Laporan Rekonsiliasi Tutup Shift Kasir</div>
+                <div class="brand-subtitle">Laporan Rekonsiliasi Tutup Shift Waitress</div>
             </td>
             <td style="border: none; padding: 0; text-align: right;" class="report-meta">
-                <strong>STAF KASIR: {{ strtoupper(auth()->user()->name) }}</strong><br>
+                <strong>STAF WAITRESS: {{ strtoupper(auth()->user()->name) }}</strong><br>
                 Tanggal Shift: {{ \Carbon\Carbon::parse($hariIni)->translatedFormat('d F Y') }}<br>
                 Dicetak: {{ now()->translatedFormat('H:i') }} WIB
             </td>
@@ -176,7 +176,7 @@
     <table class="footer-note">
         <tr>
             <td style="border: none; padding: 0;">
-                Laporan Tutup Shift Kasir sah secara sistem komputerisasi Master Cafe POS.
+                Laporan Tutup Shift Waitress sah secara sistem komputerisasi Master Cafe POS.
             </td>
             <td style="border: none; padding: 0; text-align: right;">
                 Dicetak pada {{ date('d/m/Y H:i:s') }}

@@ -53,8 +53,8 @@
                     @if($pembayaran->status == 'pending_verification')
                         <div class="alert alert-warning text-center rounded-4" style="background-color: #2b200b; color: #ffc107; border: 1px solid #c08e5c;">
                             <i class="bi bi-hourglass-split d-block mb-2" style="font-size: 2rem;"></i>
-                            <h6 class="fw-bold">Menunggu Verifikasi Kasir</h6>
-                            <small>Bukti pembayaran Anda sedang dicek oleh kasir. Silakan tunggu di meja Anda.</small>
+                            <h6 class="fw-bold">Menunggu Konfirmasi Waitress</h6>
+                            <small>Bukti pembayaran Anda sedang diverifikasi oleh sistem. Silakan tunggu di meja Anda.</small>
                         </div>
                         <div class="d-grid mt-4">
                             <a href="{{ $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : (auth()->check() ? url('/konsumen/profil') : url('/')) }}" class="btn btn-outline-secondary btn-lg fw-bold rounded-pill btn-touch">

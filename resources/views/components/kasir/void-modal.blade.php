@@ -26,7 +26,7 @@
                         <select id="void-alasan-select" class="form-select form-select-sm text-white mb-2" style="background-color: #0e1217; border-color: #21262d;" onchange="window.handleVoidReasonChange(this)">
                             <option value="Pelanggan Membatalkan Pesanan">Pelanggan Membatalkan Pesanan</option>
                             <option value="Salah Input Menu / Meja">Salah Input Menu / Meja</option>
-                            <option value="Pesanan Uji Coba (Testing Kasir)">Pesanan Uji Coba (Testing Kasir)</option>
+                            <option value="Pesanan Uji Coba (Testing Waitress)">Pesanan Uji Coba (Testing Waitress)</option>
                             <option value="Menu Habis / Batal Masak">Menu Habis / Batal Masak</option>
                             <option value="custom">-- Alasan Lainnya (Ketik Manual) --</option>
                         </select>
@@ -34,7 +34,7 @@
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label text-white-50 small fw-bold mb-1">Password Akun Kasir (Otorisasi)</label>
+                        <label class="form-label text-white-50 small fw-bold mb-1">Password Akun Waitress (Otorisasi)</label>
                         <div class="position-relative">
                             <input type="password" 
                                    id="void-password-input" 

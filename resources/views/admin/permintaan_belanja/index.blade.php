@@ -5,7 +5,7 @@
     <div class="row mb-4 align-items-center">
         <div class="col-md-8">
             <h4 class="fw-bold text-accent mb-1"><i class="bi bi-cart-check-fill me-2"></i>Daftar Permintaan Belanja</h4>
-            <p class="text-white-50 mb-0">Kelola daftar barang atau bahan baku yang diminta oleh Kasir untuk dibeli.</p>
+            <p class="text-white-50 mb-0">Kelola daftar barang atau bahan baku yang diminta oleh Staf Waitress untuk dibeli.</p>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
             <button type="button" class="btn btn-primary rounded-pill shadow-sm d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#adminBeliModal">

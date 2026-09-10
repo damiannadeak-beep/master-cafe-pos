@@ -18,12 +18,12 @@
     </li>
     <li class="nav-item">
         <a class="nav-link active" href="{{ route('admin.absensi.index') }}">
-            <i class="bi bi-calendar-check-fill me-1"></i> Absensi Kasir
+            <i class="bi bi-calendar-check-fill me-1"></i> Absensi Waitress
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link text-white-50" href="{{ route('admin.void_logs.index') }}">
-            <i class="bi bi-journal-x me-1"></i> Audit Void Kasir
+            <i class="bi bi-journal-x me-1"></i> Audit Void Waitress
         </a>
     </li>
 </ul>
@@ -58,7 +58,7 @@
 @if(count($rekapAbsensi) > 0)
 <div class="row mb-4">
     <div class="col-12">
-        <h5 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-2"></i>Rekapitulasi Kehadiran Kasir (Berdasarkan Filter)</h5>
+        <h5 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-2"></i>Rekapitulasi Kehadiran Waitress (Berdasarkan Filter)</h5>
         <div class="row g-3">
             @foreach($rekapAbsensi as $rekap)
                 <div class="col-md-4 col-sm-6">
@@ -88,7 +88,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th class="ps-4">Tanggal</th>
-                        <th>Nama Kasir</th>
+                        <th>Nama Waitress</th>
                         <th>Shift</th>
                         <th>Jam Masuk</th>
                         <th>Jam Keluar</th>

@@ -106,7 +106,7 @@
 <div class="d-none d-print-block px-4 py-4" style="background: white; color: black !important;">
     <div class="text-center mb-4">
         <h2 class="fw-bold">Laporan Penjualan Shift</h2>
-        <p>Kasir: {{ auth()->user()->name }} | Tanggal: {{ $shift->waktu_buka->format('Y-m-d') }}</p>
+        <p>Waitress: {{ auth()->user()->name }} | Tanggal: {{ $shift->waktu_buka->format('Y-m-d') }}</p>
     </div>
     
     <table class="table table-dark text-white border-secondary table-bordered border-dark mb-4 text-white">

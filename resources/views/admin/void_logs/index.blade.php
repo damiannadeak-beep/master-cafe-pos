@@ -20,19 +20,19 @@
     </li>
     <li class="nav-item">
         <a class="nav-link text-white-50" href="{{ route('admin.absensi.index') }}">
-            <i class="bi bi-calendar-check-fill me-1"></i> Absensi Kasir
+            <i class="bi bi-calendar-check-fill me-1"></i> Absensi Waitress
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link active" href="{{ route('admin.void_logs.index') }}">
-            <i class="bi bi-journal-x me-1"></i> Audit Void Kasir
+            <i class="bi bi-journal-x me-1"></i> Audit Void Waitress
         </a>
     </li>
 </ul>
 
     <div class="card shadow mb-4 border-0">
         <div class="card-header py-3 text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" border-bottom-0">
-            <h6 class="m-0 font-weight-bold text-primary">Data Void Kasir</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Data Void Waitress</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -41,7 +41,7 @@
                         <tr>
                             <th>Waktu Void</th>
                             <th>No. Pesanan</th>
-                            <th>Nama Kasir</th>
+                            <th>Nama Waitress</th>
                             <th>Total Nilai</th>
                             <th>Alasan</th>
                         </tr>
