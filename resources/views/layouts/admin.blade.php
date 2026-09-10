@@ -130,7 +130,7 @@
                         <i class="bi bi-graph-up-arrow me-2"></i> Pusat Laporan
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.kasir.*', 'admin.users.*') ? 'active' : '' }}" href="{{ route('admin.kasir.index') }}">
-                        <i class="bi bi-people-fill me-2"></i> Kasir & Shift
+                        <i class="bi bi-people-fill me-2"></i> Staf Waitress & Shift
                     </a>
 
                     <div class="nav-section-title">Marketing & Sistem</div>

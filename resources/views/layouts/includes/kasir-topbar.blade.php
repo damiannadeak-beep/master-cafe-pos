@@ -17,7 +17,7 @@
                 <!-- Layanan Utama (Akses Langsung 1-Klik) -->
                 <div class="d-flex align-items-center gap-1 p-1 bg-surface-dark rounded-pill border border-subtle">
                     <a class="nav-pill-btn {{ request()->routeIs('kasir.pos') ? 'active' : '' }}" href="{{ route('kasir.pos') }}">
-                        <i class="bi bi-cart-plus me-1"></i> Transaksi Kasir
+                        <i class="bi bi-cart-plus me-1"></i> Pesanan Manual
                     </a>
                     <a class="nav-pill-btn {{ request()->routeIs('kasir.pesanan_aktif') ? 'active' : '' }}" href="{{ route('kasir.pesanan_aktif') }}">
                         <i class="bi bi-bell me-1"></i> Pesanan Aktif

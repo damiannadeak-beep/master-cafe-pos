@@ -8,8 +8,8 @@
                 <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3">
                     <i class="bi bi-box-arrow-right fs-1"></i>
                 </div>
-                <h3 class="fw-bold">Tutup Shift Kasir</h3>
-                <p class="text-white-50">Hitung seluruh fisik uang tunai yang ada di dalam laci kasir sekarang dan masukkan totalnya ke bawah ini.</p>
+                <h3 class="fw-bold">Tutup Shift Waitress</h3>
+                <p class="text-white-50">Hitung seluruh fisik uang tunai yang ada di dalam laci pos station sekarang dan masukkan totalnya ke bawah ini.</p>
             </div>
 
             <div class="alert alert-info py-2">

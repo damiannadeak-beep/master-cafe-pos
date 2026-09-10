@@ -112,8 +112,8 @@
                 <td>: {{ $order->meja->nama_meja_atau_nomor ?? 'Takeaway' }}</td>
             </tr>
             <tr>
-                <td>Kasir</td>
-                <td>: {{ $order->kasir->name ?? 'Kasir' }}</td>
+                <td>Waitress</td>
+                <td>: {{ $order->kasir->name ?? 'Waitress' }}</td>
             </tr>
         </table>
     </div>

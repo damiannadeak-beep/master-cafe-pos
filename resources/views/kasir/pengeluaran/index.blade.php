@@ -4,7 +4,7 @@
 <div class="container-fluid px-0 pb-5">
     <div class="row g-4 align-items-start mt-2">
         <div class="col-12">
-            <h4 class="fw-bold mb-0 text-accent"><i class="bi bi-wallet2 me-2"></i> Pengeluaran Kasir</h4>
+            <h4 class="fw-bold mb-0 text-accent"><i class="bi bi-wallet2 me-2"></i> Pengeluaran Operasional Waitress</h4>
             <p class="text-white-50 small">Catat pengeluaran harian seperti beli es batu, plastik, dll.</p>
         </div>
 

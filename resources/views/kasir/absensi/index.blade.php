@@ -6,7 +6,7 @@
         <div class="card kasir-card hover-lift border-0 shadow-sm text-center">
             <div class="card-header bg-transparent border-0 pt-4">
                 <h4 class="fw-bold mb-0">
-                    <i class="bi bi-geo-alt-fill text-danger me-2"></i> Absensi Shift Kasir
+                    <i class="bi bi-geo-alt-fill text-danger me-2"></i> Absensi Shift Waitress
                 </h4>
             </div>
             <div class="card-body">

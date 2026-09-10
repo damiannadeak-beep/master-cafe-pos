@@ -4,8 +4,8 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2>Manajemen Kasir</h2>
-            <p class="text-white-50 mb-0">Kelola akun kasir dan penugasan shift kerja.</p>
+            <h2>Manajemen Staf Waitress</h2>
+            <p class="text-white-50 mb-0">Kelola akun staf waitress dan penugasan shift kerja.</p>
         </div>
         <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm">
             <i class="bi bi-people me-1"></i> Data Semua Akun (User)

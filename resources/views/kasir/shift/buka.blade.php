@@ -8,8 +8,8 @@
                 <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
                     <i class="bi bi-cash-stack fs-1"></i>
                 </div>
-                <h3 class="fw-bold">Buka Shift Kasir</h3>
-                <p class="text-white-50">Masukkan nominal uang tunai (uang kembalian) yang saat ini ada di laci kasir.</p>
+                <h3 class="fw-bold">Buka Shift Waitress</h3>
+                <p class="text-white-50">Masukkan nominal uang tunai (uang kembalian) yang saat ini ada di laci pos station.</p>
             </div>
 
             @if(session('warning'))
@@ -32,7 +32,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary  w-100 fw-bold rounded-pill shadow-sm btn-touch">
-                    Mulai Shift & Buka Akses Kasir <i class="bi bi-arrow-right ms-2"></i>
+                    Mulai Shift & Buka Akses Tablet Waitress <i class="bi bi-arrow-right ms-2"></i>
                 </button>
             </form>
         </div>
