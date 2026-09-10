@@ -30,6 +30,7 @@
 3. **0% Resiko Pesanan Palsu pada Takeaway:** Pesanan bawa pulang via web wajib lunas via Midtrans terlebih dahulu sebelum diteruskan ke dapur.
 4. **Pelacakan Live Real-Time Tanpa Login:** Konsumen tetap memantau progres pesanannya (*Diterima &rarr; Lunas &rarr; Dimasak &rarr; Siap &rarr; Selesai*) via WebSocket Reverb & LocalStorage HP.
 5. **Penyatuan Portal Login Staff:** Rute `/login` dikhususkan sebagai satu-satunya pintu resmi untuk Karyawan (Admin, Kasir, Kitchen, Pelayan).
+6. **Akses Menu Super Smooth & Mulus (< 1 Detik Loading Time):** Pengalaman membuka daftar menu dibuat sangat ringan, lancar (*smooth transition 60fps*), tanpa delay/lag pada browser HP Android maupun iOS, dilengkapi *lazy loading* gambar dan animasi mikro yang responsif.
 
 ---
 
@@ -149,6 +150,12 @@
 ### 4.8. Kebijakan Pembatalan Pesanan (Zero Waste)
 - Konsumen hanya bisa membatalkan pesanan dari HP jika status masih *Menunggu Pembayaran / Pending*.
 - Begitu status berubah jadi *Sedang Dimasak Dapur 👨‍🍳*, tombol batal di HP otomatis dikunci. Pembatalan darurat hanya bisa dilakukan lewat Kasir (*Void Order*).
+
+### 4.9. Optimasi Performa & Akses Menu Mulus (Smooth & Fast Menu Rendering)
+- **Instant Menu Render (< 1 Detik):** Daftar menu dimuat secara instan saat QR meja dipindai tanpa delay atau *layout shift* (CLS 0).
+- **Optimasi Gambar (Lazy Loading & WebP):** Foto hidangan dikompresi hemat bandwidth dan menggunakan mekanisme *lazy loading* agar konsumsi data di HP pelanggan sangat ringan.
+- **Transisi Mulus 60fps (Smooth Micro-Animations):** Interaksi penambahan item (+/-) ke keranjang, modal pemilihan varian, serta perubahan tombol checkout dilapisi animasi transisi CSS yang mulus dan responsif.
+- **Performa Ringan di Seluruh Perangkat:** Bebas lag di berbagai spesifikasi HP (Android entry-level maupun iOS).
 
 ---
 
