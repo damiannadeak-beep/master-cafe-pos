@@ -116,9 +116,9 @@
         </div>
     </div>
 
-    <!-- Baris 3: Kinerja Kasir & Penggunaan Stok -->
+    <!-- Baris 3: Kinerja Kasir / Waitress -->
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-12">
             <div class="card shadow-sm h-100">
                 <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <i class="bi bi-person-badge text-primary me-2"></i> Kinerja Waitress per Shift
@@ -150,35 +150,6 @@
                                 </tr>
                                 @empty
                                 <tr><td colspan="4" class="text-center text-white-50">Belum ada data staf waitress.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header fw-bold text-white" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                    <i class="bi bi-box-seam text-success me-2"></i> Penggunaan Stok Bahan Baku
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Bahan Baku</th>
-                                    <th>Total Terpakai</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($stockUsage as $stok)
-                                <tr>
-                                    <td class="fw-medium">{{ $stok->nama_bahan }}</td>
-                                    <td><span class="badge bg-danger">{{ $stok->total_penggunaan }} {{ $stok->satuan }}</span></td>
-                                </tr>
-                                @empty
-                                <tr><td colspan="2" class="text-center text-white-50">Belum ada data penggunaan bahan.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>

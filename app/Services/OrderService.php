@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\{Menu, Bahan, Pesanan, DetailPesanan, Promo};
+use App\Models\{Menu, Pesanan, DetailPesanan, Promo};
 
 class OrderService
 {
     /**
-     * Proses item pesanan: lock menu & bahan, validasi stok, kurangi stok, buat detail pesanan.
+     * Proses item pesanan: lock menu, validasi stok menu, kurangi stok menu, buat detail pesanan.
      *
      * @param  Pesanan  $pesanan
      * @param  array    $items  Array of ['id_menu', 'jumlah', 'catatan'?, 'variants'?]
@@ -21,7 +21,7 @@ class OrderService
         $menuIds = collect($items)->pluck('id_menu')->unique()->sort()->values()->all();
 
         // 2. Lock & load semua menu sekaligus (1 query, bukan N query)
-        $menus = Menu::with('bahans')->whereIn('id', $menuIds)
+        $menus = Menu::whereIn('id', $menuIds)
             ->where('is_available', true)
             ->lockForUpdate()
             ->get()
@@ -33,45 +33,35 @@ class OrderService
             }
         }
 
-        // 3. Kumpulkan & lock semua bahan baku sekaligus
-        $allBahanIds = $menus->flatMap(fn($m) => $m->bahans->pluck('id'))
-            ->unique()->sort()->values()->all();
-
-        $bahans = Bahan::whereIn('id', $allBahanIds)
-            ->lockForUpdate()
-            ->get()
-            ->keyBy('id');
-
-        // 4. Proses setiap item
+        // 3. Proses setiap item
         $totalHarga = 0;
         $totalHpp = 0;
 
         foreach ($items as $item) {
             $menu = $menus->get($item['id_menu']);
 
-            // 4a. Kurangi stok bahan baku
-            foreach ($menu->bahans as $bahanItem) {
-                $bahan = $bahans->get($bahanItem->id);
-                $dibutuhkan = $bahanItem->pivot->jumlah_dibutuhkan * $item['jumlah'];
-
-                if ($bahan->stok < $dibutuhkan) {
-                    throw new \Exception("Gagal: Stok bahan {$bahan->nama_bahan} tidak mencukupi untuk menu {$menu->nama_menu}.");
-                }
-
-                $bahan->decrement('stok', $dibutuhkan);
-                $bahan->stok -= $dibutuhkan; // Sync in-memory
-                $totalHpp += $bahan->harga_beli * $dibutuhkan;
+            // 3a. Validasi stok menu langsung
+            if ($menu->stok < $item['jumlah']) {
+                throw new \Exception("Gagal: Stok produk {$menu->nama_menu} tidak mencukupi (Sisa: {$menu->stok}).");
             }
 
-            // 4b. Hitung harga varian
+            // 3b. Kurangi stok menu
+            $menu->decrement('stok', $item['jumlah']);
+            $menu->stok -= $item['jumlah']; // Sync in-memory
+
+            if ($menu->stok <= 0) {
+                $menu->update(['is_available' => false]);
+            }
+
+            // 3c. Hitung harga varian
             [$hargaVarian, $selectedVariants] = $this->resolveVariants($menu, $item['variants'] ?? []);
 
-            // 4c. Hitung subtotal
+            // 3d. Hitung subtotal
             $hargaTotalPerItem = $menu->harga + $hargaVarian;
             $subtotal = $hargaTotalPerItem * $item['jumlah'];
             $totalHarga += $subtotal;
 
-            // 4d. Buat detail pesanan
+            // 3e. Buat detail pesanan
             DetailPesanan::create([
                 'id_pesanan' => $pesanan->id,
                 'id_menu' => $menu->id,
@@ -80,14 +70,6 @@ class OrderService
                 'catatan' => $item['catatan'] ?? null,
                 'selected_variants' => !empty($selectedVariants) ? json_encode($selectedVariants) : null,
             ]);
-
-            // 4e. Kurangi stok menu (kuota harian)
-            if ($menu->stok >= $item['jumlah']) {
-                $menu->decrement('stok', $item['jumlah']);
-                $menu->stok -= $item['jumlah']; // Sync in-memory
-            } else {
-                throw new \Exception("Gagal: Stok produk {$menu->nama_menu} tidak mencukupi.");
-            }
         }
 
         return ['total' => $totalHarga, 'total_hpp' => $totalHpp];

@@ -5,7 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\Menu;
-use App\Models\Bahan;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,10 +34,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.admin', function ($view) {
             $data = cache()->remember('admin_layout_stok_data', 15, function() {
                 $menuMenipis = Menu::where('stok', '<', 10)->where('is_available', true)->get();
-                $bahanMenipis = Bahan::where('stok', '<', 10)->get();
-                $stokMenipisCount = $menuMenipis->count() + $bahanMenipis->count();
-                $pendingReq = \App\Models\PermintaanBelanja::where('status', 'menunggu')->count();
-                return compact('menuMenipis', 'bahanMenipis', 'stokMenipisCount', 'pendingReq');
+                $stokMenipisCount = $menuMenipis->count();
+                return compact('menuMenipis', 'stokMenipisCount');
             });
 
             $view->with($data);

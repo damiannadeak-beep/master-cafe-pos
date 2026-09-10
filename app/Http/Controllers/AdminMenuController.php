@@ -38,8 +38,7 @@ class AdminMenuController extends Controller
 
     public function create()
     {
-        $bahans = \App\Models\Bahan::all();
-        return view('admin.menu.form', ['menu' => new Menu(), 'bahans' => $bahans]);
+        return view('admin.menu.form', ['menu' => new Menu()]);
     }
 
     public function store(StoreMenuRequest $request, MenuService $menuService)
@@ -53,9 +52,8 @@ class AdminMenuController extends Controller
 
     public function edit($id)
     {
-        $menu = Menu::with('bahans')->findOrFail($id);
-        $bahans = \App\Models\Bahan::all();
-        return view('admin.menu.form', compact('menu', 'bahans'));
+        $menu = Menu::findOrFail($id);
+        return view('admin.menu.form', compact('menu'));
     }
 
     public function update(UpdateMenuRequest $request, $id, MenuService $menuService)

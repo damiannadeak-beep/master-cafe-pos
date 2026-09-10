@@ -15,7 +15,6 @@ use App\Http\Controllers\AdminPromoController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\KonsumenController;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminBahanController;
 use App\Http\Controllers\AdminPengeluaranController;
 use App\Http\Controllers\AdminMejaController;
 use App\Http\Controllers\WaitressPengeluaranController;
@@ -190,12 +189,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/menu/{id}/stock', [AdminMenuController::class, 'updateStock'])->name('menu.stock');
         Route::post('/menu/ai-description', [AdminMenuController::class, 'generateAiDescription'])->name('menu.ai_description');
 
-        // Stok Bahan Baku
-        Route::get('/stok', [AdminBahanController::class, 'index'])->name('stok.index');
-        Route::post('/stok', [AdminBahanController::class, 'store'])->name('stok.store');
-        Route::put('/stok/{id}', [AdminBahanController::class, 'update'])->name('stok.update');
-        Route::delete('/stok/{id}', [AdminBahanController::class, 'destroy'])->name('stok.destroy');
-
         // Pengeluaran
         Route::get('/pengeluaran', [AdminPengeluaranController::class, 'index'])->name('pengeluaran.index');
         Route::post('/pengeluaran', [AdminPengeluaranController::class, 'store'])->name('pengeluaran.store');
@@ -224,11 +217,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/promo/{id}', [AdminPromoController::class, 'destroy'])->name('promo.destroy');
         // User management
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-        // Permintaan Belanja (Admin)
-        Route::get('/permintaan-belanja', [\App\Http\Controllers\PermintaanBelanjaController::class, 'adminIndex'])->name('permintaan.index');
-        Route::post('/permintaan-belanja', [\App\Http\Controllers\PermintaanBelanjaController::class, 'adminStore'])->name('permintaan.store');
-        Route::put('/permintaan-belanja/{id}', [\App\Http\Controllers\PermintaanBelanjaController::class, 'adminUpdateStatus'])->name('permintaan.update');
-
     });
 
     // Role: Waitress / Kasir

@@ -3,39 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Bahan;
 use App\Models\Menu;
 
 class WaitressStokController extends Controller
 {
     /**
-     * Tampilkan halaman update stok waitress
+     * Tampilkan halaman update stok produk waitress
      */
     public function index()
     {
-        $bahans = Bahan::orderBy('nama_bahan')->get();
         $menus = Menu::orderBy('nama_menu')->get();
 
-        return view('waitress.stok.index', compact('bahans', 'menus'));
+        return view('waitress.stok.index', compact('menus'));
     }
 
     /**
-     * Update stok bahan dan menu berdasarkan input form
+     * Update stok menu berdasarkan input form
      */
     public function update(Request $request)
     {
         $request->validate([
-            'bahan' => 'nullable|array',
-            'bahan.*' => 'integer|min:0',
             'menu' => 'nullable|array',
             'menu.*' => 'integer|min:0',
         ]);
-
-        if ($request->has('bahan')) {
-            foreach ($request->bahan as $id => $stok) {
-                Bahan::where('id', $id)->update(['stok' => $stok]);
-            }
-        }
 
         if ($request->has('menu')) {
             foreach ($request->menu as $id => $stok) {
@@ -52,6 +42,6 @@ class WaitressStokController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Stok berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Stok produk berhasil diperbarui.');
     }
 }

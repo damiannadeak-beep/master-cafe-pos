@@ -209,31 +209,8 @@
         </tbody>
     </table>
 
-    <!-- 4. PENGGUNAAN STOK BAHAN BAKU -->
-    <div class="section-title">3. REKAP PENGGUNAAN STOK BAHAN BAKU</div>
-    <table>
-        <thead>
-            <tr>
-                <th width="10%" class="text-center">No</th>
-                <th>Nama Bahan Baku</th>
-                <th width="30%" class="text-right">Total Terpakai</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($stockUsage as $index => $stok)
-            <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ $stok->nama_bahan }}</td>
-                <td class="text-right fw-bold">{{ $stok->total_penggunaan }} {{ $stok->satuan }}</td>
-            </tr>
-            @empty
-            <tr><td colspan="3" class="text-center" style="color: #888;">Belum ada penggunaan bahan baku.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <!-- 5. METODE PEMBAYARAN -->
-    <div class="section-title">4. RINGKASAN METODE PEMBAYARAN</div>
+    <!-- 3. METODE PEMBAYARAN -->
+    <div class="section-title">3. METODE PEMBAYARAN</div>
     <table>
         <thead>
             <tr>

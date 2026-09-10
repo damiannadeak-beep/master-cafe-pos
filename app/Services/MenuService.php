@@ -28,7 +28,7 @@ class MenuService
     }
 
     /**
-     * Buat menu baru + upload gambar + sync bahan baku.
+     * Buat menu baru + upload gambar.
      */
     public function createMenu(array $data, array $requestData): Menu
     {
@@ -41,15 +41,11 @@ class MenuService
             unset($data['image']);
         }
 
-        $menu = Menu::create($data);
-
-        $this->syncBahans($menu, $requestData);
-
-        return $menu;
+        return Menu::create($data);
     }
 
     /**
-     * Update menu + upload gambar baru (jika ada) + sync bahan baku.
+     * Update menu + upload gambar baru (jika ada).
      */
     public function updateMenu(Menu $menu, array $data, array $requestData): Menu
     {
@@ -65,28 +61,7 @@ class MenuService
 
         $menu->update($data);
 
-        $this->syncBahans($menu, $requestData);
-
         return $menu;
-    }
-
-    /**
-     * Sync relasi bahan baku (resep) ke menu.
-     */
-    private function syncBahans(Menu $menu, array $requestData): void
-    {
-        if (isset($requestData['bahans']) && is_array($requestData['bahans'])) {
-            $syncData = [];
-            foreach ($requestData['bahans'] as $index => $bahanId) {
-                if (!empty($bahanId)) {
-                    $qty = $requestData['jumlah_dibutuhkan'][$index] ?? 1;
-                    $syncData[$bahanId] = ['jumlah_dibutuhkan' => $qty];
-                }
-            }
-            $menu->bahans()->sync($syncData);
-        } else {
-            $menu->bahans()->detach();
-        }
     }
 
     /**

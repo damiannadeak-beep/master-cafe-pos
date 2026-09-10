@@ -58,18 +58,8 @@ class ReportService
             ->orderByDesc('total_pendapatan')
             ->get();
 
-        // 4. Penggunaan Stok Bahan Baku
-        $stockUsage = DB::table('detail_pesanan')
-            ->join('pesanan', 'detail_pesanan.id_pesanan', '=', 'pesanan.id')
-            ->join('pembayaran', 'pesanan.id', '=', 'pembayaran.id_pesanan')
-            ->join('bahan_menu', 'detail_pesanan.id_menu', '=', 'bahan_menu.menu_id')
-            ->join('bahans', 'bahan_menu.bahan_id', '=', 'bahans.id')
-            ->whereBetween('pembayaran.tanggal', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->where('pembayaran.status', 'paid')
-            ->selectRaw('bahans.nama_bahan, bahans.satuan, SUM(detail_pesanan.jumlah * bahan_menu.jumlah_dibutuhkan) as total_penggunaan')
-            ->groupBy('bahans.id', 'bahans.nama_bahan', 'bahans.satuan')
-            ->orderByDesc('total_penggunaan')
-            ->get();
+        // 4. Penggunaan Stok Bahan Baku (Dinonaktifkan)
+        $stockUsage = collect();
 
         // 5. Metode Pembayaran (Cash vs QRIS)
         $paymentMethods = Pembayaran::selectRaw('metode, count(id) as total_transaksi, sum(total_bayar) as total')

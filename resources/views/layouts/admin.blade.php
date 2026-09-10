@@ -56,16 +56,6 @@
                                     </a>
                                 </li>
                             @endforeach
-                            @foreach($bahanMenipis as $bahan)
-                                <li>
-                                    <a class="dropdown-item d-flex text-white justify-content-between align-items-center py-2" href="{{ route('admin.stok.index') }}">
-                                        <div>
-                                            <i class="bi bi-layers text-warning me-2"></i> {{ $bahan->nama_bahan }}
-                                        </div>
-                                        <span class="badge bg-danger rounded-pill">{{ $bahan->stok }}</span>
-                                    </a>
-                                </li>
-                            @endforeach
                         @else
                             <li><span class="dropdown-item text-secondary small text-center py-3">Semua stok aman</span></li>
                         @endif
@@ -110,19 +100,10 @@
                     <a class="nav-link {{ request()->routeIs('admin.menu.*') ? 'active' : '' }}" href="{{ route('admin.menu.index') }}">
                         <i class="bi bi-list-ul me-2"></i> Produk (Menu)
                     </a>
-                    <a class="nav-link {{ request()->routeIs('admin.stok.*') ? 'active' : '' }}" href="{{ route('admin.stok.index') }}">
-                        <i class="bi bi-box-seam me-2"></i> Stok Bahan Baku
-                    </a>
 
                     <div class="nav-section-title">Keuangan</div>
                     <a class="nav-link {{ request()->routeIs('admin.pengeluaran.*') ? 'active' : '' }}" href="{{ route('admin.pengeluaran.index') }}">
                         <i class="bi bi-wallet2 me-2"></i> Pengeluaran
-                    </a>
-                    <a class="nav-link {{ request()->routeIs('admin.permintaan.*') ? 'active' : '' }}" href="{{ route('admin.permintaan.index') }}">
-                        <i class="bi bi-cart-check-fill me-2"></i> Permintaan Belanja
-                        @if(!empty($pendingReq) && $pendingReq > 0)
-                            <span class="badge bg-danger ms-auto rounded-pill">{{ $pendingReq }}</span>
-                        @endif
                     </a>
 
                     <div class="nav-section-title">Laporan & Staf</div>

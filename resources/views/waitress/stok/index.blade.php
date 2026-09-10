@@ -4,8 +4,8 @@
 <div class="container-fluid px-0 py-0">
     <div class="row mb-4">
         <div class="col-12">
-            <h4 class="fw-bold text-accent"><i class="bi bi-box-seam me-2"></i>Update Stok Fisik</h4>
-            <p class="text-white-50">Perbarui jumlah stok bahan baku dan produk jadi secara langsung. Perubahan akan disimpan dan dapat dilihat oleh admin.</p>
+            <h4 class="fw-bold text-accent"><i class="bi bi-box-seam me-2"></i>Update Stok Produk</h4>
+            <p class="text-white-50">Perbarui jumlah stok produk jadi dan ketersediaan menu secara langsung.</p>
         </div>
     </div>
 
@@ -19,91 +19,64 @@
     <form action="{{ route('kasir.stok.update') }}" method="POST">
         @csrf
         <div class="row g-4">
-            <!-- Kolom Bahan Baku -->
-            <div class="col-md-6">
-                <div class="card kasir-card hover-lift h-100">
-                    <div class="card-header bg-transparent border-bottom pt-4 pb-3 px-4">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-basket2-fill me-2 text-warning"></i>Stok Bahan Baku</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                            <table class="table table-dark table-hover align-middle mb-0">
-                                <thead class="table table-dark sticky-top">
-                                    <tr>
-                                        <th class="ps-4">Nama Bahan</th>
-                                        <th class="text-center" style="width: 150px;">Sisa Stok</th>
-                                        <th class="pe-4 text-center">Satuan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($bahans as $bahan)
-                                        <tr>
-                                            <td class="ps-4 fw-medium">{{ $bahan->nama_bahan }}</td>
-                                            <td class="text-center">
-                                                <input type="number" name="bahan[{{ $bahan->id }}]" class="form-control text-white border-secondary  text-center mx-auto" value="{{ $bahan->stok }}" min="0" style="width: 80px;">
-                                            </td>
-                                            <td class="pe-4 text-center text-white-50">{{ $bahan->satuan }}</td>
-                                        </tr>
-                                    @endforeach
-                                    @if($bahans->isEmpty())
-                                        <tr><td colspan="3" class="text-center py-4 text-white-50">Belum ada bahan baku.</td></tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Kolom Menu (Produk Jadi) -->
-            <div class="col-md-6">
-                <div class="card kasir-card hover-lift h-100">
-                    <div class="card-header bg-transparent border-bottom pt-4 pb-3 px-4">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-cup-straw me-2 text-info"></i>Stok Produk Jadi (Menu)</h5>
+            <div class="col-12 col-xl-10 mx-auto">
+                <div class="card kasir-card hover-lift">
+                    <div class="card-header bg-transparent border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-cup-straw me-2 text-info"></i>Daftar Stok Produk (Menu)</h5>
+                        <span class="badge bg-secondary">{{ $menus->count() }} Item</span>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
                             <table class="table table-dark table-hover align-middle mb-0">
-                                <thead class="table table-dark sticky-top">
+                                <thead class="table-dark sticky-top">
                                     <tr>
-                                        <th class="ps-4">Nama Menu</th>
-                                        <th class="text-center" style="width: 150px;">Sisa Stok</th>
-                                        <th class="pe-4 text-center">Tersedia?</th>
+                                        <th class="ps-4">Nama Produk</th>
+                                        <th class="text-center">Kategori</th>
+                                        <th class="text-center" style="width: 160px;">Jumlah Stok</th>
+                                        <th class="pe-4 text-center" style="width: 140px;">Ketersediaan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($menus as $menu)
                                         <tr>
-                                            <td class="ps-4 fw-medium">{{ $menu->nama_menu }}</td>
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-light">{{ $menu->nama_menu }}</div>
+                                                <div class="small text-white-50">Rp {{ number_format($menu->harga, 0, ',', '.') }}</div>
+                                            </td>
                                             <td class="text-center">
-                                                <input type="number" id="stok-{{ $menu->id }}" name="menu[{{ $menu->id }}]" class="form-control text-white border-secondary  text-center mx-auto" value="{{ $menu->stok }}" min="0" style="width: 80px;" onchange="checkAvailability({{ $menu->id }})" onkeyup="checkAvailability({{ $menu->id }})">
+                                                <span class="badge {{ $menu->kategori == 'makanan' ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                                    {{ ucfirst($menu->kategori) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" id="stok-{{ $menu->id }}" name="menu[{{ $menu->id }}]" class="form-control text-white border-secondary text-center mx-auto" value="{{ $menu->stok }}" min="0" style="width: 100px;" onchange="checkAvailability({{ $menu->id }})" onkeyup="checkAvailability({{ $menu->id }})">
                                             </td>
                                             <td class="pe-4 text-center">
-                                                <select id="avail-{{ $menu->id }}" name="menu_available[{{ $menu->id }}]" class="form-select text-white border-secondary  form-select-sm text-center mx-auto" style="width: 80px; font-weight: bold; color: {{ $menu->is_available ? '#198754' : '#dc3545' }}" onchange="updateColor(this)">
-                                                    <option value="1" {{ $menu->is_available ? 'selected' : '' }} class="text-success">Ya</option>
-                                                    <option value="0" {{ !$menu->is_available ? 'selected' : '' }} class="text-danger">Tidak</option>
+                                                <select id="avail-{{ $menu->id }}" name="menu_available[{{ $menu->id }}]" class="form-select text-white border-secondary form-select-sm text-center mx-auto" style="width: 100px; font-weight: bold; color: {{ $menu->is_available ? '#198754' : '#dc3545' }}" onchange="updateColor(this)">
+                                                    <option value="1" {{ $menu->is_available ? 'selected' : '' }} class="text-success">Tersedia</option>
+                                                    <option value="0" {{ !$menu->is_available ? 'selected' : '' }} class="text-danger">Habis</option>
                                                 </select>
                                             </td>
                                         </tr>
                                     @endforeach
                                     @if($menus->isEmpty())
-                                        <tr><td colspan="3" class="text-center py-4 text-white-50">Belum ada menu.</td></tr>
+                                        <tr><td colspan="4" class="text-center py-4 text-white-50">Belum ada menu produk.</td></tr>
                                     @endif
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm btn-touch">
+                        <i class="bi bi-save me-2"></i> Simpan Pembaruan Stok
+                    </button>
+                </div>
             </div>
         </div>
-
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-primary  rounded-pill px-4 shadow-sm btn-touch">
-                <i class="bi bi-save me-2"></i> Simpan Pembaruan Stok
-            </button>
-        </div>
     </form>
-</div>
 </div>
 
 <script>
@@ -115,11 +88,9 @@
         let stok = parseInt(stokInput.value) || 0;
         
         if (stok <= 0) {
-            // Paksa dropdown menjadi Tidak dan warna merah
             availSelect.value = "0";
             availSelect.style.color = '#dc3545';
         } else {
-            // Kembalikan menjadi Ya dan warna hijau jika stok > 0 dan sebelumnya habis
             if(availSelect.value === "0" && availSelect.dataset.wasZero) {
                 availSelect.value = "1";
                 availSelect.style.color = '#198754';
@@ -133,17 +104,15 @@
     function updateColor(select) {
         select.style.color = select.value === '1' ? '#198754' : '#dc3545';
         
-        // Cek jika Kasir memaksa "Ya" tapi stok 0
         const id = select.id.split('-')[1];
         const stokInput = document.getElementById('stok-' + id);
         if (select.value === '1' && (parseInt(stokInput.value) || 0) <= 0) {
-            alert('Stok masih kosong! Tidak dapat diatur menjadi Tersedia.');
+            alert('Stok masih 0! Tidak dapat diatur menjadi Tersedia.');
             select.value = '0';
             select.style.color = '#dc3545';
         }
     }
 
-    // Inisialisasi awal
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('input[id^="stok-"]').forEach(input => {
             const id = input.id.split('-')[1];
@@ -152,5 +121,3 @@
     });
 </script>
 @endsection
-
-

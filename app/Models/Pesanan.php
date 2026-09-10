@@ -68,7 +68,7 @@ class Pesanan extends Model
     }
 
     /**
-     * Mengembalikan stok menu dan bahan baku yang sudah terpotong.
+     * Mengembalikan stok menu yang sudah terpotong.
      */
     public function restoreStock()
     {
@@ -77,14 +77,8 @@ class Pesanan extends Model
             if ($menu) {
                 // Kembalikan stok produk jadi/menu
                 $menu->increment('stok', $detail->jumlah);
-                
-                // Kembalikan stok bahan baku yang terikat dengan menu
-                $bahanIds = $menu->bahans->pluck('id')->all();
-                $bahans = \App\Models\Bahan::whereIn('id', $bahanIds)->lockForUpdate()->get()->keyBy('id');
-
-                foreach ($menu->bahans as $bahan) {
-                    $dibutuhkan = $bahan->pivot->jumlah_dibutuhkan * $detail->jumlah;
-                    $bahans->get($bahan->id)?->increment('stok', $dibutuhkan);
+                if (!$menu->is_available && $menu->stok > 0) {
+                    $menu->update(['is_available' => true]);
                 }
             }
         }

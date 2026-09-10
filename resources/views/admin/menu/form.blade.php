@@ -66,41 +66,6 @@
                 </div>
 
                 <hr class="my-4">
-                <h5 class="fw-bold mb-3"><i class="bi bi-list-stars text-primary me-2"></i>Resep / Komposisi Bahan Baku (Opsional)</h5>
-                <p class="text-white-50 small mb-3">Tambahkan bahan baku di sini agar stok bahan otomatis berkurang saat produk ini dipesan.</p>
-                
-                <div id="recipe-container">
-                    @if($menu->exists && $menu->bahans->count() > 0)
-                        @foreach($menu->bahans as $index => $bahan)
-                            <div class="row g-2 mb-2 recipe-row">
-                                <div class="col-7">
-                                    <select name="bahans[]" class="form-select text-white border-secondary ">
-                                        <option value="">-- Pilih Bahan Baku --</option>
-                                        @foreach($bahans as $b)
-                                            <option value="{{ $b->id }}" {{ $bahan->id == $b->id ? 'selected' : '' }}>
-                                                {{ $b->nama_bahan }} (Stok: {{ $b->stok }} {{ $b->satuan }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-4">
-                                    <div class="input-group">
-                                        <input type="number" name="jumlah_dibutuhkan[]" class="form-control" value="{{ $bahan->pivot->jumlah_dibutuhkan }}" placeholder="Jumlah" min="1">
-                                        <span class="input-group-text">Satuan</span>
-                                    </div>
-                                </div>
-                                <div class="col-1 text-end">
-                                    <button type="button" class="btn btn-outline-danger remove-recipe"><i class="bi bi-trash"></i></button>
-                                </div>
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-
-                <button type="button" class="btn btn-sm btn-outline-primary mb-4" id="add-recipe">
-                    <i class="bi bi-plus-circle me-1"></i> Tambah Bahan Baku
-                </button>
-                <hr class="my-4">
 
                 @include("components.admin.menu-variant-builder")
 </div>
@@ -108,44 +73,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('recipe-container');
-    const btnAdd = document.getElementById('add-recipe');
-    
-    // Template for new row
-    const template = `
-        <div class="row g-2 mb-2 recipe-row">
-            <div class="col-7">
-                <select name="bahans[]" class="form-select text-white border-secondary ">
-                    <option value="">-- Pilih Bahan Baku --</option>
-                    @if(isset($bahans))
-                        @foreach($bahans as $b)
-                            <option value="{{ $b->id }}">{{ $b->nama_bahan }} (Stok: {{ $b->stok }} {{ $b->satuan }})</option>
-                        @endforeach
-                    @endif
-                </select>
-            </div>
-            <div class="col-4">
-                <div class="input-group">
-                    <input type="number" name="jumlah_dibutuhkan[]" class="form-control" value="1" placeholder="Jumlah" min="1">
-                    <span class="input-group-text">Satuan</span>
-                </div>
-            </div>
-            <div class="col-1 text-end">
-                <button type="button" class="btn btn-outline-danger remove-recipe"><i class="bi bi-trash"></i></button>
-            </div>
-        </div>
-    `;
-
-    btnAdd.addEventListener('click', function() {
-        container.insertAdjacentHTML('beforeend', template);
-    });
-
-    container.addEventListener('click', function(e) {
-        if(e.target.closest('.remove-recipe')) {
-            e.target.closest('.recipe-row').remove();
-        }
-    });
-
     // --- VARIANTS LOGIC ---
     let variants = [];
     try {
