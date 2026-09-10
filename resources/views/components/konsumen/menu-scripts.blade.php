@@ -370,10 +370,6 @@
         }
 
         const inputName = document.getElementById('inputGuestName');
-        if (inputName && !inputName.value) {
-            const savedName = localStorage.getItem('master_cafe_guest_name');
-            if (savedName) inputName.value = savedName;
-        }
 
         const modalQty = document.getElementById('modal-summary-qty');
         const modalTotal = document.getElementById('modal-summary-total');
@@ -415,8 +411,7 @@
             return;
         }
 
-        localStorage.setItem('master_cafe_guest_name', guestName);
-        if (guestPhone) localStorage.setItem('master_cafe_guest_phone', guestPhone);
+        // Nama & phone tidak disimpan di localStorage agar antar pesanan bersih (device shared)
 
         proceedToCheckout(guestName, guestPhone);
     }
@@ -434,8 +429,8 @@
             @if(isset($meja))
             id_meja: "{{ $meja->id }}",
             @endif
-            guest_name: guestName || localStorage.getItem('master_cafe_guest_name') || 'Tamu',
-            guest_phone: guestPhone || localStorage.getItem('master_cafe_guest_phone') || null,
+            guest_name: guestName || 'Tamu',
+            guest_phone: guestPhone || null,
             promo_id: document.getElementById('promo_id') ? document.getElementById('promo_id').value : null,
             items: cart
         };
