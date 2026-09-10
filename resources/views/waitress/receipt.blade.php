@@ -105,11 +105,21 @@
             </tr>
             <tr>
                 <td>Order</td>
-                <td>: #{{ $order->id }}</td>
+                <td>: #{{ $order->id }} ({{ $order->tipe_pesanan === 'takeaway' ? 'Takeaway' : 'Dine-In' }})</td>
             </tr>
             <tr>
-                <td>Meja</td>
-                <td>: {{ $order->meja->nama_meja_atau_nomor ?? 'Takeaway' }}</td>
+                <td>Pemesan</td>
+                <td>: {{ $order->customer_name }}</td>
+            </tr>
+            @if(!empty($order->guest_phone))
+            <tr>
+                <td>No. WA</td>
+                <td>: {{ $order->guest_phone }}</td>
+            </tr>
+            @endif
+            <tr>
+                <td>Lokasi</td>
+                <td>: {{ $order->tipe_pesanan === 'takeaway' ? 'Bungkus' : ($order->meja->nama_meja_atau_nomor ?? 'Meja ?') }}</td>
             </tr>
             <tr>
                 <td>Waitress</td>

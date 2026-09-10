@@ -18,21 +18,54 @@
                     </div>
                     
                     <div class="card-body  text-white bg-opacity-50">
-                        <div class="d-flex mb-3 align-items-center">
-                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
-                                <i class="bi bi-geo-alt-fill"></i>
+                        <div class="p-3 rounded-3 mb-3" style="background-color: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(192, 142, 92, 0.15); width: 36px; height: 36px; color: #c08e5c;">
+                                        <i class="{{ $order->tipe_pesanan == 'takeaway' ? 'bi bi-bag-check-fill' : 'bi bi-shop' }}"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white fs-6">
+                                            {{ $order->tipe_pesanan == 'takeaway' ? 'Takeaway (Bungkus)' : 'Dine-In (Makan di Tempat)' }}
+                                        </h6>
+                                        <small class="text-secondary" style="font-size: 0.8rem;">
+                                            @if($order->tipe_pesanan == 'takeaway')
+                                                <span class="badge rounded-pill text-bg-warning px-2">Bawa Pulang</span>
+                                            @elseif($order->tipe_pesanan == 'dine_in' && !$order->id_meja)
+                                                <span class="text-danger fw-bold"><i class="bi bi-geo-alt"></i> Belum Pilih Meja</span>
+                                            @else
+                                                <span class="badge rounded-pill text-bg-secondary px-2">Meja {{ $order->meja->nama_meja_atau_nomor ?? '?' }}</span>
+                                            @endif
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">{{ $order->tipe_pesanan == 'takeaway' ? 'Takeaway' : 'Dine-In' }}</h6>
-                                <small class="text-white-50">
-                                    @if($order->tipe_pesanan == 'takeaway')
-                                        Bungkus
-                                    @elseif($order->tipe_pesanan == 'dine_in' && !$order->id_meja)
-                                        <span class="text-danger fw-bold"><i class="bi bi-geo-alt"></i> Belum Pilih Meja (Datang Nanti)</span>
-                                    @else
-                                        {{ $order->meja->nama_meja_atau_nomor ?? 'Meja Tidak Diketahui' }}
+
+                            <!-- Informasi Detail Pemesan & No WA -->
+                            <div class="pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-1">
+                                <div>
+                                    <div class="small text-white fw-bold">
+                                        <i class="bi bi-person-fill text-warning me-1"></i> Pemesan: <span class="text-white">{{ $order->customer_name }}</span>
+                                    </div>
+                                    @if(!empty($order->guest_phone))
+                                        <div class="small text-white-50 mt-1">
+                                            <i class="bi bi-whatsapp text-success me-1"></i> WA: <span class="text-white">{{ $order->guest_phone }}</span>
+                                        </div>
                                     @endif
-                                </small>
+                                </div>
+
+                                @if(!empty($order->guest_phone))
+                                    @php
+                                        $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone);
+                                        if (str_starts_with($cleanPhone, '0')) {
+                                            $cleanPhone = '62' . substr($cleanPhone, 1);
+                                        }
+                                        $waMessage = rawurlencode("Halo Kak {$order->customer_name}, pesanan Master Cafe #{$order->id} Anda sudah siap! Silakan diambil di kasir/counter. Terima kasih!");
+                                    @endphp
+                                    <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waMessage }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;">
+                                        <i class="bi bi-whatsapp me-1"></i> Chat WA
+                                    </a>
+                                @endif
                             </div>
                         </div>
 
