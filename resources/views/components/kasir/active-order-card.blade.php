@@ -93,7 +93,7 @@
                         <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
                             @if($order->status === 'pending')
                                 <button type="button" class="btn btn-sm btn-primary w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus({{ $order->id }}, 'processing', this)">
-                                    <i class="bi bi-play-circle me-1"></i> Proses Masak
+                                    <i class="bi bi-printer me-1"></i> Konfirmasi & Cetak Tiket Dapur
                                 </button>
                             @endif
                             

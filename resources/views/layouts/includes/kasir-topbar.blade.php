@@ -3,7 +3,7 @@
         <!-- Logo & Brand -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('kasir.pos') }}">
             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="rounded-circle shadow-sm" style="height: 38px; width: 38px; object-fit: cover;">
-            <span class="fw-bold tracking-tight">Kasir Pos</span>
+            <span class="fw-bold tracking-tight">Tablet Waitress</span>
         </a>
         
         <!-- Mobile Toggler -->
