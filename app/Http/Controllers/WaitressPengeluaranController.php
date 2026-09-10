@@ -5,18 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pengeluaran;
 
-class KasirPengeluaranController extends Controller
+class WaitressPengeluaranController extends Controller
 {
     public function index(Request $request)
     {
-        // Kasir hanya melihat pengeluarannya sendiri atau semua pengeluaran hari ini?
-        // Untuk transparansi, kasir bisa melihat pengeluarannya sendiri.
         $pengeluarans = Pengeluaran::where('user_id', auth()->id())
             ->orderBy('tanggal', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
             
-        return view('kasir.pengeluaran.index', compact('pengeluarans'));
+        return view('waitress.pengeluaran.index', compact('pengeluarans'));
     }
 
     public function store(Request $request)

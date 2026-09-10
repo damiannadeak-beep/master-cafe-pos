@@ -17,7 +17,7 @@ class AbsensiController extends Controller
 
         $settings = \App\Models\Setting::pluck('value', 'key')->toArray();
 
-        return view('kasir.absensi.index', compact('absensi', 'settings'));
+        return view('waitress.absensi.index', compact('absensi', 'settings'));
     }
 
     public function store(Request $request)

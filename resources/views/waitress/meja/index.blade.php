@@ -1,4 +1,4 @@
-@extends('layouts.kasir')
+@extends('layouts.waitress')
 
 @section('content')
 <div class="container-fluid px-0 py-0">

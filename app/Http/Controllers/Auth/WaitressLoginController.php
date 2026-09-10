@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
-class KasirLoginController extends Controller
+class WaitressLoginController extends Controller
 {
     /**
-     * Menampilkan formulir login khusus kasir.
+     * Menampilkan formulir login khusus waitress.
      */
     public function showLoginForm()
     {
@@ -23,11 +23,11 @@ class KasirLoginController extends Controller
             }
         }
 
-        return view('auth.kasir-login');
+        return view('auth.waitress-login');
     }
 
     /**
-     * Memproses autentikasi kasir.
+     * Memproses autentikasi waitress.
      */
     public function login(Request $request)
     {
@@ -39,14 +39,14 @@ class KasirLoginController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $user = Auth::user();
 
-            // Verifikasi role kasir atau pemilik
+            // Verifikasi role kasir/waitress atau pemilik
             if (!$user->hasRole('kasir') && !$user->hasRole('pemilik')) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
                 throw ValidationException::withMessages([
-                    'email' => 'Akses ditolak. Akun ini tidak memiliki hak akses kasir.',
+                    'email' => 'Akses ditolak. Akun ini tidak memiliki hak akses staf waitress.',
                 ]);
             }
 
@@ -55,7 +55,7 @@ class KasirLoginController extends Controller
         }
 
         throw ValidationException::withMessages([
-            'email' => 'Kredensial kasir yang diberikan tidak cocok.',
+            'email' => 'Kredensial staf yang diberikan tidak cocok.',
         ]);
     }
 }

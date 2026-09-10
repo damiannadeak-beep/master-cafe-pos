@@ -108,7 +108,7 @@
 </head>
 <body>
     <div id="app" class="kasir-layout">
-        @include("layouts.includes.kasir-topbar")
+        @include("layouts.includes.waitress-topbar")
 
         <main class="kasir-main">
             <div class="kasir-container">

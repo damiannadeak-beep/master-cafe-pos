@@ -10,7 +10,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminMenuController;
-use App\Http\Controllers\AdminKasirController;
+use App\Http\Controllers\AdminWaitressController;
 use App\Http\Controllers\AdminPromoController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\KonsumenController;
@@ -18,9 +18,9 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminBahanController;
 use App\Http\Controllers\AdminPengeluaranController;
 use App\Http\Controllers\AdminMejaController;
-use App\Http\Controllers\KasirPengeluaranController;
+use App\Http\Controllers\WaitressPengeluaranController;
 use App\Http\Controllers\PushSubscriptionController;
-use App\Http\Controllers\KasirMejaController;
+use App\Http\Controllers\WaitressMejaController;
 
 // ================= AREA PUBLIK =================
 // Halaman yang bisa diakses tanpa perlu login
@@ -88,7 +88,7 @@ Route::get('/storage/{path}', function ($path) {
 
 
 use App\Http\Controllers\Auth\OwnerLoginController;
-use App\Http\Controllers\Auth\KasirLoginController;
+use App\Http\Controllers\Auth\WaitressLoginController;
 use App\Http\Middleware\VerifySecretOwnerAccess;
 
 $ownerSlug = config('auth.owner_path', 'ruang-owner-x92k');
@@ -100,10 +100,10 @@ Route::prefix($ownerSlug)->middleware(['web', VerifySecretOwnerAccess::class])->
     Route::post('/login', [OwnerLoginController::class, 'login'])->middleware('throttle:3,1')->name('owner.login.submit');
 });
 
-// ================= JALUR RAHASIA KASIR (POS) =================
+// ================= JALUR RAHASIA WAITRESS (POS) =================
 Route::prefix($kasirSlug)->middleware(['web'])->group(function () {
-    Route::get('/login', [KasirLoginController::class, 'showLoginForm'])->middleware('throttle:5,1')->name('kasir.login');
-    Route::post('/login', [KasirLoginController::class, 'login'])->middleware('throttle:3,1')->name('kasir.login.submit');
+    Route::get('/login', [WaitressLoginController::class, 'showLoginForm'])->middleware('throttle:5,1')->name('kasir.login');
+    Route::post('/login', [WaitressLoginController::class, 'login'])->middleware('throttle:3,1')->name('kasir.login.submit');
 });
 
 // ================= DECOY & STEALTH ROUTES =================
@@ -208,12 +208,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/meja/{id}', [AdminMejaController::class, 'destroy'])->name('meja.destroy');
         Route::get('/meja/{id}/qr', [AdminMejaController::class, 'printQr'])->name('meja.print_qr');
 
-        // Kasir management
-        Route::get('/kasir/manage', [AdminKasirController::class, 'index'])->name('kasir.index');
-        Route::post('/kasir', [AdminKasirController::class, 'store'])->name('kasir.store');
-        Route::get('/kasir/{id}/edit', [AdminKasirController::class, 'edit'])->name('kasir.edit');
-        Route::put('/kasir/{id}', [AdminKasirController::class, 'update'])->name('kasir.update');
-        Route::delete('/kasir/{id}', [AdminKasirController::class, 'destroy'])->name('kasir.destroy');
+        // Waitress management
+        Route::get('/kasir/manage', [AdminWaitressController::class, 'index'])->name('kasir.index');
+        Route::post('/kasir', [AdminWaitressController::class, 'store'])->name('kasir.store');
+        Route::get('/kasir/{id}/edit', [AdminWaitressController::class, 'edit'])->name('kasir.edit');
+        Route::put('/kasir/{id}', [AdminWaitressController::class, 'update'])->name('kasir.update');
+        Route::delete('/kasir/{id}', [AdminWaitressController::class, 'destroy'])->name('kasir.destroy');
 
         // Promo management
         Route::get('/promo', [AdminPromoController::class, 'index'])->name('promo.index');
@@ -231,7 +231,7 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
-    // Role: Kasir
+    // Role: Waitress / Kasir
     Route::middleware(['role:kasir'])->prefix('kasir')->group(function () {
         Route::get('/pos', [PosController::class, 'index'])->name('kasir.pos');
         Route::get('/pesanan-aktif', [PosController::class, 'pesananAktif'])->name('kasir.pesanan_aktif');
@@ -252,17 +252,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/api/notifications', [PosController::class, 'getNotifications']);
         Route::post('/api/notifications/{id}/read', [PosController::class, 'readNotification']);
 
-        // Pengeluaran Kasir
-        Route::get('/pengeluaran', [KasirPengeluaranController::class, 'index'])->name('kasir.pengeluaran.index');
-        Route::post('/pengeluaran', [KasirPengeluaranController::class, 'store'])->name('kasir.pengeluaran.store');
+        // Pengeluaran Waitress
+        Route::get('/pengeluaran', [WaitressPengeluaranController::class, 'index'])->name('kasir.pengeluaran.index');
+        Route::post('/pengeluaran', [WaitressPengeluaranController::class, 'store'])->name('kasir.pengeluaran.store');
 
-        // Manajemen Meja Kasir
-        Route::get('/meja', [KasirMejaController::class, 'index'])->name('kasir.meja.index');
-        Route::put('/meja/{id}/toggle', [KasirMejaController::class, 'toggle'])->name('kasir.meja.toggle');
+        // Manajemen Meja Waitress
+        Route::get('/meja', [WaitressMejaController::class, 'index'])->name('kasir.meja.index');
+        Route::put('/meja/{id}/toggle', [WaitressMejaController::class, 'toggle'])->name('kasir.meja.toggle');
 
-        // Stok Opname Kasir
-        Route::get('/stok', [\App\Http\Controllers\KasirStokController::class, 'index'])->name('kasir.stok.index');
-        Route::post('/stok', [\App\Http\Controllers\KasirStokController::class, 'update'])->name('kasir.stok.update');
+        // Stok Opname Waitress
+        Route::get('/stok', [\App\Http\Controllers\WaitressStokController::class, 'index'])->name('kasir.stok.index');
+        Route::post('/stok', [\App\Http\Controllers\WaitressStokController::class, 'update'])->name('kasir.stok.update');
 
         // Absensi Geolocation
         Route::get('/absensi', [\App\Http\Controllers\AbsensiController::class, 'index'])->name('kasir.absensi.index');

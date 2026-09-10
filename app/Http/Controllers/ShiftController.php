@@ -16,7 +16,7 @@ class ShiftController extends Controller
         if ($shift) {
             return redirect()->route('kasir.pos');
         }
-        return view('kasir.shift.buka');
+        return view('waitress.shift.buka');
     }
 
     public function storeBukaShift(Request $request)
@@ -41,7 +41,7 @@ class ShiftController extends Controller
             return redirect()->route('kasir.pos')->with('error', 'Tidak ada shift yang aktif.');
         }
 
-        return view('kasir.shift.tutup', compact('shift'));
+        return view('waitress.shift.tutup', compact('shift'));
     }
 
     public function storeTutupShift(Request $request)

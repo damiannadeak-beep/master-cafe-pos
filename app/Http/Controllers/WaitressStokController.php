@@ -6,20 +6,17 @@ use Illuminate\Http\Request;
 use App\Models\Bahan;
 use App\Models\Menu;
 
-class KasirStokController extends Controller
+class WaitressStokController extends Controller
 {
     /**
-     * Tampilkan halaman update stok kasir
+     * Tampilkan halaman update stok waitress
      */
     public function index()
     {
-        // Ambil semua data bahan baku
         $bahans = Bahan::orderBy('nama_bahan')->get();
-        
-        // Ambil semua data menu
         $menus = Menu::orderBy('nama_menu')->get();
 
-        return view('kasir.stok.index', compact('bahans', 'menus'));
+        return view('waitress.stok.index', compact('bahans', 'menus'));
     }
 
     /**
@@ -34,14 +31,12 @@ class KasirStokController extends Controller
             'menu.*' => 'integer|min:0',
         ]);
 
-        // Update stok Bahan
         if ($request->has('bahan')) {
             foreach ($request->bahan as $id => $stok) {
                 Bahan::where('id', $id)->update(['stok' => $stok]);
             }
         }
 
-        // Update stok Menu
         if ($request->has('menu')) {
             foreach ($request->menu as $id => $stok) {
                 $is_available = isset($request->menu_available[$id]) && $request->menu_available[$id] == '1' ? true : false;

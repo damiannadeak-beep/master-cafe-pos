@@ -299,7 +299,7 @@ class OrderController extends Controller
             ->where('order_token', $order_token)
             ->firstOrFail();
 
-        return view('kasir.receipt', compact('order'));
+        return view('waitress.receipt', compact('order'));
     }
 
     /**

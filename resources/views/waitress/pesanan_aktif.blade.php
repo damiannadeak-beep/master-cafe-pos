@@ -1,4 +1,4 @@
-@extends('layouts.kasir')
+@extends('layouts.waitress')
 
 @section('content')
 <div class="container-fluid px-0 py-3" style="height: 100%; overflow-y: auto; overflow-x: hidden; padding-bottom: 5rem !important;">
@@ -12,20 +12,20 @@
     </div>
 
     <div class="row g-4" id="active-orders-container">
-        @include("components.kasir.active-order-card")
+        @include("components.waitress.active-order-card")
     </div>
 </div>
 
-@include("components.kasir.payment-modal")
+@include("components.waitress.payment-modal")
 
-@include("components.kasir.void-modal")
+@include("components.waitress.void-modal")
 
-@include("components.kasir.qris-modal")
+@include("components.waitress.qris-modal")
 
-@include("components.kasir.split-bill-modal")
+@include("components.waitress.split-bill-modal")
 
-@include("components.kasir.verification-modal")
+@include("components.waitress.verification-modal")
 
-@include("components.kasir.pesanan-aktif-scripts")
+@include("components.waitress.pesanan-aktif-scripts")
 @endsection
 

@@ -1,4 +1,4 @@
-@extends('layouts.kasir')
+@extends('layouts.waitress')
 
 @section('content')
 <div class="container-fluid px-0" style="height: calc(100vh - 125px); margin-top: 15px;">
@@ -14,7 +14,7 @@
 
 <x-pos.modals />
 
-@include("components.kasir.pos-scripts")
+@include("components.waitress.pos-scripts")
 
 <style>
     .kasir-main { padding: 0 !important; }

@@ -20,7 +20,7 @@ class PermintaanBelanjaController extends Controller
         // Ambil daftar bahan baku untuk dropdown (opsional)
         $bahans = Bahan::orderBy('nama_bahan')->get();
                         
-        return view('kasir.permintaan_belanja.index', compact('permintaans', 'bahans'));
+        return view('waitress.permintaan_belanja.index', compact('permintaans', 'bahans'));
     }
 
     public function kasirStore(Request $request)

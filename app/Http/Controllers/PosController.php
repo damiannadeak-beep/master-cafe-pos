@@ -30,7 +30,7 @@ class PosController extends Controller
         $mejas = Meja::all();
         $promos = Promo::active()->get();
 
-        return view('kasir.pos', compact('menus', 'mejas', 'promos'));
+        return view('waitress.pos', compact('menus', 'mejas', 'promos'));
     }
 
     /**
@@ -55,10 +55,10 @@ class PosController extends Controller
             ->get();
 
         if ($request->ajax() || $request->wantsJson() || $request->query('cards_only')) {
-            return view('components.kasir.active-order-card', compact('orders'))->render();
+            return view('components.waitress.active-order-card', compact('orders'))->render();
         }
 
-        return view('kasir.pesanan_aktif', compact('orders'));
+        return view('waitress.pesanan_aktif', compact('orders'));
     }
 
     /**
@@ -300,7 +300,7 @@ class PosController extends Controller
             abort(403, 'Pesanan belum dibayar lunas.');
         }
 
-        return view('kasir.receipt', compact('order'));
+        return view('waitress.receipt', compact('order'));
     }
 
     /**
@@ -374,7 +374,7 @@ class PosController extends Controller
             // Jika fitur mati, jatuh kembali ke print html biasa (fallback)
             if (str_contains($e->getMessage(), 'tidak aktif')) {
                 $order = Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id);
-                return view('kasir.kitchen_receipt', compact('order'));
+                return view('waitress.kitchen_receipt', compact('order'));
             }
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -438,7 +438,7 @@ class PosController extends Controller
     {
         try {
             $data = $this->getShiftReportData();
-            return view('kasir.shift_report', $data);
+            return view('waitress.shift_report', $data);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

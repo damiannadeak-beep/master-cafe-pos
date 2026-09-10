@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Meja;
 
-class KasirMejaController extends Controller
+class WaitressMejaController extends Controller
 {
     /**
-     * Menampilkan daftar meja untuk dikelola Kasir
+     * Menampilkan daftar meja untuk dikelola Waitress
      */
     public function index(Request $request)
     {
@@ -23,7 +23,7 @@ class KasirMejaController extends Controller
                                           $p->where('status', '!=', 'paid');
                                       });
                              });
-                    });
+                     });
             })
             ->with(['konsumen', 'pembayaran', 'detail_pesanan.menu'])
             ->latest();
@@ -34,10 +34,10 @@ class KasirMejaController extends Controller
         $mejaKosong = $totalMeja - $mejaAdaPesanan;
 
         if ($request->ajax() || $request->wantsJson() || $request->query('grid_only')) {
-            return view('kasir.meja.grid', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'))->render();
+            return view('waitress.meja.grid', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'))->render();
         }
 
-        return view('kasir.meja.index', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'));
+        return view('waitress.meja.index', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'));
     }
 
     /**
@@ -53,19 +53,22 @@ class KasirMejaController extends Controller
 
             $statusName = $meja->is_available ? 'Tersedia' : 'Terisi';
 
-            // Broadcast real-time event ke kasir lain
             try {
                 broadcast(new \App\Events\MejaStatusUpdated($meja));
             } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('[KasirMejaController] Gagal broadcast WebSocket: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::warning('[WaitressMejaController] Gagal broadcast WebSocket: ' . $e->getMessage());
             }
 
             return response()->json([
-                'message' => 'Status meja berhasil diubah menjadi ' . $statusName,
+                'status' => 'success',
+                'message' => 'Status meja ' . $meja->nama_meja_atau_nomor . ' diubah menjadi ' . $statusName,
                 'is_available' => $meja->is_available
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengubah status meja: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
