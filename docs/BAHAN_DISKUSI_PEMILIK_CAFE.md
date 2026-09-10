@@ -1,13 +1,14 @@
 # 📋 Bahan Diskusi & Pengambilan Keputusan Pemilik Master Cafe
+## Master Cafe Smart Self-Ordering System (Sistem Pemesanan Mandiri Cerdas)
 **Dokumen:** Konsultasi Fitur Pemesanan Meja, Pembayaran & Operasional  
-**Penyusun:** Tim Pengembang Aplikasi Master Cafe POS  
+**Penyusun:** Tim Pengembang Master Cafe Smart Self-Ordering System  
 **Tanggal:** 10 September 2026  
 **Status:** Siap Didiskusikan dengan Pemilik (Owner) Kafe  
 
 ---
 
 ## 🎯 Ringkasan Eksekutif
-Aplikasi Master Cafe POS telah disempurnakan dengan sistem **Pemesanan Mandiri Meja (Guest Ordering via QR Code)** tanpa mewajibkan pelanggan membuat akun/login, dilengkapi optimasi **kecepatan akses menu yang super mulus (smooth 60fps & instant loading < 1 detik)** di seluruh HP pelanggan. Untuk memastikan sistem berjalan selaras dengan kebiasaan operasional dan kenyamanan pelanggan Master Cafe, terdapat beberapa poin strategis yang memerlukan arahan dan keputusan dari Pemilik Kafe.
+Sistem **Master Cafe Smart Self-Ordering System (Sistem Pemesanan Mandiri Cerdas)** telah disempurnakan dengan pemesanan meja mandiri via QR Code tanpa mewajibkan pelanggan membuat akun/login, dilengkapi optimasi **kecepatan akses menu yang super mulus (smooth 60fps & instant loading < 1 detik)** di seluruh HP pelanggan. Untuk memastikan sistem berjalan selaras dengan kebiasaan operasional dan kenyamanan pelanggan Master Cafe, terdapat beberapa poin strategis yang memerlukan arahan dan keputusan dari Pemilik Kafe.
 
 ---
 

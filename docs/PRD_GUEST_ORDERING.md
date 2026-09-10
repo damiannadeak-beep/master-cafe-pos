@@ -1,9 +1,9 @@
 # 📄 Product Requirements Document (PRD)
-## Sistem Pemesanan Konsumen Tanpa Login & Integrasi Midtrans Payment Gateway
-**Proyek:** Master Cafe POS  
+## Master Cafe Smart Self-Ordering System (Sistem Pemesanan Mandiri Cerdas)
+**Proyek:** Master Cafe Smart Self-Ordering System  
 **Versi:** 2.1 (Guest Ordering, Live Tracking & Midtrans Gateway)  
 **Status:** Disetujui  
-**Tanggal:** 9 September 2026  
+**Tanggal:** 10 September 2026  
 
 ---
 
