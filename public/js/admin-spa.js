@@ -129,7 +129,7 @@
         const currentPath = new URL(currentUrl, window.location.origin).pathname;
         document.querySelectorAll('.admin-sidebar a.nav-link').forEach(link => {
             const linkPath = new URL(link.href, window.location.origin).pathname;
-            if (linkPath === currentPath || (linkPath !== '/admin/dashboard' && currentPath.startsWith(linkPath))) {
+            if (linkPath === currentPath || (linkPath !== '/admin/dashboard' && currentPath.startsWith(linkPath + '/'))) {
                 link.classList.add('active');
             } else {
                 link.classList.remove('active');

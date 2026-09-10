@@ -103,10 +103,10 @@
 
                     <div class="nav-section-title">Keuangan</div>
                     <a class="nav-link {{ request()->routeIs('admin.pengeluaran_bisnis.*') ? 'active' : '' }}" href="{{ route('admin.pengeluaran_bisnis.index') }}">
-                        <i class="bi bi-wallet-fill me-2" style="color: #c08e5c;"></i> Pengeluaran Bisnis
+                        <i class="bi bi-wallet2 me-2"></i> Pengeluaran Bisnis
                     </a>
-                    <a class="nav-link {{ request()->routeIs('admin.pengeluaran.*') ? 'active' : '' }}" href="{{ route('admin.pengeluaran.index') }}">
-                        <i class="bi bi-receipt me-2 text-warning"></i> Pengeluaran Kasir
+                    <a class="nav-link {{ request()->routeIs('admin.pengeluaran.*') && !request()->routeIs('admin.pengeluaran_bisnis.*') ? 'active' : '' }}" href="{{ route('admin.pengeluaran.index') }}">
+                        <i class="bi bi-receipt me-2"></i> Pengeluaran Kasir
                     </a>
 
                     <div class="nav-section-title">Laporan & Staf</div>
