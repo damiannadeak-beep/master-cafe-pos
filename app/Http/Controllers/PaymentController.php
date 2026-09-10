@@ -50,15 +50,17 @@ class PaymentController extends Controller
         }
 
         // Generate Midtrans Snap Token jika Server Key valid
-        $snapToken = $pembayaran->snap_token;
         $clientKey = Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey'));
         $serverKey = Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey'));
+        
         $isProduction = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction')) == '1';
 
         \Midtrans\Config::$serverKey = $serverKey;
         \Midtrans\Config::$isProduction = $isProduction;
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
+
+        $snapToken = $pembayaran->snap_token;
 
         if (empty($snapToken) && !empty($serverKey) && !str_contains($serverKey, 'xxxxxx')) {
             try {
@@ -94,7 +96,6 @@ class PaymentController extends Controller
                         'email' => $customerEmail,
                     ],
                     'item_details' => $itemDetails,
-                    'enabled_payments' => ['qris', 'gopay', 'shopeepay'],
                 ];
 
                 $snapToken = \Midtrans\Snap::getSnapToken($midtransParams);
