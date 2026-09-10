@@ -51,16 +51,16 @@
 
         const stockEl = document.getElementById('variantModalStockBadge');
         if (stockEl) {
-            if (currentSelectedMenu.stok > 0) {
+            if (currentSelectedMenu.is_available) {
                 stockEl.style.background = 'rgba(72, 187, 120, 0.15)';
                 stockEl.style.color = '#48bb78';
                 stockEl.style.border = '1px solid rgba(72, 187, 120, 0.3)';
-                stockEl.innerHTML = `<i class="bi bi-check-circle me-1"></i> Sisa: ${currentSelectedMenu.stok}`;
+                stockEl.innerHTML = `<i class="bi bi-check-circle me-1"></i> Tersedia`;
             } else {
                 stockEl.style.background = 'rgba(245, 101, 101, 0.15)';
                 stockEl.style.color = '#f56565';
                 stockEl.style.border = '1px solid rgba(245, 101, 101, 0.3)';
-                stockEl.innerHTML = `<i class="bi bi-x-circle me-1"></i> Stok Habis`;
+                stockEl.innerHTML = `<i class="bi bi-x-circle me-1"></i> Habis`;
             }
         }
 

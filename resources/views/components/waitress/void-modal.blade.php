@@ -16,7 +16,7 @@
                 <div class="modal-body p-4 pt-3">
                     <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-danger small py-2 px-3 rounded-3 mb-3 d-flex align-items-center gap-2">
                         <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-                        <span>Pesanan akan dibatalkan permanen dan stok bahan akan dikembalikan.</span>
+                        <span>Pesanan akan dibatalkan permanen.</span>
                     </div>
 
                     <div id="void-error-alert" class="alert alert-warning small py-2 px-3 rounded-3 mb-3 d-none"></div>

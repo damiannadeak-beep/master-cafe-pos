@@ -96,27 +96,21 @@
                    
             const badgeCat = `<span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 rounded-pill shadow-sm bg-info text-white text-capitalize" style="backdrop-filter: blur(4px);">${menu.kategori}</span>`;
 
-            const stockAlertClass = ''; // Garis merah dimatikan sesuai permintaan user
-            const stockBadge = menu.stok > 0 && menu.stok <= 5 && menu.is_available ? `<span class="badge bg-danger position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill shadow-sm" style="backdrop-filter: blur(4px);"><i class="bi bi-exclamation-circle me-1"></i>Sisa ${menu.stok}</span>` : '';
-            
-            const isHabis = menu.stok <= 0;
-            const disabledStyle = (!menu.is_available || isHabis) ? 'opacity: 0.6; filter: grayscale(80%); pointer-events: none;' : 'cursor: pointer;';
-            const textOverlay = !menu.is_available ? 'TIDAK TERSEDIA' : (isHabis ? 'STOK HABIS' : '');
-            const habisOverlay = textOverlay !== '' ? `<div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); z-index: 5;"><h4 class="text-white fw-bold border border-2 border-white p-2 rounded">${textOverlay}</h4></div>` : '';
+            const isHabis = !menu.is_available;
+            const disabledStyle = isHabis ? 'opacity: 0.6; filter: grayscale(80%); pointer-events: none;' : 'cursor: pointer;';
+            const habisOverlay = isHabis ? `<div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); z-index: 5;"><h4 class="text-white fw-bold border border-2 border-white p-2 rounded">HABIS</h4></div>` : '';
 
             const html = `
                 <div class="col-6 col-sm-6 col-md-4 col-lg-3">
-                    <div class="menu-card card h-100 position-relative overflow-hidden ${(menu.is_available && !isHabis) ? 'hover-lift' : ''} ${stockAlertClass}" 
-                         onclick="${(menu.is_available && !isHabis) ? `openVariantModal(${menu.id})` : ''}"
+                    <div class="menu-card card h-100 position-relative overflow-hidden ${!isHabis ? 'hover-lift' : ''}" 
+                         onclick="${!isHabis ? `openVariantModal(${menu.id})` : ''}"
                          style="${disabledStyle}">
                         ${habisOverlay}
                         ${badgeCat}
-                        ${stockBadge}
                         ${imageHtml}
                         <div class="card-body text-center p-2 p-md-3">
                             <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.9rem;" title="${menu.nama_menu}">${menu.nama_menu}</h6>
                             <p class="price mb-0 fw-bold text-primary font-sans" style="font-size: 0.9rem;">${menu.is_dynamic_price ? 'Sesuai Timbangan' : 'Rp ' + parseFloat(menu.harga).toLocaleString('id-ID')}</p>
-                            <small class="text-white-50 d-block mt-1" style="font-size: 0.75rem;">Sisa: ${menu.stok}</small>
                         </div>
                     </div>
                 </div>

@@ -103,9 +103,9 @@
 
                     <!-- Overlay Stok Floating di Kanan Atas -->
                     <div class="position-absolute top-0 end-0 m-2">
-                        @if($menu->stok > 0)
+                        @if($menu->is_available)
                             <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(72, 187, 120, 0.4); color: #48bb78; font-size: 0.65rem;">
-                                Sisa: {{ $menu->stok }}
+                                Tersedia
                             </span>
                         @else
                             <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(245, 101, 101, 0.4); color: #f56565; font-size: 0.65rem;">
@@ -258,10 +258,10 @@
 
         // Stok
         const stockContainer = document.getElementById('katalogModalStockContainer');
-        if (menu.stok > 0) {
-            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-check-circle me-1"></i> Tersedia (Sisa: ${menu.stok} porsi)</span>`;
+        if (menu.is_available) {
+            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-check-circle me-1"></i> Tersedia</span>`;
         } else {
-            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(245, 101, 101, 0.15); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-x-circle me-1"></i> Stok Habis</span>`;
+            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(245, 101, 101, 0.15); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-x-circle me-1"></i> Habis</span>`;
         }
 
         const modalEl = document.getElementById('katalogDetailModal');
