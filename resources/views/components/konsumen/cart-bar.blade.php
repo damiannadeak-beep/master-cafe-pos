@@ -61,7 +61,12 @@
                            style="background-color: #0e1217; border: 1px solid #30363d; font-size: 1rem;" 
                            value="{{ auth()->check() ? auth()->user()->name : '' }}" required maxlength="50">
                     <small class="text-muted" style="font-size: 0.78rem;">
-                        <i class="bi bi-info-circle me-1"></i>Nama ini digunakan pelayan & kasir untuk mengantar pesanan ke meja Anda.
+                        <i class="bi bi-info-circle me-1"></i>
+                        @if(isset($meja))
+                            Nama ini digunakan pelayan untuk mengantar pesanan ke Meja {{ $meja->nama_meja_atau_nomor }}.
+                        @else
+                            Nama ini digunakan kasir & dapur untuk memanggil Anda saat pesanan siap dibungkus.
+                        @endif
                     </small>
                 </div>
 
