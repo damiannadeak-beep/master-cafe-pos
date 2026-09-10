@@ -5,8 +5,8 @@
 <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-            <h2>Dashboard Pemilik</h2>
-            <p class="text-white-50 mb-0">Kelola penjualan, stok, dan pantau performa warung.</p>
+            <h2>Dashboard Executive Owner</h2>
+            <p class="text-white-50 mb-0">Pantau omzet real-time, stok bahan baku, dan performa operasional Master Cafe.</p>
         </div>
         <span class="badge bg-secondary fs-6 px-3 py-2">Hari Ini: {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</span>
     </div>

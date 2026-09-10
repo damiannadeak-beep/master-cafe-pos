@@ -110,6 +110,9 @@ class AdminController extends Controller
         $request->validate([
             'qris_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'gemini_api_key' => 'nullable|string',
+            'midtrans_server_key' => 'nullable|string',
+            'midtrans_client_key' => 'nullable|string',
+            'midtrans_is_production' => 'nullable|in:0,1',
         ]);
 
         if ($request->hasFile('qris_image')) {
@@ -140,7 +143,12 @@ class AdminController extends Controller
             Setting::updateOrCreate(['key' => 'qris_image'], ['value' => $path]);
         }
 
-        $settingsService->updateSettings(['gemini_api_key' => $request->gemini_api_key]);
+        $settingsService->updateSettings([
+            'gemini_api_key' => $request->gemini_api_key,
+            'midtrans_server_key' => $request->midtrans_server_key,
+            'midtrans_client_key' => $request->midtrans_client_key,
+            'midtrans_is_production' => $request->midtrans_is_production ?? '0',
+        ]);
 
         return redirect()->route('admin.settings')->with('success', 'Pengaturan pembayaran berhasil diperbarui!');
     }
