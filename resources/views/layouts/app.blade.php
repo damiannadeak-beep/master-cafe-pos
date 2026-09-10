@@ -65,10 +65,7 @@
                         </li>
                     </ul>
 
-                    <!-- Indikator Jam Operasional Toko (PRD 4.7) -->
-                    <span class="badge rounded-pill me-3 d-none d-md-inline-flex align-items-center gap-1 py-1 px-2.5" style="background: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.72rem;">
-                        <span class="d-inline-block rounded-circle bg-success" style="width: 6px; height: 6px;"></span> Buka &bull; 16.00 - 23.00
-                    </span>
+
 
                     <ul class="navbar-nav ms-auto">
                         @auth
