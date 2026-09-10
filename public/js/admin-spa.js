@@ -229,6 +229,13 @@
             // Eksekusi skrip bawaan konten baru
             executeScripts(contentContainer);
 
+            // Dispatch DOMContentLoaded agar skrip yang mendengarkan DOMContentLoaded tetap berjalan pada navigasi SPA
+            try {
+                document.dispatchEvent(new Event('DOMContentLoaded'));
+            } catch(e) {
+                console.warn('[AdminSPA] DOMContentLoaded dispatch error:', e);
+            }
+
             // Re-init Bootstrap komponen (tooltips, modals, popovers)
             if (window.bootstrap) {
                 const tooltipTriggerList = [].slice.call(contentContainer.querySelectorAll('[data-bs-toggle="tooltip"]'));
