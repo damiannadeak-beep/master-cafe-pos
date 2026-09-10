@@ -132,7 +132,7 @@
                             
                             @if($order->status === 'processing')
                                 <button type="button" class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus({{ $order->id }}, 'completed', this)">
-                                    <i class="bi bi-check2-all me-1"></i> Selesai Dimasak
+                                    <i class="bi bi-check2-all me-1"></i> {{ $order->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan Pesanan' : 'Selesai Dimasak' }}
                                 </button>
                             @endif
 

@@ -40,20 +40,10 @@ class PosController extends Controller
     {
         $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
             ->where(function ($query) {
-                // Dine-In: status pending atau processing
-                $query->where(function ($q) {
-                    $q->where('tipe_pesanan', '!=', 'takeaway')
-                      ->whereIn('status', ['pending', 'processing']);
-                })
-                // Takeaway: WAJIB LUNAS (pembayaran status = paid) atau status processing/completed
-                ->orWhere(function ($q) {
-                    $q->where('tipe_pesanan', 'takeaway')
-                      ->whereIn('status', ['processing', 'completed'])
-                      ->whereHas('pembayaran', function ($p) {
-                          $p->where('status', 'paid');
-                      });
-                })
-                // Atau pesanan completed yang belum lunas
+                // 1. Pesanan Dine-In atau Takeaway yang MASIH DIPROSES (pending atau processing)
+                $query->whereIn('status', ['pending', 'processing'])
+                
+                // 2. Pesanan Completed yang BELUM LUNAS (perlu ditagih kasir)
                 ->orWhere(function ($q) {
                     $q->where('status', 'completed')
                       ->where(function ($sub) {
@@ -63,6 +53,13 @@ class PosController extends Controller
                               });
                       });
                 });
+            })
+            // Saring Takeaway: Takeaway yang belum lunas (unpaid) TIDAK BISA muncul di antrean aktif
+            ->where(function ($query) {
+                $query->where('tipe_pesanan', '!=', 'takeaway')
+                      ->orWhereHas('pembayaran', function ($p) {
+                          $p->where('status', 'paid');
+                      });
             })
             ->orderBy('created_at', 'asc')
             ->get();
@@ -80,27 +77,24 @@ class PosController extends Controller
     public function activeOrdersCount()
     {
         $count = Pesanan::where(function ($query) {
-            $query->where(function ($q) {
-                $q->where('tipe_pesanan', '!=', 'takeaway')
-                  ->whereIn('status', ['pending', 'processing']);
-            })
-            ->orWhere(function ($q) {
-                $q->where('tipe_pesanan', 'takeaway')
-                  ->whereIn('status', ['processing', 'completed'])
-                  ->whereHas('pembayaran', function ($p) {
+            $query->whereIn('status', ['pending', 'processing'])
+                  ->orWhere(function ($q) {
+                      $q->where('status', 'completed')
+                        ->where(function ($sub) {
+                            $sub->whereDoesntHave('pembayaran')
+                                ->orWhereHas('pembayaran', function ($p) {
+                                    $p->where('status', '!=', 'paid');
+                                });
+                        });
+                  });
+        })
+        ->where(function ($query) {
+            $query->where('tipe_pesanan', '!=', 'takeaway')
+                  ->orWhereHas('pembayaran', function ($p) {
                       $p->where('status', 'paid');
                   });
-            })
-            ->orWhere(function ($q) {
-                $q->where('status', 'completed')
-                  ->where(function ($sub) {
-                      $sub->whereDoesntHave('pembayaran')
-                          ->orWhereHas('pembayaran', function ($p) {
-                              $p->where('status', '!=', 'paid');
-                          });
-                  });
-            });
-        })->count();
+        })
+        ->count();
 
         $latestId = Pesanan::max('id') ?? 0;
 
