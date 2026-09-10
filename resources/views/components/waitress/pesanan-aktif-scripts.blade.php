@@ -140,12 +140,32 @@
             if (window.showToast) window.showToast(`Pesanan #${id} sedang dimasak!`, 'success');
         } else if (status === 'completed') {
             if (badgeContainer) {
-                badgeContainer.outerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> SIAP DIHIDANGKAN</span>';
+                badgeContainer.outerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> SELESAI</span>';
             }
-            if (btnElement) {
-                btnElement.remove();
+            // Tampilkan tombol cetak struk sebelum kartu hilang
+            const footerActions = card ? card.querySelector('.d-flex.flex-wrap.gap-2') : null;
+            if (footerActions) {
+                @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
+                footerActions.innerHTML = `
+                    <div class="w-100 text-center">
+                        <p class="text-success fw-bold small mb-2"><i class="bi bi-check-circle-fill me-1"></i> Pesanan selesai! Cetak struk jika konsumen meminta.</p>
+                        <div class="d-flex gap-2 justify-content-center">
+                            @if($printerActive)
+                            <button type="button" class="btn btn-sm btn-info text-white fw-bold btn-touch" onclick="window.printThermal(${id})">
+                                <i class="bi bi-printer me-1"></i> Cetak Thermal
+                            </button>
+                            @endif
+                            <a href="/kasir/order/${id}/receipt" target="_blank" class="btn btn-sm btn-outline-primary fw-bold btn-touch">
+                                <i class="bi bi-file-earmark-text me-1"></i> Cetak Browser
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold btn-touch" onclick="document.getElementById('order-card-${id}')?.remove()">
+                                <i class="bi bi-x-lg me-1"></i> Tutup
+                            </button>
+                        </div>
+                    </div>
+                `;
             }
-            if (window.showToast) window.showToast(`Pesanan #${id} selesai dimasak!`, 'success');
+            if (window.showToast) window.showToast(`Pesanan #${id} selesai! Struk bisa dicetak.`, 'success');
         }
 
         // Kirim permintaan ke server di background tanpa menghalangi kasir
