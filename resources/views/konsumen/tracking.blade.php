@@ -159,9 +159,14 @@
                                     {{ $isPaid ? 'Pembayaran Lunas' : ($isPendingVerif ? 'Verifikasi Pembayaran' : 'Menunggu Pembayaran') }}
                                 </h6>
                                 @if(!$isPaid && !$isPendingVerif)
-                                    <a href="{{ url('/konsumen/checkout/' . $pesanan->id . '?token=' . $pesanan->order_token) }}" class="btn btn-sm rounded-pill px-3 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.78rem;">
-                                        ⚡ Bayar Sekarang
-                                    </a>
+                                    <div class="d-flex gap-1 align-items-center flex-wrap">
+                                        <a href="{{ url('/tracking/' . $pesanan->order_token . '?paid=1') }}" class="btn btn-sm btn-success rounded-pill px-2 py-1 fw-bold shadow-sm" style="font-size: 0.75rem;">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Konfirmasi Lunas
+                                        </a>
+                                        <a href="{{ url('/konsumen/checkout/' . $pesanan->id . '?token=' . $pesanan->order_token) }}" class="btn btn-sm rounded-pill px-2 py-1 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.75rem;">
+                                            ⚡ Bayar Sekarang
+                                        </a>
+                                    </div>
                                 @endif
                             </div>
                             <small class="text-secondary d-block mt-1" id="payment-status-text">
