@@ -358,6 +358,8 @@
     function finishCustomerSession() {
         try {
             localStorage.removeItem('active_guest_order');
+            localStorage.removeItem('master_cafe_guest_name');
+            localStorage.removeItem('master_cafe_guest_phone');
         } catch(e) {}
         @if($meja)
             window.location.href = "{{ url('/konsumen/menu/' . $meja->id) }}";
