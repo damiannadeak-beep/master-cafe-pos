@@ -394,46 +394,4 @@ class AdminController extends Controller
         $logs = $query->paginate(20)->withQueryString();
         return view('admin.activity_logs', compact('logs'));
     }
-
-    public function aiSalesAnalysis(ReportService $reportService)
-    {
-        $apiKey = Setting::getVal('gemini_api_key');
-        if (!$apiKey) {
-            return response()->json(['error' => 'API Key Gemini belum dikonfigurasi.'], 400);
-        }
-
-        $startDate = Carbon::now()->subDays(6)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
-
-        $data = $reportService->getReportsData($startDate->toDateString(), $endDate->toDateString());
-
-        $totalPendapatanStr = "Rp " . number_format($data['totalPendapatan'], 0, ',', '.');
-        $labaBersihStr = "Rp " . number_format($data['labaBersih'], 0, ',', '.');
-
-        $topMenus = collect($data['bestSeller'])->map(fn($m) => "- {$m->nama_menu} ({$m->total_terjual} porsi)")->implode("\n");
-
-        $prompt = "Berikut adalah data ringkasan penjualan Master Cafe saya selama 7 hari terakhir:\n";
-        $prompt .= "- Total Pendapatan Kotor: {$totalPendapatanStr}\n";
-        $prompt .= "- Laba Bersih: {$labaBersihStr}\n";
-        $prompt .= "- Menu Paling Laris:\n{$topMenus}\n\n";
-        $prompt .= "Sebagai asisten restoran AI (namamu: Gemini), tolong buatkan paragraf singkat (maksimal 3 paragraf) dalam bahasa Indonesia santai (bahasa bos dan asisten) yang berisi: 1. Kesimpulan apakah minggu ini bagus. 2. Sorotan produk apa yang paling laris. 3. Saran bisnis praktis untuk besok/minggu depan (misalnya stok atau promo). Jangan gunakan format markdown (seperti bintang tebal dll), cukup teks paragraf biasa.";
-
-        try {
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" . $apiKey, [
-                'contents' => [
-                    ['parts' => [['text' => $prompt]]]
-                ]
-            ]);
-
-            if ($response->successful()) {
-                $responseData = $response->json();
-                $text = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? '';
-                return response()->json(['analysis' => nl2br(trim($text))]);
-            }
-
-            return response()->json(['error' => 'Gagal mendapatkan analisis dari AI.'], 500);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan sistem.'], 500);
-        }
-    }
 }

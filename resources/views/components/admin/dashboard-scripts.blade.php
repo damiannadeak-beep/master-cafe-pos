@@ -79,41 +79,5 @@
         createSalesChart('monthlySalesChart', monthlyLabels, monthlyData, monthlyLaba);
     }
     initDashboardCharts();
-
-    // Expose getAiAnalysis to window for onclick handler (SPA-safe)
-    window.getAiAnalysis = function() {
-        var btn = document.getElementById('btn-analyze');
-        var content = document.getElementById('ai-analysis-content');
-        if (!btn || !content) return;
-
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sedang Menganalisis...';
-        content.innerHTML = '<div class="text-center py-4"><div class="spinner-grow text-primary mb-3" role="status"><span class="visually-hidden">Loading...</span></div><p class="text-white-50 small">Gemini AI sedang membaca dan menyimpulkan data penjualan Anda...</p></div>';
-
-        fetch('{{ route('admin.ai_sales_analysis') }}', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Analisis';
-
-            if (data.error) {
-                content.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle"></i> ' + data.error + '</div>';
-            } else if (data.analysis) {
-                content.classList.remove('text-center', 'text-white-50');
-                content.innerHTML = '<div class="fs-6 lh-lg text-white">' + data.analysis + '</div>';
-            }
-        })
-        .catch(function(err) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-lightning-charge"></i> Coba Lagi';
-            content.innerHTML = '<div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle"></i> Gagal terhubung ke server AI.</div>';
-        });
-    };
 })();
 </script>

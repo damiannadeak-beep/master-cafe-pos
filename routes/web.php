@@ -141,7 +141,6 @@ Route::middleware(['auth'])->group(function () {
     // Role: Pemilik (Admin)
     Route::middleware(['role:pemilik'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-        Route::get('/api/ai/sales-analysis', [AdminController::class, 'aiSalesAnalysis'])->name('ai_sales_analysis');
         Route::get('/laporan', [AdminController::class, 'reports'])->name('reports.index');
         Route::get('/reports/revenue', [AdminController::class, 'downloadRevenueReport'])->name('reports.revenue');
         Route::get('/reports/pdf', [AdminController::class, 'exportPdf'])->name('reports.pdf');
