@@ -7,58 +7,52 @@
 
 ---
 
-## 1. Latar Belakang & Masalah (Problem Statement)
+## 1. Latar Belakang & Alasan Bisnis (Business Rationale)
 
-### Kondisi Saat Ini:
-- Konsumen yang memindai (scan) QR meja diarahkan ke proses login/register terlebih dahulu (`/login` atau `/register`).
-- Rute pemesanan konsumen dilindungi middleware `['role:konsumen', 'verified']`.
-- Terdapat dua portal login terpisah (`/login` untuk konsumen dan `/staff/login` untuk karyawan).
-- Pembayaran non-tunai saat ini masih manual (kasir harus memeriksa mutasi m-banking atau mengecek foto bukti transfer satu per satu).
+### 🚀 3 Alasan Utama Pembaharuan Sistem:
+1. **Efisiensi Waktu Konsumen:** Memangkas durasi pemesanan karena konsumen cenderung menghabiskan waktu cukup lama dalam memilih makanan. Dengan menu digital interaktif di HP, konsumen bebas bereksplorasi tanpa merasa canggung.
+2. **Penghematan Biaya Operasional (Cost Saving):** Mengurangi pengeluaran biaya tenaga kerja (waitress & kasir) karena alur pemesanan dan verifikasi pembayaran non-tunai telah otomatis ditangani oleh sistem.
+3. **Keleluasaan Tambah Pesanan (Re-Order Freedom):** Memberikan ruang dan kebebasan yang lebih luas kepada konsumen jika ingin menambah pesanan kopi/makanan kapan saja tanpa harus menunggu atau mencari pelayan.
 
-### Masalah yang Dihadapi Konsumen & Bisnis:
-1. **Friction Tinggi (Beban Mental):** Konsumen datang ke cafe ingin segera menikmati makanan/minuman. Wajib mengisi formulir registrasi, mengingat password, atau verifikasi email memicu kejenuhan (*drop-off rate* tinggi).
-2. **Antrean Kasir & Efisiensi Meja:** Konsumen yang ingin membayar non-tunai harus mengantre di kasir atau menunggu kasir memeriksa mutasi manual.
-3. **Resiko Pesanan Fiktif / Prank Order:** Jika membuka pemesanan bawa pulang (*takeaway*) lewat web tanpa verifikasi pembayaran otomatis di awal, rawan nomor palsu dan makanan yang sudah dimasak tidak diambil.
-4. **Data User Sampah:** Database dipenuhi akun konsumen sekali pakai yang tidak pernah login kembali.
+### Masalah Operasional Lama:
+1. **Friction Tinggi (Beban Mental):** Konsumen wajib registrasi/login sebelum melihat menu.
+2. **Antrean Kasir & Efisiensi Meja:** Konsumen mengantre lama di kasir hanya untuk membayar.
+3. **Pemeriksaan Mutasi Manual:** Kasir harus mengecek foto bukti transfer satu per satu secara manual.
 
 ---
 
 ## 2. Tujuan & Sasaran (Goals & Objectives)
 
-1. **Pemesanan Meja Super Cepat (Zero-Friction):** Konsumen dapat menyelesaikan pesanan dalam kurun waktu kurang dari **45 detik** sejak memindai QR meja tanpa perlu membuat akun/password.
-2. **Pembayaran Otomatis dengan Midtrans (Auto-Settlement):** Mengintegrasikan Midtrans Snap / Core QRIS dinamis sehingga transaksi terverifikasi secara instan (< 2 detik) via Webhook tanpa campur tangan manual kasir.
-3. **0% Resiko Pesanan Palsu pada Takeaway:** Pesanan bawa pulang via web wajib lunas via Midtrans terlebih dahulu sebelum diteruskan ke dapur.
-4. **Pelacakan Live Real-Time Tanpa Login:** Konsumen tetap memantau progres pesanannya (*Diterima &rarr; Lunas &rarr; Dimasak &rarr; Siap &rarr; Selesai*) via WebSocket Reverb & LocalStorage HP.
+1. **Pemesanan Meja Super Cepat (Zero-Friction):** Konsumen menyelesaikan pesanan dalam waktu kurang dari **45 detik** dari scan QR meja tanpa perlu membuat akun/password.
+2. **Pembayaran Otomatis dengan Midtrans (Auto-Settlement):** Verifikasi pembayaran instan via QRIS Dinamis & Virtual Account (VA) tanpa cek manual kasir.
+3. **Antrean Masuk Setelah Lunas:** Pesanan otomatis masuk ke antrean tablet POS kasir/waitress begitu pembayaran terverifikasi otomatis oleh Midtrans.
+4. **Pelacakan Live Real-Time Tanpa Login:** Konsumen memantau progres pesanannya (*Diterima &rarr; Lunas &rarr; Dimasak &rarr; Siap &rarr; Selesai*) via WebSocket Reverb & LocalStorage HP.
 5. **Penyatuan Portal Login Staff:** Rute `/login` dikhususkan sebagai satu-satunya pintu resmi untuk Karyawan (Admin, Kasir, Kitchen, Pelayan).
-6. **Akses Menu Super Smooth & Mulus (< 1 Detik Loading Time):** Pengalaman membuka daftar menu dibuat sangat ringan, lancar (*smooth transition 60fps*), tanpa delay/lag pada browser HP Android maupun iOS, dilengkapi *lazy loading* gambar dan animasi mikro yang responsif.
+6. **Akses Menu Super Smooth & Mulus (< 1 Detik Loading Time):** Pengalaman membuka menu dibuat sangat mulus (*smooth transition 60fps*), tanpa lag di HP Android/iOS.
 
 ---
 
-## 3. Alur Pemesanan (User Flow)
+## 3. Alur Pemesanan Utama (Core 5-Step Order Flow)
 
-### 🍽️ Alur A: Makan di Tempat (Dine-In via Scan Meja Tanpa Login)
+### 🍽️ Alur Resmi Pemesanan Meja (Dine-In Pay-First Flow):
 ```
-[Konsumen Duduk di Meja & Scan QR Meja]
+[LANGKAH 1]
+Konsumen memindai (scan) Barcode QR di atas meja → Terbuka tampilan website menu meja → Pilih menu & konfirmasi pesanan (input Nama Pemesan)
                    ↓
-[Halaman Menu Meja Terbuka Otomatis di HP (Tanpa Login)]
+[LANGKAH 2]
+Konsumen langsung melakukan pembayaran di HP via QR (QRIS Dinamis) atau Transfer Virtual Account (Midtrans Payment Gateway)
                    ↓
-[Pilih Makanan, Minuman, & Varian ke Keranjang]
+[LANGKAH 3]
+Sistem mendeteksi pembayaran telah LUNAS (Auto-Settlement) → Pesanan otomatis masuk ke dalam Antrean Pesanan pada layar POS / Tablet Waitress & Kasir (Lonceng Audio 🔔)
                    ↓
-[Checkout Cepat: Ketik Nama Pemesan (Contoh: Budi)]
+[LANGKAH 4]
+Waitress mengonfirmasi pesanan di tablet POS, mencetak struk pesanan (tiket dapur), dan menyerahkannya kepada Tukang Masak / Chef
                    ↓
-[PILIHAN PEMBAYARAN]
- ├── Opsi 1: Bayar di Tempat via Midtrans QRIS Dinamis
- │          (Scan QRIS langsung di layar HP → Webhook Lunas Otomatis)
- └── Opsi 2: Bayar di Kasir (Tunai / Open Bill saat selesai makan)
-                   ↓
-[Pesanan Terkirim ke Layar Kasir & Dapur (Real-time Reverb)]
-                   ↓
-[Layar HP Konsumen: Live Order Tracking + Tombol Panggil Pelayan]
-                   ↓
-[Makanan Selesai Dimasak & Diantar Pelayan ke Meja]
-                   ↓
-[Pasca-Selesai: Form Rating Bintang 1-5 & Download Struk Digital]
+[LANGKAH 5]
+Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan langsung ke meja konsumen (Selesai ✅)
 ```
+
+*(Catatan: Untuk pilihan bayar tunai di kasir tetap didukung sebagai opsi fleksibel jika disetujui Pemilik Kafe).*
 
 ### 🛍️ Alur B: Bawa Pulang (Takeaway via Web Luar / Pre-Order)
 ```
