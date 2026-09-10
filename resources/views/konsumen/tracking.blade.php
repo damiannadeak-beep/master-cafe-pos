@@ -65,105 +65,7 @@
         color: #e3b341;
         transform: scale(1.15);
     }
-
-    /* ===== PRINT RECEIPT STYLES ===== */
-    @media print {
-        /* Hide everything by default */
-        body, html {
-            background: #fff !important;
-            color: #000 !important;
-            font-family: 'Courier New', monospace !important;
-            font-size: 12px !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-        /* Hide non-receipt elements */
-        nav, footer, 
-        #active-order-recovery-banner,
-        .app-navbar, .navbar,
-        .stepper, .stepper-item,
-        #rating-container,
-        #btnCallBell,
-        .pulse-animation,
-        .no-print {
-            display: none !important;
-        }
-
-        /* Hide completion banner, call waiter, rating section */
-        .alert { display: none !important; }
-        .border-top.border-secondary { display: none !important; }
-
-        /* Show receipt header (hidden on screen) */
-        .print-only { display: block !important; }
-
-        /* Reset card styles for print */
-        .tracking-card, .card {
-            background: #fff !important;
-            border: none !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            color: #000 !important;
-            padding: 0 !important;
-            margin-bottom: 8px !important;
-        }
-
-        /* Make all text black */
-        .text-white, .text-light, .text-secondary, .text-white-50,
-        h4, h5, h6, span, p, small, strong, div {
-            color: #000 !important;
-        }
-
-        /* Badge styles for print */
-        .badge {
-            background: none !important;
-            border: 1px solid #000 !important;
-            color: #000 !important;
-            font-size: 10px !important;
-            padding: 2px 6px !important;
-        }
-
-        /* Order items */
-        .list-group .d-flex {
-            border-bottom: 1px dashed #ccc !important;
-            padding: 4px 0 !important;
-        }
-
-        /* Total section */
-        .fw-bold.fs-5 {
-            font-size: 14px !important;
-            border-top: 2px solid #000 !important;
-            padding-top: 8px !important;
-        }
-
-        /* Page setup */
-        @page {
-            size: 80mm auto;
-            margin: 5mm;
-        }
-
-        /* Container adjustments */
-        .container, .row, .col-lg-7, .col-md-9 {
-            width: 100% !important;
-            max-width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        /* Hide stepper card entirely */
-        .card:has(.stepper) { display: none !important; }
-
-        /* Hide buttons */
-        button, .btn, a.btn { display: none !important; }
-    }
 </style>
-
-<!-- Print-Only Receipt Header (Hidden on screen) -->
-<div class="print-only" style="display: none; text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px dashed #000;">
-    <h3 style="margin: 0; font-family: serif; font-size: 18px;">☕ Master Cafe</h3>
-    <p style="margin: 4px 0 0; font-size: 10px;">Struk Digital Pesanan</p>
-    <p style="margin: 2px 0 0; font-size: 10px;">{{ now()->translatedFormat('d M Y, H:i') }}</p>
-</div>
 
 <div class="container mt-3 mt-md-4 mb-5 pb-5">
     <div class="row justify-content-center">
@@ -175,14 +77,12 @@
                     <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
                     <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Selesai & Pembayaran Lunas</h5>
                     <p class="text-secondary small mb-3">Terima kasih telah berkunjung ke Master Cafe. Klik tombol di bawah untuk menyelesaikan sesi pesanan Anda.</p>
-                    <div class="d-flex justify-content-center gap-2 flex-wrap">
-                        <button onclick="finishCustomerSession()" class="btn btn-md rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--gradient-bronze); color: white; border: none;">
-                            <i class="bi bi-check2-circle me-1"></i> Selesai
-                        </button>
-                        <button onclick="window.print()" class="btn btn-md btn-outline-light rounded-pill px-3 py-2 fw-bold">
-                            <i class="bi bi-printer me-1"></i> Cetak Struk
-                        </button>
-                    </div>
+                    <button onclick="finishCustomerSession()" class="btn btn-md rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--gradient-bronze); color: white; border: none;">
+                        <i class="bi bi-check2-circle me-1"></i> Selesai
+                    </button>
+                    <p class="text-white-50 small mt-3 mb-0">
+                        <i class="bi bi-info-circle me-1"></i> Butuh struk? Silakan minta ke kasir kami.
+                    </p>
                 </div>
             @endif
 
