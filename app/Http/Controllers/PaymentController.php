@@ -165,6 +165,10 @@ class PaymentController extends Controller
     {
         $pesanan = Pesanan::with(['pembayaran', 'meja'])->findOrFail($id_pesanan);
 
+        if (($pesanan->tipe_pesanan ?? '') === 'takeaway') {
+            return redirect()->back()->with('error', 'Pesanan Bawa Pulang (Takeaway) wajib dibayar lunas di awal via Midtrans QRIS / Virtual Account.');
+        }
+
         $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
         $isAuthorized = false;
 
