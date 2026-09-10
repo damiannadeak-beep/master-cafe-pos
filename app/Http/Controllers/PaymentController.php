@@ -155,6 +155,17 @@ class PaymentController extends Controller
                 'message' => 'Pesanan Lunas QRIS: Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas.',
                 'is_read' => false
             ]);
+
+            try {
+                $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->get();
+                \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
+                    'Pesanan Lunas (Midtrans)',
+                    'Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas via Midtrans.',
+                    '/kasir/pesanan-aktif'
+                ));
+            } catch (\Throwable $e) {
+                Log::warning('[PaymentController] Gagal kirim WebPush: ' . $e->getMessage());
+            }
         }
 
         $targetUrl = $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?paid=1') : url('/');
