@@ -11,11 +11,7 @@ const reverbScheme = isHttps ? 'https' : (import.meta.env.VITE_REVERB_SCHEME || 
 
 const useReverb = Boolean(reverbKey && !reverbKey.startsWith('${'));
 
-const shouldConnect = typeof window !== 'undefined' && (
-    window.enableEcho === true ||
-    window.location.pathname.startsWith('/kasir') ||
-    window.location.pathname.startsWith('/admin')
-);
+const shouldConnect = typeof window !== 'undefined' && window.enableEcho === true;
 
 if (shouldConnect) {
     if (useReverb) {
