@@ -25,7 +25,7 @@ class KasirMejaController extends Controller
                              });
                     });
             })
-            ->with(['konsumen', 'pembayaran', 'detailPesanan.menu'])
+            ->with(['konsumen', 'pembayaran', 'detail_pesanan.menu'])
             ->latest();
         }])->orderBy('nama_meja_atau_nomor')->get();
 

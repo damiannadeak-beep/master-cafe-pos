@@ -95,7 +95,7 @@
                                     <i class="bi bi-person me-1"></i> {{ $activeOrder->konsumen->name ?? 'Tamu Langsung' }}
                                 </div>
                                 <div class="text-white-50 small mb-2">
-                                    <i class="bi bi-bag me-1"></i> {{ $activeOrder->detailPesanan->count() }} Item &bull; <strong class="text-accent">Rp {{ number_format($activeOrder->total, 0, ',', '.') }}</strong>
+                                    <i class="bi bi-bag me-1"></i> {{ $activeOrder->detail_pesanan->count() }} Item &bull; <strong class="text-accent">Rp {{ number_format($activeOrder->total, 0, ',', '.') }}</strong>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between pt-2 border-top border-secondary border-opacity-25" style="font-size: 0.75rem;">
                                     <span class="text-white-50">Pembayaran:</span>
