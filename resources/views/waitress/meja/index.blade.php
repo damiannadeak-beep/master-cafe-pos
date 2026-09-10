@@ -70,6 +70,7 @@
                 'Cache-Control': 'no-cache'
             }
         })
+        .then(res => res.text())
         .then(html => {
             // Smooth DOM update: only replace if the markup actually changed to avoid layout reflows
             if (container.innerHTML !== html) {
