@@ -101,11 +101,11 @@ Gunakan tabel ini saat berdiskusi langsung dengan Pemilik Kafe untuk mencatat pe
 
 Agar Pemilik Kafe dapat melihat dan mencoba langsung kecanggihan sistem di laptop Anda saat rapat, berikut tautan dan akun pengujian yang telah disiapkan:
 
-### 1. Akun Login Staf (Kasir & Owner)
+### 1. Akun Login Staf (Tablet Waitress & Owner)
 
 | Peran | Pintu URL Login Rahasia | Akun Pengujian | Fungsi Utama yang Ditunjukkan |
 |---|---|---|---|
-| **Kasir (POS)** | `http://localhost:8000/pos-kasir-gate-88/login` | **Email:** `safik@gmail.com`<br>**Password:** `password123` | • Layar Pesanan Aktif (`/kasir/pesanan-aktif`)<br>• Lonceng audio (*chime*) saat pesanan meja masuk<br>• Tombol proses masak & selesaikan bayar<br>• Tombol cetak struk thermal |
+| **Waitress / Tablet Staf** | `http://localhost:8000/pos-kasir-gate-88/login` | **Email:** `safik@gmail.com`<br>**Password:** `password123` | • Layar Pesanan Aktif Antrean Meja (`/kasir/pesanan-aktif`)<br>• Lonceng audio (*chime*) saat pesanan meja masuk<br>• Konfirmasi pesanan & cetak tiket dapur<br>• Pengantaran pesanan ke meja |
 | **Owner (Admin)** | `http://localhost:8000/ruang-owner-x92k/login?key=MasterCafeSecret2026!`<br>*(Buka di Incognito/Private Window)* | **Email:** `damiannadeak@gmail.com`<br>**Password:** `password123` | • Dashboard omzet penjualan harian & laba<br>• Manajemen menu & promo kafe<br>• Generator & Cetak stiker QR meja (`/admin/meja`) |
 
 ---
@@ -120,7 +120,7 @@ Anda dapat memperagakan pengalaman pelanggan saat duduk di meja kafe:
 3. Klik menu (misal: Kopi / Lemon Tea), pilih varian/catatan (*Less sugar*), lalu klik **Pesan**.
 4. Masukkan nama pemesan: `Pak Hendra` (atau nama Pemilik Kafe).
 5. Klik **Kirim Pesanan**.
-6. **Momen WOW:** Buka tab Kasir, pesanan Meja 1 atas nama *Pak Hendra* langsung muncul seketika secara live disertai bunyi notifikasi bel!
+6. **Momen WOW:** Buka tab **Tablet Waitress**, pesanan Meja 1 atas nama *Pak Hendra* langsung muncul seketika secara live disertai bunyi notifikasi bel!
 
 #### B. Melalui Kamera HP Sungguhan (Scan QR Asli):
 1. Di layar Owner, buka menu **Manajemen Meja** (`/admin/meja`) lalu klik **Cetak QR** pada Meja 1.

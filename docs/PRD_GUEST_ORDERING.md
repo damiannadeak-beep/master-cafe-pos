@@ -24,10 +24,10 @@
 ## 2. Tujuan & Sasaran (Goals & Objectives)
 
 1. **Pemesanan Meja Super Cepat (Zero-Friction):** Konsumen menyelesaikan pesanan dalam waktu kurang dari **45 detik** dari scan QR meja tanpa perlu membuat akun/password.
-2. **Pembayaran Otomatis dengan Midtrans (Auto-Settlement):** Verifikasi pembayaran instan via QRIS Dinamis & Virtual Account (VA) tanpa cek manual kasir.
-3. **Antrean Masuk Setelah Lunas:** Pesanan otomatis masuk ke antrean tablet POS kasir/waitress begitu pembayaran terverifikasi otomatis oleh Midtrans.
+2. **Pembayaran Otomatis dengan Midtrans (Auto-Settlement):** Verifikasi pembayaran instan via QRIS Dinamis & Virtual Account (VA) tanpa perlu kasir fisik.
+3. **Antrean Masuk Setelah Lunas:** Pesanan otomatis masuk ke antrean **Tablet Waitress / Station Pelayan** begitu pembayaran terverifikasi otomatis oleh Midtrans.
 4. **Pelacakan Live Real-Time Tanpa Login:** Konsumen memantau progres pesanannya (*Diterima &rarr; Lunas &rarr; Dimasak &rarr; Siap &rarr; Selesai*) via WebSocket Reverb & LocalStorage HP.
-5. **Penyatuan Portal Login Staff:** Rute `/login` dikhususkan sebagai satu-satunya pintu resmi untuk Karyawan (Admin, Kasir, Kitchen, Pelayan).
+5. **Penyatuan Portal Login Staff:** Rute `/login` dikhususkan sebagai satu-satunya pintu resmi untuk Karyawan (Admin, Waitress, Barista, Chef).
 6. **Akses Menu Super Smooth & Mulus (< 1 Detik Loading Time):** Pengalaman membuka menu dibuat sangat mulus (*smooth transition 60fps*), tanpa lag di HP Android/iOS.
 
 ---
@@ -43,10 +43,10 @@ Konsumen memindai (scan) Barcode QR di atas meja → Terbuka tampilan website me
 Konsumen langsung melakukan pembayaran di HP via QR (QRIS Dinamis) atau Transfer Virtual Account (Midtrans Payment Gateway)
                    ↓
 [LANGKAH 3]
-Sistem mendeteksi pembayaran telah LUNAS (Auto-Settlement) → Pesanan otomatis masuk ke dalam Antrean Pesanan pada layar POS / Tablet Waitress & Kasir (Lonceng Audio 🔔)
+Sistem mendeteksi pembayaran telah LUNAS (Auto-Settlement) → Pesanan otomatis masuk ke dalam Antrean Pesanan pada Tablet Waitress / Station Pelayan (Lonceng Audio 🔔)
                    ↓
 [LANGKAH 4]
-Waitress mengonfirmasi pesanan di tablet POS, mencetak struk pesanan (tiket dapur), dan menyerahkannya kepada Tukang Masak / Chef
+Waitress mengonfirmasi pesanan di Tablet Waitress, mencetak struk pesanan (tiket dapur), dan menyerahkannya kepada Tukang Masak / Chef
                    ↓
 [LANGKAH 5]
 Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan langsung ke meja konsumen (Selesai ✅)
