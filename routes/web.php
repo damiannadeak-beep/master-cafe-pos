@@ -267,9 +267,6 @@ Route::middleware(['auth'])->group(function () {
         // Absensi Geolocation
         Route::get('/absensi', [\App\Http\Controllers\AbsensiController::class, 'index'])->name('kasir.absensi.index');
         Route::post('/absensi', [\App\Http\Controllers\AbsensiController::class, 'store'])->name('kasir.absensi.store');
-        // Permintaan Belanja (Kasir)
-        Route::get('/permintaan-belanja', [\App\Http\Controllers\PermintaanBelanjaController::class, 'kasirIndex'])->name('kasir.permintaan.index');
-        Route::post('/permintaan-belanja', [\App\Http\Controllers\PermintaanBelanjaController::class, 'kasirStore'])->name('kasir.permintaan.store');
 
         // Shift Kasir
         Route::get('/shift/buka', [\App\Http\Controllers\ShiftController::class, 'bukaShift'])->name('kasir.shift.buka');

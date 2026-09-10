@@ -51,18 +51,13 @@
 
                     <!-- Dropdown Alat & Stok -->
                     <div class="dropdown">
-                        <button class="nav-pill-btn dropdown-toggle {{ request()->routeIs('kasir.stok.*', 'kasir.permintaan.*', 'kasir.absensi.*') ? 'active' : '' }}" type="button" id="dropdownAlatStok" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="nav-pill-btn dropdown-toggle {{ request()->routeIs('kasir.stok.*', 'kasir.absensi.*') ? 'active' : '' }}" type="button" id="dropdownAlatStok" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-sliders me-1"></i> Alat & Stok
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark kasir-dropdown shadow-lg border-0" aria-labelledby="dropdownAlatStok">
                             <li>
                                 <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('kasir.stok.*') ? 'active' : '' }}" href="{{ route('kasir.stok.index') }}">
                                     <i class="bi bi-box-seam me-2 text-success"></i> Update Stok
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('kasir.permintaan.*') ? 'active' : '' }}" href="{{ route('kasir.permintaan.index') }}">
-                                    <i class="bi bi-bag-plus me-2 text-primary"></i> Permintaan Belanja
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider border-secondary opacity-25"></li>

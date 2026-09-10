@@ -9,50 +9,6 @@ use App\Models\Bahan;
 class PermintaanBelanjaController extends Controller
 {
     // ==========================================
-    // SISI KASIR
-    // ==========================================
-    
-    public function kasirIndex()
-    {
-        $permintaans = PermintaanBelanja::orderBy('created_at', 'desc')
-                        ->paginate(10);
-                        
-        // Ambil daftar bahan baku untuk dropdown (opsional)
-        $bahans = Bahan::orderBy('nama_bahan')->get();
-                        
-        return view('waitress.permintaan_belanja.index', compact('permintaans', 'bahans'));
-    }
-
-    public function kasirStore(Request $request)
-    {
-        $request->validate([
-            'nama_barang' => 'required|string|max:255',
-            'sisa_stok' => 'nullable|string|max:255',
-            'jumlah_diminta' => 'required|string|max:255',
-            'catatan' => 'nullable|string',
-        ]);
-
-        $permintaan = PermintaanBelanja::create([
-            'user_id' => auth()->id(),
-            'nama_barang' => $request->nama_barang,
-            'sisa_stok' => $request->sisa_stok,
-            'jumlah_diminta' => $request->jumlah_diminta,
-            'catatan' => $request->catatan,
-            'status' => 'menunggu'
-        ]);
-
-        // Notify Admin
-        $admins = \App\Models\User::role('pemilik')->get();
-        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\WebPushNotification(
-            'Permintaan Belanja Baru',
-            'Kasir meminta pembelian: ' . $permintaan->nama_barang . ' (' . $permintaan->jumlah_diminta . ')',
-            '/admin/permintaan-belanja'
-        ));
-
-        return redirect()->route('kasir.permintaan.index')->with('success', 'Permintaan belanja berhasil dikirim.');
-    }
-
-    // ==========================================
     // SISI ADMIN
     // ==========================================
 
