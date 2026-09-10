@@ -354,12 +354,16 @@
     const pesananId = {{ $pesanan->id }};
     let bellCooldown = 0;
 
-    // Fungsi Utama: Menyelesaikan Sesi Pesanan Konsumen & Kembali ke Katalog
+    // Fungsi Utama: Menyelesaikan Sesi Pesanan Konsumen & Kembali ke Menu Meja yang Sama
     function finishCustomerSession() {
         try {
             localStorage.removeItem('active_guest_order');
         } catch(e) {}
-        window.location.href = "{{ url('/katalog') }}";
+        @if($meja)
+            window.location.href = "{{ url('/konsumen/menu/' . $meja->id) }}";
+        @else
+            window.location.href = "{{ url('/katalog') }}";
+        @endif
     }
 
     // 1. Fungsi Panggil Pelayan dengan Cooldown 2 Menit
