@@ -76,7 +76,7 @@
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                     <div>
                         <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold" style="background: rgba(192, 142, 92, 0.15); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.3); font-size: 0.8rem;">
-                            <i class="bi bi-geo-alt-fill me-1"></i> {{ $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Pesanan Cafe' }}
+                            <i class="bi bi-geo-alt-fill me-1"></i> {{ ($pesanan->tipe_pesanan ?? '') === 'takeaway' ? '🥡 Bawa Pulang (Takeaway)' : ($meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Pesanan Cafe') }}
                         </span>
                         <h4 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">
                             Order #{{ $pesanan->id }}

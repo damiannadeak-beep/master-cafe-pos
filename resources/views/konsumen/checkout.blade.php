@@ -91,7 +91,7 @@
                             @endif
                         </div>
 
-                        <!-- Opsi 2: Pembayaran Tunai (Cash) Saat Makanan Diantar -->
+                        <!-- Opsi 2: Pembayaran Tunai (Cash) Saat Makanan Diantar / Di Kasir -->
                         <div class="p-3 rounded-4 mb-3" style="background: #12161c; border: 1px solid rgba(255, 255, 255, 0.1);">
                             <div class="d-flex align-items-center gap-3 mb-3">
                                 <div class="rounded-circle p-2 d-flex align-items-center justify-content-center bg-dark border border-secondary" style="width: 44px; height: 44px; color: #22c55e;">
@@ -99,17 +99,23 @@
                                 </div>
                                 <div>
                                     <h6 class="text-white fw-bold mb-0">Bayar Tunai (Cash)</h6>
-                                    <small class="text-white-50">Bayar uang tunai ke Waitress saat pesanan diantarkan</small>
+                                    <small class="text-white-50">
+                                        @if(($pesanan->tipe_pesanan ?? '') === 'takeaway')
+                                            Bayar uang tunai di kasir saat mengambil pesanan dibungkus
+                                        @else
+                                            Bayar uang tunai ke Waitress saat pesanan diantarkan
+                                        @endif
+                                    </small>
                                 </div>
                             </div>
 
-                            <form action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST" onsubmit="return confirm('Pesan sekarang dan bayar tunai ke Waitress saat makanan tiba?')">
+                            <form action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST" onsubmit="return confirm('{{ ($pesanan->tipe_pesanan ?? '') === 'takeaway' ? 'Pesan sekarang dan bayar tunai di kasir saat ambil pesanan?' : 'Pesan sekarang dan bayar tunai ke Waitress saat makanan tiba?' }}')">
                                 @csrf
                                 @if($pesanan->order_token)
                                     <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
                                 @endif
                                 <button type="submit" class="btn btn-outline-light btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem; border-color: rgba(255, 255, 255, 0.2);">
-                                    💵 Bayar Cash Saat Makanan Diantar <i class="bi bi-person-badge ms-1"></i>
+                                    💵 {{ ($pesanan->tipe_pesanan ?? '') === 'takeaway' ? 'Bayar Cash di Kasir Saat Ambil Pesanan' : 'Bayar Cash Saat Makanan Diantar' }} <i class="bi bi-person-badge ms-1"></i>
                                 </button>
                             </form>
                         </div>
