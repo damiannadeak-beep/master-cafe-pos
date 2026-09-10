@@ -1,8 +1,8 @@
 # 📄 Product Requirements Document (PRD)
 ## Master Cafe Smart Self-Ordering System (Sistem Pemesanan Mandiri Cerdas)
 **Proyek:** Master Cafe Smart Self-Ordering System  
-**Versi:** 2.1 (Guest Ordering, Live Tracking & Midtrans Gateway)  
-**Status:** Disetujui  
+**Versi:** 2.2 (Guest Self-Ordering, Hybrid Waitress POS, Live Tracking & Midtrans Gateway)  
+**Status:** Disetujui & Terimplementasi Berjalan  
 **Tanggal:** 10 September 2026  
 
 ---
@@ -26,15 +26,17 @@
 1. **Pemesanan Meja Super Cepat (Zero-Friction):** Konsumen menyelesaikan pesanan dalam waktu kurang dari **45 detik** dari scan QR meja tanpa perlu membuat akun/password.
 2. **Pembayaran Otomatis dengan Midtrans (Auto-Settlement):** Verifikasi pembayaran instan via QRIS Dinamis & Virtual Account (VA) tanpa perlu kasir fisik.
 3. **Antrean Masuk Setelah Lunas:** Pesanan otomatis masuk ke antrean **Tablet Waitress / Station Pelayan** begitu pembayaran terverifikasi otomatis oleh Midtrans.
-4. **Pelacakan Live Real-Time Tanpa Login:** Konsumen memantau progres pesanannya (*Diterima &rarr; Lunas &rarr; Dimasak &rarr; Siap &rarr; Selesai*) via WebSocket Reverb & LocalStorage HP.
-5. **Penyatuan Portal Login Staff:** Rute `/login` dikhususkan sebagai satu-satunya pintu resmi untuk Karyawan (Admin, Waitress, Barista, Chef).
-6. **Akses Menu Super Smooth & Mulus (< 1 Detik Loading Time):** Pengalaman membuka menu dibuat sangat mulus (*smooth transition 60fps*), tanpa lag di HP Android/iOS.
+4. **Sistem Pemesanan Hibrida (Hybrid Support):** Pelayan / Waitress dapat mengisikan pesanan secara manual via Tablet Waitress (`/kasir/pos`) untuk konsumen lansia, walk-in, atau konsumen yang HP-nya bermasalah.
+5. **Pelacakan Live Real-Time Tanpa Login:** Konsumen memantau progres pesanannya (*Diterima &rarr; Lunas &rarr; Dimasak &rarr; Siap &rarr; Selesai*) via WebSocket Reverb & LocalStorage HP (TTL 12 jam).
+6. **Penyatuan Portal Login Staff:** Rute `/login` dikhususkan sebagai satu-satunya pintu resmi untuk Karyawan (Admin, Waitress, Barista, Chef).
+7. **Refactoring Nomenklatur Waitress:** Seluruh istilah antarmuka lantai kafe 100% dialihkan ke istilah **Waitress / Tablet Waitress** untuk menciptakan diferensiasi peran yang jelas.
+8. **Akses Menu Super Smooth & Mulus (< 1 Detik Loading Time):** Pengalaman membuka menu dibuat sangat mulus (*smooth transition 60fps*), tanpa lag di HP Android/iOS.
 
 ---
 
-## 3. Alur Pemesanan Utama (Core 5-Step Order Flow)
+## 3. Alur Pemesanan Utama (Core Hybrid Order Flow)
 
-### 🍽️ Alur Resmi Pemesanan Meja (Dine-In Pay-First Flow):
+### 🍽️ Alur A: Self-Service QR Code (Dine-In Pay-First Flow Utama)
 ```
 [LANGKAH 1]
 Konsumen memindai (scan) Barcode QR di atas meja → Terbuka tampilan website menu meja → Pilih menu & konfirmasi pesanan (input Nama Pemesan)
@@ -46,14 +48,27 @@ Konsumen langsung melakukan pembayaran di HP via QR (QRIS Dinamis) atau Transfer
 Sistem mendeteksi pembayaran telah LUNAS (Auto-Settlement) → Pesanan otomatis masuk ke dalam Antrean Pesanan pada Tablet Waitress / Station Pelayan (Lonceng Audio 🔔)
                    ↓
 [LANGKAH 4]
-Waitress mengonfirmasi pesanan di Tablet Waitress, mencetak struk pesanan (tiket dapur), dan menyerahkannya kepada Tukang Masak / Chef
+Waitress mengonfirmasi pesanan di Tablet Waitress, mencetak struk pesanan (tiket dapur), dan menyerahkannya kepada Chef / Barista
                    ↓
 [LANGKAH 5]
-Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan langsung ke meja konsumen (Selesai ✅)
+Setelah makanan selesai dimasak → Waitress mengantarkan pesanan langsung ke meja konsumen (Selesai ✅)
 ```
 *(Catatan: Kebijakan 100% Wajib Bayar Lunas di Depan (Pay-First Policy) diberlakukan secara penuh via Midtrans QRIS/VA untuk membebaskan kafe dari risiko pesanan tidak dibayar).*
 
-### 🛍️ Alur B: Bawa Pulang (Takeaway via Web Luar / Pre-Order)
+### 📋 Alur B: Manual Order via Tablet Waitress (Pemesanan oleh Staff untuk Konsumen Non-HP)
+```
+[Konsumen Mendatangi Kasir/Waitress atau Pelayan Datang ke Meja]
+                   ↓
+[Waitress Membuka Screen Tablet POS di /kasir/pos]
+                   ↓
+[Pilih Nomor Meja → Pilih Item Makanan & Minuman]
+                   ↓
+[Pilih Metode Bayar: Tunai (Cash) atau QRIS Manual]
+                   ↓
+[Klik "Simpan Pesanan" → Tiket Dapur Terintegrasi & Meja Ditandai Terisi (Merah)]
+```
+
+### 🛍️ Alur C: Bawa Pulang (Takeaway via Web Luar / Pre-Order)
 ```
 [Buka Website / Pilih Mode Bawa Pulang (Takeaway)]
                    ↓
@@ -97,11 +112,11 @@ Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan lang
   4. **Webhook Handler (`/api/midtrans/webhook`):**
      - Menerima notifikasi status `settlement`.
      - Otomatis mengubah status pesanan dari `unpaid` &rarr; `paid`.
-     - Mengirim sinyal WebSocket Reverb ke layar Dapur & Kasir untuk mencetak tiket dan membunyikan lonceng (*audio chime*).
+     - Mengirim sinyal WebSocket Reverb ke layar Dapur & Waitress untuk mencetak tiket dan membunyikan lonceng (*audio chime*).
      - Layar HP konsumen berganti detik itu juga ke status: *Pembayaran Berhasil! Pesanan Sedang Dimasak*.
 - **Lingkungan Pengujian Sandbox (Uji Coba Gratis):**
   - Pada tahap pengembangan lokal, sistem wajib dikonfigurasi dalam mode **Midtrans Sandbox** (`midtrans_is_production = 0`).
-  - Pengujian dilakukan menggunakan simulator QRIS/kartu resmi Midtrans, sehingga dapat disimulasikan berkali-kali tanpa memotong uang riil sepeser pun. Mode *Production* hanya diaktifkan saat peluncuran resmi.
+  - Mode *Production* diaktifkan dari menu Setting Admin dengan mengisi Server Key & Client Key asli.
 
 ### 4.4. Mekanisme Pelacakan Live Tanpa Akun (Live Order Tracking)
 1. **URL Pesanan Unik (Secure Order Token):**
@@ -109,12 +124,7 @@ Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan lang
      `https://mastercafe.nadeak.net/tracking/ORD-20260909-X9A2`
 2. **Penyimpanan Browser Lokal (LocalStorage HP) & Batas Waktu (TTL 12 Jam):**
    - Browser HP menyimpan data pesanan aktif (`order_token` & `id_meja`).
-   - Jika browser tertutup tidak sengaja, saat membuka kembali web cafe akan muncul bar notifikasi:  
-     *"Pesanan Meja 03 Anda sedang disiapkan. [Klik untuk Lihat Status]"*.
-   - **Masa Berlaku Simpanan (12 Jam / Goldilocks Standard):**  
-     Data di HP konsumen otomatis dibersihkan saat pesanan berstatus **✅ Selesai (Completed)** atau maksimal **12 jam** sejak pemesanan. Durasi ini menjamin:
-     - Pelanggan yang nongkrong lama (hingga 3–6 jam) tetap aman melihat status pesanannya.
-     - Jika keesokan harinya pelanggan datang kembali, memori browser HP sudah otomatis bersih seperti baru.
+   - Data di HP konsumen otomatis dibersihkan saat pesanan berstatus **✅ Selesai (Completed)** atau maksimal **12 jam** sejak pemesanan.
 3. **Status Real-time (Websocket / Reverb):**
    - Status di layar HP berganti live tanpa reload:
      - 🟡 **Menunggu Pembayaran**
@@ -126,127 +136,73 @@ Setelah makanan selesai dimasak oleh Chef → Waitress mengantarkan pesanan lang
 - **Terikat ke Nomor Meja:** Pelayan langsung tahu meja mana yang memanggil tanpa butuh data akun konsumen.
 - **Pilihan 1 Sentuhan:** 🙋 *Panggil Pelayan*, 🧻 *Minta Tisu / Asbak*, 🧾 *Minta Bill*.
 - **Anti-Spam Cooldown:** Tombol terkunci 2 menit setelah ditekan.
-- **Notifikasi Kasir:** Layar POS Kasir membunyikan lonceng (*audio chime*) dan memunculkan pop-up instan.
+- **Notifikasi Waitress:** Layar POS Waitress membunyikan lonceng (*audio chime*) dan memunculkan pop-up instan.
 
 ### 4.6. Struk Digital & Ulasan Pasca-Pesanan
 - **Struk Digital (E-Receipt):** Setelah pesanan selesai, konsumen dapat mengunduh bukti transaksi (PDF/gambar) via tombol **[📥 Simpan Struk Digital]**.
 - **Rating & Ulasan:** Di layar tracking muncul kartu umpan balik bintang 1–5 sehingga konsumen bisa langsung memberi review dan review langsung tersimpan ke dashboard toko.
 
-### 4.7. Indikator Toko Buka/Tutup Minimalis
-- Badge penanda kecil di navbar: `🟢 Buka` / `🔴 Tutup`.
-- Jika tutup, tombol checkout dinonaktifkan halus tanpa mengganggu konsumen yang ingin melihat-lihat menu.
-
-### 4.8. Kebijakan Pembatalan Pesanan (Zero Waste)
-- Konsumen hanya bisa membatalkan pesanan dari HP jika status masih *Menunggu Pembayaran / Pending*.
-- Begitu status berubah jadi *Sedang Dimasak Dapur 👨‍🍳*, tombol batal di HP otomatis dikunci. Pembatalan darurat hanya bisa dilakukan lewat Kasir (*Void Order*).
-
-### 4.9. Optimasi Performa & Akses Menu Mulus (Smooth & Fast Menu Rendering)
-- **Instant Menu Render (< 1 Detik):** Daftar menu dimuat secara instan saat QR meja dipindai tanpa delay atau *layout shift* (CLS 0).
-- **Optimasi Gambar (Lazy Loading & WebP):** Foto hidangan dikompresi hemat bandwidth dan menggunakan mekanisme *lazy loading* agar konsumsi data di HP pelanggan sangat ringan.
-- **Transisi Mulus 60fps (Smooth Micro-Animations):** Interaksi penambahan item (+/-) ke keranjang, modal pemilihan varian, serta perubahan tombol checkout dilapisi animasi transisi CSS yang mulus dan responsif.
-- **Performa Ringan di Seluruh Perangkat:** Bebas lag di berbagai spesifikasi HP (Android entry-level maupun iOS).
-
 ---
 
-## 5. Penataan Arsitektur Autentikasi & Antarmuka
+## 5. Penataan Arsitektur Autentikasi & Nomenklatur Peran
 
 | Komponen | Kondisi Lama | Penyesuaian Baru |
 |---|---|---|
-| **`/login`** | Dipakai konsumen umum | Menjadi portal login tunggal untuk **Staff / Karyawan** |
-| **`/staff/login`** | Halaman terpisah | Di-redirect ke `/login` resmi |
+| **`/login`** | Dipakai konsumen umum | Portal login tunggal untuk **Staff / Karyawan** |
+| **Penyebutan Peran Staf** | Kasir | **Waitress / Tablet Waitress** |
+| **Modul Backend POS** | `Kasir*.php` controllers & views | `Waitress*.php` (Meja, Stok, Pengeluaran, Shift) |
 | **Rute Konsumen** | Wajib `['auth', 'role:konsumen']` | Dibuka untuk umum (*public guest*) |
-| **Profil Konsumen (`/konsumen/profil`)** | Edit nama, avatar, & ganti password | **Dihapus total** (konsumen tidak memiliki akun) |
-| **Navbar Publik** | Tombol login, register, avatar profil | **Dibersihkan total** (hanya Logo, Menu, Keranjang, Status) |
-| **Tabel `pesanan`** | `id_konsumen` wajib terisi akun user | `id_konsumen` sudah `nullable()`, ditambah kolom `guest_name`, `order_token` |
+| **Profil Konsumen** | Edit nama, avatar, & password | **Dihapus total** (konsumen tidak memiliki akun) |
+| **Tabel `pesanan`** | `id_konsumen` wajib terisi akun user | `id_konsumen` `nullable()`, ditambah `guest_name`, `order_token` |
 | **Payment Gateway** | Belum terhubung otomatis | **Terintegrasi Midtrans (Snap QRIS & Webhook)** |
 
 ---
 
-## 6. Skenario Operasional: Mengatasi Risiko Meja Kabur Tanpa Login (Dine & Dash Mitigation)
+## 6. Skenario Operasional & Protokol Pemeliharaan
 
-### 6.1. Fakta Lapangan di Master Cafe
-Berdasarkan wawancara dengan staf kasir Master Cafe:
-- Kasir memiliki kebiasaan mengandalkan **ingatan visual** terhadap pengunjung mana yang sudah bayar dan mana yang belum.
-- **Tantangan di Area Luas & Jam Sibuk (*Peak Hours*):** Master Cafe memiliki area duduk yang luas. Di saat cafe ramai, ingatan manusia memiliki keterbatasan (*human error*), rawan lupa, atau tidak terlihat saat kasir sedang sibuk meracik minuman/melayani antrean.
-
-### 6.2. Solusi Penguat Kasir (*Visual Table Assistant + Midtrans*)
-Sistem POS tidak mengubah kultur kasir, melainkan menjadi **asisten visual pengingat otomatis**:
-
-1. 🟡 **Pengingat Warna Meja di Layar POS Kasir:**
-   - Kasir tidak perlu memeras ingatan di kepala. Di layar kasir, meja yang memilih bayar belakangan akan menyala warna **Kuning Terang** mencolok:  
-     `Meja 03 - Kak Rian (Belum Bayar: Rp 75.000 - 45 Menit)`.
-   - Kasir cukup melirik layar untuk memantau status meja secara instan.
-
+### 6.1. Pengelolaan Meja & Mencegah Meja Kabur
+1. 🟡 **Pengingat Warna Meja di Layar POS Waitress:**
+   - Di layar Tablet Waitress, meja yang belum membayar akan menyala warna **Kuning Terang** mencolok.
 2. 💳 **Kemudahan Bayar QRIS Mandiri dari HP Meja:**
-   - Seringkali pengunjung bukan berniat kabur, melainkan malas berdiri dan mengantre di kasir.
-   - Di layar HP meja pengunjung ada tombol: **[Bayar via QRIS Midtrans Sekarang]**.
-   - Pengunjung bisa langsung bayar dari meja sebelum berdiri. Begitu lunas, speaker kasir seketika membunyikan lonceng 🔔 *Ting-tung!* dan warna Meja 03 di layar kasir otomatis berganti menjadi **🔵 Biru (LUNAS ✅)**.
+   - Konsumen bisa bayar dari meja via Midtrans QRIS. Begitu lunas, speaker Tablet Waitress membunyikan lonceng 🔔 dan warna meja berganti **🔵 Biru (LUNAS ✅)**.
+3. 📋 **Alur Input Manual untuk Non-HP:**
+   - Waitress siap melayani input pesanan manual dari tablet jika ada tamu yang membutuhkan bantuan.
 
-3. 🙋 **Prosedur Sapaan Ramah Pelayan Lantai:**
-   - Jika kasir/pelayan melihat pengunjung Meja 03 sudah berdiri merapikan barang bawaan namun di layar POS meja tersebut masih menyala **Kuning (Belum Bayar)**:
-   - Staf dapat menyapa dengan ramah dan sopan:  
-     *"Permisi Kak, untuk Meja 03 pembayarannya mau dibantu di kasir atau sudah via QRIS di HP?"* 😊
-
-### 6.3. Kebijakan Rombongan & Gabung Meja (Tetap Simpel Sesuai Kebiasaan Kasir)
-- **Keputusan Desain:** Berdasarkan hasil diskusi langsung dengan staf kasir, sistem **tidak menambahkan fitur penggabungan meja otomatis (*merge table*) yang rumit** agar kasir tidak terbebani alur kerja baru.
-- **Operasional Lapangan:** 
-  - Setiap meja tetap berjalan mandiri sesuai stiker QR masing-masing seperti yang sudah berjalan lancar saat ini.
-  - Jika ada rombongan di dua meja (misal Meja 03 & Meja 04) yang ingin membayar sekaligus, kasir cukup menyelesaikan transaksi Meja 03 lalu Meja 04 secara berturut-turut di kasir, atau konsumen membayar masing-masing dari HP via Midtrans QRIS.
-  - Ini menjaga sistem tetap ringan, mudah dioperasikan kasir, dan bebas dari kerumitan teknis.
+### 6.2. Protokol Pemeliharaan Cache & Stabilitas
+Pasca update kode atau perubahan file Blade/Route, wajib diisolasi dengan pembersihan cache berikut agar tidak memicu error kompilasi view (*ViewNotFoundException*):
+```bash
+php artisan optimize:clear
+```
 
 ---
 
-## 7. Fondasi Unggulan yang Sudah Aktif Berjalan
+## 7. Standar Sistem Desain & Identitas Visual (Official Dark Bronze Design System)
 
-Project Master Cafe POS saat ini telah memiliki teknologi mutakhir yang sudah berjalan di kode:
-1. 🔊 **Audio Chime Kasir (bell.wav + WebAudio API)**: Berbunyi otomatis saat ada pesanan masuk / panggil pelayan / Midtrans settlement.
-2. 📱 **Progressive Web App (PWA)**: Aplikasi POS kasir bisa di-install langsung di HP/tablet kasir tanpa Play Store.
-3. 🖨️ **Cetak Thermal ESC/POS Jaringan (Port 9100)**: Cetak struk kasir dan tiket dapur instan via Wi-Fi.
-4. 🧾 **Pisah Bon (Split Bill)**: Kasir dapat memecah satu pesanan meja menjadi beberapa nota terpisah.
+Seluruh antarmuka aplikasi mematuhi standar desain baku yang ditetapkan pada `docs/DESIGN_SYSTEM.md`:
 
----
-
-## 8. Kebijakan Pengembangan Aman (Git Branching & Local-Only Testing)
-
-1. 🌿 **Branch Khusus:** Seluruh pengerjaan fitur ini dilakukan pada branch baru terpisah: `feature/guest-ordering-midtrans`.
-2. 🔒 **Karantina Server:** **TIDAK BOLEH melakukan git push ke GitHub atau cPanel** selama masa pengerjaan dan pengujian.
-3. 💻 **Pengujian 100% di Komputer Lokal:** Seluruh pengetesan (migrasi DB, pesanan meja, simulasi Midtrans Sandbox, WebSocket Reverb, cetak struk) disimulasikan tuntas di komputer lokal (*localhost*).
-4. 🚀 **Merge & Deploy:** Kode baru hanya akan di-merge ke `master` setelah seluruh unit test lulus dan disetujui secara resmi oleh Pemilik Master Cafe.
-
----
-
-## 9. Rencana Tahapan Implementasi (Milestones)
-
-- [x] **Fase 1 (Git & Database):** Buat branch `feature/guest-ordering-midtrans`, buat migration untuk menambahkan kolom `guest_name` dan `order_token` pada tabel `pesanan` (`id_konsumen` dan `tipe_pesanan` sudah ada).
-- [x] **Fase 2 (Rute Publik & Form Menu Meja):** Buka rute `/meja/{id_meja}` dari middleware `auth`, lengkapi checkout tanpa login (hanya input nama), serta tambahkan indikator jam buka/tutup minimalis.
-- [x] **Fase 3 (Integrasi Midtrans Snap & Webhook):** Sambungkan pop-up Midtrans QRIS dinamis dan tangani callback webhook otomatis (`settlement` &rarr; `paid` &rarr; trigger dapur & audio chime).
-- [x] **Fase 4 (Layar Live Tracking, Call Bell, & E-Receipt):** Buat halaman `/tracking/{order_token}` dengan WebSocket Reverb live update, tombol panggil pelayan meja, tombol unduh struk digital, dan kartu rating bintang pasca-selesai.
-- [x] **Fase 5 (Pembersihan Profil Konsumen & Penyatuan Login Staff):** Hapus rute profil konsumen, bersihkan navbar publik dari tombol login/register konsumen, dan alihkan rute `/login` khusus untuk karyawan.
-- [x] **Fase 6 (Pengujian Lokal Menyeluruh):** Simulasi pemesanan tamu dari scan QR meja, pembayaran Midtrans Sandbox, notifikasi suara kasir, hingga rating pasca-selesai di komputer lokal.
-
----
-
-## 10. Standar Sistem Desain & Identitas Visual (Official Dark Bronze Design System)
-
-Seluruh antarmuka aplikasi **Master Cafe Smart Self-Ordering System** (Public Guest, Tablet Waitress/Kasir, dan Owner Dashboard) wajib mematuhi standar desain baku yang telah ditetapkan pada [docs/DESIGN_SYSTEM.md](file:///c:/xampp/htdocs/angkringan-pos/docs/DESIGN_SYSTEM.md):
-
-### 🎨 10.1. Palet Warna Utama (Dark Bronze Palette):
+### 🎨 7.1. Palet Warna Utama (Dark Bronze Palette):
 - **Background Utama (Level 0):** `#0e1217` (Hitam Gelap Elegan).
 - **Surface & Kartu (Level 1):** `#161b22` (Gelap Timbul Kontras).
 - **Border & Pembatas (Level 2):** `#21262d` (Garis Batas Halus 1px).
 - **Aksen Perunggu (Bronze Gradient):** `linear-gradient(135deg, #986c43 0%, #c08e5c 100%)`.
-- **Teks Utama & Redup:** `#ffffff` (Putih Murni) & `#a0aab2` (Abu-abu Kebiruan Kontras Tinggi).
+- **Teks Utama & Redup:** `#ffffff` (Putih Murni) & `#a0aab2` (Abu-abu Kebiruan).
 
-### ✒️ 10.2. Tipografi Baku (Google Fonts):
+### ✒️ 7.2. Tipografi Baku:
 - **Rye (Serif):** Judul utama & elemen branding.
 - **Alex Brush (Cursive) & Caveat:** Sentuhan artistik logo & slogan.
 - **Outfit / Plus Jakarta Sans:** Teks badan, daftar menu, tabel harga, & UI operasional.
 
-### 📐 10.3. Grid 8-Point & Target Sentuh (Touch Target):
+### 📐 7.3. Grid 8-Point & Target Sentuh:
 - Seluruh margin, padding, border-radius (16px), dan ukuran tombol menggunakan kelipatan **8px**.
-- Ukuran tombol interaktif pada perangkat sentuh minimal **40px - 48px** agar mudah dan akurat ditekan dengan jari.
+- Ukuran tombol interaktif minimal **40px - 48px** agar mudah dan akurat ditekan dengan jari pada layar tablet/smartphone.
 
-### 🖼️ 10.4. Aset Brand Resmi & Notifikasi:
-- **Logo Resmi:** Wajib menggunakan file aset gambar asli `public/images/logo.png` (dilarang menggunakan badge teks dummy).
-- **Notifikasi/Toast:** Menggunakan toast custom *Dark Bronze* (`showToast()`), tanpa `alert()` bawaan browser yang kaku.
-- **Single Theme Approach:** Menggunakan 1 tema baku *Dark Bronze* di seluruh modul tanpa toggle light mode agar konsisten dan pekat.
+---
+
+## 8. Ringkasan Status Tahapan (Milestones)
+
+- [x] **Fase 1 (Database & Migrasi):** `guest_name` dan `order_token` pada tabel `pesanan` aktif.
+- [x] **Fase 2 (Rute Publik & Guest Self-Service):** Rute `/konsumen/menu/{id_meja}` tanpa login aktif.
+- [x] **Fase 3 (Integrasi Midtrans Snap & Webhook):** Auto-settlement QRIS & VA aktif.
+- [x] **Fase 4 (Live Order Tracking & Table Bell):** Pelacakan real-time TTL 12 jam & tombol panggil pelayan aktif.
+- [x] **Fase 5 (Refactoring Waitress & Staff Portal):** Seluruh nomenklatur & rute Kasir dialihkan ke **Waitress / Tablet Waitress**.
+- [x] **Fase 6 (Hybrid POS & Cache Clearance):** Input manual via POS Waitress & pembersihan cache kompilasi tuntas.
