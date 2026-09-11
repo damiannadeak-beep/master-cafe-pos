@@ -22,7 +22,7 @@ class AdminPromoController extends Controller
     {
         $allMenus = Menu::where('is_available', true)
             ->orderBy('nama_menu', 'asc')
-            ->get(['id', 'nama_menu', 'harga', 'kategori', 'foto']);
+            ->get(['id', 'nama_menu', 'harga', 'kategori', 'image']);
 
         return view('admin.promo.form', [
             'promo' => new Promo([
@@ -101,7 +101,7 @@ class AdminPromoController extends Controller
         $promo = Promo::with('menus')->findOrFail($id);
         $allMenus = Menu::where('is_available', true)
             ->orderBy('nama_menu', 'asc')
-            ->get(['id', 'nama_menu', 'harga', 'kategori', 'foto']);
+            ->get(['id', 'nama_menu', 'harga', 'kategori', 'image']);
 
         return view('admin.promo.form', compact('promo', 'allMenus'));
     }
