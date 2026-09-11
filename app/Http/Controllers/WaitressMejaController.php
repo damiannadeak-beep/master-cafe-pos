@@ -33,11 +33,18 @@ class WaitressMejaController extends Controller
         $mejaAdaPesanan = $mejas->filter(fn($m) => $m->pesanan->isNotEmpty())->count();
         $mejaKosong = $totalMeja - $mejaAdaPesanan;
 
+        // Ambil panggilan meja aktif (unread call_bell notifications)
+        $activeCallsMap = \App\Models\Notification::where('type', 'call_bell')
+            ->where('is_read', false)
+            ->whereNotNull('id_meja')
+            ->get()
+            ->keyBy('id_meja');
+
         if ($request->ajax() || $request->wantsJson() || $request->query('grid_only')) {
-            return view('waitress.meja.grid', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'))->render();
+            return view('waitress.meja.grid', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong', 'activeCallsMap'))->render();
         }
 
-        return view('waitress.meja.index', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong'));
+        return view('waitress.meja.index', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong', 'activeCallsMap'));
     }
 
     /**

@@ -98,9 +98,21 @@ class PosController extends Controller
 
         $latestId = Pesanan::max('id') ?? 0;
 
+        $activeHash = Pesanan::whereIn('status', ['pending', 'processing', 'completed'])
+            ->with('pembayaran')
+            ->get()
+            ->map(function ($o) {
+                $payStatus = $o->pembayaran?->status ?? 'unpaid';
+                $payTime = $o->pembayaran?->updated_at?->timestamp ?? 0;
+                $orderTime = $o->updated_at?->timestamp ?? 0;
+                return "{$o->id}-{$o->status}-{$payStatus}-{$payTime}-{$orderTime}";
+            })
+            ->join('|');
+
         return response()->json([
             'count' => $count,
             'latest_id' => $latestId,
+            'hash' => md5($activeHash),
         ]);
     }
 
@@ -188,6 +200,16 @@ class PosController extends Controller
                 'status' => $request->validated('status'),
                 'id_kasir' => auth()->id() // Kasir yang memproses pesanan
             ]);
+
+            // Broadcast status update ke listener real-time (WebSocket / Polling)
+            try {
+                broadcast(new \App\Events\PesananBaru($pesanan));
+                if ($pesanan->id_meja && $pesanan->meja) {
+                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[PosController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
+            }
 
             // Notify Customer via Web Push (non-blocking)
             if ($pesanan->konsumen) {
@@ -384,17 +406,17 @@ class PosController extends Controller
      */
     public function printKitchenReceipt($id, PrintService $printService)
     {
-        try {
-            $printService->printKitchenReceipt($id);
-            return response()->json(['message' => 'Tiket dapur berhasil dikirim ke printer thermal.']);
-        } catch (\Exception $e) {
-            // Jika fitur mati, jatuh kembali ke print html biasa (fallback)
-            if (str_contains($e->getMessage(), 'tidak aktif')) {
-                $order = Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id);
-                return view('waitress.kitchen_receipt', compact('order'));
+        if (request()->ajax() || request()->wantsJson()) {
+            try {
+                $printService->printKitchenReceipt($id);
+                return response()->json(['message' => 'Tiket dapur berhasil dikirim ke printer thermal.']);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
             }
-            return response()->json(['error' => $e->getMessage()], 500);
         }
+
+        $order = Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id);
+        return view('waitress.kitchen_receipt', compact('order'));
     }
 
     /**
@@ -689,6 +711,16 @@ class PosController extends Controller
         $notif = \App\Models\Notification::find($id);
         if ($notif) {
             $notif->update(['is_read' => true]);
+
+            if ($notif->id_meja) {
+                $meja = \App\Models\Meja::find($notif->id_meja);
+                if ($meja) {
+                    try {
+                        broadcast(new \App\Events\MejaStatusUpdated($meja));
+                    } catch (\Throwable $e) {}
+                }
+            }
+
             return response()->json(['message' => 'Notifikasi ditandai dibaca']);
         }
         return response()->json(['error' => 'Notifikasi tidak ditemukan'], 404);

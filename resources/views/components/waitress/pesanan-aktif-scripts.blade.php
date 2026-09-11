@@ -157,16 +157,8 @@
         const promptText = document.getElementById('orderCompletedPromptText');
         const actionsContainer = document.getElementById('orderCompletedActions');
 
-        const browserBtn = document.getElementById('btnOrderCompletedBrowser');
-        if (browserBtn) {
-            browserBtn.href = `/kasir/order/${id}/receipt`;
-        }
-
-        const thermalBtn = document.getElementById('btnOrderCompletedThermal');
-        if (thermalBtn) {
-            thermalBtn.onclick = function() {
-                window.printThermal(id);
-            };
+        if (!window.defaultOrderCompletedActionsHTML && actionsContainer) {
+            window.defaultOrderCompletedActionsHTML = actionsContainer.innerHTML;
         }
 
         if (!isPaid) {
@@ -195,6 +187,21 @@
             if (promptText) {
                 promptText.innerText = 'Pesanan telah selesai disiapkan! Apakah ingin mencetak struk transaksi sekarang?';
             }
+            if (actionsContainer && window.defaultOrderCompletedActionsHTML) {
+                actionsContainer.innerHTML = window.defaultOrderCompletedActionsHTML;
+            }
+
+            const browserBtn = document.getElementById('btnOrderCompletedBrowser');
+            if (browserBtn) {
+                browserBtn.href = `/kasir/order/${id}/receipt`;
+            }
+
+            const thermalBtn = document.getElementById('btnOrderCompletedThermal');
+            if (thermalBtn) {
+                thermalBtn.onclick = function() {
+                    window.printThermal(id);
+                };
+            }
         }
 
         window.openModalById('orderCompletedModal');
@@ -210,6 +217,11 @@
             });
         }
     });
+
+    // --- Cetak Tiket Dapur / Koki ---
+    window.printKitchenTicket = function(id) {
+        window.open(`/kasir/order/${id}/kitchen-receipt`, 'KitchenTicket_' + id, 'width=420,height=600,scrollbars=yes');
+    };
 
     // --- 2. Update Status Pesanan (Optimistic Update: 0 Detik Instan!) ---
     window.updateOrderStatus = function(id, status, btnElement) {

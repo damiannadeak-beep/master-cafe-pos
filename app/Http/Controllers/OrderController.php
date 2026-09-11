@@ -242,14 +242,15 @@ class OrderController extends Controller
 
         $meja = Meja::findOrFail($validated['id_meja']);
 
-        // Mencegah spam (misal: cek apakah ada notifikasi call_bell untuk meja ini dalam 2 menit terakhir)
+        // Mencegah spam (cek apakah ada notifikasi call_bell BELUM DITANGGAPI untuk meja ini dalam 2 menit terakhir)
         $recentCall = \App\Models\Notification::where('type', 'call_bell')
             ->where('id_meja', $meja->id)
+            ->where('is_read', false)
             ->where('created_at', '>=', now()->subMinutes(2))
             ->first();
 
         if ($recentCall) {
-            return response()->json(['error' => 'Pelayan sudah dipanggil. Mohon tunggu sebentar.'], 429);
+            return response()->json(['error' => 'Pelayan sudah dipanggil dan sedang menuju ke meja Anda.'], 429);
         }
 
         \App\Models\Notification::create([
@@ -258,6 +259,13 @@ class OrderController extends Controller
             'id_meja' => $meja->id,
             'is_read' => false
         ]);
+
+        // Broadcast event real-time ke Waitress Station
+        try {
+            broadcast(new \App\Events\MejaStatusUpdated($meja));
+        } catch (\Throwable $e) {
+            Log::warning('[OrderController] Gagal broadcast call_bell: ' . $e->getMessage());
+        }
 
         // Trigger Push Notification to Admin and Kasir
         $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();

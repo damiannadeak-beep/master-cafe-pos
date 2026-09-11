@@ -2,30 +2,92 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Dapur - #{{ $order->id }}</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; width: 58mm; margin: 0 auto; padding: 10px; font-size: 12px; }
+        /* Gaya Khusus untuk Printer Thermal 58mm */
+        @page {
+            margin: 0;
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 10px;
+            width: 58mm; /* Lebar standar kertas thermal kecil */
+            box-sizing: border-box;
+        }
         .text-center { text-align: center; }
-        .font-weight-bold { font-weight: bold; }
-        .mb-1 { margin-bottom: 5px; }
-        .mt-2 { margin-top: 10px; }
-        .border-bottom { border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; vertical-align: top; }
         .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .font-weight-bold, .fw-bold { font-weight: bold; }
+        .mb-1 { margin-bottom: 5px; }
+        .mb-2 { margin-bottom: 10px; }
+        .mt-1 { margin-top: 5px; }
+        .mt-2 { margin-top: 10px; }
         
+        .header {
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 5px;
+        }
+        .header h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+        }
+        .header p {
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            vertical-align: top;
+            padding: 2px 0;
+            text-align: left;
+        }
+        
+        .border-bottom, .divider {
+            border-bottom: 1px dashed #000;
+            margin: 5px 0;
+            padding-bottom: 5px;
+        }
+        
+        /* Hilangkan tombol print saat mencetak */
         @media print {
-            body { width: 100%; padding: 0; }
+            .no-print { display: none !important; }
+        }
+        
+        .btn-print {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body onload="window.print()">
-    <div class="text-center border-bottom">
-        <h3 class="mb-1 mt-2">STRUK DAPUR</h3>
-        <p style="font-size: 14px; margin: 0;"><strong>PESANAN #{{ $order->id }}</strong></p>
+    
+    <button class="no-print btn-print" onclick="window.print()">Cetak Tiket Sekarang</button>
+
+    <div class="header text-center">
+        <h3>STRUK DAPUR</h3>
+        <p class="font-weight-bold">PESANAN #{{ $order->id }}</p>
     </div>
     
-    <div class="border-bottom" style="padding-top: 5px;">
+    <div class="border-bottom">
         <table>
             <tr>
                 <td>Tanggal</td>
@@ -43,10 +105,10 @@
     </div>
 
     <div class="border-bottom">
-        <table class="mt-2" style="margin-bottom: 10px;">
+        <table style="margin-top: 5px; margin-bottom: 5px;">
             <thead>
                 <tr>
-                    <th style="width: 20px;">Qty</th>
+                    <th style="width: 25px;">Qty</th>
                     <th>Item Menu</th>
                 </tr>
             </thead>
@@ -79,7 +141,7 @@
     </div>
 
     <div class="text-center mt-2">
-        <p class="font-weight-bold" style="font-size: 16px;">-- SEGERA SIAPKAN --</p>
+        <p class="font-weight-bold" style="font-size: 15px; margin-top: 10px;">-- SEGERA SIAPKAN --</p>
     </div>
 </body>
 </html>

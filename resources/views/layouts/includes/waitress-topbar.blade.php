@@ -26,6 +26,19 @@
                     <a class="nav-pill-btn {{ request()->routeIs('kasir.meja.*') ? 'active' : '' }}" href="{{ route('kasir.meja.index') }}">
                         <i class="bi bi-grid-3x3-gap-fill me-1"></i> Monitor Meja
                     </a>
+                    <!-- Notifikasi Panggilan Meja (Call Bell) -->
+                    <div class="dropdown">
+                        <button class="nav-pill-btn dropdown-toggle text-warning" type="button" id="dropdownCallBell" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell-fill me-1"></i> Panggilan
+                            <span class="badge bg-danger rounded-pill ms-1 shadow-sm" id="badge-call-bells" style="display: none;">0</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark kasir-dropdown shadow-lg border-0 p-2" id="dropdown-call-bells-list" aria-labelledby="dropdownCallBell" style="min-width: 270px;">
+                            <li class="dropdown-header text-white-50 fw-bold small border-bottom border-secondary border-opacity-25 pb-2 mb-1">
+                                <i class="bi bi-bell-fill me-1 text-warning"></i> Panggilan Meja Aktif
+                            </li>
+                            <li id="call-bell-empty-msg"><span class="dropdown-item small text-muted py-2">Tidak ada panggilan aktif</span></li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- Dropdown Kelompok Operasional Kas & Alat -->

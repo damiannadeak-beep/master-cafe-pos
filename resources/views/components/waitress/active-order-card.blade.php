@@ -124,14 +124,19 @@
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
+                            <!-- Tombol Cetak Tiket Dapur / Koki -->
+                            <a href="{{ route('kasir.order.kitchen', $order->id) }}" target="_blank" class="btn btn-sm btn-outline-info flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" title="Cetak rincian pesanan untuk Koki / Barista">
+                                <i class="bi bi-journal-text me-1"></i> Tiket Dapur / Koki
+                            </a>
+
                             @if($order->status === 'pending')
-                                <button type="button" class="btn btn-sm btn-primary w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus({{ $order->id }}, 'processing', this)">
-                                    <i class="bi bi-printer me-1"></i> Konfirmasi & Cetak Tiket Dapur
+                                <button type="button" class="btn btn-sm btn-primary flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus({{ $order->id }}, 'processing', this)">
+                                    <i class="bi bi-fire me-1"></i> Konfirmasi & Dimasak
                                 </button>
                             @endif
                             
                             @if($order->status === 'processing')
-                                <button type="button" class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus({{ $order->id }}, 'completed', this)">
+                                <button type="button" class="btn btn-sm btn-success flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus({{ $order->id }}, 'completed', this)">
                                     <i class="bi bi-check2-all me-1"></i> {{ $order->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan Pesanan' : 'Selesai Dimasak' }}
                                 </button>
                             @endif
@@ -163,7 +168,7 @@
                                     </button>
                                 @endif
                                 <a href="{{ route('kasir.order.receipt', $order->id) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center">
-                                    <i class="bi bi-file-earmark-text me-1"></i> Cetak Browser
+                                    <i class="bi bi-file-earmark-text me-1"></i> Struk Kasir (Browser)
                                 </a>
                             @endif
                         </div>

@@ -46,12 +46,17 @@
     @forelse($mejas as $meja)
         @php
             $activeOrder = $meja->pesanan->first();
+            $callNotif = isset($activeCallsMap) && isset($activeCallsMap[$meja->id]) ? $activeCallsMap[$meja->id] : null;
         @endphp
         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
             <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift" 
-                 style="background-color: #14171c; border: 1px solid {{ $activeOrder ? 'rgba(245, 158, 11, 0.4)' : '#21262d' }} !important;">
+                 style="background-color: #14171c; border: 1px solid {{ $callNotif ? '#dc3545' : ($activeOrder ? 'rgba(245, 158, 11, 0.4)' : '#21262d') }} !important;">
                 
-                @if($activeOrder)
+                @if($callNotif)
+                    <div class="bg-danger text-white text-center py-1 fw-bold small pulse-animation">
+                        <i class="bi bi-bell-fill me-1"></i> MEMANGGIL PELAYAN
+                    </div>
+                @elseif($activeOrder)
                     <div class="position-absolute top-0 start-0 end-0" style="height: 4px; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
                 @endif
 
@@ -65,7 +70,11 @@
                                 </h5>
                                 <small class="text-white-50">{{ $meja->keterangan ?? 'Meja Pelanggan' }}</small>
                             </div>
-                            @if($activeOrder)
+                            @if($callNotif)
+                                <span class="badge bg-danger text-white rounded-pill px-2 py-1 small pulse-animation">
+                                    <i class="bi bi-bell-fill"></i> Panggilan
+                                </span>
+                            @elseif($activeOrder)
                                 <span class="badge rounded-pill px-2 py-1 small" style="background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
                                     <i class="bi bi-dot"></i> Ada Pesanan
                                 </span>
@@ -116,12 +125,18 @@
                     </div>
 
                     <!-- Footer Kartu -->
-                    <div class="pt-2">
+                    <div class="pt-2 d-flex flex-column gap-2">
+                        @if($callNotif)
+                            <button onclick="dismissCallBellNotif({{ $callNotif->id }})" class="btn btn-warning w-100 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" style="height: 40px; min-height: 40px; font-size: 0.875rem;">
+                                <i class="bi bi-check2-circle me-2" style="font-size: 1.1rem;"></i> Tanggapi Panggilan
+                            </button>
+                        @endif
+
                         @if($activeOrder)
                             <a href="{{ route('kasir.pesanan_aktif') }}" class="btn w-100 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" style="height: 40px; min-height: 40px; font-size: 0.875rem; border: 1px solid #c08e5c; color: #c08e5c; background: rgba(192, 142, 92, 0.1); transition: all 0.2s ease;">
                                 <i class="bi bi-eye me-2" style="font-size: 1.1rem;"></i> Buka di Pesanan Aktif
                             </a>
-                        @else
+                        @elseif(!$callNotif)
                             <div class="text-center">
                                 <span class="text-secondary small" style="font-size: 0.75rem;"><i class="bi bi-shield-check me-1"></i>Otomatis terisi saat ada pesanan</span>
                             </div>

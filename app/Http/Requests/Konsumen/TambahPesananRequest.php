@@ -21,6 +21,7 @@ class TambahPesananRequest extends FormRequest
             'items' => 'required|array',
             'items.*.id_menu' => 'required|exists:menu,id',
             'items.*.jumlah' => 'required|integer|min:1',
+            'items.*.harga' => 'nullable|numeric|min:0',
             'items.*.catatan' => 'nullable|string|max:255',
             'items.*.variants' => 'nullable|array',
             'promo_id' => 'nullable|exists:promos,id',

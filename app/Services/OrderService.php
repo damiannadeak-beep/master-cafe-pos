@@ -48,8 +48,12 @@ class OrderService
             // 3c. Hitung harga varian
             [$hargaVarian, $selectedVariants] = $this->resolveVariants($menu, $item['variants'] ?? []);
 
-            // 3d. Hitung subtotal
-            $hargaTotalPerItem = $menu->harga + $hargaVarian;
+            // 3d. Hitung base price (dukung menu timbangan / dynamic price)
+            $basePrice = ($menu->is_dynamic_price && isset($item['harga']) && $item['harga'] > 0)
+                ? (float) $item['harga']
+                : (float) $menu->harga;
+
+            $hargaTotalPerItem = $basePrice + $hargaVarian;
             $subtotal = $hargaTotalPerItem * $item['jumlah'];
             $totalHarga += $subtotal;
 

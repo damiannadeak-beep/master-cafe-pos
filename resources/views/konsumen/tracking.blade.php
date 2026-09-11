@@ -350,7 +350,7 @@
 <script>
     const orderToken = "{{ $pesanan->order_token }}";
     const pesananId = {{ $pesanan->id }};
-    let bellCooldown = 0;
+    const trackingMejaId = {{ $meja ? $meja->id : 0 }};
 
     // Fungsi Utama: Menyelesaikan Sesi Pesanan Konsumen & Kembali ke Menu Meja yang Sama
     function finishCustomerSession() {
@@ -366,7 +366,7 @@
         @endif
     }
 
-    // 1. Fungsi Panggil Pelayan dengan Cooldown 2 Menit
+    // 1. Fungsi Panggil Pelayan dengan Cooldown Persisten di LocalStorage (Bertahan saat Refresh)
     function callWaiter(mejaId) {
         const btn = document.getElementById('btnCallBell');
         if (!btn || btn.disabled) return;
@@ -387,10 +387,10 @@
         .then(data => {
             if (data.error) {
                 alert(data.error);
-                startCooldown(60);
+                startCooldown(mejaId, 60);
             } else {
                 alert('🔔 ' + (data.message || 'Pelayan telah dipanggil dan segera menuju ke meja Anda.'));
-                startCooldown(120);
+                startCooldown(mejaId, 120);
             }
         })
         .catch(err => {
@@ -400,22 +400,46 @@
         });
     }
 
-    function startCooldown(seconds) {
+    function startCooldown(mejaId, seconds) {
+        const expireTime = Date.now() + (seconds * 1000);
+        try {
+            localStorage.setItem('call_bell_expire_' + mejaId, expireTime);
+        } catch(e) {}
+        checkCallBellCooldown(mejaId);
+    }
+
+    function checkCallBellCooldown(mejaId) {
+        if (!mejaId) return;
         const btn = document.getElementById('btnCallBell');
         if (!btn) return;
-        bellCooldown = seconds;
-        btn.disabled = true;
-        
-        const timer = setInterval(() => {
-            bellCooldown--;
-            if (bellCooldown <= 0) {
-                clearInterval(timer);
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-bell-fill me-1"></i> Panggil Pelayan';
-            } else {
-                btn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i> Tunggu (${bellCooldown}s)`;
+
+        try {
+            const expire = localStorage.getItem('call_bell_expire_' + mejaId);
+            if (expire) {
+                const remaining = Math.ceil((parseInt(expire) - Date.now()) / 1000);
+                if (remaining > 0) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i> Tunggu (${remaining}s)`;
+
+                    if (window.bellTimerInterval) clearInterval(window.bellTimerInterval);
+                    window.bellTimerInterval = setInterval(() => {
+                        const rem = Math.ceil((parseInt(expire) - Date.now()) / 1000);
+                        if (rem <= 0) {
+                            clearInterval(window.bellTimerInterval);
+                            localStorage.removeItem('call_bell_expire_' + mejaId);
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="bi bi-bell-fill me-1"></i> Panggil Pelayan';
+                        } else {
+                            btn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i> Tunggu (${rem}s)`;
+                        }
+                    }, 1000);
+                } else {
+                    localStorage.removeItem('call_bell_expire_' + mejaId);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-bell-fill me-1"></i> Panggil Pelayan';
+                }
             }
-        }, 1000);
+        } catch(e) {}
     }
 
     // 2. Rating Handler
@@ -487,8 +511,10 @@
     }
 
     function pollOrderStatus() {
-        if (document.hidden) return;
-        fetch("{{ url('/api/tracking/' . $pesanan->order_token . '/status') }}")
+        fetch("{{ url('/api/tracking/' . $pesanan->order_token . '/status') }}?_t=" + Date.now(), {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/json' }
+        })
             .then(res => res.json())
             .then(data => {
                 updateStatusUI(data);
@@ -496,11 +522,23 @@
             .catch(err => console.log('Polling sync error:', err));
     }
 
-    // Fast real-time polling (3 detik) agar status pesanan ter-update otomatis tanpa refresh
-    let trackingInterval = setInterval(pollOrderStatus, 3000);
+    // Fast real-time polling (2.5 detik) agar status pesanan ter-update otomatis tanpa refresh manual
+    let trackingInterval = setInterval(pollOrderStatus, 2500);
+
+    // Langsung periksa status saat tab kembali fokus/aktif
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            pollOrderStatus();
+        }
+    });
 
     // Cleanup active order LocalStorage jika status sudah completed / cancelled
     document.addEventListener('DOMContentLoaded', () => {
+        const trackingMejaId = {{ $meja ? $meja->id : 0 }};
+        if (trackingMejaId) {
+            checkCallBellCooldown(trackingMejaId);
+        }
+
         if (currentStatus === 'completed' || currentStatus === 'cancelled') {
             try {
                 localStorage.removeItem('active_guest_order');
@@ -519,5 +557,10 @@
                 });
         }
     });
+
+    // Run immediately if DOM is already ready
+    if (typeof trackingMejaId !== 'undefined' && trackingMejaId) {
+        checkCallBellCooldown(trackingMejaId);
+    }
 </script>
 @endsection

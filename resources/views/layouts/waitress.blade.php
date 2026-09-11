@@ -125,12 +125,21 @@
         // --- Utility: Fetch Active Orders Count Badge & Smart Auto-Sync ---
         let lastKnownOrderId = null;
         let lastKnownCount = null;
+        let lastKnownHash = null;
         let isInitialSync = true;
         let lastNotifiedOrderId = null;
 
         function triggerNewOrderNotification(orderId, message) {
+            // Selalu auto-reload kartu pesanan realtime tanpa refresh halaman
+            if (typeof window.reloadActiveOrdersCards === 'function') {
+                window.reloadActiveOrdersCards(true);
+            }
+            if (typeof window.reloadMejaGrid === 'function') {
+                window.reloadMejaGrid(true);
+            }
+
             if (orderId && lastNotifiedOrderId === orderId) {
-                return; // Hindari duplikasi jika WebSocket dan Sync mendeteksi bersamaan
+                return; // Hindari duplikasi suara bel jika WebSocket dan Sync mendeteksi bersamaan
             }
             if (orderId) {
                 lastNotifiedOrderId = orderId;
@@ -144,17 +153,6 @@
             // 2. Toast alert INSTANTLY
             if (window.showToast) {
                 window.showToast(message || 'Pesanan baru masuk!', 'success');
-            }
-
-            // 3. Auto-reload daftar pesanan aktif (prioritaskan pembaruan kartu realtime tanpa reload halaman)
-            if (window.location.pathname.includes('pesanan-aktif')) {
-                if (typeof window.reloadActiveOrdersCards === 'function') {
-                    window.reloadActiveOrdersCards(true);
-                } else {
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
-                }
             }
         }
 
@@ -184,24 +182,125 @@
 
                     const currentLatestId = parseInt(data.latest_id) || 0;
                     const currentCount = parseInt(data.count) || 0;
+                    const currentHash = data.hash || null;
 
                     if (!isInitialSync) {
-                        // Deteksi jika ada pesanan baru: ID lebih tinggi ATAU jumlah pesanan bertambah
                         const hasNewOrder = (currentLatestId > 0 && lastKnownOrderId > 0 && currentLatestId > lastKnownOrderId) ||
                                            (lastKnownCount !== null && currentCount > lastKnownCount);
+                        const hasStateChange = (lastKnownHash !== null && currentHash !== null && currentHash !== lastKnownHash);
 
-                        if (hasNewOrder) {
-                            console.log('[Sync] Pesanan baru terdeteksi! ID:', currentLatestId, 'Count:', currentCount);
-                            triggerNewOrderNotification(currentLatestId, 'Pesanan baru masuk!');
+                        if (hasStateChange || hasNewOrder) {
+                            console.log('[Sync] Perubahan status/pembayaran pesanan terdeteksi!');
+                            if (typeof window.reloadActiveOrdersCards === 'function') {
+                                window.reloadActiveOrdersCards(true);
+                            }
+                            if (typeof window.reloadMejaGrid === 'function') {
+                                window.reloadMejaGrid(true);
+                            }
+                            if (hasNewOrder) {
+                                triggerNewOrderNotification(currentLatestId, 'Pesanan baru masuk!');
+                            }
                         }
                     }
 
                     lastKnownOrderId = currentLatestId;
                     lastKnownCount = currentCount;
+                    lastKnownHash = currentHash;
                     isInitialSync = false;
                 })
                 .catch(err => {
                     // Ignore aborted network requests during tab sleep or page navigation
+                });
+        }
+
+        let knownNotifIds = new Set();
+        let isInitialNotifSync = true;
+
+        window.dismissCallBellNotif = function(notifId) {
+            fetch('{{ url("/kasir/api/notifications") }}/' + notifId + '/read', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(() => {
+                if (window.showToast) window.showToast('Panggilan meja telah ditanggapi', 'success');
+                fetchWaitressNotifications();
+                if (typeof window.reloadMejaGrid === 'function') {
+                    window.reloadMejaGrid(true);
+                }
+            })
+            .catch(err => console.error('Gagal memproses tanggapan panggilan:', err));
+        };
+
+        function fetchWaitressNotifications() {
+            if (document.hidden) return;
+            fetch('{{ url("/kasir/api/notifications") }}?_t=' + Date.now(), {
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Cache-Control': 'no-cache' 
+                }
+            })
+                .then(response => {
+                    if (!response.ok) return [];
+                    return response.json();
+                })
+                .then(notifications => {
+                    if (!Array.isArray(notifications)) return;
+
+                    const callBells = notifications.filter(n => n.type === 'call_bell');
+                    const badge = document.getElementById('badge-call-bells');
+                    const listContainer = document.getElementById('dropdown-call-bells-list');
+
+                    if (badge) {
+                        if (callBells.length > 0) {
+                            badge.innerText = callBells.length;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    if (listContainer) {
+                        if (callBells.length > 0) {
+                            let itemsHtml = '<li class="dropdown-header text-white-50 fw-bold small border-bottom border-secondary border-opacity-25 pb-2 mb-1"><i class="bi bi-bell-fill me-1 text-warning"></i> Panggilan Meja Aktif (' + callBells.length + ')</li>';
+                            callBells.forEach(c => {
+                                itemsHtml += '<li class="px-2 py-1"><div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded-3 border border-secondary border-opacity-25"><div><strong class="text-warning small d-block"><i class="bi bi-bell-fill me-1"></i>' + c.message + '</strong><small class="text-white-50" style="font-size: 0.72rem;">Konsumen memanggil pelayan</small></div><button onclick="dismissCallBellNotif(' + c.id + ')" class="btn btn-sm btn-warning rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;"><i class="bi bi-check2"></i> Tanggapi</button></div></li>';
+                            });
+                            listContainer.innerHTML = itemsHtml;
+                        } else {
+                            listContainer.innerHTML = '<li class="dropdown-header text-white-50 fw-bold small border-bottom border-secondary border-opacity-25 pb-2 mb-1"><i class="bi bi-bell-fill me-1 text-warning"></i> Panggilan Meja Aktif</li><li><span class="dropdown-item small text-muted py-2">Tidak ada panggilan aktif</span></li>';
+                        }
+                    }
+
+                    notifications.forEach(notif => {
+                        if (!knownNotifIds.has(notif.id)) {
+                            knownNotifIds.add(notif.id);
+                            if (!isInitialNotifSync) {
+                                console.log('[NotifSync] Panggilan / Notifikasi baru terdeteksi:', notif);
+                                // 1. Mainkan suara bell "Ting"
+                                if (window.playDingSound) {
+                                    window.playDingSound();
+                                }
+                                // 2. Tampilkan Toast Notifikasi di Layar Waitress
+                                if (window.showToast) {
+                                    const isCallBell = notif.type === 'call_bell';
+                                    window.showToast((isCallBell ? '🔔 ' : '📦 ') + notif.message, isCallBell ? 'warning' : 'success');
+                                }
+                                // 3. Refresh grid monitor meja jika sedang di halaman meja
+                                if (typeof window.reloadMejaGrid === 'function') {
+                                    window.reloadMejaGrid(true);
+                                }
+                            }
+                        }
+                    });
+                    isInitialNotifSync = false;
+                })
+                .catch(err => {
+                    // Ignore background network errors
                 });
         }
 
@@ -328,14 +427,19 @@
         // --- Real-Time Hybrid Engine (Laravel Echo / Reverb + Smart Auto-Sync) ---
         document.addEventListener('DOMContentLoaded', () => {
             fetchActiveOrdersCount();
+            fetchWaitressNotifications();
 
-            // Default fallback interval: 5 seconds (not 1s, preventing CPU spike before WebSocket loads)
-            let syncInterval = setInterval(fetchActiveOrdersCount, 5000);
+            // Default fallback interval: 3.5 seconds
+            let syncInterval = setInterval(() => {
+                fetchActiveOrdersCount();
+                fetchWaitressNotifications();
+            }, 3500);
 
             // Immediate refresh when tab becomes visible again
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
                     fetchActiveOrdersCount();
+                    fetchWaitressNotifications();
                 }
             });
 
@@ -346,13 +450,27 @@
                     const kasirChannel = window.Echo.channel('kasir-notifications');
 
                     const handlePesananBaru = (e) => {
-                        console.log('[WebSocket] Pesanan baru diterima via Reverb:', e);
+                        console.log('[WebSocket] Pesanan baru/update diterima via Reverb:', e);
                         fetchActiveOrdersCount();
+                        fetchWaitressNotifications();
+                        if (typeof window.reloadActiveOrdersCards === 'function') {
+                            window.reloadActiveOrdersCards(true);
+                        }
+                        if (typeof window.reloadMejaGrid === 'function') {
+                            window.reloadMejaGrid(true);
+                        }
                         triggerNewOrderNotification(e.id, e.message || 'Pesanan baru masuk!');
                     };
 
                     const handleMejaStatus = (e) => {
                         console.log('[WebSocket] Status meja diupdate:', e);
+                        fetchWaitressNotifications();
+                        if (typeof window.reloadActiveOrdersCards === 'function') {
+                            window.reloadActiveOrdersCards(true);
+                        }
+                        if (typeof window.reloadMejaGrid === 'function') {
+                            window.reloadMejaGrid(true);
+                        }
                         window.dispatchEvent(new CustomEvent('meja-status-updated', { detail: e }));
                     };
 
@@ -362,13 +480,13 @@
                         .listen('.MejaStatusUpdated', handleMejaStatus)
                         .listen('MejaStatusUpdated', handleMejaStatus);
 
-                    // Dynamic sync optimization: slow down polling when WebSocket is connected
+                    // Keep active sync interval at 4s for instant reliability
                     if (window.Echo.connector && window.Echo.connector.pusher) {
                         const pusherConn = window.Echo.connector.pusher.connection;
                         pusherConn.bind('connected', () => {
-                            console.log('[WebSocket] Terhubung secara real-time! Mengurangi frekuensi background polling ke 30s.');
+                            console.log('[WebSocket] Terhubung secara real-time (polling 4s active).');
                             clearInterval(syncInterval);
-                            syncInterval = setInterval(fetchActiveOrdersCount, 30000);
+                            syncInterval = setInterval(fetchActiveOrdersCount, 4000);
                         });
                         pusherConn.bind('unavailable', () => {
                             console.warn('[WebSocket] Tidak tersedia, beralih ke smart auto-sync 4s.');

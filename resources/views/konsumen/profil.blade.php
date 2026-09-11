@@ -169,6 +169,19 @@
     }
 
     function callBell(id_meja) {
+        if (!id_meja) return;
+        const expireKey = 'call_bell_expire_' + id_meja;
+        try {
+            const expire = localStorage.getItem(expireKey);
+            if (expire) {
+                const remaining = Math.ceil((parseInt(expire) - Date.now()) / 1000);
+                if (remaining > 0) {
+                    alert('Pelayan sudah dipanggil. Mohon tunggu ' + remaining + ' detik lagi.');
+                    return;
+                }
+            }
+        } catch(e) {}
+
         if(confirm('Panggil pelayan ke meja Anda?')) {
             fetch('/konsumen/call-bell', {
                 method: 'POST',
@@ -183,7 +196,10 @@
                 if(data.error) {
                     alert(data.error);
                 } else {
-                    alert(data.message);
+                    alert('🔔 ' + (data.message || 'Pelayan segera datang ke meja Anda.'));
+                    try {
+                        localStorage.setItem(expireKey, Date.now() + (120 * 1000));
+                    } catch(e) {}
                 }
             })
             .catch(err => {

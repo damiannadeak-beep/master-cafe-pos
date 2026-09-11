@@ -62,23 +62,21 @@
                            value="{{ auth()->check() ? auth()->user()->name : '' }}" required maxlength="50">
                 </div>
 
+                @if(!isset($meja))
                 <div class="mb-3">
                     <label for="inputGuestPhone" class="form-label text-white small fw-bold">
-                        No. WhatsApp / HP @if(!isset($meja))<span class="text-danger">* (Wajib untuk Takeaway)</span>@else<span class="text-secondary">(Opsional)</span>@endif
+                        No. WhatsApp / HP <span class="text-danger">* (Wajib untuk Takeaway)</span>
                     </label>
                     <input type="tel" id="inputGuestPhone" class="form-control form-control-lg rounded-3 text-white" 
                            placeholder="Contoh: 081234567890" 
                            style="background-color: #0e1217; border: 1px solid #30363d; font-size: 1rem;" 
-                           maxlength="20" @if(!isset($meja)) required @endif>
+                           maxlength="20" required>
                     <small class="text-muted d-block mt-1" style="font-size: 0.78rem;">
                         <i class="bi bi-whatsapp me-1 text-success"></i>
-                        @if(isset($meja))
-                            Digunakan pelayan untuk mengantar pesanan ke Meja {{ $meja->nama_meja_atau_nomor }}.
-                        @else
-                            Digunakan kasir & dapur untuk memberi tahu via WhatsApp saat pesanan selesai dibungkus.
-                        @endif
+                        Digunakan kasir & dapur untuk memberi tahu via WhatsApp saat pesanan selesai dibungkus.
                     </small>
                 </div>
+                @endif
 
                 <div class="p-3 rounded-3 mt-3" style="background-color: #0e1217; border: 1px solid #21262d;">
                     <div class="d-flex justify-content-between align-items-center mb-1">

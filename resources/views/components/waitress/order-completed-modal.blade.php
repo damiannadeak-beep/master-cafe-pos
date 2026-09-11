@@ -41,8 +41,8 @@
                         <i class="bi bi-printer-fill fs-5"></i> Cetak Struk Thermal
                     </button>
                     @endif
-                    <a href="#" target="_blank" class="btn btn-outline-primary fw-bold py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="btnOrderCompletedBrowser">
-                        <i class="bi bi-file-earmark-text-fill fs-5"></i> Cetak Struk Browser
+                    <a href="#" target="_blank" class="btn btn-outline-primary fw-bold py-2 rounded-3 d-flex align-items-center justify-content-center gap-2" id="btnOrderCompletedBrowser">
+                        <i class="bi bi-file-earmark-text-fill fs-5"></i> Cetak Struk Kasir (Browser)
                     </a>
                     <button type="button" class="btn btn-secondary fw-semibold py-2 rounded-3 mt-1" data-bs-dismiss="modal">
                         Selesai Tanpa Struk
