@@ -119,7 +119,7 @@
 
                     <div class="nav-section-title">Marketing & Sistem</div>
                     <a class="nav-link {{ request()->routeIs('admin.promo.*') ? 'active' : '' }}" href="{{ route('admin.promo.index') }}">
-                        <i class="bi bi-tag-fill me-2"></i> Promo
+                        <i class="bi bi-boxes me-2"></i> Paket Hemat (Promo)
                     </a>
                     <a class="nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}" href="{{ route('admin.reviews.index') }}">
                         <i class="bi bi-chat-left-text-fill me-2"></i> Ulasan Pelanggan

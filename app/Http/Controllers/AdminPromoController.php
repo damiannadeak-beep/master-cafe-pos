@@ -14,7 +14,7 @@ class AdminPromoController extends Controller
 {
     public function index()
     {
-        $promos = Promo::with('menus')->orderBy('id', 'desc')->paginate(15);
+        $promos = Promo::with('menus')->where('type', 'package')->orderBy('id', 'desc')->paginate(15);
         return view('admin.promo.index', compact('promos'));
     }
 
@@ -39,36 +39,33 @@ class AdminPromoController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:discount,package',
-            'discount_type' => 'nullable|in:percentage,nominal',
             'value' => 'required|numeric|min:0',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date',
             'days' => 'nullable|array',
             'days.*' => 'string',
-            'package_menus' => 'nullable|array',
+            'package_menus' => 'required|array|min:1',
             'package_menus.*' => 'nullable|exists:menus,id',
             'package_qty' => 'nullable|array',
             'package_qty.*' => 'nullable|integer|min:1',
         ]);
 
-        if ($data['type'] === 'package') {
-            $data['discount_type'] = 'nominal';
-            
-            // Filter menu kosong
-            $validMenus = array_filter($request->input('package_menus', []), fn($m) => !empty($m));
-            if (empty($validMenus)) {
-                return back()->withInput()->withErrors([
-                    'package_menus' => 'Promo Paket Hemat (Bundling) wajib menyertakan minimal 1 menu pilihan.'
-                ]);
-            }
+        $data['type'] = 'package';
+        $data['discount_type'] = 'nominal';
+        
+        // Filter menu kosong
+        $validMenus = array_filter($request->input('package_menus', []), fn($m) => !empty($m));
+        if (empty($validMenus)) {
+            return back()->withInput()->withErrors([
+                'package_menus' => 'Paket Hemat (Bundling) wajib menyertakan minimal 1 menu pilihan.'
+            ]);
         }
 
         $data['is_active'] = $request->has('is_active');
         $promo = Promo::create($data);
 
         // Sync Paket Menus
-        if ($promo->type === 'package' && $request->has('package_menus')) {
+        if ($request->has('package_menus')) {
             $menus = $request->input('package_menus');
             $qtys = $request->input('package_qty');
             $syncData = [];
@@ -90,10 +87,10 @@ class AdminPromoController extends Controller
         }
         
         if (function_exists('activity')) {
-            activity()->causedBy(auth()->user())->performedOn($promo)->log('Membuat promo baru: ' . $promo->title);
+            activity()->causedBy(auth()->user())->performedOn($promo)->log('Membuat paket hemat baru: ' . $promo->title);
         }
 
-        return redirect()->route('admin.promo.index')->with('success', 'Promo berhasil disimpan.');
+        return redirect()->route('admin.promo.index')->with('success', 'Paket hemat berhasil disimpan.');
     }
 
     public function edit($id)
@@ -112,40 +109,32 @@ class AdminPromoController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:discount,package',
-            'discount_type' => 'nullable|in:percentage,nominal',
             'value' => 'required|numeric|min:0',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date',
             'days' => 'nullable|array',
             'days.*' => 'string',
-            'package_menus' => 'nullable|array',
+            'package_menus' => 'required|array|min:1',
             'package_menus.*' => 'nullable|exists:menus,id',
             'package_qty' => 'nullable|array',
             'package_qty.*' => 'nullable|integer|min:1',
         ]);
 
-        if ($data['type'] === 'package') {
-            $data['discount_type'] = 'nominal';
-            
-            $validMenus = array_filter($request->input('package_menus', []), fn($m) => !empty($m));
-            if (empty($validMenus)) {
-                return back()->withInput()->withErrors([
-                    'package_menus' => 'Promo Paket Hemat (Bundling) wajib menyertakan minimal 1 menu pilihan.'
-                ]);
-            }
+        $data['type'] = 'package';
+        $data['discount_type'] = 'nominal';
+        
+        $validMenus = array_filter($request->input('package_menus', []), fn($m) => !empty($m));
+        if (empty($validMenus)) {
+            return back()->withInput()->withErrors([
+                'package_menus' => 'Paket Hemat (Bundling) wajib menyertakan minimal 1 menu pilihan.'
+            ]);
         }
 
         $data['is_active'] = $request->has('is_active');
-
-        if ($data['type'] === 'discount') {
-            $promo->menus()->detach();
-        }
-
         $promo->update($data);
 
         // Sync Paket Menus
-        if ($promo->type === 'package' && $request->has('package_menus')) {
+        if ($request->has('package_menus')) {
             $menus = $request->input('package_menus');
             $qtys = $request->input('package_qty');
             $syncData = [];
@@ -166,10 +155,10 @@ class AdminPromoController extends Controller
         }
         
         if (function_exists('activity')) {
-            activity()->causedBy(auth()->user())->performedOn($promo)->log('Memperbarui promo: ' . $promo->title);
+            activity()->causedBy(auth()->user())->performedOn($promo)->log('Memperbarui paket hemat: ' . $promo->title);
         }
 
-        return redirect()->route('admin.promo.index')->with('success', 'Promo berhasil diperbarui.');
+        return redirect()->route('admin.promo.index')->with('success', 'Paket hemat berhasil diperbarui.');
     }
 
     public function toggleStatus($id)
