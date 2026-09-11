@@ -487,6 +487,7 @@
     }
 
     function pollOrderStatus() {
+        if (document.hidden) return;
         fetch("{{ url('/api/tracking/' . $pesanan->order_token . '/status') }}")
             .then(res => res.json())
             .then(data => {
@@ -495,8 +496,8 @@
             .catch(err => console.log('Polling sync error:', err));
     }
 
-    // Jalankan background polling setiap 5 detik
-    setInterval(pollOrderStatus, 5000);
+    // Smart background polling (12s fallback)
+    let trackingInterval = setInterval(pollOrderStatus, 12000);
 
     // Cleanup active order LocalStorage jika status sudah completed / cancelled
     document.addEventListener('DOMContentLoaded', () => {
@@ -509,6 +510,10 @@
         }
 
         if (window.Echo) {
+            // Slow down HTTP polling to 30s when WebSocket is active
+            clearInterval(trackingInterval);
+            trackingInterval = setInterval(pollOrderStatus, 30000);
+
             window.Echo.channel('kasir-notifications')
                 .listen('.PesananBaru', (e) => {
                     if (e.id == pesananId) pollOrderStatus();

@@ -13,15 +13,28 @@
     }
 
     function filterMenu(category, btn) {
-        document.querySelectorAll('.btn-filter').forEach(b => { b.classList.remove('active'); b.classList.replace('btn-outline-secondary', 'btn-outline-secondary'); b.style.backgroundColor=''; b.style.color=''; b.style.border=''; });
-        btn.classList.add('active'); btn.style.backgroundColor='#c08e5c'; btn.style.color='white'; btn.style.border='none';
+        document.querySelectorAll('.btn-filter').forEach(b => { 
+            b.classList.remove('active'); 
+            b.style.backgroundColor = ''; 
+            b.style.color = ''; 
+            b.style.border = ''; 
+        });
+        if (btn) {
+            btn.classList.add('active'); 
+            btn.style.backgroundColor = '#c08e5c'; 
+            btn.style.color = 'white'; 
+            btn.style.border = 'none';
+        }
 
-        document.querySelectorAll('.menu-item').forEach(item => {
-            if (category === 'semua' || item.getAttribute('data-kategori') === category) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
+        requestAnimationFrame(() => {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                const itemCat = (item.getAttribute('data-kategori') || '').toLowerCase();
+                if (category === 'semua' || itemCat === category.toLowerCase()) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
     }
 

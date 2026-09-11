@@ -98,9 +98,7 @@
             if (!anyModalOpen && !window.activeCompletedOrderId) {
                 container.innerHTML = html;
             }
-            if (typeof fetchActiveOrdersCount === 'function') {
-                fetchActiveOrdersCount();
-            }
+            // Tidak perlu memanggil fetchActiveOrdersCount() ganda di sini karena sudah ditangani oleh sync engine
         })
         .catch(err => {
             console.error('[PesananAktif] Gagal memuat pesanan aktif:', err);
@@ -115,12 +113,12 @@
         });
     };
 
-    // Auto-sync berkala tiap 6 detik jika kasir sedang di tab aktif dan idle (tidak ada modal terbuka)
+    // Auto-sync berkala tiap 12 detik jika kasir sedang di tab aktif dan idle (tidak ada modal terbuka)
     setInterval(() => {
         if (!document.hidden && !document.querySelector('.modal.show') && !window.activeCompletedOrderId && !isReloadingCards) {
             window.reloadActiveOrdersCards(true);
         }
-    }, 6000);
+    }, 12000);
 
     // --- Modal Selesai & Cetak Struk Controller ---
     window.activeCompletedOrderId = null;

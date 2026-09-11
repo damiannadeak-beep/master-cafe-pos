@@ -184,32 +184,14 @@
                 if (rawOrder) {
                     const guestOrder = JSON.parse(rawOrder);
                     if (guestOrder && guestOrder.token && guestOrder.expires_at > Date.now()) {
-                        fetch('/api/tracking/' + guestOrder.token + '/status')
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data && (data.status === 'completed' || data.status === 'cancelled')) {
-                                    localStorage.removeItem('active_guest_order');
-                                    const banner = document.getElementById('active-order-recovery-banner');
-                                    if (banner) banner.style.display = 'none';
-                                } else if (!window.location.pathname.includes('/tracking/' + guestOrder.token)) {
-                                    const banner = document.getElementById('active-order-recovery-banner');
-                                    const link = document.getElementById('active-order-recovery-link');
-                                    if (banner && link) {
-                                        link.href = '/tracking/' + guestOrder.token;
-                                        banner.style.display = 'block';
-                                    }
-                                }
-                            })
-                            .catch(() => {
-                                if (!window.location.pathname.includes('/tracking/' + guestOrder.token)) {
-                                    const banner = document.getElementById('active-order-recovery-banner');
-                                    const link = document.getElementById('active-order-recovery-link');
-                                    if (banner && link) {
-                                        link.href = '/tracking/' + guestOrder.token;
-                                        banner.style.display = 'block';
-                                    }
-                                }
-                            });
+                        if (!window.location.pathname.includes('/tracking/')) {
+                            const banner = document.getElementById('active-order-recovery-banner');
+                            const link = document.getElementById('active-order-recovery-link');
+                            if (banner && link) {
+                                link.href = '/tracking/' + guestOrder.token;
+                                banner.style.display = 'block';
+                            }
+                        }
                     } else if (guestOrder && guestOrder.expires_at <= Date.now()) {
                         localStorage.removeItem('active_guest_order');
                     }

@@ -146,10 +146,14 @@
             variants = [];
         }
 
+        let syncTimeout = null;
         function syncInput() {
-            if (inputVariants) {
-                inputVariants.value = JSON.stringify(variants);
-            }
+            clearTimeout(syncTimeout);
+            syncTimeout = setTimeout(() => {
+                if (inputVariants) {
+                    inputVariants.value = JSON.stringify(variants);
+                }
+            }, 100);
         }
 
         function renderVariants() {

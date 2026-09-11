@@ -229,13 +229,6 @@
             // Eksekusi skrip bawaan konten baru
             executeScripts(contentContainer);
 
-            // Dispatch DOMContentLoaded agar skrip yang mendengarkan DOMContentLoaded tetap berjalan pada navigasi SPA
-            try {
-                document.dispatchEvent(new Event('DOMContentLoaded'));
-            } catch(e) {
-                console.warn('[AdminSPA] DOMContentLoaded dispatch error:', e);
-            }
-
             // Re-init Bootstrap komponen (tooltips, modals, popovers)
             if (window.bootstrap) {
                 const tooltipTriggerList = [].slice.call(contentContainer.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -248,34 +241,19 @@
                 });
             }
 
-            // Dispatch global event
+            // Dispatch global event untuk modul yang butuh re-init
             window.dispatchEvent(new CustomEvent('admin:page-loaded', { detail: { url } }));
 
             ProgressBar.done();
             isNavigating = false;
-        }, 80);
+        }, 60);
     }
 
-    // Inisialisasi event listener navigasi & hover prefetching
+    // Inisialisasi event listener navigasi SPA
     function initSpaNavigation() {
         ProgressBar.init();
 
-        // 1. Delegasi Hover & Touchstart untuk Instan Prefetching
-        document.body.addEventListener('pointerenter', function(e) {
-            const link = e.target.closest('a');
-            if (link && isEligibleAdminLink(link)) {
-                prefetchUrl(link.href);
-            }
-        }, { capture: true, passive: true });
-
-        document.body.addEventListener('touchstart', function(e) {
-            const link = e.target.closest('a');
-            if (link && isEligibleAdminLink(link)) {
-                prefetchUrl(link.href);
-            }
-        }, { capture: true, passive: true });
-
-        // 2. Delegasi Click untuk Transisi Mulus Tanpa Reload
+        // Delegasi Click untuk Transisi Mulus Tanpa Reload (Instant Response)
         document.body.addEventListener('click', function(e) {
             // Jangan cegah jika klik dengan tombol Ctrl / Cmd / Shift / Scroll wheel
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
@@ -300,7 +278,7 @@
             }
         });
 
-        // 3. Tangani Tombol Back / Forward di Browser
+        // Tangani Tombol Back / Forward di Browser
         window.addEventListener('popstate', function(e) {
             var currentPath = window.location.pathname;
             if (currentPath.startsWith('/admin')) {
@@ -310,22 +288,13 @@
             }
         });
 
-        // 4. Bersihkan cache SPA ketika form disubmit (POST/PUT/DELETE)
+        // Bersihkan cache SPA ketika form disubmit (POST/PUT/DELETE)
         document.body.addEventListener('submit', function(e) {
             pageCache.clear();
         }, { capture: true });
 
-        // 5. Expose fungsi clear cache secara global
+        // Expose fungsi clear cache secara global
         window.adminSpaClearCache = function() { pageCache.clear(); };
-
-        // Prefetch seluruh menu sidebar utama saat admin pertama kali membuka dashboard
-        setTimeout(() => {
-            document.querySelectorAll('.admin-sidebar a.nav-link').forEach(link => {
-                if (isEligibleAdminLink(link)) {
-                    prefetchUrl(link.href);
-                }
-            });
-        }, 1200);
     }
 
     if (document.readyState === 'loading') {
