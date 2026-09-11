@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
 class Menu extends Model
 {
-    use LogsActivity;
+    use SoftDeletes, LogsActivity;
 
     protected $table = 'menu';
     protected $fillable = ['nama_menu', 'harga', 'stok', 'image', 'kategori', 'is_available', 'is_dynamic_price', 'variants_json', 'deskripsi'];

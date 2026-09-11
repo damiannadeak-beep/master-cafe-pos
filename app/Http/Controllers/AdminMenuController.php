@@ -79,14 +79,40 @@ class AdminMenuController extends Controller
     public function destroy($id)
     {
         $menu = Menu::findOrFail($id);
+
+        // 1. Cek apakah menu sedang ada di pesanan aktif (pending / processing)
+        $activeOrdersCount = \App\Models\DetailPesanan::where('id_menu', $menu->id)
+            ->whereHas('pesanan', function ($q) {
+                $q->whereIn('status', ['pending', 'processing']);
+            })
+            ->count();
+
+        if ($activeOrdersCount > 0) {
+            return redirect()->route('admin.menu.index')->with('error', "Produk '{$menu->nama_menu}' tidak dapat dihapus karena saat ini sedang aktif diproses di dapur pada {$activeOrdersCount} pesanan. Harap selesaikan pesanan tersebut terlebih dahulu.");
+        }
+
         try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            // Lepaskan dari resep bahan & paket promo jika ada
+            $menu->bahans()->detach();
+            \Illuminate\Support\Facades\DB::table('promo_menu')->where('menu_id', $menu->id)->delete();
+
+            // Soft-delete menu
+            $namaMenu = $menu->nama_menu;
             $menu->delete();
-            return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil dihapus.');
+
+            \Illuminate\Support\Facades\DB::commit();
+            return redirect()->route('admin.menu.index')->with('success', "Produk '{$namaMenu}' berhasil dihapus.");
         } catch (\Illuminate\Database\QueryException $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
             if ($e->getCode() == 23000) {
-                return redirect()->route('admin.menu.index')->with('error', 'Tidak dapat menghapus produk ini karena sudah pernah dipesan. Silakan "Edit" produk ini jika ingin mengganti gambar atau menonaktifkannya.');
+                return redirect()->route('admin.menu.index')->with('error', 'Database server belum menjalankan migrasi soft delete. Silakan jalankan `php artisan migrate` di terminal cPanel.');
             }
-            throw $e;
+            return redirect()->route('admin.menu.index')->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->route('admin.menu.index')->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
 
