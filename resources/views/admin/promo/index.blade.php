@@ -192,9 +192,11 @@
                                             Rp {{ number_format($p->value, 0, ',', '.') }}
                                         </div>
                                         @if($savings > 0)
-                                            <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 mt-1">
-                                                Hemat Rp {{ number_format($savings, 0, ',', '.') }} ({{ $savingsPercent }}%)
-                                            </span>
+                                            <div class="mt-1">
+                                                <span class="badge rounded-pill text-white shadow-sm" style="background-color: #1f883d; font-size: 0.75rem; padding: 5px 10px;">
+                                                    <i class="bi bi-stars me-1 text-warning"></i>Hemat Rp {{ number_format($savings, 0, ',', '.') }} ({{ $savingsPercent }}%)
+                                                </span>
+                                            </div>
                                         @endif
                                     </td>
 

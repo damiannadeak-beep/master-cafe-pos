@@ -332,7 +332,7 @@
                                         </div>
                                     </div>
                                     <div class="text-end">
-                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-1 px-2 fw-semibold" id="previewSavingsBadge" style="font-size: 0.8rem;">
+                                        <span class="badge rounded-pill text-white py-1 px-2 fw-semibold" id="previewSavingsBadge" style="background-color: #1f883d; font-size: 0.8rem;">
                                             Hemat Rp 0
                                         </span>
                                     </div>
@@ -498,7 +498,8 @@
                     savingsText.className = 'fw-bold text-success';
                     savingsNote.textContent = 'Strategi bundling menarik! Pelanggan hemat Rp ' + savings.toLocaleString('id-ID') + '.';
                     previewSavingsBadge.textContent = `Hemat ${formatRupiah(savings)}`;
-                    previewSavingsBadge.className = 'badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-1 px-2 fw-semibold';
+                    previewSavingsBadge.className = 'badge rounded-pill text-white py-1 px-2 fw-semibold';
+                    previewSavingsBadge.style.backgroundColor = '#1f883d';
                 } else if (savings === 0) {
                     savingsText.textContent = 'Harga paket sama dengan harga normal (Diskon Rp 0)';
                     savingsText.className = 'fw-bold text-warning';
