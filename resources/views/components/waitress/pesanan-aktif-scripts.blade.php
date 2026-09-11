@@ -525,12 +525,23 @@
     // --- 5. Split Bill (Pisah Bon Tanpa Reload) ---
     window.openSplitModal = function(orderId, btnElement) {
         splitOrderId = orderId;
+        const btn = btnElement ? (btnElement.closest('button') || btnElement) : null;
         let details = [];
-        try {
-            details = JSON.parse(btnElement.getAttribute('data-details'));
-        } catch (e) {
-            console.error('Error parse data-details:', e);
-            details = [];
+        if (btn) {
+            let rawData = btn.getAttribute('data-details') || '';
+            try {
+                details = JSON.parse(rawData);
+            } catch (e) {
+                try {
+                    // Fallback jika ada HTML entity decoding issue
+                    const txt = document.createElement('textarea');
+                    txt.innerHTML = rawData;
+                    details = JSON.parse(txt.value);
+                } catch (e2) {
+                    console.error('Error parse data-details:', e2);
+                    details = [];
+                }
+            }
         }
         splitDetails = details;
         
@@ -538,22 +549,29 @@
         if (splitOrderSpan) splitOrderSpan.innerText = orderId;
 
         let html = '';
-        details.forEach(item => {
-            html += `
-            <div class="d-flex align-items-center mb-2">
-                <div class="form-check flex-grow-1">
-                    <input class="form-check-input split-cb" type="checkbox" value="${item.id}" id="chk_${item.id}">
-                    <label class="form-check-label text-light" for="chk_${item.id}">
-                        ${item.menu ? item.menu.nama_menu : 'Menu'} (Rp ${Number(item.subtotal).toLocaleString('id-ID')})
-                    </label>
+        if (details.length === 0) {
+            html = '<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-circle me-1"></i> Data item pesanan tidak ditemukan atau gagal dimuat.</div>';
+        } else {
+            details.forEach(item => {
+                const menuName = item.menu ? item.menu.nama_menu : (item.nama_menu || 'Menu');
+                const subtotal = Number(item.subtotal || 0).toLocaleString('id-ID');
+                html += `
+                <div class="d-flex align-items-center mb-2 p-2 rounded" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07);">
+                    <div class="form-check flex-grow-1 mb-0">
+                        <input class="form-check-input split-cb" type="checkbox" value="${item.id}" id="chk_${item.id}" style="cursor: pointer;">
+                        <label class="form-check-label text-light fw-semibold" for="chk_${item.id}" style="cursor: pointer;">
+                            ${menuName}
+                            <div class="small text-warning fw-normal">Rp ${subtotal}</div>
+                        </label>
+                    </div>
+                    <div style="width: 75px;">
+                        <input type="number" class="form-control text-white border-secondary form-control-sm text-center split-qty" id="qty_${item.id}" value="1" min="1" max="${item.jumlah}" disabled style="background-color: #0d1117;">
+                    </div>
+                    <span class="ms-2 small text-white-50">/ ${item.jumlah}</span>
                 </div>
-                <div style="width: 80px;">
-                    <input type="number" class="form-control text-white border-secondary form-control-sm text-center split-qty" id="qty_${item.id}" value="1" min="1" max="${item.jumlah}" disabled>
-                </div>
-                <span class="ms-2 small text-white-50">/ ${item.jumlah}</span>
-            </div>
-            `;
-        });
+                `;
+            });
+        }
         
         const splitContainer = document.getElementById('split-items-container');
         if (splitContainer) splitContainer.innerHTML = html;

@@ -156,7 +156,7 @@
                                 </button>
                                 <div class="w-100 m-0 p-0"></div> <!-- Break line -->
                                 @if($order->detail_pesanan->sum('jumlah') > 1)
-                                <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold mt-1 btn-touch d-flex justify-content-center align-items-center" data-details="{{ htmlspecialchars(json_encode($order->detail_pesanan), ENT_QUOTES, 'UTF-8') }}" onclick="window.openSplitModal({{ $order->id }}, this)">
+                                <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold mt-1 btn-touch d-flex justify-content-center align-items-center" data-details="{{ json_encode($order->detail_pesanan) }}" onclick="window.openSplitModal({{ $order->id }}, this)">
                                     <i class="bi bi-layout-split me-1"></i> Pisah Bon (Split Bill)
                                 </button>
                                 @endif
