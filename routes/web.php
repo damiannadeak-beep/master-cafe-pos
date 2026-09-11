@@ -96,14 +96,14 @@ $kasirSlug = config('auth.kasir_path', 'pos-kasir-gate-88');
 
 // ================= JALUR RAHASIA PEMILIK (OWNER) =================
 Route::prefix($ownerSlug)->middleware(['web', VerifySecretOwnerAccess::class])->group(function () {
-    Route::get('/login', [OwnerLoginController::class, 'showLoginForm'])->middleware('throttle:5,1')->name('owner.login');
-    Route::post('/login', [OwnerLoginController::class, 'login'])->middleware('throttle:3,1')->name('owner.login.submit');
+    Route::get('/login', [OwnerLoginController::class, 'showLoginForm'])->middleware('throttle:60,1')->name('owner.login');
+    Route::post('/login', [OwnerLoginController::class, 'login'])->middleware('throttle:10,1')->name('owner.login.submit');
 });
 
 // ================= JALUR RAHASIA WAITRESS (POS) =================
 Route::prefix($kasirSlug)->middleware(['web'])->group(function () {
-    Route::get('/login', [WaitressLoginController::class, 'showLoginForm'])->middleware('throttle:5,1')->name('kasir.login');
-    Route::post('/login', [WaitressLoginController::class, 'login'])->middleware('throttle:3,1')->name('kasir.login.submit');
+    Route::get('/login', [WaitressLoginController::class, 'showLoginForm'])->middleware('throttle:60,1')->name('kasir.login');
+    Route::post('/login', [WaitressLoginController::class, 'login'])->middleware('throttle:10,1')->name('kasir.login.submit');
 });
 
 // ================= DECOY & STEALTH ROUTES =================
