@@ -496,8 +496,8 @@
             .catch(err => console.log('Polling sync error:', err));
     }
 
-    // Smart background polling (12s fallback)
-    let trackingInterval = setInterval(pollOrderStatus, 12000);
+    // Fast real-time polling (3 detik) agar status pesanan ter-update otomatis tanpa refresh
+    let trackingInterval = setInterval(pollOrderStatus, 3000);
 
     // Cleanup active order LocalStorage jika status sudah completed / cancelled
     document.addEventListener('DOMContentLoaded', () => {
@@ -510,10 +510,6 @@
         }
 
         if (window.Echo) {
-            // Slow down HTTP polling to 30s when WebSocket is active
-            clearInterval(trackingInterval);
-            trackingInterval = setInterval(pollOrderStatus, 30000);
-
             window.Echo.channel('kasir-notifications')
                 .listen('.PesananBaru', (e) => {
                     if (e.id == pesananId) pollOrderStatus();
