@@ -36,8 +36,13 @@ class AdminMejaController extends Controller
 
     public function destroy($id)
     {
-        Meja::findOrFail($id)->delete();
-        return redirect()->route('admin.meja.index')->with('success', 'Meja berhasil dihapus.');
+        try {
+            $meja = Meja::findOrFail($id);
+            $meja->delete();
+            return redirect()->route('admin.meja.index')->with('success', 'Meja berhasil dihapus.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('admin.meja.index')->with('error', 'Tidak dapat menghapus meja ini karena pernah digunakan dalam transaksi/pesanan. Anda bisa mengedit nama mejanya jika perlu.');
+        }
     }
 
     public function printQr($id)

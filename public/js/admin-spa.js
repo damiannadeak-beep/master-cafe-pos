@@ -249,9 +249,22 @@
         }, 60);
     }
 
-    // Inisialisasi event listener navigasi SPA
-    function initSpaNavigation() {
-        ProgressBar.init();
+        // Smart Hover Prefetching (120ms hover intent) untuk navigasi instan 0ms
+        let hoverTimer = null;
+        document.body.addEventListener('pointerenter', function(e) {
+            const link = e.target.closest ? e.target.closest('a') : null;
+            if (link && isEligibleAdminLink(link)) {
+                clearTimeout(hoverTimer);
+                hoverTimer = setTimeout(() => {
+                    prefetchUrl(link.href);
+                }, 120);
+            }
+        }, { capture: true, passive: true });
+
+        document.body.addEventListener('pointerleave', function(e) {
+            const link = e.target.closest ? e.target.closest('a') : null;
+            if (link) clearTimeout(hoverTimer);
+        }, { capture: true, passive: true });
 
         // Delegasi Click untuk Transisi Mulus Tanpa Reload (Instant Response)
         document.body.addEventListener('click', function(e) {
@@ -278,6 +291,95 @@
             }
         });
 
+        // Tangani Form Submit (POST / PUT / DELETE) secara instan tanpa full page reload
+        document.body.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (!form || form.tagName !== 'FORM') return;
+
+            // Abaikan form jika memiliki data-no-spa atau target _blank
+            if (form.hasAttribute('data-no-spa') || form.target === '_blank') {
+                pageCache.clear();
+                return;
+            }
+
+            const action = form.action || window.location.href;
+            try {
+                const url = new URL(action, window.location.origin);
+                if (url.origin !== window.location.origin || !url.pathname.startsWith('/admin')) {
+                    pageCache.clear();
+                    return;
+                }
+            } catch (err) {
+                return;
+            }
+
+            // Jika form mengunggah file (enctype multipart/form-data), biarkan submit native atau tangani khusus
+            if (form.enctype && form.enctype.includes('multipart')) {
+                pageCache.clear();
+                return;
+            }
+
+            e.preventDefault();
+            pageCache.clear();
+            ProgressBar.start();
+
+            const formData = new FormData(form);
+            const method = (form.method || 'POST').toUpperCase();
+
+            fetch(action, {
+                method: method,
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-Admin-SPA': '1'
+                }
+            })
+            .then(response => {
+                const targetUrl = response.redirected ? response.url : action;
+                return response.text().then(html => ({ html, targetUrl }));
+            })
+            .then(({ html, targetUrl }) => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTitle = doc.querySelector('title')?.innerText || document.title;
+                const newContent = doc.querySelector('.admin-content');
+                const contentContainer = document.querySelector('.admin-content');
+
+                if (newContent && contentContainer) {
+                    document.title = newTitle;
+                    history.pushState({ url: targetUrl }, newTitle, targetUrl);
+
+                    // Clean modals
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.querySelectorAll('body > .modal').forEach(el => {
+                        try { bootstrap.Modal.getInstance(el)?.dispose(); } catch(err) {}
+                        el.remove();
+                    });
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('overflow');
+                    document.body.style.removeProperty('padding-right');
+
+                    contentContainer.innerHTML = newContent.innerHTML;
+                    executeScripts(contentContainer);
+                    updateActiveSidebar(targetUrl);
+
+                    if (window.bootstrap) {
+                        const tooltipTriggerList = [].slice.call(contentContainer.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+                    }
+                    window.dispatchEvent(new CustomEvent('admin:page-loaded', { detail: { url: targetUrl } }));
+                } else {
+                    window.location.href = targetUrl;
+                }
+                ProgressBar.done();
+            })
+            .catch(err => {
+                console.warn('[AdminSPA] Form submit fallback:', err);
+                ProgressBar.done();
+                form.submit();
+            });
+        }, { capture: true });
+
         // Tangani Tombol Back / Forward di Browser
         window.addEventListener('popstate', function(e) {
             var currentPath = window.location.pathname;
@@ -287,11 +389,6 @@
                 window.location.reload();
             }
         });
-
-        // Bersihkan cache SPA ketika form disubmit (POST/PUT/DELETE)
-        document.body.addEventListener('submit', function(e) {
-            pageCache.clear();
-        }, { capture: true });
 
         // Expose fungsi clear cache secara global
         window.adminSpaClearCache = function() { pageCache.clear(); };

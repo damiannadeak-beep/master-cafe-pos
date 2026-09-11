@@ -69,7 +69,7 @@ trait HandlesImageUpload
             $destinations[] = rtrim($_SERVER['DOCUMENT_ROOT'], '/') . '/public/storage/' . $path;
         }
 
-        $homeDir = env('HOME') ?: getenv('HOME') ?: '/home/nadp3189';
+        $homeDir = (PHP_OS_FAMILY !== 'Windows') ? (env('HOME') ?: getenv('HOME') ?: '/home/nadp3189') : null;
         if ($homeDir) {
             // Folder utama di home (DOCUMENT ROOT AKTIF)
             $destinations[] = $homeDir . '/mastercafe.nadeak.net/public/storage/' . $path;
@@ -125,7 +125,7 @@ trait HandlesImageUpload
             Storage::disk('public')->delete($imagePath);
         }
 
-        $homeDir = env('HOME') ?: getenv('HOME');
+        $homeDir = (PHP_OS_FAMILY !== 'Windows') ? (env('HOME') ?: getenv('HOME')) : null;
         $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? null;
 
         $targetPaths = [
