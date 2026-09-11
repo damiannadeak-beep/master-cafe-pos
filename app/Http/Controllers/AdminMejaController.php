@@ -36,12 +36,46 @@ class AdminMejaController extends Controller
 
     public function destroy($id)
     {
+        $meja = Meja::findOrFail($id);
+
+        // 1. Cek apakah ada pesanan yang MASIH AKTIF atau BELUM LUNAS di meja ini
+        $activeOrders = $meja->pesanan()
+            ->where(function ($q) {
+                $q->whereIn('status', ['pending', 'processing', 'ready'])
+                  ->orWhere(function ($comp) {
+                      $comp->where('status', 'completed')
+                           ->where(function ($pSub) {
+                               $pSub->whereDoesntHave('pembayaran')
+                                    ->orWhereHas('pembayaran', function ($p) {
+                                        $p->where('status', '!=', 'paid');
+                                    });
+                           });
+                  });
+            })
+            ->count();
+
+        if ($activeOrders > 0) {
+            return redirect()->route('admin.meja.index')->with('error', "Meja '{$meja->nama_meja_atau_nomor}' tidak dapat dihapus karena saat ini masih digunakan oleh {$activeOrders} pesanan aktif/belum lunas. Harap selesaikan transaksi meja tersebut terlebih dahulu.");
+        }
+
         try {
-            $meja = Meja::findOrFail($id);
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            // 2. Lepaskan relasi id_meja pada riwayat transaksi lama agar histori pembukuan tetap aman
+            $meja->pesanan()->update(['id_meja' => null]);
+
+            // 3. Hapus notifikasi terkait meja ini (jika ada)
+            \App\Models\Notification::where('id_meja', $meja->id)->delete();
+
+            // 4. Hapus meja secara permanen
+            $namaMeja = $meja->nama_meja_atau_nomor;
             $meja->delete();
-            return redirect()->route('admin.meja.index')->with('success', 'Meja berhasil dihapus.');
-        } catch (\Illuminate\Database\QueryException $e) {
-            return redirect()->route('admin.meja.index')->with('error', 'Tidak dapat menghapus meja ini karena pernah digunakan dalam transaksi/pesanan. Anda bisa mengedit nama mejanya jika perlu.');
+
+            \Illuminate\Support\Facades\DB::commit();
+            return redirect()->route('admin.meja.index')->with('success', "Meja '{$namaMeja}' berhasil dihapus.");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->route('admin.meja.index')->with('error', 'Gagal menghapus meja: ' . $e->getMessage());
         }
     }
 
