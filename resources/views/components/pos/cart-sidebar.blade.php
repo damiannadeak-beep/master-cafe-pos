@@ -14,28 +14,36 @@
                 
                 <div class="row g-3 mb-4 p-3 rounded-4 order-config-box">
                     <div class="col-12">
+                        <label class="small fw-bold mb-1 text-accent">Tipe Pesanan</label>
+                        <select name="tipe_pesanan" id="select-tipe-pesanan" style="background-color: #161b22; border: 1px solid #21262d !important;" class="form-select border-0 shadow-sm text-white" onchange="toggleMeja()">
+                            <option value="dine_in">Dine In (Makan di Tempat)</option>
+                            <option value="takeaway">Takeaway (Bawa Pulang)</option>
+                        </select>
+                    </div>
+                    <div class="col-12" id="wrapper-nomor-meja">
                         <label class="small fw-bold mb-1 text-accent">Nomor Meja</label>
-                        <select name="id_meja" style="background-color: #161b22; border: 1px solid #21262d !important;" class="form-select border-0 shadow-sm text-white" required>
+                        <select name="id_meja" id="select-id-meja" style="background-color: #161b22; border: 1px solid #21262d !important;" class="form-select border-0 shadow-sm text-white" required>
                             @foreach($mejas as $meja)
                                 <option value="{{ $meja->id }}">{{ $meja->nama_meja_atau_nomor }} {{ !$meja->is_available ? '(Terisi)' : '' }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12">
-                        <label class="small fw-bold mb-1 text-accent">Tipe Pesanan</label>
-                        <select name="tipe_pesanan" style="background-color: #161b22; border: 1px solid #21262d !important;" class="form-select border-0 shadow-sm text-white" onchange="toggleMeja()">
-                            <option value="dine_in">Dine In (Makan di Tempat)</option>
-                            <option value="takeaway">Takeaway (Bawa Pulang)</option>
-                        </select>
+                    <div class="col-12 d-none" id="info-takeaway-badge">
+                        <div class="p-2 rounded-3 text-center" style="background-color: rgba(192, 142, 92, 0.1); border: 1px dashed rgba(192, 142, 92, 0.4); color: #e5b98a;">
+                            <i class="bi bi-bag-check-fill me-1"></i>
+                            <span class="small fw-semibold">Pesanan Bungkus / Takeaway (Tanpa Meja)</span>
+                        </div>
                     </div>
                     <div class="col-12 mt-2">
-                        <label class="small fw-bold mb-1 text-accent">Promo Diskon</label>
+                        <label class="small fw-bold mb-1 text-accent">Paket Hemat / Promo</label>
                         <select name="promo_id" style="background-color: #161b22; border: 1px solid #21262d !important;" class="form-select border-0 shadow-sm text-white" onchange="renderCart()">
                             <option value="">-- Tanpa Promo --</option>
                             @foreach($promos as $promo)
                                 <option value="{{ $promo->id }}" data-type="{{ $promo->type }}" data-value="{{ $promo->value }}">
                                     {{ $promo->title }} 
-                                    @if($promo->type == 'discount')
+                                    @if($promo->type == 'package')
+                                        (Paket Rp {{ number_format($promo->value,0,',','.') }})
+                                    @elseif($promo->type == 'discount')
                                         ({{ $promo->value <= 100 ? $promo->value.'%' : 'Rp '.number_format($promo->value,0,',','.') }})
                                     @endif
                                 </option>

@@ -15,12 +15,25 @@
 
     // --- LOGIKA TOGGLE MEJA ---
     function toggleMeja() {
-        const tipePesanan = document.querySelector('select[name="tipe_pesanan"]').value;
+        const tipePesanan = document.querySelector('select[name="tipe_pesanan"]')?.value;
+        const wrapperMeja = document.getElementById('wrapper-nomor-meja');
+        const infoTakeaway = document.getElementById('info-takeaway-badge');
         const mejaSelect = document.querySelector('select[name="id_meja"]');
+
         if (tipePesanan === 'takeaway') {
-            mejaSelect.disabled = true;
+            if (wrapperMeja) wrapperMeja.classList.add('d-none');
+            if (infoTakeaway) infoTakeaway.classList.remove('d-none');
+            if (mejaSelect) {
+                mejaSelect.disabled = true;
+                mejaSelect.removeAttribute('required');
+            }
         } else {
-            mejaSelect.disabled = false;
+            if (wrapperMeja) wrapperMeja.classList.remove('d-none');
+            if (infoTakeaway) infoTakeaway.classList.add('d-none');
+            if (mejaSelect) {
+                mejaSelect.disabled = false;
+                mejaSelect.setAttribute('required', 'required');
+            }
         }
     }
 
@@ -488,11 +501,19 @@
     function submitOrder(isLunas, method) {
         if (cart.length === 0) return alert('Keranjang masih kosong!');
 
+        const tipePesanan = document.querySelector('select[name="tipe_pesanan"]')?.value || 'dine_in';
+        const mejaSelect = document.querySelector('select[name="id_meja"]');
+        const idMeja = tipePesanan === 'takeaway' ? null : (mejaSelect ? mejaSelect.value : null);
+
+        if (tipePesanan === 'dine_in' && !idMeja) {
+            return alert('Silakan pilih nomor meja untuk pesanan Makan di Tempat (Dine In)!');
+        }
+
         let formData = {
             _token: "{{ csrf_token() }}",
-            id_meja: document.querySelector('select[name="id_meja"]').value,
-            tipe_pesanan: document.querySelector('select[name="tipe_pesanan"]').value,
-            promo_id: document.querySelector('select[name="promo_id"]').value,
+            id_meja: idMeja,
+            tipe_pesanan: tipePesanan,
+            promo_id: document.querySelector('select[name="promo_id"]')?.value || null,
             pembayaran_langsung: isLunas,
             metode_pembayaran: method,
             items: cart

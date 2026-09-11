@@ -14,8 +14,8 @@ class StoreManualOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_meja' => 'required|exists:meja,id',
             'tipe_pesanan' => 'required|in:dine_in,takeaway',
+            'id_meja' => 'required_if:tipe_pesanan,dine_in|nullable|exists:meja,id',
             'pembayaran_langsung' => 'required|boolean',
             'metode_pembayaran' => 'nullable|in:cash,qris,pending',
             'items' => 'required|array',

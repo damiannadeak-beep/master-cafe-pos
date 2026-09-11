@@ -127,9 +127,10 @@ class PosController extends Controller
             DB::beginTransaction();
 
             // 2. Buat Data Pesanan Baru
+            $idMeja = ($validated['tipe_pesanan'] === 'takeaway') ? null : ($validated['id_meja'] ?? null);
             $pesanan = Pesanan::create([
                 'id_konsumen' => null,
-                'id_meja' => $validated['id_meja'],
+                'id_meja' => $idMeja,
                 'id_kasir' => auth()->id(),
                 'tipe_pesanan' => $validated['tipe_pesanan'],
                 'tanggal' => now(),
@@ -138,8 +139,8 @@ class PosController extends Controller
             ]);
 
             // Otomatis matikan ketersediaan meja jika ini pesanan dine-in
-            if ($validated['id_meja'] && $validated['tipe_pesanan'] === 'dine_in') {
-                Meja::where('id', $validated['id_meja'])->update(['is_available' => false]);
+            if (!empty($idMeja) && $validated['tipe_pesanan'] === 'dine_in') {
+                Meja::where('id', $idMeja)->update(['is_available' => false]);
             }
 
             // 3. Proses item pesanan via OrderService (lock stok, kurangi bahan, buat detail)
