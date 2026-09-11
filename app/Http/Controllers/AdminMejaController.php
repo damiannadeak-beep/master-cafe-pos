@@ -61,11 +61,15 @@ class AdminMejaController extends Controller
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
 
-            // 2. Lepaskan relasi id_meja pada riwayat transaksi lama agar histori pembukuan tetap aman
-            $meja->pesanan()->update(['id_meja' => null]);
+            // 2. Lepaskan relasi id_meja pada SEMUA pesanan (termasuk yang di-soft-delete)
+            \Illuminate\Support\Facades\DB::table('pesanan')
+                ->where('id_meja', $meja->id)
+                ->update(['id_meja' => null]);
 
             // 3. Hapus notifikasi terkait meja ini (jika ada)
-            \App\Models\Notification::where('id_meja', $meja->id)->delete();
+            \Illuminate\Support\Facades\DB::table('notifications')
+                ->where('id_meja', $meja->id)
+                ->delete();
 
             // 4. Hapus meja secara permanen
             $namaMeja = $meja->nama_meja_atau_nomor;
