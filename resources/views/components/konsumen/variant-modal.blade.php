@@ -70,8 +70,8 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary text-white fw-bold rounded-pill flex-fill btn-touch py-2" style="white-space: nowrap; border-color: #21262d; font-size: 0.85rem;" onclick="addAnotherVariantSelection()">
-                            <i class="bi bi-plus-circle me-1"></i>Porsi Lain
+                        <button type="button" class="btn btn-outline-secondary text-white fw-bold rounded-pill flex-fill btn-touch py-2" id="btnAddAnotherVariantBtn" style="white-space: nowrap; border-color: #21262d; font-size: 0.85rem;" onclick="addAnotherVariantSelection()">
+                            <i class="bi bi-plus-circle me-1"></i><span id="btnAnotherVariantText">Beda Racikan / Varian</span>
                         </button>
                         <button type="button" class="btn btn-touch fw-bold rounded-pill flex-fill shadow-lg text-white py-2" style="background: var(--gradient-bronze); border: none; white-space: nowrap; font-size: 0.85rem;" onclick="confirmVariantSelection()">
                             <i class="bi bi-cart-plus me-1"></i>Tambahkan

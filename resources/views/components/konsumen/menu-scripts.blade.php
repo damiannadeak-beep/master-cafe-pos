@@ -128,6 +128,15 @@
         }
 
         let container = document.getElementById('variantModalContent');
+        const btnTextEl = document.getElementById('btnAnotherVariantText');
+        if (btnTextEl) {
+            if (currentSelectedMenu.variants && currentSelectedMenu.variants.length > 0) {
+                btnTextEl.innerText = 'Beda Racikan / Varian';
+            } else {
+                btnTextEl.innerText = 'Beda Catatan';
+            }
+        }
+
         if (content === '') {
             container.innerHTML = '<p class="text-muted my-2 text-center small"><i class="bi bi-check-circle me-1"></i> Menu siap disajikan tanpa tambahan varian khusus.</p>';
         } else {
