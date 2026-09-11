@@ -45,7 +45,7 @@ class AdminPromoController extends Controller
             'days' => 'nullable|array',
             'days.*' => 'string',
             'package_menus' => 'required|array|min:1',
-            'package_menus.*' => 'nullable|exists:menus,id',
+            'package_menus.*' => 'nullable|exists:menu,id',
             'package_qty' => 'nullable|array',
             'package_qty.*' => 'nullable|integer|min:1',
         ]);
@@ -115,7 +115,7 @@ class AdminPromoController extends Controller
             'days' => 'nullable|array',
             'days.*' => 'string',
             'package_menus' => 'required|array|min:1',
-            'package_menus.*' => 'nullable|exists:menus,id',
+            'package_menus.*' => 'nullable|exists:menu,id',
             'package_qty' => 'nullable|array',
             'package_qty.*' => 'nullable|integer|min:1',
         ]);
