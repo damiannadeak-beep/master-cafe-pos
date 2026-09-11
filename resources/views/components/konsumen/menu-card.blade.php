@@ -86,6 +86,15 @@
                                 <i class="bi bi-slash-circle me-1"></i> Sedang Habis
                             </span>
                         </div>
+                    @elseif($menu->is_dynamic_price)
+                        <!-- Jika Menu Timbangan Murni (Dipesan di Lokasi via Waitress) -->
+                        <div class="w-100 py-1 text-center rounded-pill cursor-pointer" 
+                             onclick="openDynamicPriceNotice({{ $menu->id }})"
+                             style="background: rgba(192, 142, 92, 0.12); border: 1px solid rgba(192, 142, 92, 0.3); cursor: pointer;">
+                            <span class="small fw-semibold" style="color: #c08e5c; font-size: 0.8rem;">
+                                <i class="bi bi-info-circle me-1"></i> Pesan di Lokasi
+                            </span>
+                        </div>
                     @else
                         <!-- Stepper Tombol - / 0 / + jika Tersedia -->
                         <div class="d-flex align-items-center justify-content-center w-100 gap-2 p-1 rounded-pill" 
@@ -101,7 +110,7 @@
                                 0
                             </span>
                             <button class="btn btn-primary rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
-                                    onclick="{{ $menu->is_dynamic_price ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')' }}"
+                                    onclick="openVariantModal({{ $menu->id }})"
                                     style="width: 28px; height: 28px; transition: all 0.2s; background: var(--gradient-bronze); border: none;"
                                     title="Tambah porsi / varian">
                                 <i class="bi bi-plus fs-5"></i>
