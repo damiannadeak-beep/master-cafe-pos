@@ -5,7 +5,7 @@
         
         <!-- Area Gambar dengan Overlay Badge -->
         <div class="position-relative cursor-pointer" 
-             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')') }}"
+             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
              style="cursor: pointer;"
              title="Sentuh untuk melihat detail & varian">
             
@@ -51,7 +51,7 @@
         <!-- Body Kartu -->
         <div class="card-body p-2 p-md-3 d-flex flex-column" style="flex: 1;">
             <div class="cursor-pointer mb-2" 
-                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')') }}"
+                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
                  style="cursor: pointer;">
                 <!-- Nama Menu -->
                 <h6 class="fw-bold text-white mb-1" 
@@ -101,7 +101,7 @@
                                 0
                             </span>
                             <button class="btn btn-primary rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
-                                    onclick="{{ $menu->is_dynamic_price ? 'alert(\'Menu ini harus dipesan langsung melalui Waitress karena harga menyesuaikan timbangan/ukuran.\')' : 'openVariantModal(' . $menu->id . ')' }}"
+                                    onclick="{{ $menu->is_dynamic_price ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')' }}"
                                     style="width: 28px; height: 28px; transition: all 0.2s; background: var(--gradient-bronze); border: none;"
                                     title="Tambah porsi / varian">
                                 <i class="bi bi-plus fs-5"></i>

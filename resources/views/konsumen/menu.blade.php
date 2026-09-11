@@ -40,6 +40,7 @@
 </div>
 
 @include('components.konsumen.variant-modal')
+@include('components.konsumen.dynamic-price-modal')
 @include('components.konsumen.cart-bar')
 @include('components.konsumen.menu-scripts', ['orderType' => 'dine_in'])
 @endsection
