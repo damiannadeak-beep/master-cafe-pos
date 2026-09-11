@@ -219,6 +219,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/promo', [AdminPromoController::class, 'store'])->name('promo.store');
         Route::get('/promo/{id}/edit', [AdminPromoController::class, 'edit'])->name('promo.edit');
         Route::put('/promo/{id}', [AdminPromoController::class, 'update'])->name('promo.update');
+        Route::patch('/promo/{id}/toggle-status', [AdminPromoController::class, 'toggleStatus'])->name('promo.toggle_status');
         Route::delete('/promo/{id}', [AdminPromoController::class, 'destroy'])->name('promo.destroy');
         // User management
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
