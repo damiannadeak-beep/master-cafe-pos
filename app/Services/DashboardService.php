@@ -170,7 +170,21 @@ class DashboardService
                 ->groupBy('menu.id', 'menu.nama_menu', 'menu.image')
                 ->orderByDesc('total_terjual')
                 ->limit(5)
-                ->get();
+                ->get()
+                ->map(function ($item) {
+                    if (!$item->image) {
+                        $item->image_url = asset('images/logo.png');
+                    } elseif (str_starts_with($item->image, 'http://') || str_starts_with($item->image, 'https://')) {
+                        $item->image_url = $item->image;
+                    } else {
+                        $path = str_contains($item->image, '/') ? $item->image : 'menus/' . $item->image;
+                        if (str_starts_with($path, 'storage/')) {
+                            $path = substr($path, 8);
+                        }
+                        $item->image_url = asset('storage/' . ltrim($path, '/'));
+                    }
+                    return $item;
+                });
 
             return compact(
                 'totalPenjualanHariIni',

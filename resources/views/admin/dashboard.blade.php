@@ -284,14 +284,18 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
-                                            @if($menu->image_url)
-                                                <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="Menu" class="rounded object-fit-cover" width="40" height="40">
-                                            @else
-                                                <div class="bg-secondary bg-opacity-10 rounded d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
-                                                    <i class="bi bi-image text-white-50"></i>
-                                                </div>
-                                            @endif
-                                            <span class="fw-medium">{{ $menu->nama_menu }}</span>
+                                            @php
+                                                $imgSrc = asset('images/logo.png');
+                                                if (!empty($menu->image_url)) {
+                                                    $imgSrc = $menu->image_url;
+                                                } elseif (!empty($menu->image)) {
+                                                    $path = str_contains($menu->image, '/') ? $menu->image : 'menus/' . $menu->image;
+                                                    if (str_starts_with($path, 'storage/')) { $path = substr($path, 8); }
+                                                    $imgSrc = asset('storage/' . ltrim($path, '/'));
+                                                }
+                                            @endphp
+                                            <img src="{{ $imgSrc }}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="{{ $menu->nama_menu }}" class="rounded object-fit-cover shadow-sm" width="42" height="42">
+                                            <span class="fw-medium text-white">{{ $menu->nama_menu }}</span>
                                         </div>
                                     </td>
                                     <td class="text-end pe-4">
