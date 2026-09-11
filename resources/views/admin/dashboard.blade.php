@@ -1,7 +1,17 @@
 @extends('layouts.admin')
 
 @section('content')
-@php $users = $users ?? collect(); @endphp
+@php 
+    $users = $users ?? collect(); 
+    $stokMenipis = $stokMenipis ?? collect(); 
+    $topMenus = $topMenus ?? collect();
+    $chartDailyLabels = $chartDailyLabels ?? [];
+    $chartDailyData = $chartDailyData ?? [];
+    $chartDailyLaba = $chartDailyLaba ?? [];
+    $chartMonthlyLabels = $chartMonthlyLabels ?? [];
+    $chartMonthlyData = $chartMonthlyData ?? [];
+    $chartMonthlyLaba = $chartMonthlyLaba ?? [];
+@endphp
 <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
@@ -18,7 +28,7 @@
         </div>
     @endif
 
-    @if($errors->any())
+    @if(isset($errors) && $errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
                 @foreach($errors->all() as $error)
