@@ -238,7 +238,7 @@
             }
         });
     </script>
-    <script src="{{ asset('js/admin-spa.js') }}"></script>
+    <script src="{{ asset('js/admin-spa.js') }}?v={{ file_exists(public_path('js/admin-spa.js')) ? filemtime(public_path('js/admin-spa.js')) : '20260911' }}"></script>
 </body>
 </html>
 

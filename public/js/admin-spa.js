@@ -124,17 +124,30 @@
         });
     }
 
-    // Update active nav-link di sidebar
+    // Update active nav-link di sidebar (Hanya 1 link yang boleh aktif)
     function updateActiveSidebar(currentUrl) {
-        const currentPath = new URL(currentUrl, window.location.origin).pathname;
+        const currentPath = new URL(currentUrl, window.location.origin).pathname.replace(/\/+$/, '');
+        let matchedLink = null;
+        let bestMatchScore = -1;
+
         document.querySelectorAll('.admin-sidebar a.nav-link').forEach(link => {
-            const linkPath = new URL(link.href, window.location.origin).pathname;
-            if (linkPath === currentPath || (linkPath !== '/admin/dashboard' && currentPath.startsWith(linkPath + '/'))) {
-                link.classList.add('active');
-            } else {
-                link.classList.remove('active');
+            const linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/+$/, '');
+            link.classList.remove('active');
+
+            if (linkPath === currentPath) {
+                matchedLink = link;
+                bestMatchScore = 1000 + linkPath.length; // Exact match prioritas tertinggi
+            } else if (linkPath !== '/admin' && linkPath !== '/admin/dashboard' && currentPath.startsWith(linkPath + '/')) {
+                if (linkPath.length > bestMatchScore) {
+                    matchedLink = link;
+                    bestMatchScore = linkPath.length;
+                }
             }
         });
+
+        if (matchedLink) {
+            matchedLink.classList.add('active');
+        }
     }
 
     // Swapping halaman dengan transisi semut (smooth cross-fade)
