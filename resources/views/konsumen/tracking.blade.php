@@ -288,7 +288,7 @@
                         </span>
                     </div>
 
-                    @if($pembayaran && $pembayaran->metode === 'cash')
+                    @if(($pesanan->tipe_pesanan ?? '') === 'dine_in' && $pembayaran && $pembayaran->metode === 'cash')
                         <div class="mt-3 p-3 rounded-3" style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25);">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="badge bg-success bg-opacity-25 text-success border border-success fw-bold">

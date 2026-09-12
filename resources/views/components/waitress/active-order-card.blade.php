@@ -123,7 +123,7 @@
                             @endif
                         </div>
 
-                        @if($order->pembayaran && $order->pembayaran->metode === 'cash' && $order->pembayaran->status !== 'paid')
+                        @if($order->tipe_pesanan === 'dine_in' && $order->pembayaran && $order->pembayaran->metode === 'cash' && $order->pembayaran->status !== 'paid')
                             <div class="p-2 mb-3 rounded-3" style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35);">
                                 <div class="d-flex align-items-center justify-content-between mb-1">
                                     <span class="badge bg-warning text-dark fw-bold"><i class="bi bi-cash-stack me-1"></i>BAYAR TUNAI DI MEJA</span>

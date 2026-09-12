@@ -101,7 +101,7 @@
                 <td>Meja</td>
                 <td class="text-right font-weight-bold">{{ $order->meja->nama_meja_atau_nomor ?? '-' }}</td>
             </tr>
-            @if($order->pembayaran && $order->pembayaran->metode === 'cash')
+            @if($order->tipe_pesanan === 'dine_in' && $order->pembayaran && $order->pembayaran->metode === 'cash')
             <tr>
                 <td>Bayar</td>
                 <td class="text-right font-weight-bold">TUNAI (CASH)</td>
