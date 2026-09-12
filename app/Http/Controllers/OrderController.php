@@ -22,7 +22,7 @@ class OrderController extends Controller
 
         $meja = Meja::find($id_meja);
         if (!$meja) {
-            return redirect()->route('pilih_tipe')->with('error', 'Meja dengan ID #' . $id_meja . ' tidak ditemukan. Silakan pindai ulang stiker QR di atas meja Anda.');
+            return response()->view('konsumen.meja_not_found', compact('id_meja'), 404);
         }
         
         // Cek apakah ada pesanan 'unpaid' aktif di meja ini (Konsep Open Bill)

@@ -10,6 +10,12 @@
                     <div>{{ session('info') }}</div>
                 </div>
             @endif
+            @if(session('error'))
+                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 p-3 d-flex align-items-center" style="background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3) !important;">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                    <div>{{ session('error') }}</div>
+                </div>
+            @endif
 
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-body p-4 p-md-5">
