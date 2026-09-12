@@ -287,6 +287,29 @@
                             Rp {{ number_format($pembayaran->total_bayar ?? ($pesanan->total - $pesanan->discount_amount), 0, ',', '.') }}
                         </span>
                     </div>
+
+                    @if($pembayaran && $pembayaran->metode === 'cash')
+                        <div class="mt-3 p-3 rounded-3" style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25);">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success fw-bold">
+                                    <i class="bi bi-cash-stack me-1"></i> Bayar Tunai (Cash) di Meja
+                                </span>
+                                <small class="text-white-50">Bayar saat makanan tiba</small>
+                            </div>
+                            @if($pembayaran->uang_kembalian > 0)
+                                <div class="small text-white mt-2">
+                                    Uang disiapkan: <strong class="text-white">Rp {{ number_format($pembayaran->uang_diterima, 0, ',', '.') }}</strong>
+                                </div>
+                                <div class="small text-warning fw-bold">
+                                    <i class="bi bi-wallet-fill me-1"></i> Kembalian Waitress: Rp {{ number_format($pembayaran->uang_kembalian, 0, ',', '.') }}
+                                </div>
+                            @elseif($pembayaran->uang_diterima)
+                                <div class="small text-success fw-bold mt-2">
+                                    <i class="bi bi-check-circle me-1"></i> Uang Pas (Tanpa Kembalian)
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
 

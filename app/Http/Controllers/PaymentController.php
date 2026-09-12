@@ -197,9 +197,37 @@ class PaymentController extends Controller
 
         $pembayaran = $pesanan->pembayaran;
         if ($pembayaran && $pembayaran->status !== 'paid') {
+            $totalTagihan = (float) $pembayaran->total_bayar;
+            $isUangPas = $request->boolean('is_uang_pas');
+            $nominalTunaiInput = $request->input('nominal_tunai');
+
+            $uangDiterima = null;
+            $uangKembalian = 0;
+            $catatanKembalian = null;
+
+            if ($isUangPas) {
+                $uangDiterima = $totalTagihan;
+                $uangKembalian = 0;
+                $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+            } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
+                $uangDiterima = (float) $nominalTunaiInput;
+                if ($uangDiterima < $totalTagihan) {
+                    return redirect()->back()->with('error', 'Nominal uang yang disiapkan (Rp ' . number_format($uangDiterima, 0, ',', '.') . ') tidak boleh kurang dari total tagihan (Rp ' . number_format($totalTagihan, 0, ',', '.') . ').');
+                }
+                $uangKembalian = max(0, $uangDiterima - $totalTagihan);
+                if ($uangKembalian > 0) {
+                    $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Siapkan Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
+                } else {
+                    $catatanKembalian = 'Uang Pas (Rp ' . number_format($uangDiterima, 0, ',', '.') . ')';
+                }
+            }
+
             $pembayaran->update([
                 'status' => 'unpaid',
                 'metode' => 'cash',
+                'uang_diterima' => $uangDiterima,
+                'uang_kembalian' => $uangKembalian,
+                'catatan_kembalian' => $catatanKembalian,
             ]);
 
             // Ubah status pesanan agar langsung diproses dimasak dapur
@@ -216,9 +244,17 @@ class PaymentController extends Controller
 
             $namaKonsumen = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu');
             $namaMeja = $pesanan->meja ? $pesanan->meja->nama_meja_atau_nomor : 'Meja';
+            
+            $notifMsg = 'Pesanan Bayar Tunai: ' . $namaMeja . ' (' . $namaKonsumen . ') - Total Rp ' . number_format($pembayaran->total_bayar, 0, ',', '.');
+            if ($uangKembalian > 0) {
+                $notifMsg .= ' [SIAPKAN KEMBALIAN: Rp ' . number_format($uangKembalian, 0, ',', '.') . ' (Uang Tamu: Rp ' . number_format($uangDiterima, 0, ',', '.') . ')]';
+            } elseif ($uangDiterima) {
+                $notifMsg .= ' [Uang Pas]';
+            }
+
             \App\Models\Notification::create([
                 'type' => 'new_order',
-                'message' => '💵 Pesanan Bayar Cash: ' . $namaMeja . ' (' . $namaKonsumen . ') - Rp ' . number_format($pembayaran->total_bayar, 0, ',', '.') . ' (Bayar tunai saat makanan diantar).',
+                'message' => $notifMsg,
                 'is_read' => false
             ]);
         }

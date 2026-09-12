@@ -168,6 +168,16 @@
                 <td>Metode</td>
                 <td class="text-right">{{ strtoupper($order->pembayaran->metode ?? 'CASH') }}</td>
             </tr>
+            @if($order->pembayaran && $order->pembayaran->uang_diterima)
+            <tr>
+                <td>Bayar</td>
+                <td class="text-right">Rp {{ number_format($order->pembayaran->uang_diterima, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td>Kembali</td>
+                <td class="text-right">Rp {{ number_format($order->pembayaran->uang_kembalian, 0, ',', '.') }}</td>
+            </tr>
+            @endif
             <tr>
                 <td>Status</td>
                 <td class="text-right">LUNAS</td>

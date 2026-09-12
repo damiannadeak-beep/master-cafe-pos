@@ -84,6 +84,10 @@ class PrintService
             $printer->setEmphasis(true);
             $printer->text("TOTAL : Rp " . number_format($order->pembayaran->total_bayar, 0, ',', '.') . "\n");
             $printer->setEmphasis(false);
+            if ($order->pembayaran->uang_diterima) {
+                $printer->text("Bayar    : Rp " . number_format($order->pembayaran->uang_diterima, 0, ',', '.') . "\n");
+                $printer->text("Kembali  : Rp " . number_format($order->pembayaran->uang_kembalian, 0, ',', '.') . "\n");
+            }
             $printer->text("--------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);
@@ -105,7 +109,7 @@ class PrintService
      */
     public function printKitchenReceipt($id_pesanan)
     {
-        $order = Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id_pesanan);
+        $order = Pesanan::with(['detail_pesanan.menu', 'meja', 'pembayaran'])->findOrFail($id_pesanan);
         
         $printer_active = Setting::getVal('printer_active') == '1';
         $printer_ip = Setting::getVal('printer_ip');
@@ -131,6 +135,17 @@ class PrintService
             $printer->text("Order #" . $order->id . " | Meja: " . ($order->meja->nama_meja_atau_nomor ?? '-') . "\n");
             $printer->text("Waktu  : " . Carbon::parse($order->tanggal)->format('d/m/Y H:i') . "\n");
             $printer->text("Tipe   : " . strtoupper(str_replace('_', ' ', $order->tipe_pesanan)) . "\n");
+            if ($order->pembayaran && $order->pembayaran->metode === 'cash') {
+                $printer->text("Bayar  : TUNAI (CASH)\n");
+                if ($order->pembayaran->uang_kembalian > 0) {
+                    $printer->setEmphasis(true);
+                    $printer->text("KEMBALIAN: Rp " . number_format($order->pembayaran->uang_kembalian, 0, ',', '.') . "\n");
+                    $printer->setEmphasis(false);
+                    $printer->text("(Uang Tamu: Rp " . number_format($order->pembayaran->uang_diterima, 0, ',', '.') . ")\n");
+                } elseif ($order->pembayaran->uang_diterima) {
+                    $printer->text("Keterangan: UANG PAS\n");
+                }
+            }
             $printer->text("--------------------------------\n");
 
             foreach ($order->detail_pesanan as $detail) {

@@ -114,14 +114,39 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-white-50 small">Status Bayar</span>
                             @if($order->pembayaran && $order->pembayaran->status === 'paid')
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle"></i> Lunas</span>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle"></i> Lunas ({{ strtoupper($order->pembayaran->metode ?? 'QRIS') }})</span>
                             @else
                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"><i class="bi bi-x-circle"></i> Belum Lunas</span>
                             @endif
                         </div>
+
+                        @if($order->pembayaran && $order->pembayaran->metode === 'cash' && $order->pembayaran->status !== 'paid')
+                            <div class="p-2 mb-3 rounded-3" style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35);">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="badge bg-warning text-dark fw-bold"><i class="bi bi-cash-stack me-1"></i>BAYAR TUNAI DI MEJA</span>
+                                    <small class="text-warning fw-bold">Siapkan Uang</small>
+                                </div>
+                                @if($order->pembayaran->uang_kembalian > 0)
+                                    <div class="small text-white fw-bold">
+                                        ⚠️ Siapkan Kembalian: <span class="text-warning fs-6">Rp {{ number_format($order->pembayaran->uang_kembalian, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="small text-white-50">
+                                        (Tamu bayar uang: Rp {{ number_format($order->pembayaran->uang_diterima, 0, ',', '.') }})
+                                    </div>
+                                @elseif($order->pembayaran->uang_diterima)
+                                    <div class="small text-success fw-bold">
+                                        ✅ Uang Pas: Rp {{ number_format($order->pembayaran->uang_diterima, 0, ',', '.') }} (Tanpa Kembalian)
+                                    </div>
+                                @else
+                                    <div class="small text-white-50">
+                                        Tamu akan bayar tunai ke Waitress saat pesanan tiba di meja.
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
 
                         <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
                             <!-- Tombol Cetak Tiket Dapur / Koki -->

@@ -101,6 +101,27 @@
                 <td>Meja</td>
                 <td class="text-right font-weight-bold">{{ $order->meja->nama_meja_atau_nomor ?? '-' }}</td>
             </tr>
+            @if($order->pembayaran && $order->pembayaran->metode === 'cash')
+            <tr>
+                <td>Bayar</td>
+                <td class="text-right font-weight-bold">TUNAI (CASH)</td>
+            </tr>
+            @if($order->pembayaran->uang_kembalian > 0)
+            <tr>
+                <td>Uang Tamu</td>
+                <td class="text-right">Rp {{ number_format($order->pembayaran->uang_diterima, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; font-size: 13px;">KEMBALIAN</td>
+                <td class="text-right font-weight-bold" style="font-size: 13px;">Rp {{ number_format($order->pembayaran->uang_kembalian, 0, ',', '.') }}</td>
+            </tr>
+            @elseif($order->pembayaran->uang_diterima)
+            <tr>
+                <td>Keterangan</td>
+                <td class="text-right font-weight-bold">UANG PAS</td>
+            </tr>
+            @endif
+            @endif
         </table>
     </div>
 
