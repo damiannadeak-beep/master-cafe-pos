@@ -70,8 +70,8 @@
 
                 <!-- Tombol Aksi -->
                 <div class="d-grid gap-2">
-                    <button type="button" onclick="submitOrder(1, 'cash')" class="btn  fw-bold rounded-pill shadow-sm text-white btn-touch" style="background: var(--gradient-bronze); border: none;"">
-                        <i class="bi bi-cash"></i> BAYAR LUNAS (CASH)
+                    <button type="button" onclick="showCashModal()" class="btn fw-bold rounded-pill shadow-sm text-white btn-touch" style="background: var(--gradient-bronze); border: none;">
+                        <i class="bi bi-cash-stack"></i> BAYAR LUNAS (CASH)
                     </button>
                     <button type="button" onclick="showQrisModal()" class="btn  fw-bold rounded-pill shadow-sm text-white btn-touch" style="background: var(--gradient-bronze); border: none;"">
                         <i class="bi bi-qr-code-scan"></i> BAYAR LUNAS (QRIS)

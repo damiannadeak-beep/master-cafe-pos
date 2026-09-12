@@ -15,7 +15,9 @@ class PayOrderRequest extends FormRequest
     {
         return [
             'metode' => 'required|in:cash,qris',
-            'email_pelanggan' => 'nullable|email'
+            'email_pelanggan' => 'nullable|email',
+            'nominal_tunai' => 'nullable|numeric|min:0',
+            'is_uang_pas' => 'nullable|boolean',
         ];
     }
 }

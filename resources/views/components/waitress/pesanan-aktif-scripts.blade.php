@@ -463,22 +463,212 @@
     };
 
     // --- 4. Modal Pembayaran & Eksekusi Pembayaran ---
-    window.payOrder = function(id) {
+    let activeOrderPayState = {
+        id: null,
+        total: 0,
+        nominal: 0,
+        isUangPas: true,
+        method: 'cash'
+    };
+
+    window.payOrder = function(id, total = 0) {
         currentOrderId = id;
+        activeOrderPayState.id = id;
+        activeOrderPayState.total = total || 0;
+        activeOrderPayState.nominal = total || 0;
+        activeOrderPayState.isUangPas = true;
+        activeOrderPayState.method = 'cash';
         
         const idDisplay = document.getElementById('payment-order-id-display');
         if (idDisplay) idDisplay.innerText = id;
 
+        const totalDisplay = document.getElementById('active-order-cash-total-display');
+        if (totalDisplay) totalDisplay.innerText = 'Rp ' + (total || 0).toLocaleString('id-ID');
+
         const emailInput = document.getElementById('email_pelanggan');
         if (emailInput) emailInput.value = '';
-        
+
+        window.switchActiveOrderPayMethod('cash');
+        window.renderActiveOrderCashPresets();
+
         window.openModalById('paymentModal');
     };
 
-    window.processPayment = function(method) {
-        window.closeModalById('paymentModal');
-        
-        if (method === 'qris') {
+    window.switchActiveOrderPayMethod = function(method) {
+        activeOrderPayState.method = method;
+        const btnCash = document.getElementById('tab-btn-cash');
+        const btnQris = document.getElementById('tab-btn-qris');
+        const cashSection = document.getElementById('active-order-cash-section');
+        const submitBtn = document.getElementById('btn-submit-active-order-pay');
+
+        if (method === 'cash') {
+            btnCash?.classList.add('active', 'btn-outline-success');
+            btnCash?.classList.remove('btn-outline-secondary');
+            btnQris?.classList.remove('active', 'btn-outline-primary');
+            btnQris?.classList.add('btn-outline-secondary');
+            if (cashSection) cashSection.style.display = 'block';
+            if (submitBtn) submitBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Selesaikan Pembayaran Tunai';
+        } else {
+            btnQris?.classList.add('active', 'btn-outline-primary');
+            btnQris?.classList.remove('btn-outline-secondary');
+            btnCash?.classList.remove('active', 'btn-outline-success');
+            btnCash?.classList.add('btn-outline-secondary');
+            if (cashSection) cashSection.style.display = 'none';
+            if (submitBtn) submitBtn.innerHTML = '<i class="bi bi-qr-code-scan me-1"></i> Lanjut ke Scan QRIS';
+        }
+    };
+
+    window.renderActiveOrderCashPresets = function() {
+        const total = activeOrderPayState.total;
+        let presetHtml = `
+            <button type="button" class="btn btn-sm btn-outline-success active-cash-preset-btn active rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('pas', ${total}, this)">
+                <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${total.toLocaleString('id-ID')})
+            </button>
+        `;
+
+        if (total < 50000) {
+            presetHtml += `
+                <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 50000, this)">
+                    Rp 50.000
+                </button>
+            `;
+        }
+
+        if (total < 100000 && total !== 50000) {
+            presetHtml += `
+                <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 100000, this)">
+                    Rp 100.000
+                </button>
+            `;
+        }
+
+        if (total > 100000) {
+            const nextCeil = Math.ceil((total + 1000) / 50000) * 50000;
+            presetHtml += `
+                <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', ${nextCeil}, this)">
+                    Rp ${nextCeil.toLocaleString('id-ID')}
+                </button>
+            `;
+        }
+
+        presetHtml += `
+            <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('custom', 0, this)">
+                <i class="bi bi-pencil me-1"></i> Nominal Lain
+            </button>
+        `;
+
+        const container = document.getElementById('active-order-cash-presets');
+        if (container) container.innerHTML = presetHtml;
+        const customContainer = document.getElementById('active-order-custom-nominal-container');
+        if (customContainer) customContainer.style.display = 'none';
+        const customInput = document.getElementById('active-order-custom-nominal');
+        if (customInput) customInput.value = '';
+
+        window.updateActiveOrderKembalianUI(total, 0, true);
+    };
+
+    window.selectActiveOrderCashPreset = function(type, amount, btnEl) {
+        document.querySelectorAll('.active-cash-preset-btn').forEach(btn => {
+            btn.classList.remove('btn-outline-success', 'active');
+            btn.classList.add('btn-outline-secondary');
+        });
+        btnEl.classList.remove('btn-outline-secondary');
+        btnEl.classList.add('btn-outline-success', 'active');
+
+        const customContainer = document.getElementById('active-order-custom-nominal-container');
+        const customInput = document.getElementById('active-order-custom-nominal');
+
+        if (type === 'pas') {
+            if (customContainer) customContainer.style.display = 'none';
+            activeOrderPayState.nominal = activeOrderPayState.total;
+            activeOrderPayState.isUangPas = true;
+            window.updateActiveOrderKembalianUI(activeOrderPayState.total, 0, true);
+        } else if (type === 'fixed') {
+            if (customContainer) customContainer.style.display = 'none';
+            activeOrderPayState.nominal = amount;
+            activeOrderPayState.isUangPas = false;
+            const kembalian = Math.max(0, amount - activeOrderPayState.total);
+            window.updateActiveOrderKembalianUI(amount, kembalian, false);
+        } else if (type === 'custom') {
+            if (customContainer) customContainer.style.display = 'block';
+            if (customInput) {
+                customInput.focus();
+                if (customInput.value) {
+                    window.onActiveOrderCustomNominalChange(customInput.value);
+                } else {
+                    window.updateActiveOrderKembalianUI(0, 0, false, true);
+                }
+            }
+            activeOrderPayState.isUangPas = false;
+        }
+    };
+
+    window.onActiveOrderCustomNominalChange = function(val) {
+        const nominal = parseInt(val) || 0;
+        activeOrderPayState.nominal = nominal;
+
+        if (nominal < activeOrderPayState.total) {
+            window.updateActiveOrderKembalianUI(nominal, 0, false, false, true);
+        } else {
+            const kembalian = nominal - activeOrderPayState.total;
+            window.updateActiveOrderKembalianUI(nominal, kembalian, kembalian === 0);
+        }
+    };
+
+    window.updateActiveOrderKembalianUI = function(nominal, kembalian, isPas, isNeedInput = false, isUnderpaid = false) {
+        const labelUang = document.getElementById('active-order-label-uang');
+        const labelKembalian = document.getElementById('active-order-label-kembalian');
+        const alertMsg = document.getElementById('active-order-kembalian-alert');
+        const card = document.getElementById('active-order-kembalian-card');
+        const submitBtn = document.getElementById('btn-submit-active-order-pay');
+
+        if (isUnderpaid) {
+            if (labelUang) labelUang.innerText = 'Rp ' + nominal.toLocaleString('id-ID');
+            if (labelKembalian) labelKembalian.innerHTML = '<span class="text-danger">⚠️ Uang Kurang</span>';
+            if (alertMsg) alertMsg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> Uang kurang dari total tagihan (Rp ' + activeOrderPayState.total.toLocaleString('id-ID') + ').</span>';
+            if (card) {
+                card.style.background = 'rgba(239, 68, 68, 0.08)';
+                card.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            }
+            if (submitBtn) submitBtn.disabled = true;
+            return;
+        }
+
+        if (isNeedInput) {
+            if (labelUang) labelUang.innerText = '-';
+            if (labelKembalian) labelKembalian.innerText = '-';
+            if (alertMsg) alertMsg.innerHTML = '<i class="bi bi-pencil-square text-warning me-1"></i> Masukkan jumlah uang tunai yang diterima.';
+            if (card) {
+                card.style.background = 'rgba(255, 255, 255, 0.04)';
+                card.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            }
+            if (submitBtn) submitBtn.disabled = true;
+            return;
+        }
+
+        if (submitBtn) submitBtn.disabled = false;
+        if (labelUang) labelUang.innerText = 'Rp ' + nominal.toLocaleString('id-ID');
+
+        if (isPas || kembalian === 0) {
+            if (labelKembalian) labelKembalian.innerHTML = '<span class="text-success">Rp 0 (Uang Pas)</span>';
+            if (alertMsg) alertMsg.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i> Uang pas, tidak ada kembalian.';
+            if (card) {
+                card.style.background = 'rgba(34, 197, 94, 0.08)';
+                card.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+            }
+        } else {
+            if (labelKembalian) labelKembalian.innerHTML = '<span class="text-warning fw-bold fs-5">Rp ' + kembalian.toLocaleString('id-ID') + '</span>';
+            if (alertMsg) alertMsg.innerHTML = '<i class="bi bi-bell-fill text-warning me-1"></i> <strong>Kembalikan uang ke tamu sebesar Rp ' + kembalian.toLocaleString('id-ID') + '</strong>.';
+            if (card) {
+                card.style.background = 'rgba(234, 179, 8, 0.09)';
+                card.style.borderColor = 'rgba(234, 179, 8, 0.4)';
+            }
+        }
+    };
+
+    window.submitActiveOrderPayment = function() {
+        if (activeOrderPayState.method === 'qris') {
+            window.closeModalById('paymentModal');
             window.openModalById('qrisScanModal');
         } else {
             window.executePayment('cash');
@@ -487,9 +677,20 @@
 
     window.executePayment = function(method) {
         window.closeModalById('qrisScanModal');
+        window.closeModalById('paymentModal');
         
         let emailInput = document.getElementById('email_pelanggan');
         let emailVal = emailInput ? emailInput.value : '';
+
+        const payload = {
+            metode: method,
+            email_pelanggan: emailVal
+        };
+
+        if (method === 'cash') {
+            payload.nominal_tunai = activeOrderPayState.nominal;
+            payload.is_uang_pas = activeOrderPayState.isUangPas;
+        }
 
         fetch(`/kasir/order/${currentOrderId}/pay`, {
             method: 'PUT',
@@ -498,7 +699,7 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ metode: method, email_pelanggan: emailVal })
+            body: JSON.stringify(payload)
         })
         .then(res => res.json())
         .then(data => {
@@ -507,10 +708,16 @@
                 else alert(data.error);
             } else {
                 const paidOrderId = currentOrderId;
-                if (window.showToast) {
-                    window.showToast(`Pembayaran pesanan #${paidOrderId} berhasil!`, 'success');
+                let toastMsg = `Pembayaran pesanan #${paidOrderId} berhasil!`;
+                if (method === 'cash' && !activeOrderPayState.isUangPas && activeOrderPayState.nominal > activeOrderPayState.total) {
+                    const kembalian = activeOrderPayState.nominal - activeOrderPayState.total;
+                    toastMsg += ` (Kembalian: Rp ${kembalian.toLocaleString('id-ID')})`;
                 }
-                if (confirm('Pembayaran berhasil! Cetak struk sekarang?')) {
+
+                if (window.showToast) {
+                    window.showToast(toastMsg, 'success');
+                }
+                if (confirm(toastMsg + '\n\nCetak struk sekarang?')) {
                     window.open(`/kasir/order/${paidOrderId}/receipt`, '_blank');
                 }
                 window.reloadActiveOrdersCards(true);

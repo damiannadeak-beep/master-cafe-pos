@@ -172,7 +172,8 @@
                                         <i class="bi bi-image me-1"></i> Cek Bukti Bayar
                                     </button>
                                 @else
-                                    <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.payOrder({{ $order->id }})">
+                                    @php $totalPayActive = (int) ($order->pembayaran?->total_bayar ?? ($order->total - ($order->discount_amount ?? 0))); @endphp
+                                    <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.payOrder({{ $order->id }}, {{ $totalPayActive }})">
                                         <i class="bi bi-cash-stack me-1"></i> Terima Bayar
                                     </button>
                                 @endif

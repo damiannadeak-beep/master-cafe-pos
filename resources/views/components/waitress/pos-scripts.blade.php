@@ -498,7 +498,199 @@
         submitOrder(1, 'qris');
     }
 
-    function submitOrder(isLunas, method) {
+    function getCurrentGrandTotal() {
+        let total = 0;
+        cart.forEach(item => {
+            total += item.harga * item.jumlah;
+        });
+        let discount = 0;
+        const promoSelect = document.querySelector('select[name="promo_id"]');
+        if (promoSelect && promoSelect.value) {
+            const option = promoSelect.options[promoSelect.selectedIndex];
+            const pType = option.getAttribute('data-type');
+            const pValue = parseFloat(option.getAttribute('data-value'));
+            if (pType === 'discount') {
+                if (pValue <= 100) {
+                    discount = total * (pValue / 100);
+                } else {
+                    discount = pValue;
+                }
+            }
+            if (discount > total) discount = total;
+        }
+        return Math.max(0, total - discount);
+    }
+
+    let posCashState = {
+        total: 0,
+        nominal: 0,
+        isUangPas: true
+    };
+
+    function showCashModal() {
+        if (cart.length === 0) return alert('Keranjang masih kosong!');
+
+        const tipePesanan = document.querySelector('select[name="tipe_pesanan"]')?.value || 'dine_in';
+        const mejaSelect = document.querySelector('select[name="id_meja"]');
+        const idMeja = tipePesanan === 'takeaway' ? null : (mejaSelect ? mejaSelect.value : null);
+
+        if (tipePesanan === 'dine_in' && !idMeja) {
+            return alert('Silakan pilih nomor meja untuk pesanan Makan di Tempat (Dine In)!');
+        }
+
+        const grandTotal = getCurrentGrandTotal();
+        posCashState.total = grandTotal;
+        posCashState.nominal = grandTotal;
+        posCashState.isUangPas = true;
+
+        document.getElementById('pos-cash-total-display').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+        
+        // Generate Preset Buttons
+        let presetHtml = `
+            <button type="button" class="btn btn-sm btn-outline-success pos-cash-preset-btn active rounded-pill px-3 py-2 fw-bold" onclick="selectPosCashPreset('pas', ${grandTotal}, this)">
+                <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${grandTotal.toLocaleString('id-ID')})
+            </button>
+        `;
+
+        if (grandTotal < 50000) {
+            presetHtml += `
+                <button type="button" class="btn btn-sm btn-outline-secondary pos-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectPosCashPreset('fixed', 50000, this)">
+                    Rp 50.000
+                </button>
+            `;
+        }
+
+        if (grandTotal < 100000 && grandTotal !== 50000) {
+            presetHtml += `
+                <button type="button" class="btn btn-sm btn-outline-secondary pos-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectPosCashPreset('fixed', 100000, this)">
+                    Rp 100.000
+                </button>
+            `;
+        }
+
+        if (grandTotal > 100000) {
+            const nextCeil = Math.ceil((grandTotal + 1000) / 50000) * 50000;
+            presetHtml += `
+                <button type="button" class="btn btn-sm btn-outline-secondary pos-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectPosCashPreset('fixed', ${nextCeil}, this)">
+                    Rp ${nextCeil.toLocaleString('id-ID')}
+                </button>
+            `;
+        }
+
+        presetHtml += `
+            <button type="button" class="btn btn-sm btn-outline-secondary pos-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectPosCashPreset('custom', 0, this)">
+                <i class="bi bi-pencil me-1"></i> Nominal Lain
+            </button>
+        `;
+
+        document.getElementById('pos-cash-presets-container').innerHTML = presetHtml;
+        document.getElementById('pos-custom-nominal-container').style.display = 'none';
+        document.getElementById('pos-custom-nominal-input').value = '';
+
+        updatePosKembalianUI(grandTotal, 0, true);
+
+        const cashModal = new bootstrap.Modal(document.getElementById('cashPaymentModal'));
+        cashModal.show();
+    }
+
+    function selectPosCashPreset(type, amount, btnEl) {
+        document.querySelectorAll('.pos-cash-preset-btn').forEach(btn => {
+            btn.classList.remove('btn-outline-success', 'active');
+            btn.classList.add('btn-outline-secondary');
+        });
+        btnEl.classList.remove('btn-outline-secondary');
+        btnEl.classList.add('btn-outline-success', 'active');
+
+        const customContainer = document.getElementById('pos-custom-nominal-container');
+        const customInput = document.getElementById('pos-custom-nominal-input');
+
+        if (type === 'pas') {
+            customContainer.style.display = 'none';
+            posCashState.nominal = posCashState.total;
+            posCashState.isUangPas = true;
+            updatePosKembalianUI(posCashState.total, 0, true);
+        } else if (type === 'fixed') {
+            customContainer.style.display = 'none';
+            posCashState.nominal = amount;
+            posCashState.isUangPas = false;
+            const kembalian = Math.max(0, amount - posCashState.total);
+            updatePosKembalianUI(amount, kembalian, false);
+        } else if (type === 'custom') {
+            customContainer.style.display = 'block';
+            customInput.focus();
+            posCashState.isUangPas = false;
+            if (customInput.value) {
+                onPosCustomNominalChange(customInput.value);
+            } else {
+                updatePosKembalianUI(0, 0, false, true);
+            }
+        }
+    }
+
+    function onPosCustomNominalChange(val) {
+        const nominal = parseInt(val) || 0;
+        posCashState.nominal = nominal;
+
+        if (nominal < posCashState.total) {
+            updatePosKembalianUI(nominal, 0, false, false, true);
+        } else {
+            const kembalian = nominal - posCashState.total;
+            updatePosKembalianUI(nominal, kembalian, kembalian === 0);
+        }
+    }
+
+    function updatePosKembalianUI(nominal, kembalian, isPas, isNeedInput = false, isUnderpaid = false) {
+        const labelUang = document.getElementById('pos-label-uang-diterima');
+        const labelKembalian = document.getElementById('pos-label-kembalian');
+        const alertMsg = document.getElementById('pos-kembalian-alert-msg');
+        const card = document.getElementById('pos-kembalian-card');
+        const submitBtn = document.getElementById('btn-confirm-pos-cash');
+
+        if (isUnderpaid) {
+            labelUang.innerText = 'Rp ' + nominal.toLocaleString('id-ID');
+            labelKembalian.innerHTML = '<span class="text-danger">⚠️ Uang Kurang</span>';
+            alertMsg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> Uang yang diserahkan kurang dari total tagihan (Rp ' + posCashState.total.toLocaleString('id-ID') + ').</span>';
+            card.style.background = 'rgba(239, 68, 68, 0.08)';
+            card.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if (isNeedInput) {
+            labelUang.innerText = '-';
+            labelKembalian.innerText = '-';
+            alertMsg.innerHTML = '<i class="bi bi-pencil-square text-warning me-1"></i> Masukkan jumlah uang tunai yang diserahkan tamu.';
+            card.style.background = 'rgba(255, 255, 255, 0.04)';
+            card.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            submitBtn.disabled = true;
+            return;
+        }
+
+        submitBtn.disabled = false;
+        labelUang.innerText = 'Rp ' + nominal.toLocaleString('id-ID');
+
+        if (isPas || kembalian === 0) {
+            labelKembalian.innerHTML = '<span class="text-success">Rp 0 (Uang Pas)</span>';
+            alertMsg.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i> Uang pas, tidak ada kembalian.';
+            card.style.background = 'rgba(34, 197, 94, 0.08)';
+            card.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        } else {
+            labelKembalian.innerHTML = '<span class="text-warning fw-bold fs-5">Rp ' + kembalian.toLocaleString('id-ID') + '</span>';
+            alertMsg.innerHTML = '<i class="bi bi-bell-fill text-warning me-1"></i> <strong>Kembalikan ke tamu sebesar Rp ' + kembalian.toLocaleString('id-ID') + '</strong>.';
+            card.style.background = 'rgba(234, 179, 8, 0.09)';
+            card.style.borderColor = 'rgba(234, 179, 8, 0.4)';
+        }
+    }
+
+    function confirmCashPayment() {
+        const modalEl = document.getElementById('cashPaymentModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        submitOrder(1, 'cash', posCashState.nominal, posCashState.isUangPas);
+    }
+
+    function submitOrder(isLunas, method, nominalTunai = null, isUangPas = false) {
         if (cart.length === 0) return alert('Keranjang masih kosong!');
 
         const tipePesanan = document.querySelector('select[name="tipe_pesanan"]')?.value || 'dine_in';
@@ -516,6 +708,8 @@
             promo_id: document.querySelector('select[name="promo_id"]')?.value || null,
             pembayaran_langsung: isLunas,
             metode_pembayaran: method,
+            nominal_tunai: nominalTunai,
+            is_uang_pas: isUangPas,
             items: cart
         };
 
@@ -529,7 +723,16 @@
             if (data.error) alert(data.error);
             else {
                 if (isLunas) {
-                    if (confirm('Pembayaran berhasil! Ingin cetak struk sekarang?')) {
+                    let alertSuccessMsg = 'Pembayaran Lunas Berhasil!';
+                    if (method === 'cash' && nominalTunai && !isUangPas) {
+                        const totalTagihan = getCurrentGrandTotal();
+                        const kembalian = Math.max(0, nominalTunai - totalTagihan);
+                        if (kembalian > 0) {
+                            alertSuccessMsg += `\n\n💵 Kembalian untuk Tamu: Rp ${kembalian.toLocaleString('id-ID')}`;
+                        }
+                    }
+
+                    if (confirm(alertSuccessMsg + '\n\nIngin cetak struk sekarang?')) {
                         @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
                         @if($printerActive)
                             if (confirm('Kirim langsung ke Mesin Printer Thermal? (Pilih Cancel untuk cetak lewat Browser)')) {

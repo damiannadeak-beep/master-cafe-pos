@@ -20,16 +20,17 @@ class PaymentService
      * @return Pesanan
      * @throws \Exception
      */
-    public function processPayment($id_pesanan, $metode, $email_pelanggan = null, $kasir_id = null)
+    public function processPayment($id_pesanan, $metode, $email_pelanggan = null, $kasir_id = null, $nominalTunai = null, $isUangPas = false)
     {
         $pesanan = Pesanan::with('konsumen')->findOrFail($id_pesanan);
+        $totalBayar = $pesanan->total - ($pesanan->discount_amount ?? 0);
         
         // Auto-create pembayaran record if it doesn't exist (fail-safe)
         $pembayaran = Pembayaran::firstOrCreate(
             ['id_pesanan' => $id_pesanan],
             [
                 'status' => 'unpaid',
-                'total_bayar' => $pesanan->total - ($pesanan->discount_amount ?? 0),
+                'total_bayar' => $totalBayar,
             ]
         );
 
@@ -37,11 +38,34 @@ class PaymentService
             throw new \Exception('Pesanan ini sudah dibayar.');
         }
 
+        $uangDiterima = $pembayaran->uang_diterima;
+        $uangKembalian = $pembayaran->uang_kembalian ?? 0;
+        $catatanKembalian = $pembayaran->catatan_kembalian;
+
+        if ($metode === 'cash') {
+            if ($isUangPas) {
+                $uangDiterima = $totalBayar;
+                $uangKembalian = 0;
+                $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+            } elseif (!empty($nominalTunai) && is_numeric($nominalTunai)) {
+                $uangDiterima = (float) $nominalTunai;
+                $uangKembalian = max(0, $uangDiterima - $totalBayar);
+                if ($uangKembalian > 0) {
+                    $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
+                } else {
+                    $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+                }
+            }
+        }
+
         $pembayaran->update([
             'status' => 'paid',
             'metode' => $metode,
             'tanggal' => now(),
-            'total_bayar' => $pesanan->total - ($pesanan->discount_amount ?? 0),
+            'total_bayar' => $totalBayar,
+            'uang_diterima' => $uangDiterima,
+            'uang_kembalian' => $uangKembalian,
+            'catatan_kembalian' => $catatanKembalian,
         ]);
 
         if ($kasir_id) {

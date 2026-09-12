@@ -25,6 +25,8 @@ class StoreManualOrderRequest extends FormRequest
             'items.*.catatan' => 'nullable|string|max:255',
             'items.*.variants' => 'nullable|array',
             'promo_id' => 'nullable|exists:promos,id',
+            'nominal_tunai' => 'nullable|numeric|min:0',
+            'is_uang_pas' => 'nullable|boolean',
         ];
     }
 }

@@ -176,12 +176,38 @@ class PosController extends Controller
             $statusBayar = $validated['pembayaran_langsung'] ? 'paid' : 'unpaid';
             $metodeBayar = $validated['pembayaran_langsung'] ? ($validated['metode_pembayaran'] ?? 'cash') : null;
 
+            $uangDiterima = null;
+            $uangKembalian = 0;
+            $catatanKembalian = null;
+
+            if ($validated['pembayaran_langsung'] && $metodeBayar === 'cash') {
+                $isUangPas = !empty($validated['is_uang_pas']);
+                $nominalTunaiInput = $validated['nominal_tunai'] ?? null;
+
+                if ($isUangPas) {
+                    $uangDiterima = $totalBayar;
+                    $uangKembalian = 0;
+                    $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+                } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
+                    $uangDiterima = (float) $nominalTunaiInput;
+                    $uangKembalian = max(0, $uangDiterima - $totalBayar);
+                    if ($uangKembalian > 0) {
+                        $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
+                    } else {
+                        $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+                    }
+                }
+            }
+
             Pembayaran::create([
                 'id_pesanan' => $pesanan->id,
                 'metode' => $metodeBayar,
                 'status' => $statusBayar,
                 'total_bayar' => $totalBayar,
                 'tanggal' => $validated['pembayaran_langsung'] ? now() : null,
+                'uang_diterima' => $uangDiterima,
+                'uang_kembalian' => $uangKembalian,
+                'catatan_kembalian' => $catatanKembalian,
             ]);
 
             DB::commit();
@@ -323,7 +349,9 @@ class PosController extends Controller
                 $id_pesanan,
                 $validated['metode'],
                 $validated['email_pelanggan'] ?? null,
-                auth()->id()
+                auth()->id(),
+                $validated['nominal_tunai'] ?? null,
+                !empty($validated['is_uang_pas'])
             );
 
             DB::commit();
