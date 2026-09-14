@@ -85,11 +85,11 @@ Gunakan tabel ini saat berdiskusi langsung dengan Pemilik Kafe untuk mencatat pe
 
 | No | Poin Keputusan | Pilihan Disepakati | Catatan Pemilik |
 |:---:|---|---|---|
-| **1** | **Input Data Tamu Makan di Tempat (Dine-In)** | [ ] Hanya Nama *(Disarankan)*<br>[ ] Nama + No. WA (Opsional)<br>[ ] Nama + No. WA (Wajib) | |
-| **2** | **Input Data Pesanan Bungkus (Takeaway Web)** | [ ] Nama + No. WA (Wajib)<br>[ ] Hanya Nama | |
-| **3** | **Kebijakan Pembayaran Meja** | [ ] Boleh Bayar Nanti di Kasir (Open Bill)<br>[ ] Wajib Lunas Duluan via QRIS | |
-| **4** | **Aktivasi Akun Midtrans** | [ ] Sudah Ada Akun (Tinggal Masukkan Key)<br>[ ] Belum Ada (Perlu Dibantu Pendaftaran)<br>[ ] Tetap Manual Transfer Sementara | |
-| **5** | **Pencetakan Struk Kertas** | [ ] Khusus Kasir Thermal Printer *(Disepakati)*<br>[ ] Sediakan juga Download PDF di HP Tamu | |
+| **1** | **Input Data Tamu Makan di Tempat (Dine-In)** | [x] Hanya Nama Pemesan *(Disepakati)* | Bebas Login. Konsumen pesan dengan menginput Nama saja. |
+| **2** | **Input Data Pesanan Bungkus (Takeaway Web)** | [x] Nama + No. WA *(Disepakati)* | Diperlukan No. WA agar sistem bisa kirim notifikasi otomatis saat pesanan siap diambil. |
+| **3** | **Kebijakan Pembayaran Meja** | [x] Wajib Langsung Bayar (Pay-First Policy) *(Disepakati)* | Tidak ada Open Bill/Bayar Nanti. Setiap transaksi pesan wajib langsung bayar (via Midtrans / Tunai ke Waitress). |
+| **4** | **Fitur Tambah Pesanan di Meja** | [x] Alur Sederhana Eksisting *(Disepakati)* | Jika mau pesan lagi, konsumen tinggal pilih menu -> isi nama -> bayar langsung tanpa perlu login. |
+| **5** | **Pencetakan Struk Kertas** | [x] Khusus Kasir Thermal Printer *(Disepakati)* | HP Konsumen cukup E-Receipt digital. Struk cetak fisik dilakukan via Printer Thermal Kasir. |
 
 ---
 
