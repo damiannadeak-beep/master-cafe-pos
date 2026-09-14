@@ -116,6 +116,10 @@ class PaymentController extends Controller
 
     public function simulateMidtransPay(Request $request, $id_pesanan)
     {
+        if (app()->isProduction()) {
+            return redirect()->back()->with('error', 'Simulasi pembayaran online tidak diizinkan di lingkungan production. Silakan gunakan pembayaran Midtrans resmi atau opsi Bayar Tunai ke Waitress.');
+        }
+
         $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
 
         $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
@@ -171,7 +175,7 @@ class PaymentController extends Controller
             }
         }
 
-        $targetUrl = $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?paid=1') : url('/');
+        $targetUrl = $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?paid_sim=1') : url('/');
         return redirect($targetUrl)->with('success', 'Pembayaran QRIS Midtrans berhasil diselesaikan (LUNAS).');
     }
 

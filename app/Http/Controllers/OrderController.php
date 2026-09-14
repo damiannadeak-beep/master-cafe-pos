@@ -304,32 +304,6 @@ class OrderController extends Controller
             ->where('order_token', $order_token)
             ->firstOrFail();
 
-        // Otomatis tandai lunas jika dialihkan dari sukses pembayaran Midtrans atau konfirmasi bayar
-        if (($request->query('paid') == '1' || $request->query('auto_settle') == '1') && $pesanan->pembayaran && $pesanan->pembayaran->status !== 'paid') {
-            $pesanan->pembayaran->update([
-                'status' => 'paid',
-                'metode' => $pesanan->pembayaran->metode ?: 'qris',
-                'tanggal' => now(),
-            ]);
-            $pesanan->update(['status' => 'processing']);
-
-            try {
-                broadcast(new \App\Events\PesananBaru($pesanan));
-                if ($pesanan->id_meja && $pesanan->meja) {
-                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
-                }
-            } catch (\Throwable $e) {
-                Log::warning('[OrderController] Gagal broadcast WebSocket: ' . $e->getMessage());
-            }
-
-            $namaKonsumen = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu');
-            \App\Models\Notification::create([
-                'type' => 'new_order',
-                'message' => 'Pesanan Lunas QRIS: Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas.',
-                'is_read' => false
-            ]);
-        }
-
         $pembayaran = $pesanan->pembayaran;
         $meja = $pesanan->meja;
 

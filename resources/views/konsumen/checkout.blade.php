@@ -85,15 +85,21 @@
                                     ⚡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                             @else
-                                <form action="{{ url('konsumen/order/' . $pesanan->id . '/simulate-midtrans-pay' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
-                                    @csrf
-                                    @if($pesanan->order_token)
-                                        <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
-                                    @endif
-                                    <button type="submit" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
-                                        ⚡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
-                                    </button>
-                                </form>
+                                @if(app()->isProduction())
+                                    <div class="alert alert-warning small py-2 px-3 rounded-3 mb-0 text-start" style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); color: #feefc3; font-size: 0.85rem;">
+                                        <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> Pembayaran Online (Midtrans) tidak dapat dihubungi. Silakan pilih opsi <strong>Bayar Tunai di Meja</strong> di bawah ini.
+                                    </div>
+                                @else
+                                    <form action="{{ url('konsumen/order/' . $pesanan->id . '/simulate-midtrans-pay' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
+                                        @csrf
+                                        @if($pesanan->order_token)
+                                            <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
+                                        @endif
+                                        <button type="submit" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
+                                            ⚡ [Simulasi Testing] Bayar Sekarang via QRIS <i class="bi bi-arrow-right ms-1"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             @endif
                         </div>
 
