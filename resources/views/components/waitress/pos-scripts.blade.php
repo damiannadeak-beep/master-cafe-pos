@@ -134,7 +134,7 @@
                         ${imageHtml}
                         <div class="card-body text-center p-2 p-md-3">
                             <h6 class="fw-bold mb-1 text-truncate" style="font-size: 0.9rem;" title="${menu.nama_menu}">${menu.nama_menu}</h6>
-                            <p class="price mb-0 fw-bold text-primary font-sans" style="font-size: 0.9rem;">${menu.is_dynamic_price ? 'Sesuai Timbangan' : 'Rp ' + parseFloat(menu.harga).toLocaleString('id-ID')}</p>
+                            <p class="price mb-0 fw-bold text-primary font-sans" style="font-size: 0.9rem;">${(menu.is_dynamic_price || Number(menu.harga) === 0) ? 'Sesuai Timbangan' : 'Rp ' + parseFloat(menu.harga).toLocaleString('id-ID')}</p>
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@
         if (!menu) return;
 
         let dynamicPrice = null;
-        if (menu.is_dynamic_price) {
+        if (menu.is_dynamic_price || Number(menu.harga) === 0) {
             let inputPrice = prompt(`Masukkan harga aktual untuk menu: ${menu.nama_menu}\n(Contoh: harga berdasarkan timbangan ikan)`);
             if (inputPrice === null || inputPrice === '') return;
             dynamicPrice = parseFloat(inputPrice);

@@ -58,7 +58,7 @@
         if (titleEl) titleEl.innerText = currentSelectedMenu.nama_menu;
 
         const priceEl = document.getElementById('variantModalMenuPrice');
-        if (priceEl) priceEl.innerText = currentSelectedMenu.is_dynamic_price ? 'Timbangan' : 'Rp ' + Number(currentSelectedMenu.harga).toLocaleString('id-ID');
+        if (priceEl) priceEl.innerText = (currentSelectedMenu.is_dynamic_price || Number(currentSelectedMenu.harga) === 0) ? 'Sesuai Timbangan' : 'Rp ' + Number(currentSelectedMenu.harga).toLocaleString('id-ID');
 
         const descEl = document.getElementById('variantModalMenuDesc');
         if (descEl) descEl.innerText = currentSelectedMenu.deskripsi || 'Hidangan istimewa racikan Master Cafe dengan kualitas bahan pilihan terbaik.';
@@ -195,7 +195,8 @@
         });
 
         let total = (base + additional) * currentModalQty;
-        document.getElementById('variantModalPrice').innerText = 'Rp ' + total.toLocaleString('id-ID');
+        const isDynamic = currentSelectedMenu.is_dynamic_price || Number(currentSelectedMenu.harga) === 0;
+        document.getElementById('variantModalPrice').innerText = (isDynamic && total === 0) ? 'Sesuai Timbangan' : 'Rp ' + total.toLocaleString('id-ID');
     }
 
     function confirmVariantSelection() {

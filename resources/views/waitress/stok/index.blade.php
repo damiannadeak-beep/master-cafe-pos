@@ -82,7 +82,7 @@
                                     </span>
                                 </td>
                                 <td class="text-nowrap fw-bold" style="color: #c08e5c;">
-                                    {{ $menu->is_dynamic_price ? 'Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
+                                    {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                                 </td>
                                 <td class="pe-4 text-center">
                                     <div class="btn-group w-100 shadow-sm" role="group" id="btn-group-{{ $menu->id }}">

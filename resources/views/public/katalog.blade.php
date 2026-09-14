@@ -125,7 +125,9 @@
                 <div class="card-body p-3 p-md-4 d-flex flex-column">
                     <h5 class="fw-bold mb-1 mb-md-2 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
                     <div class="mb-2">
-                        <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">Rp {{ number_format($menu->harga, 0, ',', '.') }}</span>
+                        <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
+                            {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
+                        </span>
                     </div>
                     <p class="flex-grow-1 mb-3 small" style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" title="Klik kartu untuk membaca selengkapnya">
                         {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
@@ -236,7 +238,7 @@
         if (!menu) return;
 
         document.getElementById('katalogModalTitle').innerText = menu.nama_menu;
-        document.getElementById('katalogModalPrice').innerText = 'Rp ' + Number(menu.harga).toLocaleString('id-ID');
+        document.getElementById('katalogModalPrice').innerText = (menu.is_dynamic_price || Number(menu.harga) === 0) ? 'Sesuai Timbangan' : 'Rp ' + Number(menu.harga).toLocaleString('id-ID');
         document.getElementById('katalogModalDesc').innerText = menu.deskripsi || 'Hidangan istimewa racikan Master Cafe dengan kualitas bahan pilihan terbaik.';
         
         // Kategori

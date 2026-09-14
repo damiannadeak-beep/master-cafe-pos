@@ -66,7 +66,13 @@
                                         {{ ucfirst($m->kategori) }}
                                     </span>
                                 </td>
-                                <td class="text-nowrap fw-bold" style="color: #c08e5c;">Rp {{ number_format($m->harga,0,',','.') }}</td>
+                                <td class="text-nowrap fw-bold" style="color: #c08e5c;">
+                                    @if($m->is_dynamic_price || $m->harga == 0)
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-speedometer2 me-1"></i> Sesuai Timbangan</span>
+                                    @else
+                                        Rp {{ number_format($m->harga, 0, ',', '.') }}
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if($m->is_available)
                                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">

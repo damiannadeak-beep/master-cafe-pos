@@ -5,7 +5,7 @@
         
         <!-- Area Gambar dengan Overlay Badge -->
         <div class="position-relative cursor-pointer" 
-             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
+             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : (($menu->is_dynamic_price || $menu->harga == 0) ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
              style="cursor: pointer;"
              title="Sentuh untuk melihat detail & varian">
             
@@ -51,7 +51,7 @@
         <!-- Body Kartu -->
         <div class="card-body p-2 p-md-3 d-flex flex-column" style="flex: 1;">
             <div class="cursor-pointer mb-2" 
-                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
+                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : (($menu->is_dynamic_price || $menu->harga == 0) ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
                  style="cursor: pointer;">
                 <!-- Nama Menu -->
                 <h6 class="fw-bold text-white mb-1" 
@@ -68,7 +68,7 @@
                 <!-- Harga -->
                 <div class="d-flex align-items-center justify-content-between">
                     <span class="fw-bold fs-6 text-nowrap" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
-                        {{ $menu->is_dynamic_price ? 'Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
+                        {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                     </span>
                     <small class="text-secondary opacity-75" style="font-size: 0.7rem;">
                         <i class="bi bi-info-circle"></i>
@@ -86,7 +86,7 @@
                                 <i class="bi bi-slash-circle me-1"></i> Sedang Habis
                             </span>
                         </div>
-                    @elseif($menu->is_dynamic_price)
+                    @elseif($menu->is_dynamic_price || $menu->harga == 0)
                         <!-- Jika Menu Timbangan Murni (Dipesan di Lokasi via Waitress) -->
                         <div class="w-100 py-1 text-center rounded-pill cursor-pointer" 
                              onclick="openDynamicPriceNotice({{ $menu->id }})"

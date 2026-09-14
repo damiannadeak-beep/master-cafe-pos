@@ -95,7 +95,7 @@
                                                     <option value="">-- Pilih Menu Kafe --</option>
                                                     @foreach($allMenus as $m)
                                                         <option value="{{ $m->id }}" data-price="{{ $m->harga }}" data-name="{{ $m->nama_menu }}" {{ $m->id == $em->id ? 'selected' : '' }}>
-                                                            {{ $m->nama_menu }} (Rp {{ number_format($m->harga, 0, ',', '.') }})
+                                                            {{ $m->is_dynamic_price || $m->harga == 0 ? $m->nama_menu . ' (Sesuai Timbangan)' : $m->nama_menu . ' (Rp ' . number_format($m->harga, 0, ',', '.') . ')' }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -122,7 +122,7 @@
                                                 <option value="">-- Pilih Menu Kafe (1) --</option>
                                                 @foreach($allMenus as $m)
                                                     <option value="{{ $m->id }}" data-price="{{ $m->harga }}" data-name="{{ $m->nama_menu }}">
-                                                        {{ $m->nama_menu }} (Rp {{ number_format($m->harga, 0, ',', '.') }})
+                                                        {{ $m->is_dynamic_price || $m->harga == 0 ? $m->nama_menu . ' (Sesuai Timbangan)' : $m->nama_menu . ' (Rp ' . number_format($m->harga, 0, ',', '.') . ')' }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -147,7 +147,7 @@
                                                 <option value="">-- Pilih Menu Kafe (2) --</option>
                                                 @foreach($allMenus as $m)
                                                     <option value="{{ $m->id }}" data-price="{{ $m->harga }}" data-name="{{ $m->nama_menu }}">
-                                                        {{ $m->nama_menu }} (Rp {{ number_format($m->harga, 0, ',', '.') }})
+                                                        {{ $m->is_dynamic_price || $m->harga == 0 ? $m->nama_menu . ' (Sesuai Timbangan)' : $m->nama_menu . ' (Rp ' . number_format($m->harga, 0, ',', '.') . ')' }}
                                                     </option>
                                                 @endforeach
                                             </select>
