@@ -223,11 +223,11 @@
             window.snap.pay('{{ $snapToken }}', {
                 onSuccess: function(result) {
                     var orderId = (result && result.order_id) ? result.order_id : '';
-                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?midtrans_order_id=" + encodeURIComponent(orderId);
+                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?order_id=" + encodeURIComponent(orderId) + "&transaction_status=settlement&status_code=200";
                 },
                 onPending: function(result) {
                     var orderId = (result && result.order_id) ? result.order_id : '';
-                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?pending=1&midtrans_order_id=" + encodeURIComponent(orderId);
+                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?pending=1&order_id=" + encodeURIComponent(orderId);
                 },
                 onError: function(result) {
                     alert('Pembayaran belum berhasil diselesaikan. Anda tetap dapat membayar langsung di kasir.');

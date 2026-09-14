@@ -88,9 +88,11 @@ class PaymentController extends Controller
                 $customerName = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu Master Cafe');
                 $customerEmail = $pesanan->konsumen?->email ?? 'guest@mastercafe.local';
 
+                $midtransOrderId = 'ORDER-' . $pesanan->id . '-' . time();
+
                 $midtransParams = [
                     'transaction_details' => [
-                        'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
+                        'order_id' => $midtransOrderId,
                         'gross_amount' => (int) $pembayaran->total_bayar,
                     ],
                     'callbacks' => [
@@ -104,7 +106,12 @@ class PaymentController extends Controller
                 ];
 
                 $snapToken = \Midtrans\Snap::getSnapToken($midtransParams);
-                $pembayaran->update(['snap_token' => $snapToken]);
+                $updateData = ['snap_token' => $snapToken];
+                if (\Illuminate\Support\Facades\Schema::hasColumn('pembayaran', 'midtrans_order_id')) {
+                    $updateData['midtrans_order_id'] = $midtransOrderId;
+                }
+                $pembayaran->update($updateData);
+                session(['midtrans_order_id_' . $pesanan->id => $midtransOrderId]);
             } catch (\Throwable $e) {
                 $snapError = $e->getMessage();
                 Log::warning('[PaymentController] Midtrans getSnapToken notice: ' . $snapError);

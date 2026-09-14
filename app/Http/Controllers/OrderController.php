@@ -314,39 +314,69 @@ class OrderController extends Controller
                     \Midtrans\Config::$serverKey = $serverKey;
                     \Midtrans\Config::$isProduction = $isProduction;
 
-                    $targetMidtransId = $request->query('midtrans_order_id');
-                    if (empty($targetMidtransId) && !empty($pesanan->pembayaran->snap_token)) {
-                        $targetMidtransId = 'ORDER-' . $pesanan->id;
-                    }
+                    $targetMidtransId = $request->query('order_id')
+                        ?? $request->query('midtrans_order_id')
+                        ?? ($pesanan->pembayaran->midtrans_order_id ?? null)
+                        ?? session('midtrans_order_id_' . $pesanan->id);
+
+                    $trxStatus = null;
+                    $paymentType = null;
 
                     if (!empty($targetMidtransId)) {
-                        $statusMidtrans = \Midtrans\Transaction::status($targetMidtransId);
-                        $trxStatus = is_object($statusMidtrans) ? ($statusMidtrans->transaction_status ?? '') : ($statusMidtrans['transaction_status'] ?? '');
-                        $paymentType = is_object($statusMidtrans) ? ($statusMidtrans->payment_type ?? '') : ($statusMidtrans['payment_type'] ?? '');
+                        try {
+                            $statusMidtrans = \Midtrans\Transaction::status($targetMidtransId);
+                            $trxStatus = is_object($statusMidtrans) ? ($statusMidtrans->transaction_status ?? '') : ($statusMidtrans['transaction_status'] ?? '');
+                            $paymentType = is_object($statusMidtrans) ? ($statusMidtrans->payment_type ?? '') : ($statusMidtrans['payment_type'] ?? '');
+                        } catch (\Throwable $e) {
+                            Log::info('[OrderController] Midtrans status API check notice for ID ' . $targetMidtransId . ': ' . $e->getMessage());
+                        }
+                    }
 
-                        if (in_array($trxStatus, ['capture', 'settlement'])) {
-                            $pesanan->pembayaran->update([
-                                'status' => 'paid',
-                                'metode' => $paymentType === 'qris' ? 'qris' : 'bank_transfer',
-                                'tanggal' => now(),
-                            ]);
-                            $pesanan->update(['status' => 'processing']);
+                    // Fallback jika API status belum berubah atau error, tapi URL redirect dari Midtrans membawa status_code 200/201 & settlement/capture
+                    if (empty($trxStatus)) {
+                        $qStatus = $request->query('transaction_status');
+                        $qCode = $request->query('status_code');
+                        if (in_array($qStatus, ['capture', 'settlement']) && in_array($qCode, ['200', '201'])) {
+                            $trxStatus = $qStatus;
+                            $paymentType = $request->query('payment_type') ?? 'bank_transfer';
+                        }
+                    }
 
-                            try {
-                                broadcast(new \App\Events\PesananBaru($pesanan));
-                                if ($pesanan->id_meja && $pesanan->meja) {
-                                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
-                                }
-                            } catch (\Throwable $e) {
-                                Log::warning('[OrderController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
+                    if (in_array($trxStatus, ['capture', 'settlement'])) {
+                        $metodeBayar = in_array($paymentType, ['qris', 'gopay', 'shopeepay']) ? 'qris' : 'bank_transfer';
+
+                        $pesanan->pembayaran->update([
+                            'status' => 'paid',
+                            'metode' => $metodeBayar,
+                            'tanggal' => now(),
+                        ]);
+                        $pesanan->update(['status' => 'processing']);
+
+                        try {
+                            broadcast(new \App\Events\PesananBaru($pesanan));
+                            if ($pesanan->id_meja && $pesanan->meja) {
+                                broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
                             }
+                        } catch (\Throwable $e) {
+                            Log::warning('[OrderController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
+                        }
 
-                            $namaKonsumen = $pesanan->customer_name;
-                            \App\Models\Notification::create([
-                                'type' => 'new_order',
-                                'message' => 'Pesanan Lunas Midtrans: Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas.',
-                                'is_read' => false
-                            ]);
+                        $namaKonsumen = $pesanan->customer_name;
+                        \App\Models\Notification::create([
+                            'type' => 'new_order',
+                            'message' => 'Pesanan Lunas Midtrans (' . strtoupper($metodeBayar) . '): Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas.',
+                            'is_read' => false
+                        ]);
+
+                        try {
+                            $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->get();
+                            \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
+                                'Pesanan Lunas (Midtrans)',
+                                'Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah dibayar lunas via Midtrans (' . strtoupper($metodeBayar) . ').',
+                                '/kasir/pesanan-aktif'
+                            ));
+                        } catch (\Throwable $e) {
+                            Log::warning('[OrderController] Gagal kirim WebPush: ' . $e->getMessage());
                         }
                     }
                 } catch (\Throwable $e) {
