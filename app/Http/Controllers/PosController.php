@@ -34,28 +34,35 @@ class PosController extends Controller
     }
 
     /**
-     * Menampilkan Halaman Pesanan Aktif Konsumen
+     * Menampilkan Halaman Pesanan Aktif Konsumen (Strict Pay-First Policy untuk Takeaway)
      */
     public function pesananAktif(Request $request)
     {
-        // 1. Ambil semua pesanan aktif (pending & processing)
-        $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
+        // 1. Proaktif cek status Midtrans untuk semua pesanan pending/unpaid sebelum memfilter
+        $pendingCheckOrders = Pesanan::with(['pembayaran'])
             ->whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
-            ->orderBy('created_at', 'asc')
             ->get();
 
-        // 2. Proaktif verifikasi status Midtrans untuk pesanan online yang belum lunas
-        foreach ($orders as $order) {
+        foreach ($pendingCheckOrders as $order) {
             if ($order->pembayaran && $order->pembayaran->status !== 'paid') {
                 $this->checkAndUpdateMidtransStatus($order);
             }
         }
 
-        // Refresh data setelah auto-check
+        // 2. Ambil pesanan aktif:
+        // - Dine-In: Tampil agar Waitress bisa mengantar & menagih
+        // - Takeaway: WAJIB LUNAS (pembayaran.status = 'paid') atau dibuat langsung oleh Kasir (id_kasir != null)
         $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
             ->whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($sub) {
+                $sub->where('tipe_pesanan', '!=', 'takeaway')
+                    ->orWhereNotNull('id_kasir')
+                    ->orWhereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    });
+            })
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -72,7 +79,14 @@ class PosController extends Controller
     public function activeOrdersCount()
     {
         $activeOrdersQuery = Pesanan::whereIn('status', ['pending', 'processing'])
-            ->whereNotIn('status', ['cancelled', 'void']);
+            ->whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($sub) {
+                $sub->where('tipe_pesanan', '!=', 'takeaway')
+                    ->orWhereNotNull('id_kasir')
+                    ->orWhereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    });
+            });
 
         $count = (clone $activeOrdersQuery)->count();
         $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
