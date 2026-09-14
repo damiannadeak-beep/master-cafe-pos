@@ -23,9 +23,6 @@
                         <i class="bi bi-bell me-1"></i> Pesanan Aktif
                         <span class="badge bg-danger rounded-pill ms-1 shadow-sm" id="badge-active-orders" style="display: none;">0</span>
                     </a>
-                    <a class="nav-pill-btn {{ request()->routeIs('kasir.meja.*') ? 'active' : '' }}" href="{{ route('kasir.meja.index') }}">
-                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Monitor Meja
-                    </a>
                     <!-- Notifikasi Panggilan Meja (Call Bell) -->
                     <div class="dropdown">
                         <button class="nav-pill-btn dropdown-toggle text-warning" type="button" id="dropdownCallBell" data-bs-toggle="dropdown" aria-expanded="false">

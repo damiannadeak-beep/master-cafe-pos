@@ -96,7 +96,6 @@
 
                                     @role('kasir')
                                         <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/pos"><i class="bi bi-display me-2 text-success"></i> Tablet Waitress Station</a>
-                                        <a class="dropdown-item text-light d-flex align-items-center" href="/kasir/meja"><i class="bi bi-grid-3x3-gap me-2 text-info"></i> Monitor Meja</a>
                                     @endrole
                                     
                                     <hr class="dropdown-divider border-secondary">
