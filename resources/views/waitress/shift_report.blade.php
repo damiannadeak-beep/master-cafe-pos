@@ -198,46 +198,6 @@
         </tbody>
     </table>
 
-    <!-- 3. Rincian Riwayat Transaksi Shift -->
-    <h6 class="fw-bold text-dark text-uppercase border-bottom border-dark pb-1 mb-2">3. Rincian Riwayat Transaksi Shift</h6>
-    <table class="table table-bordered border-secondary table-sm mb-4 table-print" style="font-size: 8.5pt;">
-        <thead>
-            <tr style="background-color: #f2f2f2;">
-                <th style="width: 35px;" class="text-center">No</th>
-                <th style="width: 70px;">Waktu</th>
-                <th style="width: 80px;">No. Order</th>
-                <th>Tipe Pesanan</th>
-                <th style="width: 80px;" class="text-center">Metode</th>
-                <th style="width: 120px;" class="text-end">Total Bayar</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $tNo = 1; @endphp
-            @forelse($pembayarans as $p)
-            <tr>
-                <td class="text-center">{{ $tNo++ }}</td>
-                <td>{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->format('H:i') : '-' }} WIB</td>
-                <td><strong>#{{ str_pad($p->id_pesanan, 4, '0', STR_PAD_LEFT) }}</strong></td>
-                <td>{{ ucfirst(str_replace('_', ' ', $p->pesanan->tipe_pesanan ?? 'Dine In')) }}</td>
-                <td class="text-center">
-                    @if($p->metode == 'cash')
-                        Tunai
-                    @elseif($p->metode == 'qris')
-                        QRIS
-                    @else
-                        {{ strtoupper($p->metode ?? '-') }}
-                    @endif
-                </td>
-                <td class="text-end fw-bold">Rp {{ number_format($p->total_bayar, 0, ',', '.') }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="6" class="text-center py-2 text-muted">Belum ada transaksi selesai pada shift ini</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-
     <!-- Tanda Tangan -->
     <div class="row pt-3 text-center" style="page-break-inside: avoid;">
         <div class="col-6">

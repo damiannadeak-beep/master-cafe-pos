@@ -212,46 +212,6 @@
         </tbody>
     </table>
 
-    <!-- Daftar Transaksi -->
-    <div class="section-heading">3. Rincian Riwayat Transaksi Shift</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th style="width: 30px;" class="text-center">No</th>
-                <th style="width: 70px;">Waktu</th>
-                <th style="width: 75px;">No. Order</th>
-                <th>Tipe Pesanan</th>
-                <th style="width: 80px;" class="text-center">Metode</th>
-                <th style="width: 110px;" class="text-end">Total Bayar</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $tNo = 1; @endphp
-            @forelse($pembayarans as $p)
-            <tr>
-                <td class="text-center">{{ $tNo++ }}</td>
-                <td>{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->format('H:i') : '-' }} WIB</td>
-                <td><strong>#{{ str_pad($p->id_pesanan, 4, '0', STR_PAD_LEFT) }}</strong></td>
-                <td>{{ ucfirst(str_replace('_', ' ', $p->pesanan->tipe_pesanan ?? 'Dine In')) }}</td>
-                <td class="text-center">
-                    @if($p->metode == 'cash')
-                        Tunai
-                    @elseif($p->metode == 'qris')
-                        QRIS
-                    @else
-                        {{ strtoupper($p->metode ?? '-') }}
-                    @endif
-                </td>
-                <td class="text-end fw-bold">Rp {{ number_format($p->total_bayar, 0, ',', '.') }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="6" class="text-center" style="padding: 10px; color: #888;">Belum ada transaksi selesai pada shift ini</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-
     <!-- Tanda Tangan -->
     <table class="footer-sign">
         <tr>
