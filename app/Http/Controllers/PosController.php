@@ -260,6 +260,17 @@ class PosController extends Controller
                 }
             }
 
+            // Kirim Notifikasi WhatsApp Otomatis jika Pesanan Takeaway Selesai
+            if ($pesanan->status === 'completed' && $pesanan->tipe_pesanan === 'takeaway' && !empty($pesanan->guest_phone)) {
+                try {
+                    $pesanan->loadMissing(['detail_pesanan.menu']);
+                    $waMessage = \App\Services\WhatsAppService::formatTakeawayReadyMessage($pesanan);
+                    \App\Services\WhatsAppService::sendMessage($pesanan->guest_phone, $waMessage);
+                } catch (\Throwable $waErr) {
+                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal kirim notifikasi WA Takeaway: ' . $waErr->getMessage());
+                }
+            }
+
             return response()->json([
                 'message' => 'Status pesanan berhasil diupdate',
                 'status' => $pesanan->status

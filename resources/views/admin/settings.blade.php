@@ -23,21 +23,35 @@
 
         @include("components.admin.settings-payment-printer")
 
-                            <!-- Kolom AI API Key -->
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-3">Sistem Verifikasi Otomatis <span class="badge bg-secondary">Opsional</span></h6>
-                                <p class="text-white-50 small">Masukkan API Key agar sistem dapat memvalidasi struk transfer pelanggan secara otomatis.</p>
+                            <!-- Kolom AI API Key & WA Gateway -->
+                            <div class="col-md-6 border-start ps-md-4">
+                                <h6 class="fw-bold mb-3 text-success"><i class="bi bi-whatsapp me-2"></i>WhatsApp Gateway (Notifikasi Takeaway)</h6>
+                                <p class="text-white-50 small">Masukkan API Token untuk mengirim notifikasi WA otomatis saat pesanan Takeaway siap diambil.</p>
                                 
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">API Key (Gemini)</label>
-                                    <input type="text" class="form-control" name="gemini_api_key" value="{{ $settings['gemini_api_key'] ?? '' }}" placeholder="AIzaSyB...">
-                                    <div class="form-text">Dapatkan gratis di <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a>.</div>
+                                    <label class="form-label fw-bold">WA Gateway API Token / Key</label>
+                                    <input type="text" class="form-control text-white" name="wa_gateway_api_key" value="{{ $settings['wa_gateway_api_key'] ?? '' }}" placeholder="Contoh: u9#xK8mPzL2..." style="background-color: #0e1217; border-color: #30363d;">
+                                    <div class="form-text text-white-50">Token resmi dari provider (misal Fonnte.com / Wablas).</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">WA Gateway API URL</label>
+                                    <input type="text" class="form-control text-white" name="wa_gateway_url" value="{{ $settings['wa_gateway_url'] ?? 'https://api.fonnte.com/send' }}" placeholder="https://api.fonnte.com/send" style="background-color: #0e1217; border-color: #30363d;">
+                                    <div class="form-text text-white-50">Default Fonnte: <code>https://api.fonnte.com/send</code></div>
+                                </div>
+
+                                <hr class="border-secondary my-4">
+
+                                <h6 class="fw-bold mb-2">Sistem Verifikasi Otomatis Struk <span class="badge bg-secondary">Opsional</span></h6>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">API Key (Gemini AI)</label>
+                                    <input type="text" class="form-control text-white" name="gemini_api_key" value="{{ $settings['gemini_api_key'] ?? '' }}" placeholder="AIzaSyB..." style="background-color: #0e1217; border-color: #30363d;">
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-success w-100 fw-bold">Simpan Pengaturan Pembayaran</button>
+                            <button type="submit" class="btn btn-success w-100 fw-bold">Simpan Pengaturan Pembayaran & WA Gateway</button>
                         </div>
                     </form>
                 </div>

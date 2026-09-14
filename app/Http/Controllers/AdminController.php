@@ -113,6 +113,8 @@ class AdminController extends Controller
             'midtrans_server_key' => 'nullable|string',
             'midtrans_client_key' => 'nullable|string',
             'midtrans_is_production' => 'nullable|in:0,1',
+            'wa_gateway_api_key' => 'nullable|string',
+            'wa_gateway_url' => 'nullable|string',
         ]);
 
         if ($request->hasFile('qris_image')) {
@@ -148,9 +150,11 @@ class AdminController extends Controller
             'midtrans_server_key' => $request->midtrans_server_key,
             'midtrans_client_key' => $request->midtrans_client_key,
             'midtrans_is_production' => $request->midtrans_is_production ?? '0',
+            'wa_gateway_api_key' => $request->wa_gateway_api_key,
+            'wa_gateway_url' => $request->wa_gateway_url ?? 'https://api.fonnte.com/send',
         ]);
 
-        return redirect()->route('admin.settings')->with('success', 'Pengaturan pembayaran berhasil diperbarui!');
+        return redirect()->route('admin.settings')->with('success', 'Pengaturan pembayaran & WA Gateway berhasil diperbarui!');
     }
 
     public function updatePrinterSettings(Request $request, SettingsService $settingsService)
