@@ -38,32 +38,23 @@ class PosController extends Controller
      */
     public function pesananAktif(Request $request)
     {
+        // 1. Ambil semua pesanan aktif (pending & processing)
         $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
-            ->where(function ($query) {
-                // 1. Pesanan Dine-In atau Takeaway yang MASIH DIPROSES (pending atau processing)
-                // - Jika dine-in: selalu tampil
-                // - Jika takeaway: tampil jika dibuat kasir (id_kasir != null) ATAU sudah lunas (paid)
-                $query->where(function ($q) {
-                    $q->whereIn('status', ['pending', 'processing'])
-                      ->where(function ($sub) {
-                          $sub->where('tipe_pesanan', '!=', 'takeaway')
-                              ->orWhereNotNull('id_kasir')
-                              ->orWhereHas('pembayaran', function ($p) {
-                                  $p->where('status', 'paid');
-                              });
-                      });
-                })
-                // 2. Pesanan Selesai Masak (completed) yang BELUM LUNAS (perlu ditagih kasir)
-                ->orWhere(function ($q) {
-                    $q->where('status', 'completed')
-                      ->where(function ($sub) {
-                          $sub->whereDoesntHave('pembayaran')
-                              ->orWhereHas('pembayaran', function ($p) {
-                                  $p->where('status', '!=', 'paid');
-                              });
-                      });
-                });
-            })
+            ->whereIn('status', ['pending', 'processing'])
+            ->whereNotIn('status', ['cancelled', 'void'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // 2. Proaktif verifikasi status Midtrans untuk pesanan online yang belum lunas
+        foreach ($orders as $order) {
+            if ($order->pembayaran && $order->pembayaran->status !== 'paid') {
+                $this->checkAndUpdateMidtransStatus($order);
+            }
+        }
+
+        // Refresh data setelah auto-check
+        $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
+            ->whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
             ->orderBy('created_at', 'asc')
             ->get();
@@ -80,28 +71,8 @@ class PosController extends Controller
      */
     public function activeOrdersCount()
     {
-        $activeOrdersQuery = Pesanan::where(function ($query) {
-            $query->where(function ($q) {
-                $q->whereIn('status', ['pending', 'processing'])
-                  ->where(function ($sub) {
-                      $sub->where('tipe_pesanan', '!=', 'takeaway')
-                          ->orWhereNotNull('id_kasir')
-                          ->orWhereHas('pembayaran', function ($p) {
-                              $p->where('status', 'paid');
-                          });
-                  });
-            })
-            ->orWhere(function ($q) {
-                $q->where('status', 'completed')
-                  ->where(function ($sub) {
-                      $sub->whereDoesntHave('pembayaran')
-                          ->orWhereHas('pembayaran', function ($p) {
-                              $p->where('status', '!=', 'paid');
-                          });
-                  });
-            });
-        })
-        ->whereNotIn('status', ['cancelled', 'void']);
+        $activeOrdersQuery = Pesanan::whereIn('status', ['pending', 'processing'])
+            ->whereNotIn('status', ['cancelled', 'void']);
 
         $count = (clone $activeOrdersQuery)->count();
         $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
@@ -122,6 +93,74 @@ class PosController extends Controller
             'latest_id' => $latestId,
             'hash' => md5($activeHash),
         ]);
+    }
+
+    /**
+     * Helper internal untuk verifikasi status Midtrans secara proaktif
+     */
+    private function checkAndUpdateMidtransStatus($pesanan)
+    {
+        if (!$pesanan || !$pesanan->pembayaran || $pesanan->pembayaran->status === 'paid') {
+            return;
+        }
+
+        $serverKey = trim(Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey')));
+        $rawIsProd = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction'));
+        $isProduction = filter_var($rawIsProd, FILTER_VALIDATE_BOOLEAN);
+
+        if (empty($serverKey)) {
+            return;
+        }
+
+        $candidates = [];
+        if (!empty($pesanan->pembayaran->midtrans_order_id)) {
+            $candidates[] = $pesanan->pembayaran->midtrans_order_id;
+        }
+        $candidates[] = 'ORDER-' . $pesanan->id;
+
+        $trxStatus = null;
+        $paymentType = null;
+
+        try {
+            \Midtrans\Config::$serverKey = $serverKey;
+            \Midtrans\Config::$isProduction = $isProduction;
+
+            foreach (array_unique(array_filter($candidates)) as $targetMidtransId) {
+                try {
+                    $statusMidtrans = \Midtrans\Transaction::status($targetMidtransId);
+                    $status = is_object($statusMidtrans) ? ($statusMidtrans->transaction_status ?? '') : ($statusMidtrans['transaction_status'] ?? '');
+                    if (in_array($status, ['capture', 'settlement'])) {
+                        $trxStatus = $status;
+                        $paymentType = is_object($statusMidtrans) ? ($statusMidtrans->payment_type ?? '') : ($statusMidtrans['payment_type'] ?? '');
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    // try next
+                }
+            }
+
+            if (in_array($trxStatus, ['capture', 'settlement'])) {
+                $metodeBayar = in_array($paymentType, ['qris', 'gopay', 'shopeepay']) ? 'qris' : 'bank_transfer';
+
+                $pesanan->pembayaran->update([
+                    'status' => 'paid',
+                    'metode' => $metodeBayar,
+                    'tanggal' => now(),
+                ]);
+                $pesanan->update(['status' => 'processing']);
+
+                try {
+                    broadcast(new \App\Events\PesananBaru($pesanan));
+                    if ($pesanan->id_meja && $pesanan->meja) {
+                        broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::info('[PosController] checkAndUpdateMidtransStatus notice: ' . $e->getMessage());
+        }
     }
 
     /**
