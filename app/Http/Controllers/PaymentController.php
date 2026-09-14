@@ -53,7 +53,8 @@ class PaymentController extends Controller
         $clientKey = Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey'));
         $serverKey = Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey'));
         
-        $isProduction = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction')) == '1';
+        $rawIsProd = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction'));
+        $isProduction = filter_var($rawIsProd, FILTER_VALIDATE_BOOLEAN);
 
         \Midtrans\Config::$serverKey = $serverKey;
         \Midtrans\Config::$isProduction = $isProduction;
@@ -61,6 +62,7 @@ class PaymentController extends Controller
         \Midtrans\Config::$is3ds = true;
 
         $snapToken = $pembayaran->snap_token;
+        $snapError = null;
 
         if (empty($snapToken) && !empty($serverKey) && !str_contains($serverKey, 'xxxxxx')) {
             try {
@@ -101,14 +103,15 @@ class PaymentController extends Controller
                 $snapToken = \Midtrans\Snap::getSnapToken($midtransParams);
                 $pembayaran->update(['snap_token' => $snapToken]);
             } catch (\Throwable $e) {
-                Log::warning('[PaymentController] Midtrans getSnapToken notice: ' . $e->getMessage());
+                $snapError = $e->getMessage();
+                Log::warning('[PaymentController] Midtrans getSnapToken notice: ' . $snapError);
                 $snapToken = null;
             }
         }
 
         $isSandboxMock = empty($snapToken) && (empty($serverKey) || str_contains($serverKey, 'xxxxxx'));
 
-        return view('konsumen.checkout', compact('pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock'));
+        return view('konsumen.checkout', compact('pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock', 'snapError'));
     }
 
     public function simulateMidtransPay(Request $request, $id_pesanan)

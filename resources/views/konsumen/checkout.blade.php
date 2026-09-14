@@ -74,6 +74,12 @@
                                 </div>
                             </div>
 
+                            @if(!empty($snapError))
+                                <div class="alert alert-warning small py-2 px-3 rounded-3 mb-3 text-start" style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.3); color: #f8d7da; font-size: 0.8rem;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> <strong>Midtrans Alert:</strong> {{ $snapError }}
+                                </div>
+                            @endif
+
                             @if(!empty($snapToken))
                                 <button id="pay-button" onclick="payWithSnap()" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
                                     ⚡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
