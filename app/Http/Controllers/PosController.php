@@ -588,12 +588,14 @@ class PosController extends Controller
     {
         try {
             $data = $this->getShiftReportData();
-            $data['hariIni'] = $data['shift']->waktu_buka->format('Y-m-d');
+            $data['hariIni'] = $data['shift']->waktu_buka ? $data['shift']->waktu_buka->format('Y-m-d') : date('Y-m-d');
 
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('kasir.shift_report_pdf', $data);
-            return $pdf->download('Laporan_Shift_' . $data['hariIni'] . '.pdf');
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('waitress.shift_report_pdf', $data)
+                ->setPaper('a4', 'portrait');
+
+            return $pdf->download('Laporan_Shift_Kasir_' . $data['hariIni'] . '.pdf');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal membuat file PDF: ' . $e->getMessage());
         }
     }
 

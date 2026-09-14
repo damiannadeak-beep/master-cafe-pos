@@ -103,69 +103,210 @@
 </div>
 
 <!-- Layout Print Browser -->
-<div class="d-none d-print-block px-4 py-4" style="background: white; color: black !important;">
-    <div class="text-center mb-4">
-        <h2 class="fw-bold">Laporan Penjualan Shift</h2>
-        <p>Waitress: {{ auth()->user()->name }} | Tanggal: {{ $shift->waktu_buka->format('Y-m-d') }}</p>
+<div class="d-none d-print-block print-area" style="background: #fff; color: #111;">
+    <!-- KOP Header Cetak -->
+    <div class="d-flex justify-content-between align-items-start border-bottom border-2 border-dark pb-2 mb-3">
+        <div>
+            <h3 class="fw-bold mb-0 text-dark" style="letter-spacing: 0.5px;">MASTER CAFE POS</h3>
+            <div class="small text-muted">Laporan Rekonsiliasi & Penutupan Shift Kasir</div>
+        </div>
+        <div class="text-end small text-dark">
+            <div><strong>Kasir:</strong> {{ auth()->user()->name }}</div>
+            <div><strong>Tanggal Shift:</strong> {{ $shift->waktu_buka ? $shift->waktu_buka->translatedFormat('d F Y') : date('d/m/Y') }}</div>
+            <div><strong>Dicetak:</strong> {{ now()->translatedFormat('d F Y H:i') }} WIB</div>
+        </div>
     </div>
-    
-    <table class="table table-dark text-white border-secondary table-bordered border-dark mb-4 text-white">
+
+    <!-- 1. Ringkasan Kas & Rekonsiliasi Shift -->
+    <h6 class="fw-bold text-dark text-uppercase border-bottom border-dark pb-1 mb-2">1. Ringkasan Kas & Rekonsiliasi Shift</h6>
+    <table class="table table-bordered border-secondary table-sm mb-3 table-print" style="font-size: 8.5pt;">
+        <tbody>
+            <tr>
+                <td style="width: 25%; background-color: #f8f9fa; font-weight: bold;">Waktu Buka Shift:</td>
+                <td style="width: 25%;">{{ $shift->waktu_buka ? $shift->waktu_buka->format('d/m/Y H:i') : '-' }} WIB</td>
+                <td style="width: 25%; background-color: #f8f9fa; font-weight: bold;">Modal Awal Kas:</td>
+                <td style="width: 25%; text-align: right; font-weight: bold;">Rp {{ number_format($shift->modal_awal ?? 0, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Waktu Tutup Shift:</td>
+                <td>{{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') . ' WIB' : 'Shift Masih Berjalan (Open)' }}</td>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Pemasukan Tunai:</td>
+                <td style="text-align: right; font-weight: bold; color: #0d6832;">Rp {{ number_format($totalCash, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Status Shift:</td>
+                <td><span class="badge bg-secondary">{{ strtoupper($shift->status) }}</span></td>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Pemasukan QRIS:</td>
+                <td style="text-align: right; font-weight: bold; color: #0b5ed7;">Rp {{ number_format($totalQris, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Total Transaksi:</td>
+                <td>{{ $pembayarans->count() }} Transaksi</td>
+                <td style="background-color: #e9ecef; font-weight: bold;">TOTAL PENJUALAN:</td>
+                <td style="text-align: right; font-weight: bold; background-color: #e9ecef;">Rp {{ number_format($totalSemua, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Pengeluaran Kasir:</td>
+                <td style="color: #dc3545; font-weight: bold;">Rp {{ number_format($shift->total_pengeluaran ?? 0, 0, ',', '.') }}</td>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Uang Fisik Aktual:</td>
+                <td style="text-align: right; font-weight: bold;">Rp {{ number_format($shift->uang_fisik_aktual ?? 0, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Total Item Terjual:</td>
+                <td>{{ $totalItemTerjual }} porsi / minuman</td>
+                <td style="background-color: #f8f9fa; font-weight: bold;">Selisih Fisik Kas:</td>
+                <td style="text-align: right; font-weight: bold; color: {{ ($shift->selisih ?? 0) < 0 ? '#dc3545' : (($shift->selisih ?? 0) > 0 ? '#0d6832' : '#000') }};">
+                    Rp {{ number_format($shift->selisih ?? 0, 0, ',', '.') }}
+                    @if(($shift->selisih ?? 0) == 0) (Pas) @elseif(($shift->selisih ?? 0) < 0) (Kurang) @else (Lebih) @endif
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- 2. Rekapitulasi Menu Terjual -->
+    <h6 class="fw-bold text-dark text-uppercase border-bottom border-dark pb-1 mb-2">2. Rekapitulasi Menu Terjual</h6>
+    <table class="table table-bordered border-secondary table-sm mb-3 table-print" style="font-size: 8.5pt;">
         <thead>
-            <tr style="background-color: #f8f9fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <th>No</th>
-                <th>Menu / Item Terjual</th>
-                <th>Qty</th>
-                <th>Subtotal</th>
+            <tr style="background-color: #f2f2f2;">
+                <th style="width: 35px;" class="text-center">No</th>
+                <th>Menu / Produk</th>
+                <th style="width: 90px;" class="text-center">Qty Terjual</th>
+                <th style="width: 130px;" class="text-end">Subtotal</th>
             </tr>
         </thead>
         <tbody>
             @php $no = 1; @endphp
             @forelse($rekapMenu as $nama => $data)
             <tr>
-                <td>{{ $no++ }}</td>
+                <td class="text-center">{{ $no++ }}</td>
                 <td>{{ $nama }}</td>
-                <td>{{ $data['jumlah'] }}</td>
-                <td>Rp {{ number_format($data['subtotal'], 0, ',', '.') }}</td>
+                <td class="text-center fw-bold">{{ $data['jumlah'] }}</td>
+                <td class="text-end">Rp {{ number_format($data['subtotal'], 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="4" class="text-center">Belum ada item terjual</td>
+                <td colspan="4" class="text-center py-2 text-muted">Belum ada item terjual</td>
             </tr>
             @endforelse
             @if($totalItemTerjual > 0)
-            <tr class="fw-bold" style="background-color: #f8f9fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <td colspan="2" class="text-end">Total Keseluruhan Item</td>
-                <td>{{ $totalItemTerjual }}</td>
-                <td></td>
+            <tr style="background-color: #f8f9fa; font-weight: bold;">
+                <td colspan="2" class="text-end">TOTAL ITEM TERJUAL:</td>
+                <td class="text-center">{{ $totalItemTerjual }}</td>
+                <td class="text-end">Rp {{ number_format($totalSemua, 0, ',', '.') }}</td>
             </tr>
             @endif
         </tbody>
     </table>
 
-    <div class="row justify-content-end">
-        <div class="col-5">
-            <table class="table table-dark text-white border-secondary table-borderless text-white">
-                <tr>
-                    <td>Total Tunai:</td>
-                    <td class="text-end">Rp {{ number_format($totalCash, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <td>Total QRIS:</td>
-                    <td class="text-end">Rp {{ number_format($totalQris, 0, ',', '.') }}</td>
-                </tr>
-                <tr class="fw-bold border-top border-dark">
-                    <td>Total Keseluruhan:</td>
-                    <td class="text-end">Rp {{ number_format($totalSemua, 0, ',', '.') }}</td>
-                </tr>
-            </table>
+    <!-- 3. Rincian Riwayat Transaksi Shift -->
+    <h6 class="fw-bold text-dark text-uppercase border-bottom border-dark pb-1 mb-2">3. Rincian Riwayat Transaksi Shift</h6>
+    <table class="table table-bordered border-secondary table-sm mb-4 table-print" style="font-size: 8.5pt;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th style="width: 35px;" class="text-center">No</th>
+                <th style="width: 70px;">Waktu</th>
+                <th style="width: 80px;">No. Order</th>
+                <th>Tipe Pesanan</th>
+                <th style="width: 80px;" class="text-center">Metode</th>
+                <th style="width: 120px;" class="text-end">Total Bayar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $tNo = 1; @endphp
+            @forelse($pembayarans as $p)
+            <tr>
+                <td class="text-center">{{ $tNo++ }}</td>
+                <td>{{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->format('H:i') : '-' }} WIB</td>
+                <td><strong>#{{ str_pad($p->id_pesanan, 4, '0', STR_PAD_LEFT) }}</strong></td>
+                <td>{{ ucfirst(str_replace('_', ' ', $p->pesanan->tipe_pesanan ?? 'Dine In')) }}</td>
+                <td class="text-center">
+                    @if($p->metode == 'cash')
+                        Tunai
+                    @elseif($p->metode == 'qris')
+                        QRIS
+                    @else
+                        {{ strtoupper($p->metode ?? '-') }}
+                    @endif
+                </td>
+                <td class="text-end fw-bold">Rp {{ number_format($p->total_bayar, 0, ',', '.') }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="6" class="text-center py-2 text-muted">Belum ada transaksi selesai pada shift ini</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <!-- Tanda Tangan -->
+    <div class="row pt-3 text-center" style="page-break-inside: avoid;">
+        <div class="col-6">
+            <div class="small">Kasir yang bertugas,</div>
+            <div style="height: 50px;"></div>
+            <div class="fw-bold"><u>{{ auth()->user()->name }}</u></div>
+            <div class="small text-muted">Staf Kasir Master Cafe</div>
+        </div>
+        <div class="col-6">
+            <div class="small">Mengetahui / Verifikasi,</div>
+            <div style="height: 50px;"></div>
+            <div class="fw-bold"><u>( Supervisor / Pemilik )</u></div>
+            <div class="small text-muted">Manajemen Master Cafe</div>
         </div>
     </div>
 </div>
 
 <style>
 @media print {
-    @page { size: auto; margin: 20mm; }
-    body { background: white !important; }
+    @page {
+        size: A4 portrait;
+        margin: 10mm 12mm;
+    }
+    html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        font-family: Arial, sans-serif !important;
+    }
+    .kasir-layout, .kasir-main, .kasir-container {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    .kasir-navbar, .kasir-topbar, .offcanvas, .d-print-none, nav, header {
+        display: none !important;
+    }
+    .print-area {
+        display: block !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+    }
+    .table-print {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        color: #000000 !important;
+        background: transparent !important;
+    }
+    .table-print th, .table-print td {
+        border: 1px solid #333333 !important;
+        color: #000000 !important;
+        padding: 4px 8px !important;
+        background: transparent !important;
+    }
+    .table-print th {
+        background-color: #f2f2f2 !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
 </style>
 @endsection
