@@ -122,9 +122,14 @@
                                     <i class="bi bi-check-all me-1"></i> Selesai
                                 </button>
                             @elseif($pesanan->status === 'processing')
-                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill fs-6 pulse-animation">
-                                    <i class="bi bi-cup-hot-fill me-1"></i> Sedang Disiapkan
-                                </span>
+                                <div class="d-flex flex-column align-items-end gap-1">
+                                    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-1.5 rounded-pill fs-6 pulse-animation">
+                                        <i class="bi bi-cup-hot-fill me-1"></i> Sedang Disiapkan
+                                    </span>
+                                    <button onclick="finishCustomerSession()" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1 mt-1 text-white-50" style="font-size: 0.75rem;">
+                                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Menu
+                                    </button>
+                                </div>
                             @elseif($pesanan->status === 'cancelled')
                                 <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 rounded-pill fs-6">
                                     <i class="bi bi-x-circle me-1"></i> Dibatalkan
