@@ -1,5 +1,12 @@
 @forelse($orders as $order)
-            <div class="col-md-6 col-lg-4" id="order-card-{{ $order->id }}">
+            @php 
+                $cardTotalPay = (int) (($order->pembayaran && (float)$order->pembayaran->total_bayar > 0) 
+                    ? $order->pembayaran->total_bayar 
+                    : ($order->total - ($order->discount_amount ?? 0))); 
+                $cardUangDiterima = (int) ($order->pembayaran?->uang_diterima ?? 0);
+                $cardUangKembalian = (int) ($order->pembayaran?->uang_kembalian ?? 0);
+            @endphp
+            <div class="col-md-6 col-lg-4" id="order-card-{{ $order->id }}" data-total="{{ $cardTotalPay }}" data-uang-diterima="{{ $cardUangDiterima }}" data-uang-kembalian="{{ $cardUangKembalian }}">
                 <div class="card shadow-sm border-0 h-100 rounded-4">
                     <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center rounded-top-4">
                         <div>

@@ -474,6 +474,20 @@
     window.payOrder = function(id, total = 0, prefilledUangDiterima = 0, prefilledUangKembalian = 0) {
         currentOrderId = id;
         activeOrderPayState.id = id;
+
+        // Failsafe: Read total and cash info from DOM data attributes if total is missing/0
+        const cardEl = document.getElementById(`order-card-${id}`);
+        if ((!total || total <= 0) && cardEl) {
+            const domTotal = parseInt(cardEl.getAttribute('data-total')) || 0;
+            if (domTotal > 0) total = domTotal;
+            if (!prefilledUangDiterima) {
+                prefilledUangDiterima = parseInt(cardEl.getAttribute('data-uang-diterima')) || 0;
+            }
+            if (!prefilledUangKembalian) {
+                prefilledUangKembalian = parseInt(cardEl.getAttribute('data-uang-kembalian')) || 0;
+            }
+        }
+
         activeOrderPayState.total = total || 0;
         
         if (prefilledUangDiterima && prefilledUangDiterima >= (total || 0)) {
