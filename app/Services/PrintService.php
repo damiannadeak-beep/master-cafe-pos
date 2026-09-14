@@ -132,19 +132,14 @@ class PrintService
             $printer->text("--------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $printer->text("Order #" . $order->id . " | Meja: " . ($order->meja->nama_meja_atau_nomor ?? '-') . "\n");
-            $printer->text("Waktu  : " . Carbon::parse($order->tanggal)->format('d/m/Y H:i') . "\n");
+            $printer->text("Order #" . $order->id . " | " . ($order->tipe_pesanan === 'takeaway' ? 'Takeaway' : ('Meja: ' . ($order->meja->nama_meja_atau_nomor ?? '-'))) . "\n");
+            $printer->text("Waktu  : " . Carbon::parse($order->tanggal ?? $order->created_at)->format('d/m/Y H:i') . "\n");
             $printer->text("Tipe   : " . strtoupper(str_replace('_', ' ', $order->tipe_pesanan)) . "\n");
-            if ($order->pembayaran && $order->pembayaran->metode === 'cash') {
-                $printer->text("Bayar  : TUNAI (CASH)\n");
-                if ($order->pembayaran->uang_kembalian > 0) {
-                    $printer->setEmphasis(true);
-                    $printer->text("KEMBALIAN: Rp " . number_format($order->pembayaran->uang_kembalian, 0, ',', '.') . "\n");
-                    $printer->setEmphasis(false);
-                    $printer->text("(Uang Tamu: Rp " . number_format($order->pembayaran->uang_diterima, 0, ',', '.') . ")\n");
-                } elseif ($order->pembayaran->uang_diterima) {
-                    $printer->text("Keterangan: UANG PAS\n");
-                }
+            if (!empty($order->customer_name)) {
+                $printer->text("Pelanggan: " . $order->customer_name . "\n");
+            }
+            if (!empty($order->catatan)) {
+                $printer->text("Catatan  : " . $order->catatan . "\n");
             }
             $printer->text("--------------------------------\n");
 
