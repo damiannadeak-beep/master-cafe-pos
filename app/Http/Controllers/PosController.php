@@ -80,7 +80,7 @@ class PosController extends Controller
      */
     public function activeOrdersCount()
     {
-        $count = Pesanan::where(function ($query) {
+        $activeOrdersQuery = Pesanan::where(function ($query) {
             $query->where(function ($q) {
                 $q->whereIn('status', ['pending', 'processing'])
                   ->where(function ($sub) {
@@ -101,12 +101,12 @@ class PosController extends Controller
                   });
             });
         })
-        ->whereNotIn('status', ['cancelled', 'void'])
-        ->count();
+        ->whereNotIn('status', ['cancelled', 'void']);
 
-        $latestId = Pesanan::max('id') ?? 0;
+        $count = (clone $activeOrdersQuery)->count();
+        $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
 
-        $activeHash = Pesanan::whereIn('status', ['pending', 'processing', 'completed'])
+        $activeHash = (clone $activeOrdersQuery)
             ->with('pembayaran')
             ->get()
             ->map(function ($o) {
