@@ -471,12 +471,18 @@
         method: 'cash'
     };
 
-    window.payOrder = function(id, total = 0) {
+    window.payOrder = function(id, total = 0, prefilledUangDiterima = 0, prefilledUangKembalian = 0) {
         currentOrderId = id;
         activeOrderPayState.id = id;
         activeOrderPayState.total = total || 0;
-        activeOrderPayState.nominal = total || 0;
-        activeOrderPayState.isUangPas = true;
+        
+        if (prefilledUangDiterima && prefilledUangDiterima >= (total || 0)) {
+            activeOrderPayState.nominal = prefilledUangDiterima;
+            activeOrderPayState.isUangPas = (prefilledUangDiterima === (total || 0));
+        } else {
+            activeOrderPayState.nominal = total || 0;
+            activeOrderPayState.isUangPas = true;
+        }
         activeOrderPayState.method = 'cash';
         
         const idDisplay = document.getElementById('payment-order-id-display');
@@ -489,7 +495,7 @@
         if (emailInput) emailInput.value = '';
 
         window.switchActiveOrderPayMethod('cash');
-        window.renderActiveOrderCashPresets();
+        window.renderActiveOrderCashPresets(prefilledUangDiterima);
 
         window.openModalById('paymentModal');
     };
@@ -518,41 +524,50 @@
         }
     };
 
-    window.renderActiveOrderCashPresets = function() {
+    window.renderActiveOrderCashPresets = function(prefilledNominal = 0) {
         const total = activeOrderPayState.total;
+        const selectedNominal = (prefilledNominal && prefilledNominal >= total) ? prefilledNominal : (activeOrderPayState.nominal || total);
+        const isUangPas = (selectedNominal === total);
+
         let presetHtml = `
-            <button type="button" class="btn btn-sm btn-outline-success active-cash-preset-btn active rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('pas', ${total}, this)">
+            <button type="button" class="btn btn-sm ${isUangPas ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('pas', ${total}, this)">
                 <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${total.toLocaleString('id-ID')})
             </button>
         `;
 
         if (total < 50000) {
+            const is50k = (selectedNominal === 50000);
             presetHtml += `
-                <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 50000, this)">
+                <button type="button" class="btn btn-sm ${is50k ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 50000, this)">
                     Rp 50.000
                 </button>
             `;
         }
 
         if (total < 100000 && total !== 50000) {
+            const is100k = (selectedNominal === 100000);
             presetHtml += `
-                <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 100000, this)">
+                <button type="button" class="btn btn-sm ${is100k ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 100000, this)">
                     Rp 100.000
                 </button>
             `;
         }
 
+        const nextCeil = total > 100000 ? Math.ceil((total + 1000) / 50000) * 50000 : 0;
         if (total > 100000) {
-            const nextCeil = Math.ceil((total + 1000) / 50000) * 50000;
+            const isCeil = (selectedNominal === nextCeil);
             presetHtml += `
-                <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', ${nextCeil}, this)">
+                <button type="button" class="btn btn-sm ${isCeil ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', ${nextCeil}, this)">
                     Rp ${nextCeil.toLocaleString('id-ID')}
                 </button>
             `;
         }
 
+        const isStandardPreset = (selectedNominal === total || selectedNominal === 50000 || selectedNominal === 100000 || (nextCeil && selectedNominal === nextCeil));
+        const isCustom = !isStandardPreset && selectedNominal > total;
+
         presetHtml += `
-            <button type="button" class="btn btn-sm btn-outline-secondary active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('custom', 0, this)">
+            <button type="button" class="btn btn-sm ${isCustom ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('custom', 0, this)">
                 <i class="bi bi-pencil me-1"></i> Nominal Lain
             </button>
         `;
@@ -560,11 +575,12 @@
         const container = document.getElementById('active-order-cash-presets');
         if (container) container.innerHTML = presetHtml;
         const customContainer = document.getElementById('active-order-custom-nominal-container');
-        if (customContainer) customContainer.style.display = 'none';
+        if (customContainer) customContainer.style.display = isCustom ? 'block' : 'none';
         const customInput = document.getElementById('active-order-custom-nominal');
-        if (customInput) customInput.value = '';
+        if (customInput) customInput.value = isCustom ? selectedNominal : '';
 
-        window.updateActiveOrderKembalianUI(total, 0, true);
+        const kembalian = Math.max(0, selectedNominal - total);
+        window.updateActiveOrderKembalianUI(selectedNominal, kembalian, isUangPas);
     };
 
     window.selectActiveOrderCashPreset = function(type, amount, btnEl) {
