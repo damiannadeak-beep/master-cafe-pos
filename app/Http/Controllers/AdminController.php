@@ -211,7 +211,7 @@ class AdminController extends Controller
         ]);
 
         $settingsService->updateSettings([
-            'geofence_active' => $request->has('geofence_active') ? '1' : '0',
+            'geofence_active' => $request->input('geofence_active', '0') == '1' ? '1' : '0',
             'cafe_latitude' => $request->cafe_latitude,
             'cafe_longitude' => $request->cafe_longitude,
             'geofence_radius' => $request->geofence_radius ?? '100',

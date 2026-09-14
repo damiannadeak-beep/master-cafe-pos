@@ -257,11 +257,33 @@
                                     Jika diaktifkan, pemesanan meja (Dine-In) hanya dapat diproses jika HP pelanggan terdeteksi berada di dalam radius kafe.
                                 </p>
 
-                                <div class="form-check form-switch mb-3 p-3 rounded-3" style="background-color: #0e1217; border: 1px solid #30363d;">
-                                    <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="geofenceActiveSwitch" name="geofence_active" value="1" {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'checked' : '' }}>
-                                    <label class="form-check-label fw-bold text-white" for="geofenceActiveSwitch">Aktifkan Proteksi GPS Meja (Dine-In)</label>
-                                    <div class="form-text text-white-50 small">Pesanan Takeaway tetap diizinkan dari luar area kafe.</div>
+                                <!-- Pilihan Kartu Tombol ON / OFF yang Jelas -->
+                                <label class="form-label fw-bold text-white mb-2">Pilih Status Proteksi GPS:</label>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="card p-3 text-center border h-100 geofence-card-select" id="cardGeofenceOff" style="cursor: pointer; transition: all 0.2s ease; background-color: #0e1217;">
+                                            <input type="radio" name="geofence_active" value="0" class="d-none" id="radioGeofenceOff" onchange="setGeofenceMode('0')" {{ !isset($settings['geofence_active']) || $settings['geofence_active'] != '1' ? 'checked' : '' }}>
+                                            <div class="d-flex align-items-center justify-content-center mb-1">
+                                                <i class="bi bi-x-circle-fill fs-4 text-danger me-2"></i>
+                                                <span class="fw-bold fs-6 text-white">OFF (NONAKTIF)</span>
+                                            </div>
+                                            <small class="text-white-50" style="font-size: 0.75rem;">Bebas pesan dari mana saja (Untuk Testing)</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="card p-3 text-center border h-100 geofence-card-select" id="cardGeofenceOn" style="cursor: pointer; transition: all 0.2s ease; background-color: #0e1217;">
+                                            <input type="radio" name="geofence_active" value="1" class="d-none" id="radioGeofenceOn" onchange="setGeofenceMode('1')" {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'checked' : '' }}>
+                                            <div class="d-flex align-items-center justify-content-center mb-1">
+                                                <i class="bi bi-check-circle-fill fs-4 text-success me-2"></i>
+                                                <span class="fw-bold fs-6 text-white">ON (AKTIF)</span>
+                                            </div>
+                                            <small class="text-white-50" style="font-size: 0.75rem;">Wajib berada di kafe untuk pesan meja</small>
+                                        </label>
+                                    </div>
                                 </div>
+
+                                <!-- Banner Keterangan Status Dinamis -->
+                                <div id="geofenceStatusBanner" class="p-3 rounded-3 mb-3 border"></div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold text-white">Batas Radius Toleransi (Meter)</label>
@@ -430,6 +452,72 @@
 </div>
 
 <script>
+function setGeofenceMode(val) {
+    const isValOn = (val === '1' || val === 1 || val === true);
+    const cardOff = document.getElementById('cardGeofenceOff');
+    const cardOn = document.getElementById('cardGeofenceOn');
+    const radioOff = document.getElementById('radioGeofenceOff');
+    const radioOn = document.getElementById('radioGeofenceOn');
+    const banner = document.getElementById('geofenceStatusBanner');
+
+    if (isValOn) {
+        if (radioOn) radioOn.checked = true;
+        if (cardOn) {
+            cardOn.style.setProperty('border-color', '#198754', 'important');
+            cardOn.style.setProperty('background-color', 'rgba(25, 135, 84, 0.15)', 'important');
+            cardOn.style.setProperty('border-width', '2px', 'important');
+        }
+        if (cardOff) {
+            cardOff.style.setProperty('border-color', '#30363d', 'important');
+            cardOff.style.setProperty('background-color', '#0e1217', 'important');
+            cardOff.style.setProperty('border-width', '1px', 'important');
+        }
+        if (banner) {
+            banner.style.setProperty('background-color', 'rgba(25, 135, 84, 0.12)', 'important');
+            banner.style.setProperty('border-color', '#198754', 'important');
+            banner.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-check text-success fs-3 me-3"></i>
+                    <div>
+                        <div class="fw-bold text-success fs-6">Status Terpilih: ON (AKTIF)</div>
+                        <div class="small text-white-50">Proteksi GPS aktif. Pelanggan yang memesan di meja (Dine-In) wajib terdeteksi berada di dalam radius kafe.</div>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        if (radioOff) radioOff.checked = true;
+        if (cardOff) {
+            cardOff.style.setProperty('border-color', '#dc3545', 'important');
+            cardOff.style.setProperty('background-color', 'rgba(220, 53, 69, 0.15)', 'important');
+            cardOff.style.setProperty('border-width', '2px', 'important');
+        }
+        if (cardOn) {
+            cardOn.style.setProperty('border-color', '#30363d', 'important');
+            cardOn.style.setProperty('background-color', '#0e1217', 'important');
+            cardOn.style.setProperty('border-width', '1px', 'important');
+        }
+        if (banner) {
+            banner.style.setProperty('background-color', 'rgba(220, 53, 69, 0.1)', 'important');
+            banner.style.setProperty('border-color', '#dc3545', 'important');
+            banner.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-x-circle-fill text-danger fs-3 me-3"></i>
+                    <div>
+                        <div class="fw-bold text-danger fs-6">Status Terpilih: OFF (NONAKTIF / BEBAS)</div>
+                        <div class="small text-white-50">Proteksi GPS saat ini dimatikan. Siapapun bebas memesan meja dari mana saja (Aman untuk fase pengetesan dari rumah).</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const initialGeofenceVal = '{{ isset($settings["geofence_active"]) && $settings["geofence_active"] == "1" ? "1" : "0" }}';
+    setGeofenceMode(initialGeofenceVal);
+});
+
 function getCafeLocation() {
     const status = document.getElementById('cafe-location-status');
     const latInput = document.getElementById('cafe_latitude');
