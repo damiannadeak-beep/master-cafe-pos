@@ -50,10 +50,19 @@ class PosController extends Controller
             }
         }
 
-        // 2. Ambil pesanan aktif (Dine-In & Takeaway langsung tampil di Kasir):
+        // 2. Ambil pesanan aktif:
+        // - Dine-In: Tampil agar Waitress bisa mengantar & menagih
+        // - Takeaway: WAJIB LUNAS (pembayaran.status = 'paid') atau dibuat langsung oleh Kasir (id_kasir != null)
         $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
             ->whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($sub) {
+                $sub->where('tipe_pesanan', '!=', 'takeaway')
+                    ->orWhereNotNull('id_kasir')
+                    ->orWhereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    });
+            })
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -70,7 +79,14 @@ class PosController extends Controller
     public function activeOrdersCount()
     {
         $activeOrdersQuery = Pesanan::whereIn('status', ['pending', 'processing'])
-            ->whereNotIn('status', ['cancelled', 'void']);
+            ->whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($sub) {
+                $sub->where('tipe_pesanan', '!=', 'takeaway')
+                    ->orWhereNotNull('id_kasir')
+                    ->orWhereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    });
+            });
 
         $count = (clone $activeOrdersQuery)->count();
         $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
