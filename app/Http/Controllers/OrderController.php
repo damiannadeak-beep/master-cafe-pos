@@ -304,6 +304,57 @@ class OrderController extends Controller
             ->where('order_token', $order_token)
             ->firstOrFail();
 
+        // Verifikasi status pembayaran secara resmi ke Midtrans API jika status belum 'paid'
+        if ($pesanan->pembayaran && $pesanan->pembayaran->status !== 'paid') {
+            $serverKey = Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey'));
+            $isProduction = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction')) == '1';
+
+            if (!empty($serverKey)) {
+                try {
+                    \Midtrans\Config::$serverKey = $serverKey;
+                    \Midtrans\Config::$isProduction = $isProduction;
+
+                    $targetMidtransId = $request->query('midtrans_order_id');
+                    if (empty($targetMidtransId) && !empty($pesanan->pembayaran->snap_token)) {
+                        $targetMidtransId = 'ORDER-' . $pesanan->id;
+                    }
+
+                    if (!empty($targetMidtransId)) {
+                        $statusMidtrans = \Midtrans\Transaction::status($targetMidtransId);
+                        $trxStatus = is_object($statusMidtrans) ? ($statusMidtrans->transaction_status ?? '') : ($statusMidtrans['transaction_status'] ?? '');
+                        $paymentType = is_object($statusMidtrans) ? ($statusMidtrans->payment_type ?? '') : ($statusMidtrans['payment_type'] ?? '');
+
+                        if (in_array($trxStatus, ['capture', 'settlement'])) {
+                            $pesanan->pembayaran->update([
+                                'status' => 'paid',
+                                'metode' => $paymentType === 'qris' ? 'qris' : 'bank_transfer',
+                                'tanggal' => now(),
+                            ]);
+                            $pesanan->update(['status' => 'processing']);
+
+                            try {
+                                broadcast(new \App\Events\PesananBaru($pesanan));
+                                if ($pesanan->id_meja && $pesanan->meja) {
+                                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                                }
+                            } catch (\Throwable $e) {
+                                Log::warning('[OrderController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
+                            }
+
+                            $namaKonsumen = $pesanan->customer_name;
+                            \App\Models\Notification::create([
+                                'type' => 'new_order',
+                                'message' => 'Pesanan Lunas Midtrans: Order #' . $pesanan->id . ' (' . $namaKonsumen . ') telah lunas.',
+                                'is_read' => false
+                            ]);
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::info('[OrderController] Midtrans transaction status check notice: ' . $e->getMessage());
+                }
+            }
+        }
+
         $pembayaran = $pesanan->pembayaran;
         $meja = $pesanan->meja;
 

@@ -222,10 +222,12 @@
             }
             window.snap.pay('{{ $snapToken }}', {
                 onSuccess: function(result) {
-                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?paid=1";
+                    var orderId = (result && result.order_id) ? result.order_id : '';
+                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?midtrans_order_id=" + encodeURIComponent(orderId);
                 },
                 onPending: function(result) {
-                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?pending=1";
+                    var orderId = (result && result.order_id) ? result.order_id : '';
+                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?pending=1&midtrans_order_id=" + encodeURIComponent(orderId);
                 },
                 onError: function(result) {
                     alert('Pembayaran belum berhasil diselesaikan. Anda tetap dapat membayar langsung di kasir.');
