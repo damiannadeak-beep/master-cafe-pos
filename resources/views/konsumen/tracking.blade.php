@@ -84,6 +84,16 @@
                         <i class="bi bi-info-circle me-1"></i> Butuh struk? Silakan minta ke kasir kami.
                     </p>
                 </div>
+            @elseif($pesanan->status === 'cancelled')
+                <!-- Banner Pesanan Dibatalkan / Dihapus oleh Kasir -->
+                <div class="alert border-0 rounded-4 p-4 mb-4 text-center shadow-lg" style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.35) !important;">
+                    <i class="bi bi-x-circle-fill text-danger fs-1 mb-2 d-block"></i>
+                    <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Telah Dibatalkan / Dihapus</h5>
+                    <p class="text-secondary small mb-3">Pesanan Anda telah dibatalkan oleh Kasir. Silakan klik tombol di bawah untuk kembali ke menu dan membuat pesanan baru.</p>
+                    <button onclick="finishCustomerSession()" class="btn btn-md btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <i class="bi bi-arrow-left-circle me-1"></i> Kembali ke Menu / Pesan Baru
+                    </button>
+                </div>
             @endif
 
             <!-- Card Header Status Meja -->
