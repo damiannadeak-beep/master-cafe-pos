@@ -97,6 +97,8 @@ class PaymentController extends Controller
                     ],
                     'callbacks' => [
                         'finish' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
+                        'unfinish' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
+                        'error' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
                     ],
                     'customer_details' => [
                         'first_name' => $customerName,
