@@ -532,10 +532,23 @@
     let currentPayStatus = "{{ $pembayaran->status ?? 'unpaid' }}";
 
     function updateStatusUI(data) {
+        if (data.status === 'cancelled' || data.status === 'void') {
+            try {
+                localStorage.removeItem('active_guest_order');
+                localStorage.removeItem('master_cafe_guest_name');
+                localStorage.removeItem('master_cafe_guest_phone');
+            } catch(e) {}
+            @if($meja)
+                window.location.href = "{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}";
+            @else
+                window.location.href = "{{ url('/katalog') }}";
+            @endif
+            return;
+        }
+
         if (data.status !== currentStatus || data.payment_status !== currentPayStatus) {
             currentStatus = data.status;
             currentPayStatus = data.payment_status;
-            // Refresh halaman agar stepper & badge ter-render sempurna
             window.location.reload();
         }
     }

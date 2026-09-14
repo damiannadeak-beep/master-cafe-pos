@@ -304,6 +304,14 @@ class OrderController extends Controller
             ->where('order_token', $order_token)
             ->firstOrFail();
 
+        if (in_array($pesanan->status, ['cancelled', 'void'])) {
+            session()->forget(['order_token', 'active_order_id']);
+            $redirectUrl = $pesanan->id_meja 
+                ? URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
+                : url('/katalog');
+            return redirect($redirectUrl)->with('info', 'Pesanan telah dibatalkan oleh kasir.');
+        }
+
         $this->checkAndUpdateMidtransStatus($pesanan, $request);
 
         $pembayaran = $pesanan->pembayaran;
