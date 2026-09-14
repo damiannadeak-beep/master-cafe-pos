@@ -185,12 +185,31 @@
                     const guestOrder = JSON.parse(rawOrder);
                     if (guestOrder && guestOrder.token && guestOrder.expires_at > Date.now()) {
                         if (!window.location.pathname.includes('/tracking/')) {
-                            const banner = document.getElementById('active-order-recovery-banner');
-                            const link = document.getElementById('active-order-recovery-link');
-                            if (banner && link) {
-                                link.href = '/tracking/' + guestOrder.token;
-                                banner.style.display = 'block';
-                            }
+                            // Verifikasi status ke database API sebelum menampilkan banner
+                            fetch('/api/tracking/' + guestOrder.token + '/status', { headers: { 'Accept': 'application/json' } })
+                                .then(res => {
+                                    if (!res.ok) throw new Error('Order tidak ditemukan');
+                                    return res.json();
+                                })
+                                .then(data => {
+                                    if (data.status === 'completed' || data.status === 'cancelled') {
+                                        localStorage.removeItem('active_guest_order');
+                                        const banner = document.getElementById('active-order-recovery-banner');
+                                        if (banner) banner.style.display = 'none';
+                                    } else {
+                                        const banner = document.getElementById('active-order-recovery-banner');
+                                        const link = document.getElementById('active-order-recovery-link');
+                                        if (banner && link) {
+                                            link.href = '/tracking/' + guestOrder.token;
+                                            banner.style.display = 'block';
+                                        }
+                                    }
+                                })
+                                .catch(() => {
+                                    localStorage.removeItem('active_guest_order');
+                                    const banner = document.getElementById('active-order-recovery-banner');
+                                    if (banner) banner.style.display = 'none';
+                                });
                         }
                     } else if (guestOrder && guestOrder.expires_at <= Date.now()) {
                         localStorage.removeItem('active_guest_order');
