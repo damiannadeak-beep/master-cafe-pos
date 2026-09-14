@@ -189,9 +189,15 @@
                                 </h6>
                                 @if(!$isPaid && !$isPendingVerif)
                                     <div class="d-flex gap-1 align-items-center flex-wrap">
+                                        <a href="{{ url('/tracking/' . $pesanan->order_token . '?paid=1') }}" class="btn btn-sm btn-success rounded-pill px-2 py-1 fw-bold shadow-sm" style="font-size: 0.75rem;">
+                                            <i class="bi bi-check2-circle me-1"></i> Saya Sudah Bayar
+                                        </a>
                                         <a href="{{ url('/konsumen/checkout/' . $pesanan->id . '?token=' . $pesanan->order_token) }}" class="btn btn-sm rounded-pill px-2 py-1 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.75rem;">
                                             ⚡ Bayar Online (QRIS)
                                         </a>
+                                        <button type="button" onclick="cancelCurrentOrder()" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;">
+                                            <i class="bi bi-trash3 me-1"></i> Batalkan
+                                        </button>
                                     </div>
                                 @endif
                             </div>
@@ -394,6 +400,43 @@
         @else
             window.location.href = "{{ url('/katalog') }}";
         @endif
+    }
+
+    // Fungsi Pembatalan Pesanan jika belum dibayar / masih pending
+    function cancelCurrentOrder() {
+        if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini? Pesanan yang belum dibayar akan dihapus dan Anda dapat memilih menu baru.')) {
+            return;
+        }
+
+        fetch("{{ url('/konsumen/order/' . $pesanan->id . '/cancel') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                token: "{{ $pesanan->order_token }}"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            try {
+                localStorage.removeItem('active_guest_order');
+                localStorage.removeItem('master_cafe_guest_name');
+                localStorage.removeItem('master_cafe_guest_phone');
+            } catch(e) {}
+
+            alert(data.message || 'Pesanan berhasil dibatalkan.');
+            @if($meja)
+                window.location.href = "{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}";
+            @else
+                window.location.href = "{{ url('/katalog') }}";
+            @endif
+        })
+        .catch(err => {
+            alert('Terjadi kesalahan saat membatalkan pesanan.');
+        });
     }
 
     // 1. Fungsi Panggil Pelayan dengan Cooldown Persisten di LocalStorage (Bertahan saat Refresh)

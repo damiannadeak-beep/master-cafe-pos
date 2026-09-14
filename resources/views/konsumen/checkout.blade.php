@@ -223,7 +223,7 @@
             window.snap.pay('{{ $snapToken }}', {
                 onSuccess: function(result) {
                     var orderId = (result && result.order_id) ? result.order_id : '';
-                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?order_id=" + encodeURIComponent(orderId) + "&transaction_status=settlement&status_code=200";
+                    window.location.href = "{{ url('/tracking/' . ($pesanan->order_token ?? '')) }}?paid=1&order_id=" + encodeURIComponent(orderId) + "&transaction_status=settlement&status_code=200";
                 },
                 onPending: function(result) {
                     var orderId = (result && result.order_id) ? result.order_id : '';

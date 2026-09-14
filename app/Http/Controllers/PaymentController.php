@@ -95,7 +95,7 @@ class PaymentController extends Controller
                         'gross_amount' => (int) $pembayaran->total_bayar,
                     ],
                     'callbacks' => [
-                        'finish' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
+                        'finish' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?paid=1') : url('/'),
                         'unfinish' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
                         'error' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
                     ],
