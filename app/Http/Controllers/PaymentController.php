@@ -93,6 +93,9 @@ class PaymentController extends Controller
                         'order_id' => 'ORDER-' . $pesanan->id . '-' . time(),
                         'gross_amount' => (int) $pembayaran->total_bayar,
                     ],
+                    'callbacks' => [
+                        'finish' => $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : url('/'),
+                    ],
                     'customer_details' => [
                         'first_name' => $customerName,
                         'email' => $customerEmail,
