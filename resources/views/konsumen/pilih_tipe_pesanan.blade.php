@@ -79,7 +79,7 @@
                 <div class="row g-2 justify-content-center mb-4" style="max-height: 200px; overflow-y: auto;">
                     @forelse($mejas ?? [] as $m)
                         <div class="col-4 col-sm-3">
-                            <a href="{{ url('/konsumen/menu/' . $m->id) }}" class="btn btn-outline-warning w-100 rounded-3 py-2 fw-bold d-flex flex-column align-items-center justify-content-center shadow-sm" style="border-color: rgba(192, 142, 92, 0.4);">
+                            <a href="{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $m->id]) }}" class="btn btn-outline-warning w-100 rounded-3 py-2 fw-bold d-flex flex-column align-items-center justify-content-center shadow-sm" style="border-color: rgba(192, 142, 92, 0.4);">
                                 <i class="bi bi-shop fs-5 mb-1" style="color: #c08e5c;"></i>
                                 <span style="font-size: 0.8rem;">Meja {{ $m->nomor_meja }}</span>
                             </a>

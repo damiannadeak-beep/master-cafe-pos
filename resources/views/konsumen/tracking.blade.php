@@ -383,7 +383,7 @@
             localStorage.removeItem('master_cafe_guest_phone');
         } catch(e) {}
         @if($meja)
-            window.location.href = "{{ url('/konsumen/menu/' . $meja->id) }}";
+            window.location.href = "{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}";
         @else
             window.location.href = "{{ url('/katalog') }}";
         @endif
