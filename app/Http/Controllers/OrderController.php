@@ -297,22 +297,18 @@ class OrderController extends Controller
     }
 
     /**
-     * Helper untuk promo aktif
+     * Helper: ambil promo aktif + kumpulkan menu IDs dari promo paket.
+     *
+     * @return array [$promos, $promoMenuIds]
      */
-    private function getActivePromosWithMenuIds()
+    private function getActivePromosWithMenuIds(): array
     {
-        $promos = Promo::where('is_active', true)
-            ->where(function($query) {
-                $query->whereNull('start_date')
-                      ->orWhere('start_date', '<=', now());
-            })
-            ->where(function($query) {
-                $query->whereNull('end_date')
-                      ->orWhere('end_date', '>=', now());
-            })
-            ->get();
+        $promos = Promo::with('menus')->active()->get();
 
-        $promoMenuIds = $promos->pluck('id_menu')->filter()->unique()->toArray();
+        $promoMenuIds = $promos
+            ->where('type', 'package')
+            ->flatMap(fn($p) => $p->menus->pluck('id'))
+            ->all();
 
         return [$promos, $promoMenuIds];
     }
