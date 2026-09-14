@@ -88,7 +88,7 @@ class PaymentController extends Controller
                 $customerName = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu Master Cafe');
                 $customerEmail = $pesanan->konsumen?->email ?? 'guest@mastercafe.local';
 
-                $midtransOrderId = 'ORDER-' . $pesanan->id . '-' . time();
+                $midtransOrderId = 'ORDER-' . $pesanan->id;
 
                 $midtransParams = [
                     'transaction_details' => [
