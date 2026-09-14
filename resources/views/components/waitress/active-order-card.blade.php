@@ -209,9 +209,6 @@
                                 <a href="{{ route('kasir.order.receipt', $order->id) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center">
                                     <i class="bi bi-file-earmark-text me-1"></i> Struk Kasir
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.voidOrder({{ $order->id }})">
-                                    <i class="bi bi-trash me-1"></i> Void
-                                </button>
                             @endif
                         </div>
                     </div>

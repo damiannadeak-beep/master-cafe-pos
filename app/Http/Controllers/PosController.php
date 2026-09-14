@@ -454,7 +454,7 @@ class PosController extends Controller
             }
 
             if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
-                throw new \Exception('Pesanan sudah dibayar dan tidak dapat divoid.');
+                throw new \Exception('Pesanan sudah dibayar lunas oleh konsumen dan tidak dapat dihapus/divoid sembarangan oleh kasir tanpa persetujuan konsumen.');
             }
 
             if ($pesanan->status === 'completed') {
