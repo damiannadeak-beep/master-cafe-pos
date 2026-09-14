@@ -48,10 +48,13 @@
 
                 <div class="row g-3 mb-3 align-items-center">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Harga Satuan (Rp) <span class="text-danger">*</span></label>
+                        <label class="form-label fw-bold">Harga Satuan (Rp) <span id="harga-asterisk" class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">Rp</span>
-                            <input type="number" step="0.01" name="harga" class="form-control" value="{{ old('harga', $menu->harga) }}" placeholder="Cth: 15000" required>
+                            <input type="number" step="0.01" name="harga" id="harga-input" class="form-control" value="{{ old('harga', $menu->harga) }}" placeholder="Cth: 15000" required>
+                        </div>
+                        <div class="form-text text-warning small mt-1" id="harga-dynamic-note" style="display: none;">
+                            <i class="bi bi-info-circle me-1"></i> Mode harga dinamis aktif. Nominal tidak wajib diisi (akan otomatis di-set Rp 0 / Sesuai Timbangan).
                         </div>
                     </div>
                     <div class="col-md-6 pt-md-4">
@@ -499,16 +502,47 @@
         });
     };
 
+    function initDynamicPriceToggle() {
+        const isDynamicSwitch = document.getElementById('is_dynamic_price');
+        const hargaInput = document.getElementById('harga-input');
+        const hargaAsterisk = document.getElementById('harga-asterisk');
+        const hargaDynamicNote = document.getElementById('harga-dynamic-note');
+
+        if (!isDynamicSwitch || !hargaInput) return;
+
+        function updateState() {
+            if (isDynamicSwitch.checked) {
+                hargaInput.removeAttribute('required');
+                if (hargaAsterisk) hargaAsterisk.style.display = 'none';
+                if (hargaDynamicNote) hargaDynamicNote.style.display = 'block';
+                hargaInput.placeholder = 'Otomatis Sesuai Timbangan (0)';
+            } else {
+                hargaInput.setAttribute('required', 'required');
+                if (hargaAsterisk) hargaAsterisk.style.display = 'inline';
+                if (hargaDynamicNote) hargaDynamicNote.style.display = 'none';
+                hargaInput.placeholder = 'Cth: 15000';
+            }
+        }
+
+        isDynamicSwitch.addEventListener('change', updateState);
+        updateState();
+    }
+
     // Execute immediately or on DOM ready / SPA load
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initMenuVariantBuilder);
+        document.addEventListener('DOMContentLoaded', function() {
+            initMenuVariantBuilder();
+            initDynamicPriceToggle();
+        });
     } else {
         initMenuVariantBuilder();
+        initDynamicPriceToggle();
     }
 
     // Also listen to SPA page-loaded event
     window.addEventListener('admin:page-loaded', function() {
         initMenuVariantBuilder();
+        initDynamicPriceToggle();
     });
 })();
 </script>

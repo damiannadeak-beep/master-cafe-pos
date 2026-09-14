@@ -36,6 +36,10 @@ class MenuService
         $data['is_available'] = true;
         $data['stok'] = 999;
 
+        if (!empty($data['is_dynamic_price']) || !isset($data['harga']) || $data['harga'] === null || $data['harga'] === '') {
+            $data['harga'] = 0;
+        }
+
         $imageFile = $requestData['image'] ?? request()->file('image');
         if ($imageFile && $imageFile instanceof \Illuminate\Http\UploadedFile && $imageFile->isValid()) {
             $data['image'] = $this->processImageUpload($imageFile);
@@ -54,6 +58,10 @@ class MenuService
         // Pertahankan status ketersediaan yang dikelola oleh waitress
         unset($data['is_available']);
         unset($data['stok']);
+
+        if (!empty($data['is_dynamic_price']) || !isset($data['harga']) || $data['harga'] === null || $data['harga'] === '') {
+            $data['harga'] = 0;
+        }
 
         $imageFile = $requestData['image'] ?? request()->file('image');
         if ($imageFile && $imageFile instanceof \Illuminate\Http\UploadedFile && $imageFile->isValid()) {

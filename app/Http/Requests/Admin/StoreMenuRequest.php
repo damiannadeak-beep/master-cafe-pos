@@ -15,7 +15,7 @@ class StoreMenuRequest extends FormRequest
     {
         return [
             'nama_menu' => 'required|string|max:255',
-            'harga' => 'required|numeric|min:0',
+            'harga' => 'nullable|numeric|min:0',
             'stok' => 'nullable|integer',
             'kategori' => 'required|string|max:100',
             'is_available' => 'nullable|boolean',
