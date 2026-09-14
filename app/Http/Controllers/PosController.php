@@ -119,8 +119,7 @@ class PosController extends Controller
         }
 
         $serverKey = trim(Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey')));
-        $rawIsProd = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction'));
-        $isProduction = filter_var($rawIsProd, FILTER_VALIDATE_BOOLEAN);
+        $isProduction = !empty($serverKey) ? !str_starts_with($serverKey, 'SB-Mid-') : false;
 
         if (empty($serverKey)) {
             return;

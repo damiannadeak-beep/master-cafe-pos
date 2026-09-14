@@ -50,11 +50,9 @@ class PaymentController extends Controller
         }
 
         // Generate Midtrans Snap Token jika Server Key valid
-        $clientKey = Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey'));
-        $serverKey = Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey'));
-        
-        $rawIsProd = Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction'));
-        $isProduction = filter_var($rawIsProd, FILTER_VALIDATE_BOOLEAN);
+        $serverKey = trim(Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey')));
+        $clientKey = trim(Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey')));
+        $isProduction = !empty($serverKey) ? !str_starts_with($serverKey, 'SB-Mid-') : false;
 
         \Midtrans\Config::$serverKey = $serverKey;
         \Midtrans\Config::$isProduction = $isProduction;
