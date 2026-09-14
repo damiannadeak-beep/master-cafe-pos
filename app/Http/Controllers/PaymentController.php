@@ -341,7 +341,7 @@ class PaymentController extends Controller
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             $pembayaran->update([
                 'status' => 'paid',
-                'metode' => $request->payment_type == 'qris' ? 'qris' : 'cash',
+                'metode' => in_array($request->payment_type, ['qris', 'gopay', 'shopeepay']) ? 'qris' : 'bank_transfer',
                 'tanggal' => now()
             ]);
             
