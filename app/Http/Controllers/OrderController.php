@@ -85,15 +85,41 @@ class OrderController extends Controller
     {
         $validated = $request->validated();
 
+        $tipe_pesanan = $validated['tipe_pesanan'] ?? 'dine_in';
+        $id_meja = $validated['id_meja'] ?? null;
+
+        if ($tipe_pesanan === 'takeaway') {
+            $id_meja = null;
+        }
+
+        // Validasi Proteksi GPS / Geofencing untuk Pemesanan Meja (Dine-In)
+        if ($tipe_pesanan === 'dine_in' && Setting::getVal('geofence_active', '0') == '1') {
+            $cafeLat = Setting::getVal('cafe_latitude') ?: Setting::getVal('warung_latitude');
+            $cafeLng = Setting::getVal('cafe_longitude') ?: Setting::getVal('warung_longitude');
+            $maxRadius = (float) Setting::getVal('geofence_radius', 100);
+
+            if (!empty($cafeLat) && !empty($cafeLng)) {
+                $userLat = $validated['user_lat'] ?? $request->input('user_lat');
+                $userLng = $validated['user_lng'] ?? $request->input('user_lng');
+
+                if (empty($userLat) || empty($userLng)) {
+                    return response()->json([
+                        'error' => 'Pemesanan meja (Dine-In) membutuhkan verifikasi lokasi GPS. Pastikan GPS aktif dan izinkan akses lokasi pada browser Anda.'
+                    ], 422);
+                }
+
+                $distance = $this->calculateDistanceMeters((float)$cafeLat, (float)$cafeLng, (float)$userLat, (float)$userLng);
+
+                if ($distance > $maxRadius) {
+                    return response()->json([
+                        'error' => 'Maaf, Anda terdeteksi berada di luar area kafe (jarak sekitar ' . round($distance) . ' meter, batas radius ' . round($maxRadius) . ' meter). Pemesanan meja (Dine-In) hanya dapat dilakukan saat Anda berada langsung di lokasi kafe.'
+                    ], 422);
+                }
+            }
+        }
+
         try {
             DB::beginTransaction();
-
-            $tipe_pesanan = $validated['tipe_pesanan'] ?? 'dine_in';
-            $id_meja = $validated['id_meja'] ?? null;
-
-            if ($tipe_pesanan === 'takeaway') {
-                $id_meja = null;
-            }
 
             // Tentukan Nama Tamu / Konsumen
             $mejaModel = $id_meja ? Meja::find($id_meja) : null;
@@ -485,5 +511,26 @@ class OrderController extends Controller
                 Log::warning('[OrderController] Gagal kirim WebPush: ' . $e->getMessage());
             }
         }
+    }
+
+    /**
+     * Menghitung jarak antara dua koordinat GPS dalam satuan meter (Formula Haversine).
+     */
+    private function calculateDistanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371000; // Radius bumi dalam meter
+
+        $latFrom = deg2rad($lat1);
+        $lonFrom = deg2rad($lon1);
+        $latTo = deg2rad($lat2);
+        $lonTo = deg2rad($lon2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+
+        return $angle * $earthRadius;
     }
 }

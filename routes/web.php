@@ -152,6 +152,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/settings/payment', [AdminController::class, 'updatePaymentSettings'])->name('settings.payment');
         Route::post('/settings/printer', [AdminController::class, 'updatePrinterSettings'])->name('settings.printer');
         Route::post('/settings/absensi', [AdminController::class, 'updateAbsensiSettings'])->name('settings.absensi');
+        Route::post('/settings/geofence', [AdminController::class, 'updateGeofenceSettings'])->name('settings.geofence');
         Route::post('/settings/lokasi', [AdminController::class, 'updateLokasiSettings'])->name('settings.lokasi');
         Route::post('/settings/kontak', [AdminController::class, 'updateKontakSettings'])->name('settings.kontak');
         Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews.index');

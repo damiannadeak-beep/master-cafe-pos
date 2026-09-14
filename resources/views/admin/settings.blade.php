@@ -237,6 +237,79 @@
                     </form>
                 </div>
             </div>
+        <!-- Kolom Pengaturan Geofencing GPS Meja -->
+        <div class="col-12 mt-4">
+            <div class="card admin-card border-0 shadow-sm">
+                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2 text-danger"></i>Proteksi Lokasi Pemesanan Meja (Geofencing GPS)</h5>
+                    <span class="badge {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'bg-success' : 'bg-secondary' }}">
+                        {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'Proteksi Aktif' : 'Nonaktif' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.settings.geofence') }}" method="POST">
+                        @csrf
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-2 text-white">Status Fitur</h6>
+                                <p class="text-white-50 small mb-3">
+                                    Cegah pesanan fiktif/iseng dari orang yang memfoto QR meja lalu memesan dari rumah. 
+                                    Jika diaktifkan, pemesanan meja (Dine-In) hanya dapat diproses jika HP pelanggan terdeteksi berada di dalam radius kafe.
+                                </p>
+
+                                <div class="form-check form-switch mb-3 p-3 rounded-3" style="background-color: #0e1217; border: 1px solid #30363d;">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="geofenceActiveSwitch" name="geofence_active" value="1" {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-bold text-white" for="geofenceActiveSwitch">Aktifkan Proteksi GPS Meja (Dine-In)</label>
+                                    <div class="form-text text-white-50 small">Pesanan Takeaway tetap diizinkan dari luar area kafe.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-white">Batas Radius Toleransi (Meter)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control text-white" name="geofence_radius" value="{{ $settings['geofence_radius'] ?? '100' }}" min="10" max="5000" style="background-color: #0e1217; border-color: #30363d;">
+                                        <span class="input-group-text bg-dark text-white-50 border-secondary">Meter</span>
+                                    </div>
+                                    <div class="form-text text-white-50 small">Rekomendasi: <strong>50 - 100 meter</strong> (memberikan toleransi sedikit akurasi GPS HP).</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 border-start ps-md-4">
+                                <h6 class="fw-bold mb-2 text-white">Titik Koordinat Lokasi Kafe</h6>
+                                <p class="text-white-50 small mb-3">Tentukan titik pusat GPS kafe Anda. Pelanggan harus berada di sekitar titik ini saat memesan di meja.</p>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-white">Latitude Kafe</label>
+                                    <input type="text" class="form-control text-white" id="cafe_latitude" name="cafe_latitude" value="{{ $settings['cafe_latitude'] ?? ($settings['warung_latitude'] ?? '') }}" placeholder="Contoh: -6.2088" style="background-color: #0e1217; border-color: #30363d;">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-white">Longitude Kafe</label>
+                                    <input type="text" class="form-control text-white" id="cafe_longitude" name="cafe_longitude" value="{{ $settings['cafe_longitude'] ?? ($settings['warung_longitude'] ?? '') }}" placeholder="Contoh: 106.8456" style="background-color: #0e1217; border-color: #30363d;">
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="getCafeLocation()">
+                                        <i class="bi bi-crosshair me-1"></i> Ambil Lokasi Kafe Saya Saat Ini
+                                    </button>
+                                    @php
+                                        $cLat = $settings['cafe_latitude'] ?? ($settings['warung_latitude'] ?? '');
+                                        $cLng = $settings['cafe_longitude'] ?? ($settings['warung_longitude'] ?? '');
+                                    @endphp
+                                    @if(!empty($cLat) && !empty($cLng))
+                                        <a href="https://www.google.com/maps?q={{ $cLat }},{{ $cLng }}" target="_blank" class="btn btn-outline-info btn-sm fw-bold">
+                                            <i class="bi bi-geo-alt me-1"></i> Buka di Google Maps
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="form-text small" id="cafe-location-status"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-danger w-100 fw-bold">Simpan Pengaturan Proteksi Lokasi (Geofencing)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- Kolom Pengaturan Kontak -->
@@ -357,6 +430,38 @@
 </div>
 
 <script>
+function getCafeLocation() {
+    const status = document.getElementById('cafe-location-status');
+    const latInput = document.getElementById('cafe_latitude');
+    const lngInput = document.getElementById('cafe_longitude');
+
+    if (!navigator.geolocation) {
+        status.innerHTML = "<span class='text-danger'>Geolocation tidak didukung oleh browser Anda.</span>";
+        return;
+    }
+
+    status.innerHTML = "<span class='text-primary'><span class='spinner-border spinner-border-sm me-1'></span> Mendeteksi lokasi GPS Anda...</span>";
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            latInput.value = position.coords.latitude;
+            lngInput.value = position.coords.longitude;
+            status.innerHTML = "<span class='text-success'>Lokasi kafe berhasil didapatkan! (Akurasi: " + Math.round(position.coords.accuracy) + " meter)</span>";
+        },
+        (error) => {
+            let msg = "";
+            switch(error.code) {
+                case error.PERMISSION_DENIED: msg = "Akses lokasi ditolak."; break;
+                case error.POSITION_UNAVAILABLE: msg = "Informasi lokasi tidak tersedia."; break;
+                case error.TIMEOUT: msg = "Waktu pencarian lokasi habis."; break;
+                default: msg = "Terjadi kesalahan."; break;
+            }
+            status.innerHTML = "<span class='text-danger'>" + msg + "</span>";
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+
 function getCurrentLocation() {
     const status = document.getElementById('location-status');
     const latInput = document.getElementById('warung_latitude');

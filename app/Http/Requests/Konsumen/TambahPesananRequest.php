@@ -25,6 +25,8 @@ class TambahPesananRequest extends FormRequest
             'items.*.catatan' => 'nullable|string|max:255',
             'items.*.variants' => 'nullable|array',
             'promo_id' => 'nullable|exists:promos,id',
+            'user_lat' => 'nullable|numeric',
+            'user_lng' => 'nullable|numeric',
         ];
     }
 }

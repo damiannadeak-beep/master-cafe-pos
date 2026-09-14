@@ -201,6 +201,33 @@ class AdminController extends Controller
         return redirect()->route('admin.settings')->with('success', 'Pengaturan Absensi & Shift berhasil diperbarui!');
     }
 
+    public function updateGeofenceSettings(Request $request, SettingsService $settingsService)
+    {
+        $request->validate([
+            'geofence_active' => 'nullable|in:0,1',
+            'cafe_latitude' => 'nullable|numeric|between:-90,90',
+            'cafe_longitude' => 'nullable|numeric|between:-180,180',
+            'geofence_radius' => 'nullable|numeric|min:5|max:10000',
+        ]);
+
+        $settingsService->updateSettings([
+            'geofence_active' => $request->has('geofence_active') ? '1' : '0',
+            'cafe_latitude' => $request->cafe_latitude,
+            'cafe_longitude' => $request->cafe_longitude,
+            'geofence_radius' => $request->geofence_radius ?? '100',
+        ]);
+
+        // Jika koordinat warung_latitude masih kosong, sinkronkan juga agar absensi staf terhubung
+        if (!empty($request->cafe_latitude) && empty(Setting::getVal('warung_latitude'))) {
+            $settingsService->updateSettings([
+                'warung_latitude' => $request->cafe_latitude,
+                'warung_longitude' => $request->cafe_longitude,
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('success', 'Pengaturan Proteksi Lokasi (Geofencing GPS Meja) berhasil diperbarui!');
+    }
+
     public function updateLokasiSettings(Request $request, SettingsService $settingsService)
     {
         $request->validate([

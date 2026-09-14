@@ -440,10 +440,48 @@
 
         // Nama & phone tidak disimpan di localStorage agar antar pesanan bersih (device shared)
 
-        proceedToCheckout(guestName, guestPhone);
+        const isGeofenceActive = {{ \App\Models\Setting::getVal('geofence_active', '0') == '1' ? 'true' : 'false' }};
+        const isDineIn = ('{{ $orderType ?? "dine_in" }}' === 'dine_in' && {{ isset($meja) ? 'true' : 'false' }});
+
+        if (isGeofenceActive && isDineIn) {
+            if (!navigator.geolocation) {
+                alert('Browser Anda tidak mendukung verifikasi lokasi GPS. Pemesanan meja (Dine-In) membutuhkan GPS aktif.');
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnSubmitFinalOrder');
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verifikasi GPS...';
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    proceedToCheckout(guestName, guestPhone, position.coords.latitude, position.coords.longitude);
+                },
+                function(error) {
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+                    }
+                    let errorMsg = 'Izin lokasi (GPS) diperlukan untuk memastikan Anda berada di meja kafe.';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg = 'Akses lokasi (GPS) ditolak oleh browser Anda. Harap izinkan akses lokasi di pengaturan browser untuk memesan di meja kafe.';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        errorMsg = 'Lokasi GPS tidak dapat dideteksi. Pastikan fitur lokasi/GPS di HP Anda aktif.';
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMsg = 'Waktu pencarian lokasi GPS habis. Silakan coba lagi.';
+                    }
+                    alert(errorMsg);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            proceedToCheckout(guestName, guestPhone, null, null);
+        }
     }
 
-    function proceedToCheckout(guestName, guestPhone) {
+    function proceedToCheckout(guestName, guestPhone, userLat = null, userLng = null) {
         const btnSubmit = document.getElementById('btnSubmitFinalOrder');
         if (btnSubmit) {
             btnSubmit.disabled = true;
@@ -458,6 +496,8 @@
             @endif
             guest_name: guestName || 'Tamu',
             guest_phone: guestPhone || null,
+            user_lat: userLat,
+            user_lng: userLng,
             promo_id: document.getElementById('promo_id') ? document.getElementById('promo_id').value : null,
             items: cart
         };
@@ -519,9 +559,9 @@
                 }
                 alert("Kesalahan validasi:\n" + msg);
             } else if (err.error) {
-                alert('Error: ' + err.error);
+                alert(err.error);
             } else if (err.message) {
-                alert("Error: " + err.message);
+                alert(err.message);
             } else {
                 alert("Terjadi kesalahan saat memproses pesanan.");
                 console.error(err);
