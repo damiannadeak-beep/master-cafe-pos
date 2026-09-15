@@ -1,2 +1,17 @@
 User-agent: *
-Disallow:
+Allow: /
+Allow: /katalog
+Allow: /lokasi
+Allow: /kontak
+Allow: /images/
+Allow: /favicon*
+Disallow: /admin/
+Disallow: /kasir/
+Disallow: /waitress/
+Disallow: /dapur/
+Disallow: /konsumen/checkout/
+Disallow: /konsumen/tracking/
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://mastercafe.nadeak.net/sitemap.xml

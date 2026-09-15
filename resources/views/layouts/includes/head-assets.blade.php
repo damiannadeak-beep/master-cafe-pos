@@ -1,5 +1,53 @@
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#0e1217">
+
+    <!-- Search Engine Optimization (SEO) & Social Meta Tags -->
+    <meta name="description" content="Master Cafe - Kafe & Resto santai di Bengkalis. Nikmati aneka kopi pilihan, hidangan istimewa, suasana nyaman, dan kemudahan pemesanan mandiri online (QR Order).">
+    <meta name="keywords" content="Master Cafe, Master Cafe Bengkalis, Cafe Bengkalis, Kopi Bengkalis, Kuliner Bengkalis, Tempat Nongkrong Bengkalis, Resto Bengkalis">
+    <meta name="author" content="Master Cafe">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="Master Cafe - Kafe & Resto Modern Bengkalis">
+    <meta property="og:description" content="Kunjungi Master Cafe di Bengkalis. Cita rasa istimewa dengan kenyamanan tempat terbaik untuk santai dan berkumpul.">
+    <meta property="og:image" content="{{ asset('images/logo.png') }}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Master Cafe - Kafe & Resto Modern Bengkalis">
+    <meta name="twitter:description" content="Kunjungi Master Cafe di Bengkalis. Cita rasa istimewa dengan kenyamanan tempat terbaik untuk santai dan berkumpul.">
+    <meta name="twitter:image" content="{{ asset('images/logo.png') }}">
+
+    <!-- JSON-LD Structured Data for Google Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CafeOrCoffeeShop",
+      "name": "Master Cafe",
+      "image": "{{ asset('images/logo.png') }}",
+      "@id": "{{ url('/') }}",
+      "url": "{{ url('/') }}",
+      "telephone": "{{ \App\Models\Setting::getVal('kontak_wa', '+62 812-3456-7890') }}",
+      "priceRange": "Rp 5.000 - Rp 50.000",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{ \App\Models\Setting::getVal('lokasi_utama_alamat', 'Jl. Bantan, Senggoro') }}",
+        "addressLocality": "Bengkalis",
+        "addressRegion": "Riau",
+        "postalCode": "28711",
+        "addressCountry": "ID"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": {{ \App\Models\Setting::getVal('cafe_latitude') ?: (\App\Models\Setting::getVal('warung_latitude') ?: 1.4828) }},
+        "longitude": {{ \App\Models\Setting::getVal('cafe_longitude') ?: (\App\Models\Setting::getVal('warung_longitude') ?: 102.1332) }}
+      },
+      "servesCuisine": "Indonesian, Coffee, Cafe"
+    }
+    </script>
     <style>
         :root, html, body {
             background-color: #0e1217 !important;
