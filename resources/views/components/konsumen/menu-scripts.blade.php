@@ -390,13 +390,129 @@
         document.getElementById('cart-qty').innerText = qty + ' Item';
     }
 
+    /**
+     * Fungsi Validasi & Pembatasan Karakter Angka Nomor WhatsApp Konsumen
+     */
+    function validateGuestPhone(showFeedback = false) {
+        const inputPhone = document.getElementById('inputGuestPhone');
+        const feedback = document.getElementById('phoneValidationFeedback');
+        const counter = document.getElementById('phoneDigitCounter');
+        if (!inputPhone) return { isValid: true, message: '', phone: '' };
+
+        // 1. Batasi karakter hanya angka (0-9)
+        let val = inputPhone.value.replace(/[^0-9]/g, '');
+
+        // 2. Batasi jumlah angka: 08xx maksimal 14 angka, 628xx maksimal 15 angka
+        const maxLen = val.startsWith('62') ? 15 : 14;
+        if (val.length > maxLen) {
+            val = val.substring(0, maxLen);
+        }
+        inputPhone.value = val;
+
+        // 3. Update indikator jumlah digit (counter)
+        if (counter) {
+            counter.innerText = val.length + ' digit';
+            if ((val.startsWith('08') && val.length >= 10 && val.length <= 14) || 
+                (val.startsWith('628') && val.length >= 11 && val.length <= 15)) {
+                counter.className = 'badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-50';
+            } else if (val.length > 0) {
+                counter.className = 'badge rounded-pill bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50';
+            } else {
+                counter.className = 'badge rounded-pill bg-dark border border-secondary text-secondary';
+            }
+        }
+
+        const isTakeaway = '{{ $orderType ?? "dine_in" }}' === 'takeaway' || !{{ isset($meja) ? 'true' : 'false' }};
+
+        // 4. Cek jika input kosong
+        if (!val) {
+            if (isTakeaway) {
+                if (showFeedback && feedback) {
+                    feedback.style.display = 'block';
+                    feedback.className = 'mt-1 text-danger';
+                    feedback.innerHTML = '<i class="bi bi-x-circle me-1"></i> Nomor WhatsApp wajib diisi untuk pesanan Takeaway.';
+                    inputPhone.style.borderColor = '#dc3545';
+                } else if (feedback) {
+                    feedback.style.display = 'none';
+                    inputPhone.style.borderColor = '#30363d';
+                }
+                return { isValid: false, message: 'Nomor WhatsApp wajib diisi untuk pesanan Takeaway (bawa pulang).', phone: '' };
+            } else {
+                // Untuk Dine-In bersifat opsional: jika kosong maka lolos
+                if (feedback) feedback.style.display = 'none';
+                inputPhone.style.borderColor = '#30363d';
+                return { isValid: true, message: '', phone: '' };
+            }
+        }
+
+        // 5. Validasi awalan: harus diawali 08 atau 628
+        if (!val.startsWith('08') && !val.startsWith('628')) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-danger';
+                feedback.innerHTML = '<i class="bi bi-x-circle me-1"></i> Nomor WhatsApp harus diawali <strong>08</strong> atau <strong>628</strong>.';
+                inputPhone.style.borderColor = '#dc3545';
+            }
+            return { isValid: false, message: 'Nomor WhatsApp tidak valid. Harus diawali dengan 08 atau 628 (contoh: 081234567890).', phone: val };
+        }
+
+        // 6. Validasi batas minimum dan maksimum angka
+        const minLen = val.startsWith('628') ? 11 : 10;
+        if (val.length < minLen) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-warning';
+                feedback.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i> Terlalu pendek (minimal ${minLen} angka, saat ini ${val.length} angka).`;
+                inputPhone.style.borderColor = '#ffc107';
+            }
+            return { isValid: false, message: `Nomor WhatsApp terlalu pendek. Minimal ${minLen} digit angka (contoh: 081234567890).`, phone: val };
+        }
+
+        if (val.length > maxLen) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-danger';
+                feedback.innerHTML = `<i class="bi bi-x-circle me-1"></i> Terlalu panjang (maksimal ${maxLen} angka).`;
+                inputPhone.style.borderColor = '#dc3545';
+            }
+            return { isValid: false, message: `Nomor WhatsApp terlalu panjang (maksimal ${maxLen} digit angka).`, phone: val };
+        }
+
+        // 7. Format dinyatakan valid
+        if (showFeedback && feedback) {
+            feedback.style.display = 'block';
+            feedback.className = 'mt-1 text-success';
+            feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Format nomor WhatsApp valid (${val.length} digit).`;
+            inputPhone.style.borderColor = '#238636';
+        } else if (feedback) {
+            feedback.style.display = 'none';
+            inputPhone.style.borderColor = '#238636';
+        }
+
+        return { isValid: true, message: '', phone: val };
+    }
+
+    // Inisialisasi event listener nomor WhatsApp
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInputEl = document.getElementById('inputGuestPhone');
+        if (phoneInputEl) {
+            phoneInputEl.addEventListener('input', function() {
+                validateGuestPhone(this.value.length > 0);
+            });
+            phoneInputEl.addEventListener('blur', function() {
+                validateGuestPhone(true);
+            });
+            phoneInputEl.addEventListener('paste', function() {
+                setTimeout(() => validateGuestPhone(true), 50);
+            });
+        }
+    });
+
     function openConfirmOrderModal() {
         if (cart.length === 0) {
             alert('Keranjang belanja masih kosong. Silakan pilih menu terlebih dahulu!');
             return;
         }
-
-        const inputName = document.getElementById('inputGuestName');
 
         const modalQty = document.getElementById('modal-summary-qty');
         const modalTotal = document.getElementById('modal-summary-total');
@@ -405,6 +521,12 @@
         }
         if (modalTotal && document.getElementById('cart-total')) {
             modalTotal.innerHTML = document.getElementById('cart-total').innerHTML;
+        }
+
+        // Update status validasi input phone saat modal terbuka
+        const phoneInputEl = document.getElementById('inputGuestPhone');
+        if (phoneInputEl) {
+            validateGuestPhone(phoneInputEl.value.trim().length > 0);
         }
 
         const modalEl = document.getElementById('modalConfirmGuestOrder');
@@ -423,7 +545,6 @@
         const inputPhone = document.getElementById('inputGuestPhone');
 
         let guestName = inputName ? inputName.value.trim() : '';
-        let guestPhone = inputPhone ? inputPhone.value.trim() : '';
 
         if (!guestName) {
             alert('Mohon masukkan Nama Pemesan / Panggilan terlebih dahulu.');
@@ -431,14 +552,17 @@
             return;
         }
 
-        const isTakeaway = '{{ $orderType ?? "dine_in" }}' === 'takeaway' || !{{ isset($meja) ? 'true' : 'false' }};
-        if (isTakeaway && !guestPhone) {
-            alert('Mohon masukkan Nomor WhatsApp / HP untuk memudahkan informasi saat pesanan Takeaway siap.');
-            if (inputPhone) inputPhone.focus();
+        // Validasi Nomor WhatsApp secara ketat
+        const phoneCheck = validateGuestPhone(true);
+        if (!phoneCheck.isValid) {
+            alert(phoneCheck.message);
+            if (inputPhone) {
+                inputPhone.focus();
+                inputPhone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
-
-        // Nama & phone tidak disimpan di localStorage agar antar pesanan bersih (device shared)
+        let guestPhone = phoneCheck.phone;
 
         const isGeofenceActive = {{ \App\Models\Setting::getVal('geofence_active', '0') == '1' ? 'true' : 'false' }};
         const isDineIn = ('{{ $orderType ?? "dine_in" }}' === 'dine_in' && {{ isset($meja) ? 'true' : 'false' }});
