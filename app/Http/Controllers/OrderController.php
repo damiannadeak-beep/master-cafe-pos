@@ -351,7 +351,7 @@ class OrderController extends Controller
         if (!$pesanan || in_array($pesanan->status, ['cancelled', 'void'])) {
             session()->forget(['order_token', 'active_order_id']);
             $redirectUrl = ($pesanan && $pesanan->id_meja) 
-                ? URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
+                ? \Illuminate\Support\Facades\URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
                 : url('/katalog');
             return redirect($redirectUrl)->with('info', 'Pesanan telah dibatalkan atau tidak ditemukan.');
         }
@@ -361,7 +361,41 @@ class OrderController extends Controller
         $pembayaran = $pesanan->pembayaran;
         $meja = $pesanan->meja;
 
-        return view('konsumen.tracking', compact('pesanan', 'pembayaran', 'meja'));
+        // Cari semua pesanan aktif di meja yang sama (Dine-In) atau nomor HP yang sama (Takeaway)
+        $activeTableOrders = collect([$pesanan]);
+
+        if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
+            $otherOrders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
+                ->where('id_meja', $pesanan->id_meja)
+                ->whereIn('status', ['pending', 'processing'])
+                ->where('id', '!=', $pesanan->id)
+                ->orderBy('id', 'asc')
+                ->get();
+
+            if ($otherOrders->isNotEmpty()) {
+                $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
+            }
+        } elseif ($pesanan->tipe_pesanan === 'takeaway' && !empty($pesanan->guest_phone)) {
+            $cleanPhone = preg_replace('/[^0-9]/', '', $pesanan->guest_phone);
+            if (!empty($cleanPhone)) {
+                $otherOrders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
+                    ->where('tipe_pesanan', 'takeaway')
+                    ->where(function($q) use ($cleanPhone, $pesanan) {
+                        $q->where('guest_phone', $pesanan->guest_phone)
+                          ->orWhereRaw("REGEXP_REPLACE(guest_phone, '[^0-9]', '') = ?", [$cleanPhone]);
+                    })
+                    ->whereIn('status', ['pending', 'processing'])
+                    ->where('id', '!=', $pesanan->id)
+                    ->orderBy('id', 'asc')
+                    ->get();
+
+                if ($otherOrders->isNotEmpty()) {
+                    $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
+                }
+            }
+        }
+
+        return view('konsumen.tracking', compact('pesanan', 'pembayaran', 'meja', 'activeTableOrders'));
     }
 
     /**
