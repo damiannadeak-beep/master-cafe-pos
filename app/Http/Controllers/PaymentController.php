@@ -22,7 +22,7 @@ class PaymentController extends Controller
 
     public function checkout(Request $request, $id_pesanan)
     {
-        $pesanan = Pesanan::with(['detail_pesanan.menu', 'pembayaran'])->findOrFail($id_pesanan);
+        $pesanan = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'konsumen'])->findOrFail($id_pesanan);
         $pembayaran = $pesanan->pembayaran;
 
         // Validasi kepemilikan pesanan (User login atau Guest dengan Token yang Cocok)
@@ -127,7 +127,7 @@ class PaymentController extends Controller
 
     public function simulateMidtransPay(Request $request, $id_pesanan)
     {
-        $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
+        $pesanan = Pesanan::with(['pembayaran', 'konsumen'])->findOrFail($id_pesanan);
 
         $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
         $isAuthorized = false;
@@ -188,7 +188,7 @@ class PaymentController extends Controller
 
     public function chooseCashPay(Request $request, $id_pesanan)
     {
-        $pesanan = Pesanan::with(['pembayaran', 'meja'])->findOrFail($id_pesanan);
+        $pesanan = Pesanan::with(['pembayaran', 'meja', 'konsumen'])->findOrFail($id_pesanan);
 
         if (($pesanan->tipe_pesanan ?? '') === 'takeaway') {
             return redirect()->back()->with('error', 'Pesanan Bawa Pulang (Takeaway) wajib dibayar lunas di awal via Midtrans QRIS / Virtual Account.');

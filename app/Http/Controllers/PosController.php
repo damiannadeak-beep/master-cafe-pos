@@ -414,7 +414,7 @@ class PosController extends Controller
                 }
             }
 
-            $orders = Pesanan::whereIn('id', $ids)->get();
+            $orders = Pesanan::with(['konsumen', 'meja', 'detail_pesanan.menu'])->whereIn('id', $ids)->get();
             if ($orders->isEmpty()) {
                 return response()->json(['error' => 'Pesanan tidak ditemukan.'], 404);
             }
@@ -439,7 +439,7 @@ class PosController extends Controller
                 }
 
                 // Notify Customer via Web Push (non-blocking)
-                if ($pesanan->konsumen) {
+                if ($pesanan->id_konsumen && $pesanan->konsumen) {
                     try {
                         $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
                         $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
@@ -561,7 +561,7 @@ class PosController extends Controller
 
             $lastPesanan = null;
             foreach ($ids as $singleId) {
-                $pesanan = Pesanan::find($singleId);
+                $pesanan = Pesanan::with('pembayaran')->find($singleId);
                 if (!$pesanan) continue;
                 if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
                     $lastPesanan = $pesanan;

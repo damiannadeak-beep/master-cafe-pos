@@ -113,15 +113,18 @@ class PaymentService
      */
     private function notifyCustomer(Pesanan $pesanan)
     {
-        if ($pesanan->konsumen) {
-            try {
-                $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
-                    'Pembayaran Diterima',
-                    'Pembayaran untuk Order #' . $pesanan->id . ' telah dikonfirmasi oleh Kasir.',
-                    '/konsumen/profil'
-                ));
-            } catch (\Exception $e) {
-                Log::warning("Gagal mengirim push notifikasi pembayaran: " . $e->getMessage());
+        if ($pesanan->id_konsumen) {
+            $pesanan->loadMissing('konsumen');
+            if ($pesanan->konsumen) {
+                try {
+                    $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
+                        'Pembayaran Diterima',
+                        'Pembayaran untuk Order #' . $pesanan->id . ' telah dikonfirmasi oleh Kasir.',
+                        '/konsumen/profil'
+                    ));
+                } catch (\Exception $e) {
+                    Log::warning("Gagal mengirim push notifikasi pembayaran: " . $e->getMessage());
+                }
             }
         }
     }
@@ -131,8 +134,11 @@ class PaymentService
      */
     private function sendEmailReceipt(Pesanan $pesanan, $targetEmail = null)
     {
-        if (!$targetEmail && $pesanan->konsumen && $pesanan->konsumen->email) {
-            $targetEmail = $pesanan->konsumen->email;
+        if (!$targetEmail && $pesanan->id_konsumen) {
+            $pesanan->loadMissing('konsumen');
+            if ($pesanan->konsumen && $pesanan->konsumen->email) {
+                $targetEmail = $pesanan->konsumen->email;
+            }
         }
 
         if ($targetEmail) {

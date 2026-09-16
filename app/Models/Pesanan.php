@@ -24,12 +24,21 @@ class Pesanan extends Model
 
     public function getCustomerNameAttribute()
     {
-        return $this->guest_name ?: ($this->konsumen?->name ?? 'Tamu');
+        if (!empty($this->guest_name)) {
+            return $this->guest_name;
+        }
+        if ($this->relationLoaded('konsumen')) {
+            return $this->konsumen?->name ?? 'Tamu';
+        }
+        if ($this->id_konsumen) {
+            return $this->konsumen?->name ?? 'Tamu';
+        }
+        return 'Tamu';
     }
 
     public function getNamaPemesanAttribute()
     {
-        return $this->guest_name ?: ($this->konsumen?->name ?? 'Tamu');
+        return $this->customer_name;
     } 
 
     public function detail_pesanan() 
