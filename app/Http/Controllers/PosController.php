@@ -66,11 +66,135 @@ class PosController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
+        $groupedOrders = $this->groupActiveOrders($orders);
+
         if ($request->ajax() || $request->wantsJson() || $request->query('cards_only')) {
-            return view('components.waitress.active-order-card', compact('orders'))->render();
+            return view('components.waitress.active-order-card', compact('groupedOrders', 'orders'))->render();
         }
 
-        return view('waitress.pesanan_aktif', compact('orders'));
+        return view('waitress.pesanan_aktif', compact('groupedOrders', 'orders'));
+    }
+
+    /**
+     * Mengelompokkan pesanan aktif per Meja (Dine-In) atau per Tamu (Takeaway)
+     * agar waitress / kasir tidak bingung dengan pesanan terpisah.
+     */
+    public function groupActiveOrders($orders)
+    {
+        $groups = [];
+
+        foreach ($orders as $order) {
+            if ($order->tipe_pesanan === 'dine_in') {
+                if ($order->id_meja) {
+                    $groupKey = 'table_' . $order->id_meja;
+                } else {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
+                    $groupKey = 'dinein_nomeja_' . ($cleanPhone ?: strtolower(trim($order->customer_name ?: 'guest'))) . '_' . $order->id;
+                }
+            } else {
+                // Takeaway
+                $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
+                if (!empty($cleanPhone)) {
+                    $groupKey = 'takeaway_phone_' . $cleanPhone;
+                } else {
+                    $groupKey = 'takeaway_name_' . strtolower(trim($order->customer_name ?: 'guest'));
+                }
+            }
+
+            if (!isset($groups[$groupKey])) {
+                $groups[$groupKey] = [
+                    'group_key' => $groupKey,
+                    'tipe_pesanan' => $order->tipe_pesanan,
+                    'meja' => $order->meja,
+                    'id_meja' => $order->id_meja,
+                    'customer_name' => $order->customer_name,
+                    'guest_phone' => $order->guest_phone,
+                    'created_at' => $order->created_at,
+                    'latest_created_at' => $order->created_at,
+                    'orders' => collect([]),
+                ];
+            }
+
+            $groups[$groupKey]['orders']->push($order);
+            if ($order->created_at > $groups[$groupKey]['latest_created_at']) {
+                $groups[$groupKey]['latest_created_at'] = $order->created_at;
+            }
+        }
+
+        $result = collect([]);
+        foreach ($groups as $g) {
+            $ordersList = $g['orders'];
+            $orderIds = $ordersList->pluck('id')->all();
+            $primaryOrder = $ordersList->first();
+
+            $totalItems = 0;
+            $totalBill = 0;
+            $totalDiscount = 0;
+            $allPaid = true;
+            $hasPending = false;
+            $hasProcessing = false;
+            $unpaidAmount = 0;
+            $totalUangDiterima = 0;
+            $totalUangKembalian = 0;
+
+            foreach ($ordersList as $ord) {
+                $ordTotal = (int) (($ord->pembayaran && (float)$ord->pembayaran->total_bayar > 0) 
+                    ? $ord->pembayaran->total_bayar 
+                    : ($ord->total - ($ord->discount_amount ?? 0)));
+                $totalBill += $ordTotal;
+                $totalDiscount += (float) ($ord->discount_amount ?? 0);
+
+                $isThisPaid = ($ord->pembayaran && $ord->pembayaran->status === 'paid');
+                if (!$isThisPaid) {
+                    $allPaid = false;
+                    $unpaidAmount += $ordTotal;
+                }
+
+                if ($ord->pembayaran) {
+                    $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
+                    $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                }
+
+                if ($ord->status === 'pending') {
+                    $hasPending = true;
+                } elseif ($ord->status === 'processing') {
+                    $hasProcessing = true;
+                }
+
+                foreach ($ord->detail_pesanan as $detail) {
+                    $totalItems += $detail->jumlah;
+                }
+            }
+
+            $overallStatus = $hasPending ? 'pending' : ($hasProcessing ? 'processing' : 'completed');
+
+            $result->push((object) [
+                'group_key' => $g['group_key'],
+                'primary_order' => $primaryOrder,
+                'orders' => $ordersList,
+                'order_ids' => $orderIds,
+                'order_ids_string' => implode(' & #', $orderIds),
+                'order_ids_badge' => implode(', ', array_map(fn($id) => '#' . $id, $orderIds)),
+                'is_grouped' => count($ordersList) > 1,
+                'tipe_pesanan' => $g['tipe_pesanan'],
+                'meja' => $g['meja'],
+                'id_meja' => $g['id_meja'],
+                'customer_name' => $g['customer_name'],
+                'guest_phone' => $g['guest_phone'],
+                'created_at' => $g['created_at'],
+                'latest_created_at' => $g['latest_created_at'],
+                'total_items' => $totalItems,
+                'total_bill' => $totalBill,
+                'total_discount' => $totalDiscount,
+                'all_paid' => $allPaid,
+                'unpaid_amount' => $unpaidAmount,
+                'total_uang_diterima' => $totalUangDiterima,
+                'total_uang_kembalian' => $totalUangKembalian,
+                'overall_status' => $overallStatus,
+            ]);
+        }
+
+        return $result;
     }
 
     /**
@@ -281,52 +405,69 @@ class PosController extends Controller
     public function updateOrderStatus(UpdateOrderStatusRequest $request, $id_pesanan)
     {
         try {
-            $pesanan = Pesanan::findOrFail($id_pesanan);
-            
-            // Update status
-            $pesanan->update([
-                'status' => $request->validated('status'),
-                'id_kasir' => auth()->id() // Kasir yang memproses pesanan
-            ]);
-
-            // Broadcast status update ke listener real-time (WebSocket / Polling)
-            try {
-                broadcast(new \App\Events\PesananBaru($pesanan));
-                if ($pesanan->id_meja && $pesanan->meja) {
-                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
-                }
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('[PosController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
-            }
-
-            // Notify Customer via Web Push (non-blocking)
-            if ($pesanan->konsumen) {
-                try {
-                    $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
-                    $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
-                        'Pesanan ' . $statusText,
-                        'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
-                        '/konsumen/profil'
-                    ));
-                } catch (\Throwable $notifyErr) {
-                    \Illuminate\Support\Facades\Log::warning('WebPush gagal dikirim: ' . $notifyErr->getMessage());
+            $ids = $request->input('order_ids');
+            if (empty($ids)) {
+                if (is_string($id_pesanan) && str_contains($id_pesanan, ',')) {
+                    $ids = array_filter(array_map('trim', explode(',', $id_pesanan)));
+                } else {
+                    $ids = [$id_pesanan];
                 }
             }
 
-            // Kirim Notifikasi WhatsApp Otomatis jika Pesanan Takeaway Selesai
-            if ($pesanan->status === 'completed' && $pesanan->tipe_pesanan === 'takeaway' && !empty($pesanan->guest_phone)) {
+            $orders = Pesanan::whereIn('id', $ids)->get();
+            if ($orders->isEmpty()) {
+                return response()->json(['error' => 'Pesanan tidak ditemukan.'], 404);
+            }
+
+            $targetStatus = $request->validated('status');
+
+            foreach ($orders as $pesanan) {
+                // Update status
+                $pesanan->update([
+                    'status' => $targetStatus,
+                    'id_kasir' => auth()->id() // Kasir yang memproses pesanan
+                ]);
+
+                // Broadcast status update ke listener real-time (WebSocket / Polling)
                 try {
-                    $pesanan->loadMissing(['detail_pesanan.menu']);
-                    $waMessage = \App\Services\WhatsAppService::formatTakeawayReadyMessage($pesanan);
-                    \App\Services\WhatsAppService::sendMessage($pesanan->guest_phone, $waMessage);
-                } catch (\Throwable $waErr) {
-                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal kirim notifikasi WA Takeaway: ' . $waErr->getMessage());
+                    broadcast(new \App\Events\PesananBaru($pesanan));
+                    if ($pesanan->id_meja && $pesanan->meja) {
+                        broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
+                }
+
+                // Notify Customer via Web Push (non-blocking)
+                if ($pesanan->konsumen) {
+                    try {
+                        $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
+                        $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
+                            'Pesanan ' . $statusText,
+                            'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
+                            '/konsumen/profil'
+                        ));
+                    } catch (\Throwable $notifyErr) {
+                        \Illuminate\Support\Facades\Log::warning('WebPush gagal dikirim: ' . $notifyErr->getMessage());
+                    }
+                }
+
+                // Kirim Notifikasi WhatsApp Otomatis jika Pesanan Takeaway Selesai
+                if ($pesanan->status === 'completed' && $pesanan->tipe_pesanan === 'takeaway' && !empty($pesanan->guest_phone)) {
+                    try {
+                        $pesanan->loadMissing(['detail_pesanan.menu']);
+                        $waMessage = \App\Services\WhatsAppService::formatTakeawayReadyMessage($pesanan);
+                        \App\Services\WhatsAppService::sendMessage($pesanan->guest_phone, $waMessage);
+                    } catch (\Throwable $waErr) {
+                        \Illuminate\Support\Facades\Log::warning('[PosController] Gagal kirim notifikasi WA Takeaway: ' . $waErr->getMessage());
+                    }
                 }
             }
 
             return response()->json([
                 'message' => 'Status pesanan berhasil diupdate',
-                'status' => $pesanan->status
+                'status' => $targetStatus,
+                'order_ids' => $ids
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
@@ -409,19 +550,38 @@ class PosController extends Controller
         try {
             DB::beginTransaction();
             
-            $pesanan = $paymentService->processPayment(
-                $id_pesanan,
-                $validated['metode'],
-                $validated['email_pelanggan'] ?? null,
-                auth()->id(),
-                $validated['nominal_tunai'] ?? null,
-                !empty($validated['is_uang_pas'])
-            );
+            $ids = $request->input('order_ids');
+            if (empty($ids)) {
+                if (is_string($id_pesanan) && str_contains($id_pesanan, ',')) {
+                    $ids = array_filter(array_map('trim', explode(',', $id_pesanan)));
+                } else {
+                    $ids = [$id_pesanan];
+                }
+            }
+
+            $lastPesanan = null;
+            foreach ($ids as $singleId) {
+                $pesanan = Pesanan::find($singleId);
+                if (!$pesanan) continue;
+                if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
+                    $lastPesanan = $pesanan;
+                    continue;
+                }
+
+                $lastPesanan = $paymentService->processPayment(
+                    $singleId,
+                    $validated['metode'],
+                    $validated['email_pelanggan'] ?? null,
+                    auth()->id(),
+                    $validated['nominal_tunai'] ?? null,
+                    !empty($validated['is_uang_pas'])
+                );
+            }
 
             DB::commit();
             return response()->json([
                 'message' => 'Pembayaran berhasil dikonfirmasi.',
-                'id_pesanan' => $pesanan->id
+                'id_pesanan' => $lastPesanan ? $lastPesanan->id : $id_pesanan
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -434,6 +594,40 @@ class PosController extends Controller
      */
     public function printReceipt($id)
     {
+        if (is_string($id) && str_contains($id, ',')) {
+            $ids = array_filter(array_map('trim', explode(',', $id)));
+            $orders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'kasir', 'meja'])->whereIn('id', $ids)->get();
+            $order = $orders->first();
+            if (!$order) {
+                abort(404, 'Pesanan tidak ditemukan.');
+            }
+            $allDetails = collect([]);
+            $total = 0;
+            $discount = 0;
+            $totalUangDiterima = 0;
+            $totalUangKembalian = 0;
+            foreach ($orders as $ord) {
+                $total += $ord->total;
+                $discount += ($ord->discount_amount ?? 0);
+                if ($ord->pembayaran) {
+                    $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
+                    $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                }
+                foreach ($ord->detail_pesanan as $d) {
+                    $allDetails->push($d);
+                }
+            }
+            $order->total = $total;
+            $order->discount_amount = $discount;
+            if ($order->pembayaran) {
+                $order->pembayaran->uang_diterima = $totalUangDiterima;
+                $order->pembayaran->uang_kembalian = $totalUangKembalian;
+            }
+            $order->setRelation('detail_pesanan', $allDetails);
+            $order->combined_ids = implode(' & #', $ids);
+            return view('waitress.receipt', compact('order'));
+        }
+
         $order = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'kasir', 'meja'])->findOrFail($id);
         
         if (!$order->pembayaran || $order->pembayaran->status !== 'paid') {
@@ -507,6 +701,27 @@ class PosController extends Controller
      */
     public function printKitchenReceipt($id, PrintService $printService)
     {
+        if (is_string($id) && str_contains($id, ',')) {
+            $ids = array_filter(array_map('trim', explode(',', $id)));
+            $orders = Pesanan::with(['detail_pesanan.menu', 'meja'])->whereIn('id', $ids)->get();
+            $order = $orders->first();
+            if (!$order) {
+                abort(404, 'Pesanan tidak ditemukan.');
+            }
+            $allDetails = collect([]);
+            foreach ($orders as $ord) {
+                foreach ($ord->detail_pesanan as $d) {
+                    if (count($orders) > 1) {
+                        $d->order_ref = '#' . $ord->id;
+                    }
+                    $allDetails->push($d);
+                }
+            }
+            $order->setRelation('detail_pesanan', $allDetails);
+            $order->combined_ids = implode(' & #', $ids);
+            return view('waitress.kitchen_receipt', compact('order'));
+        }
+
         if (request()->ajax() || request()->wantsJson()) {
             try {
                 $printService->printKitchenReceipt($id);

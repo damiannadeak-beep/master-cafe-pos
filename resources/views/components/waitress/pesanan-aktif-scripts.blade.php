@@ -125,7 +125,9 @@
 
     window.showOrderCompletedModal = function(id) {
         window.activeCompletedOrderId = id;
-        const card = document.getElementById('order-card-' + id);
+        const ids = Array.isArray(id) ? id : (typeof id === 'string' && id.includes(',') ? id.split(',').map(s => s.trim()) : [id]);
+        const primaryId = ids[0];
+        const card = document.getElementById('order-card-' + primaryId);
 
         let customerName = 'Pelanggan';
         let orderType = 'Dine-In';
@@ -144,8 +146,11 @@
             }
         }
 
+        const idParam = ids.join(',');
+        const idLabel = ids.length > 1 ? `#${ids.join(' & #')}` : `#${primaryId}`;
+
         const subTitle = document.getElementById('orderCompletedSubtitle');
-        if (subTitle) subTitle.innerText = `Pesanan #${id}`;
+        if (subTitle) subTitle.innerText = `Pesanan ${idLabel}`;
 
         const custEl = document.getElementById('orderCompletedCustomer');
         if (custEl) custEl.innerText = customerName;
@@ -167,11 +172,11 @@
                 payBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i>Belum Lunas';
             }
             if (promptText) {
-                promptText.innerHTML = '<span class="text-warning fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Pesanan telah selesai dimasak, namun belum lunas.</span><br><small class="text-white-50">Silakan terima pembayaran terlebih dahulu dari konsumen.</small>';
+                promptText.innerHTML = '<span class="text-warning fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Pesanan telah selesai disiapkan, namun belum lunas.</span><br><small class="text-white-50">Silakan terima pembayaran terlebih dahulu dari konsumen.</small>';
             }
             if (actionsContainer) {
                 actionsContainer.innerHTML = `
-                    <button type="button" class="btn btn-warning text-dark fw-bold py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" onclick="window.closeModalById('orderCompletedModal'); window.payOrder(${id});">
+                    <button type="button" class="btn btn-warning text-dark fw-bold py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" onclick="window.closeModalById('orderCompletedModal'); window.payGroupOrders('${idParam}');">
                         <i class="bi bi-cash-stack fs-5"></i> Terima Pembayaran Sekarang
                     </button>
                     <button type="button" class="btn btn-secondary fw-semibold py-2 rounded-3 mt-1" data-bs-dismiss="modal">
@@ -193,13 +198,13 @@
 
             const browserBtn = document.getElementById('btnOrderCompletedBrowser');
             if (browserBtn) {
-                browserBtn.href = `/kasir/order/${id}/receipt`;
+                browserBtn.href = `/kasir/order/${idParam}/receipt`;
             }
 
             const thermalBtn = document.getElementById('btnOrderCompletedThermal');
             if (thermalBtn) {
                 thermalBtn.onclick = function() {
-                    window.printThermal(id);
+                    window.printThermal(primaryId);
                 };
             }
         }
@@ -225,8 +230,12 @@
 
     // --- 2. Update Status Pesanan (Optimistic Update: 0 Detik Instan!) ---
     window.updateOrderStatus = function(id, status, btnElement) {
-        const card = document.getElementById('order-card-' + id);
+        const ids = Array.isArray(id) ? id : (typeof id === 'string' && id.includes(',') ? id.split(',').map(s => s.trim()) : [id]);
+        const primaryId = ids[0];
+        const card = document.getElementById('order-card-' + primaryId);
         const badgeContainer = card ? card.querySelector('.card-header .badge') : null;
+        const idLabel = ids.length > 1 ? `#${ids.join(' & #')}` : `#${primaryId}`;
+        const idParam = ids.join(',');
 
         // ⚡ OPTIMISTIC UPDATE: Langsung ubah badge & tombol di layar kasir dalam 0 milidetik!
         if (status === 'processing') {
@@ -234,35 +243,35 @@
                 badgeContainer.outerHTML = '<span class="badge bg-primary"><i class="bi bi-fire"></i> DIMASAK</span>';
             }
             if (btnElement) {
-                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus(${id}, 'completed', this)">
+                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus('${idParam}', 'completed', this)">
                     <i class="bi bi-check2-all me-1"></i> Selesai Dimasak
                 </button>`;
             }
-            if (window.showToast) window.showToast(`Pesanan #${id} sedang dimasak!`, 'success');
+            if (window.showToast) window.showToast(`Pesanan ${idLabel} sedang dimasak!`, 'success');
         } else if (status === 'completed') {
             if (badgeContainer) {
                 badgeContainer.outerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> SELESAI</span>';
             }
             if (btnElement) {
-                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.showOrderCompletedModal(${id})">
+                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.showOrderCompletedModal('${idParam}')">
                     <i class="bi bi-printer me-1"></i> Cetak Struk
                 </button>`;
             }
-            if (window.showToast) window.showToast(`Pesanan #${id} selesai!`, 'success');
+            if (window.showToast) window.showToast(`Pesanan ${idLabel} selesai!`, 'success');
 
             // Buka modal dialog konfirmasi selesai & opsi cetak struk
-            window.showOrderCompletedModal(id);
+            window.showOrderCompletedModal(idParam);
         }
 
         // Kirim permintaan ke server di background tanpa menghalangi kasir
-        fetch(`/kasir/order/${id}/status`, {
+        fetch(`/kasir/order/${primaryId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({ status: status })
+            body: JSON.stringify({ status: status, order_ids: ids.map(i => parseInt(i)) })
         })
         .then(res => res.json())
         .then(data => {
@@ -465,15 +474,25 @@
     // --- 4. Modal Pembayaran & Eksekusi Pembayaran ---
     let activeOrderPayState = {
         id: null,
+        orderIds: [],
         total: 0,
         nominal: 0,
         isUangPas: true,
         method: 'cash'
     };
 
-    window.payOrder = function(id, total = 0, prefilledUangDiterima = 0, prefilledUangKembalian = 0) {
+    window.payGroupOrders = function(idsStr, total = 0, prefilledUangDiterima = 0, prefilledUangKembalian = 0) {
+        const ids = (typeof idsStr === 'string' && idsStr.includes(','))
+            ? idsStr.split(',').map(s => parseInt(s.trim()))
+            : [parseInt(idsStr)];
+        const primaryId = ids[0];
+        window.payOrder(primaryId, total, prefilledUangDiterima, prefilledUangKembalian, ids);
+    };
+
+    window.payOrder = function(id, total = 0, prefilledUangDiterima = 0, prefilledUangKembalian = 0, orderIds = null) {
         currentOrderId = id;
         activeOrderPayState.id = id;
+        activeOrderPayState.orderIds = orderIds || (typeof id === 'string' && id.includes(',') ? id.split(',').map(s => parseInt(s.trim())) : [parseInt(id)]);
 
         // Failsafe: Read total and cash info from DOM data attributes if total is missing/0
         const cardEl = document.getElementById(`order-card-${id}`);
@@ -500,7 +519,13 @@
         activeOrderPayState.method = 'cash';
         
         const idDisplay = document.getElementById('payment-order-id-display');
-        if (idDisplay) idDisplay.innerText = id;
+        if (idDisplay) {
+            if (activeOrderPayState.orderIds && activeOrderPayState.orderIds.length > 1) {
+                idDisplay.innerText = activeOrderPayState.orderIds.join(' & #');
+            } else {
+                idDisplay.innerText = id;
+            }
+        }
 
         const totalDisplay = document.getElementById('active-order-cash-total-display');
         if (totalDisplay) totalDisplay.innerText = 'Rp ' + (total || 0).toLocaleString('id-ID');
@@ -714,7 +739,8 @@
 
         const payload = {
             metode: method,
-            email_pelanggan: emailVal
+            email_pelanggan: emailVal,
+            order_ids: (activeOrderPayState.orderIds && activeOrderPayState.orderIds.length > 0) ? activeOrderPayState.orderIds : [currentOrderId]
         };
 
         if (method === 'cash') {
@@ -738,7 +764,14 @@
                 else alert(data.error);
             } else {
                 const paidOrderId = currentOrderId;
-                let toastMsg = `Pembayaran pesanan #${paidOrderId} berhasil!`;
+                const receiptParam = (activeOrderPayState.orderIds && activeOrderPayState.orderIds.length > 1) 
+                    ? activeOrderPayState.orderIds.join(',') 
+                    : paidOrderId;
+                const displayId = (activeOrderPayState.orderIds && activeOrderPayState.orderIds.length > 1)
+                    ? activeOrderPayState.orderIds.join(' & #')
+                    : paidOrderId;
+
+                let toastMsg = `Pembayaran pesanan #${displayId} berhasil!`;
                 if (method === 'cash' && !activeOrderPayState.isUangPas && activeOrderPayState.nominal > activeOrderPayState.total) {
                     const kembalian = activeOrderPayState.nominal - activeOrderPayState.total;
                     toastMsg += ` (Kembalian: Rp ${kembalian.toLocaleString('id-ID')})`;
@@ -748,7 +781,7 @@
                     window.showToast(toastMsg, 'success');
                 }
                 if (confirm(toastMsg + '\n\nCetak struk sekarang?')) {
-                    window.open(`/kasir/order/${paidOrderId}/receipt`, '_blank');
+                    window.open(`/kasir/order/${receiptParam}/receipt`, '_blank');
                 }
                 window.reloadActiveOrdersCards(true);
             }

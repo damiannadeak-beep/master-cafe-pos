@@ -15,6 +15,8 @@ class UpdateOrderStatusRequest extends FormRequest
     {
         return [
             'status' => 'required|in:processing,completed',
+            'order_ids' => 'nullable|array',
+            'order_ids.*' => 'integer',
         ];
     }
 }

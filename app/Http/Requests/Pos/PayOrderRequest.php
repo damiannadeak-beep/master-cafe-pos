@@ -18,6 +18,8 @@ class PayOrderRequest extends FormRequest
             'email_pelanggan' => 'nullable|email',
             'nominal_tunai' => 'nullable|numeric|min:0',
             'is_uang_pas' => 'nullable|boolean',
+            'order_ids' => 'nullable|array',
+            'order_ids.*' => 'integer',
         ];
     }
 }
