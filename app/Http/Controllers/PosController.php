@@ -68,11 +68,22 @@ class PosController extends Controller
 
         $groupedOrders = $this->groupActiveOrders($orders);
 
+        // 3. Ambil pesanan selesai terbaru (History pesanan selesai untuk Tablet Waitress)
+        $completedOrders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir'])
+            ->where('status', 'completed')
+            ->orderBy('updated_at', 'desc')
+            ->take(50)
+            ->get();
+
+        if ($request->query('history_only')) {
+            return view('components.waitress.completed-order-card', compact('completedOrders'))->render();
+        }
+
         if ($request->ajax() || $request->wantsJson() || $request->query('cards_only')) {
             return view('components.waitress.active-order-card', compact('groupedOrders', 'orders'))->render();
         }
 
-        return view('waitress.pesanan_aktif', compact('groupedOrders', 'orders'));
+        return view('waitress.pesanan_aktif', compact('groupedOrders', 'orders', 'completedOrders'));
     }
 
     /**

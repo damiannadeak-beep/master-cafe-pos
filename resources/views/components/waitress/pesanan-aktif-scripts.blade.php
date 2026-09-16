@@ -70,6 +70,115 @@
         if (backdrop) backdrop.remove();
     };
 
+    // --- TAB CONTROLLER: Pesanan Aktif vs Riwayat Selesai ---
+    let currentOrderTab = 'active';
+    let isReloadingCompleted = false;
+
+    window.switchOrderTab = function(tab) {
+        currentOrderTab = tab;
+        const paneActive = document.getElementById('pane-active-orders');
+        const paneCompleted = document.getElementById('pane-completed-orders');
+        const btnActive = document.getElementById('tab-btn-active');
+        const btnCompleted = document.getElementById('tab-btn-completed');
+        const pageTitle = document.getElementById('page-order-title');
+
+        if (tab === 'active') {
+            if (paneActive) paneActive.style.display = 'block';
+            if (paneCompleted) paneCompleted.style.display = 'none';
+            if (btnActive) btnActive.classList.add('active');
+            if (btnCompleted) btnCompleted.classList.remove('active');
+            if (pageTitle) pageTitle.innerHTML = '<i class="bi bi-receipt text-accent me-1.5" style="color: #c08e5c;"></i> Monitor Pesanan Waitress';
+        } else {
+            if (paneActive) paneActive.style.display = 'none';
+            if (paneCompleted) paneCompleted.style.display = 'block';
+            if (btnActive) btnActive.classList.remove('active');
+            if (btnCompleted) btnCompleted.classList.add('active');
+            if (pageTitle) pageTitle.innerHTML = '<i class="bi bi-clock-history text-success me-1.5"></i> Riwayat Pesanan Selesai';
+            window.reloadCompletedOrders(true);
+        }
+    };
+
+    window.refreshCurrentTab = function() {
+        if (currentOrderTab === 'active') {
+            window.reloadActiveOrdersCards(false);
+        } else {
+            window.reloadCompletedOrders(false);
+        }
+    };
+
+    window.reloadCompletedOrders = function(silent = false) {
+        if (isReloadingCompleted) return;
+        const container = document.getElementById('completed-orders-container');
+        if (!container) return;
+
+        isReloadingCompleted = true;
+        const refreshBtn = document.getElementById('btn-refresh-orders');
+        if (refreshBtn && !silent) {
+            const icon = refreshBtn.querySelector('i');
+            if (icon) icon.classList.add('spin-animation');
+            refreshBtn.disabled = true;
+        }
+
+        fetch('{{ route("kasir.pesanan_aktif") }}?history_only=1&_t=' + Date.now(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html,application/xhtml+xml',
+                'Cache-Control': 'no-cache'
+            }
+        })
+        .then(res => res.text())
+        .then(html => {
+            container.innerHTML = html;
+            const items = container.querySelectorAll('.completed-order-item');
+            const tabBadge = document.getElementById('tab-count-completed');
+            if (tabBadge) tabBadge.innerText = items.length;
+
+            const searchInput = document.getElementById('search-completed-input');
+            if (searchInput && searchInput.value.trim() !== '') {
+                window.filterCompletedOrders(searchInput.value);
+            } else {
+                const filterInfo = document.getElementById('completed-filter-info');
+                if (filterInfo) filterInfo.innerText = `Menampilkan ${items.length} pesanan selesai hari ini`;
+            }
+        })
+        .catch(err => {
+            console.error('[RiwayatPesanan] Gagal memuat riwayat:', err);
+        })
+        .finally(() => {
+            isReloadingCompleted = false;
+            if (refreshBtn) {
+                const icon = refreshBtn.querySelector('i');
+                if (icon) icon.classList.remove('spin-animation');
+                refreshBtn.disabled = false;
+            }
+        });
+    };
+
+    window.filterCompletedOrders = function(keyword) {
+        const term = (keyword || '').toLowerCase().trim();
+        const items = document.querySelectorAll('#completed-orders-container .completed-order-item');
+        let visibleCount = 0;
+
+        items.forEach(card => {
+            const searchData = card.getAttribute('data-search') || '';
+            if (!term || searchData.includes(term)) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const filterInfo = document.getElementById('completed-filter-info');
+        if (filterInfo) {
+            if (term) {
+                filterInfo.innerText = `Ditemukan ${visibleCount} dari ${items.length} pesanan selesai`;
+            } else {
+                filterInfo.innerText = `Menampilkan ${items.length} pesanan selesai hari ini`;
+            }
+        }
+    };
+
     // --- 1. Realtime Dynamic Cards Loader (Tanpa Refresh Halaman) ---
     window.reloadActiveOrdersCards = function(silent = false) {
         if (isReloadingCards) return;
@@ -97,6 +206,9 @@
             const anyModalOpen = document.querySelector('.modal.show');
             if (!anyModalOpen && !window.activeCompletedOrderId) {
                 container.innerHTML = html;
+                const activeCards = container.querySelectorAll('.order-card-item');
+                const badgeActive = document.getElementById('tab-count-active');
+                if (badgeActive && activeCards) badgeActive.innerText = activeCards.length;
             }
             // Tidak perlu memanggil fetchActiveOrdersCount() ganda di sini karena sudah ditangani oleh sync engine
         })
@@ -282,6 +394,9 @@
             } else {
                 if (typeof fetchActiveOrdersCount === 'function') {
                     fetchActiveOrdersCount();
+                }
+                if (status === 'completed') {
+                    window.reloadCompletedOrders(true);
                 }
             }
         })
