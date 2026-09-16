@@ -237,9 +237,14 @@ class PosController extends Controller
             })
             ->join('|');
 
+        $completedMax = Pesanan::where('status', 'completed')->max('updated_at') ?? '';
+        $completedCount = Pesanan::where('status', 'completed')->whereDate('created_at', today())->count();
+        $activeHash .= "|comp:{$completedCount}-{$completedMax}";
+
         return response()->json([
             'count' => $count,
             'latest_id' => $latestId,
+            'completed_count' => $completedCount,
             'hash' => md5($activeHash),
         ]);
     }

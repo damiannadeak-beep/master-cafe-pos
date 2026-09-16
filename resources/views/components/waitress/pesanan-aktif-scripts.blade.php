@@ -227,8 +227,13 @@
 
     // Auto-sync berkala tiap 12 detik jika kasir sedang di tab aktif dan idle (tidak ada modal terbuka)
     setInterval(() => {
-        if (!document.hidden && !document.querySelector('.modal.show') && !window.activeCompletedOrderId && !isReloadingCards) {
-            window.reloadActiveOrdersCards(true);
+        if (!document.hidden && !document.querySelector('.modal.show') && !window.activeCompletedOrderId) {
+            if (!isReloadingCards) {
+                window.reloadActiveOrdersCards(true);
+            }
+            if (typeof window.reloadCompletedOrders === 'function' && !isReloadingCompleted) {
+                window.reloadCompletedOrders(true);
+            }
         }
     }, 12000);
 

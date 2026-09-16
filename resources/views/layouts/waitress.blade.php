@@ -194,6 +194,9 @@
                             if (typeof window.reloadActiveOrdersCards === 'function') {
                                 window.reloadActiveOrdersCards(true);
                             }
+                            if (typeof window.reloadCompletedOrders === 'function') {
+                                window.reloadCompletedOrders(true);
+                            }
                             if (typeof window.reloadMejaGrid === 'function') {
                                 window.reloadMejaGrid(true);
                             }
@@ -459,6 +462,9 @@
                         if (typeof window.reloadActiveOrdersCards === 'function') {
                             window.reloadActiveOrdersCards(true);
                         }
+                        if (typeof window.reloadCompletedOrders === 'function') {
+                            window.reloadCompletedOrders(true);
+                        }
                         if (typeof window.reloadMejaGrid === 'function') {
                             window.reloadMejaGrid(true);
                         }
@@ -470,6 +476,9 @@
                         fetchWaitressNotifications();
                         if (typeof window.reloadActiveOrdersCards === 'function') {
                             window.reloadActiveOrdersCards(true);
+                        }
+                        if (typeof window.reloadCompletedOrders === 'function') {
+                            window.reloadCompletedOrders(true);
                         }
                         if (typeof window.reloadMejaGrid === 'function') {
                             window.reloadMejaGrid(true);
