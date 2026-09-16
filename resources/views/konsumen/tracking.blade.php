@@ -596,25 +596,31 @@
         } catch(e) { orders = []; }
 
         // Sinkronisasi pesanan aktif dari database server ke LocalStorage
-        @if(isset($activeTableOrders) && $activeTableOrders->count() > 0)
-            const serverOrders = @json($activeTableOrders->map(fn($o) => [
-                'token' => $o->order_token,
-                'id' => $o->id,
-                'label' => $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Takeaway',
-                'type' => $o->tipe_pesanan,
-                'time' => $o->created_at->timestamp * 1000
-            ]));
-            if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-                serverOrders.forEach(srv => {
-                    const existingIdx = orders.findIndex(o => o.token === srv.token);
-                    if (existingIdx >= 0) {
-                        orders[existingIdx] = srv;
-                    } else {
-                        orders.push(srv);
-                    }
-                });
+        @php
+            $serverOrdersList = [];
+            if (isset($activeTableOrders) && $activeTableOrders->count() > 0) {
+                foreach ($activeTableOrders as $act) {
+                    $serverOrdersList[] = [
+                        'token' => $act->order_token,
+                        'id' => $act->id,
+                        'label' => $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Takeaway',
+                        'type' => $act->tipe_pesanan,
+                        'time' => $act->created_at->timestamp * 1000
+                    ];
+                }
             }
-        @endif
+        @endphp
+        const serverOrders = {!! json_encode($serverOrdersList) !!};
+        if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+            serverOrders.forEach(srv => {
+                const existingIdx = orders.findIndex(o => o.token === srv.token);
+                if (existingIdx >= 0) {
+                    orders[existingIdx] = srv;
+                } else {
+                    orders.push(srv);
+                }
+            });
+        }
 
         // Bersihkan order yang sudah completed / cancelled
         if ("{{ $pesanan->status }}" === 'completed' || "{{ $pesanan->status }}" === 'cancelled') {
