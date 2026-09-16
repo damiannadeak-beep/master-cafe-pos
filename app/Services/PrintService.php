@@ -171,4 +171,81 @@ class PrintService
             throw new \Exception('Gagal mencetak ke dapur. Error: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Mempersiapkan data Pesanan (single atau gabungan multi-order) untuk tampilan Struk Kasir (HTML)
+     */
+    public function prepareReceiptOrder($id): Pesanan
+    {
+        if (is_string($id) && str_contains($id, ',')) {
+            $ids = array_filter(array_map('trim', explode(',', $id)));
+            $orders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'kasir', 'meja'])->whereIn('id', $ids)->get();
+            $order = $orders->first();
+            if (!$order) {
+                abort(404, 'Pesanan tidak ditemukan.');
+            }
+            $allDetails = collect([]);
+            $total = 0;
+            $discount = 0;
+            $totalUangDiterima = 0;
+            $totalUangKembalian = 0;
+            foreach ($orders as $ord) {
+                $total += $ord->total;
+                $discount += ($ord->discount_amount ?? 0);
+                if ($ord->pembayaran) {
+                    $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
+                    $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                }
+                foreach ($ord->detail_pesanan as $d) {
+                    $allDetails->push($d);
+                }
+            }
+            $order->total = $total;
+            $order->discount_amount = $discount;
+            if ($order->pembayaran) {
+                $order->pembayaran->uang_diterima = $totalUangDiterima;
+                $order->pembayaran->uang_kembalian = $totalUangKembalian;
+            }
+            $order->setRelation('detail_pesanan', $allDetails);
+            $order->combined_ids = implode(' & #', $ids);
+            return $order;
+        }
+
+        $order = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'kasir', 'meja'])->findOrFail($id);
+        
+        if (!$order->pembayaran || $order->pembayaran->status !== 'paid') {
+            abort(403, 'Pesanan belum dibayar lunas.');
+        }
+
+        return $order;
+    }
+
+    /**
+     * Mempersiapkan data Pesanan (single atau gabungan multi-order) untuk tampilan Tiket Dapur (HTML)
+     */
+    public function prepareKitchenReceiptOrder($id): Pesanan
+    {
+        if (is_string($id) && str_contains($id, ',')) {
+            $ids = array_filter(array_map('trim', explode(',', $id)));
+            $orders = Pesanan::with(['detail_pesanan.menu', 'meja'])->whereIn('id', $ids)->get();
+            $order = $orders->first();
+            if (!$order) {
+                abort(404, 'Pesanan tidak ditemukan.');
+            }
+            $allDetails = collect([]);
+            foreach ($orders as $ord) {
+                foreach ($ord->detail_pesanan as $d) {
+                    if (count($orders) > 1) {
+                        $d->order_ref = '#' . $ord->id;
+                    }
+                    $allDetails->push($d);
+                }
+            }
+            $order->setRelation('detail_pesanan', $allDetails);
+            $order->combined_ids = implode(' & #', $ids);
+            return $order;
+        }
+
+        return Pesanan::with(['detail_pesanan.menu', 'meja'])->findOrFail($id);
+    }
 }

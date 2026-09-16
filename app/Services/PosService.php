@@ -306,4 +306,45 @@ class PosService
             return $pesananBaru;
         });
     }
+
+    /**
+     * Mengambil kalkulasi data jumlah pesanan aktif dan hash pembaruan
+     */
+    public function getActiveOrdersCountData(): array
+    {
+        $activeOrdersQuery = Pesanan::whereIn('status', ['pending', 'processing'])
+            ->whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($sub) {
+                $sub->where('tipe_pesanan', '!=', 'takeaway')
+                    ->orWhereNotNull('id_kasir')
+                    ->orWhereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    });
+            });
+
+        $count = (clone $activeOrdersQuery)->count();
+        $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
+
+        $activeHash = (clone $activeOrdersQuery)
+            ->with('pembayaran')
+            ->get()
+            ->map(function ($o) {
+                $payStatus = $o->pembayaran?->status ?? 'unpaid';
+                $payTime = $o->pembayaran?->updated_at?->timestamp ?? 0;
+                $orderTime = $o->updated_at?->timestamp ?? 0;
+                return "{$o->id}-{$o->status}-{$payStatus}-{$payTime}-{$orderTime}";
+            })
+            ->join('|');
+
+        $completedMax = Pesanan::where('status', 'completed')->max('updated_at') ?? '';
+        $completedCount = Pesanan::where('status', 'completed')->whereDate('created_at', today())->count();
+        $activeHash .= "|comp:{$completedCount}-{$completedMax}";
+
+        return [
+            'count' => $count,
+            'latest_id' => $latestId,
+            'completed_count' => $completedCount,
+            'hash' => md5($activeHash),
+        ];
+    }
 }
