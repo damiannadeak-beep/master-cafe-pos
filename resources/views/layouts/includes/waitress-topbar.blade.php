@@ -25,7 +25,7 @@
                     </a>
                     <!-- Notifikasi Panggilan Meja (Call Bell) -->
                     <div class="dropdown">
-                        <button class="nav-pill-btn dropdown-toggle text-warning" type="button" id="dropdownCallBell" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="nav-pill-btn dropdown-toggle" type="button" id="dropdownCallBell" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell-fill me-1"></i> Panggilan
                             <span class="badge bg-danger rounded-pill ms-1 shadow-sm" id="badge-call-bells" style="display: none;">0</span>
                         </button>

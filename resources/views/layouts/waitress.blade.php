@@ -253,14 +253,17 @@
 
                     const callBells = notifications.filter(n => n.type === 'call_bell');
                     const badge = document.getElementById('badge-call-bells');
+                    const bellBtn = document.getElementById('dropdownCallBell');
                     const listContainer = document.getElementById('dropdown-call-bells-list');
 
                     if (badge) {
                         if (callBells.length > 0) {
                             badge.innerText = callBells.length;
                             badge.style.display = 'inline-block';
+                            if (bellBtn) bellBtn.classList.add('text-warning');
                         } else {
                             badge.style.display = 'none';
+                            if (bellBtn) bellBtn.classList.remove('text-warning');
                         }
                     }
 
