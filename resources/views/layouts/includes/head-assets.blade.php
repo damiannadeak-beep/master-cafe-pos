@@ -24,16 +24,16 @@
     <!-- JSON-LD Structured Data for Google Rich Snippets -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "CafeOrCoffeeShop",
+      "@@context": "https://schema.org",
+      "@@type": "CafeOrCoffeeShop",
       "name": "Master Cafe",
       "image": "{{ asset('images/logo.png') }}",
-      "@id": "{{ url('/') }}",
+      "@@id": "{{ url('/') }}",
       "url": "{{ url('/') }}",
       "telephone": "{{ \App\Models\Setting::getVal('kontak_wa', '+62 812-3456-7890') }}",
       "priceRange": "Rp 5.000 - Rp 50.000",
       "address": {
-        "@type": "PostalAddress",
+        "@@type": "PostalAddress",
         "streetAddress": "{{ \App\Models\Setting::getVal('lokasi_utama_alamat', 'Jl. Bantan, Senggoro') }}",
         "addressLocality": "Bengkalis",
         "addressRegion": "Riau",
@@ -41,7 +41,7 @@
         "addressCountry": "ID"
       },
       "geo": {
-        "@type": "GeoCoordinates",
+        "@@type": "GeoCoordinates",
         "latitude": {{ \App\Models\Setting::getVal('cafe_latitude') ?: (\App\Models\Setting::getVal('warung_latitude') ?: 1.4828) }},
         "longitude": {{ \App\Models\Setting::getVal('cafe_longitude') ?: (\App\Models\Setting::getVal('warung_longitude') ?: 102.1332) }}
       },
