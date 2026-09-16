@@ -47,7 +47,35 @@
         background-color: #238636;
         color: white;
     }
-    .pulse-animation {
+    /* Hanya bulatan icon yang bergerak dan berdenyut */
+    .pulse-icon,
+    .stepper-item.pulse-animation .stepper-icon {
+        animation: stepperIconPulse 1.8s infinite ease-in-out;
+    }
+    @keyframes stepperIconPulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(192, 142, 92, 0.7);
+        }
+        50% {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 10px rgba(192, 142, 92, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(192, 142, 92, 0);
+        }
+    }
+    /* Pastikan seluruh teks dan container stepper tetap diam di tempat */
+    .stepper-item {
+        animation: none !important;
+        transform: none !important;
+    }
+    .stepper-item.pulse-animation {
+        animation: none !important;
+        transform: none !important;
+    }
+    .pulse-animation:not(.stepper-item) {
         animation: pulseGlow 1.8s infinite;
     }
     @keyframes pulseGlow {
@@ -172,8 +200,8 @@
                         $isPaid = ($pembayaran && $pembayaran->status === 'paid');
                         $isPendingVerif = ($pembayaran && $pembayaran->status === 'pending_verification');
                     @endphp
-                    <div class="stepper-item {{ $isPaid ? 'completed' : ($isPendingVerif ? 'active pulse-animation' : 'active') }}" id="step-payment">
-                        <div class="stepper-icon">
+                    <div class="stepper-item {{ $isPaid ? 'completed' : 'active' }}" id="step-payment">
+                        <div class="stepper-icon {{ $isPendingVerif ? 'pulse-icon' : '' }}">
                             @if($isPaid)
                                 <i class="bi bi-check-circle-fill"></i>
                             @elseif($isPendingVerif)
@@ -218,8 +246,8 @@
                         $isCooking = ($pesanan->status === 'processing');
                         $isDone = ($pesanan->status === 'completed');
                     @endphp
-                    <div class="stepper-item {{ $isDone ? 'completed' : ($isCooking ? 'active pulse-animation' : '') }}" id="step-kitchen">
-                        <div class="stepper-icon">
+                    <div class="stepper-item {{ $isDone ? 'completed' : ($isCooking ? 'active' : '') }}" id="step-kitchen">
+                        <div class="stepper-icon {{ $isCooking ? 'pulse-icon' : '' }}">
                             @if($isDone)
                                 <i class="bi bi-check2-all"></i>
                             @elseif($isCooking)
