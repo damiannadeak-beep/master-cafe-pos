@@ -31,7 +31,7 @@
         <!-- Banner Pemulihan Pesanan Aktif (LocalStorage Guest Order) -->
         <div id="active-order-recovery-banner" class="alert alert-warning border-0 rounded-0 mb-0 text-center py-2 shadow-sm" style="display: none; background: linear-gradient(90deg, #1c2128 0%, #282015 50%, #1c2128 100%); border-bottom: 1px solid #c08e5c !important; z-index: 1040; position: relative;">
             <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2 small">
-                <span class="text-white"><i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:</span>
+                <span class="text-white" id="active-order-recovery-text"><i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:</span>
                 <a id="active-order-recovery-link" href="#" class="btn btn-sm rounded-pill fw-bold px-3 btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.78rem;">
                     Lihat Status Pesanan <i class="bi bi-arrow-right ms-1"></i>
                 </a>
@@ -215,42 +215,61 @@
                 });
             };
             
-            // Check for active guest order in LocalStorage (PRD 4.4 Item 2)
+            // Check for active guest orders in LocalStorage (PRD 4.4 Item 2 & Multi-Order support)
             try {
-                const rawOrder = localStorage.getItem('active_guest_order');
-                if (rawOrder) {
-                    const guestOrder = JSON.parse(rawOrder);
-                    if (guestOrder && guestOrder.token && guestOrder.expires_at > Date.now()) {
-                        if (!window.location.pathname.includes('/tracking/')) {
-                            // Verifikasi status ke database API sebelum menampilkan banner
-                            fetch('/api/tracking/' + guestOrder.token + '/status', { headers: { 'Accept': 'application/json' } })
-                                .then(res => {
-                                    if (!res.ok) throw new Error('Order tidak ditemukan');
-                                    return res.json();
-                                })
-                                .then(data => {
-                                    if (data.status === 'completed' || data.status === 'cancelled') {
-                                        localStorage.removeItem('active_guest_order');
-                                        const banner = document.getElementById('active-order-recovery-banner');
-                                        if (banner) banner.style.display = 'none';
-                                    } else {
-                                        const banner = document.getElementById('active-order-recovery-banner');
-                                        const link = document.getElementById('active-order-recovery-link');
-                                        if (banner && link) {
-                                            link.href = '/tracking/' + guestOrder.token;
-                                            banner.style.display = 'block';
-                                        }
-                                    }
-                                })
-                                .catch(() => {
+                let orders = [];
+                const rawOrders = localStorage.getItem('active_guest_orders');
+                if (rawOrders) {
+                    try { orders = JSON.parse(rawOrders); } catch(e) { orders = []; }
+                    if (!Array.isArray(orders)) orders = [];
+                }
+                // Fallback jika belum migrasi ke active_guest_orders
+                if (orders.length === 0) {
+                    const rawSingle = localStorage.getItem('active_guest_order');
+                    if (rawSingle) {
+                        try {
+                            const single = JSON.parse(rawSingle);
+                            if (single && single.token) orders.push(single);
+                        } catch(e) {}
+                    }
+                }
+
+                if (orders.length > 0 && !window.location.pathname.includes('/tracking/')) {
+                    const latestOrder = orders[0];
+                    fetch('/api/tracking/' + latestOrder.token + '/status', { headers: { 'Accept': 'application/json' } })
+                        .then(res => {
+                            if (!res.ok) throw new Error('Order tidak ditemukan');
+                            return res.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'completed' || data.status === 'cancelled') {
+                                orders = orders.filter(o => o.token !== latestOrder.token);
+                                localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+                                if (orders.length === 0) {
                                     localStorage.removeItem('active_guest_order');
                                     const banner = document.getElementById('active-order-recovery-banner');
                                     if (banner) banner.style.display = 'none';
-                                });
-                        }
-                    } else if (guestOrder && guestOrder.expires_at <= Date.now()) {
-                        localStorage.removeItem('active_guest_order');
-                    }
+                                } else {
+                                    localStorage.setItem('active_guest_order', JSON.stringify(orders[0]));
+                                }
+                            } else {
+                                const banner = document.getElementById('active-order-recovery-banner');
+                                const link = document.getElementById('active-order-recovery-link');
+                                const textEl = document.getElementById('active-order-recovery-text');
+                                if (banner && link) {
+                                    link.href = '/tracking/' + latestOrder.token;
+                                    if (textEl) {
+                                        textEl.innerHTML = orders.length > 1 
+                                            ? `<i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki <strong>${orders.length} pesanan aktif</strong> di Master Cafe:` 
+                                            : `<i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:`;
+                                    }
+                                    banner.style.display = 'block';
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            // Gagal fetch status / order expired
+                        });
                 }
             } catch (e) {
                 // Ignore parsing errors

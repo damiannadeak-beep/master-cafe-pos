@@ -523,8 +523,19 @@
             modalTotal.innerHTML = document.getElementById('cart-total').innerHTML;
         }
 
-        // Update status validasi input phone saat modal terbuka
+        // Auto-fill nama dan nomor HP yang tersimpan jika ini adalah pesanan tambahan
+        const savedName = localStorage.getItem('master_cafe_guest_name');
+        const savedPhone = localStorage.getItem('master_cafe_guest_phone');
+        const inputNameEl = document.getElementById('inputGuestName');
         const phoneInputEl = document.getElementById('inputGuestPhone');
+        if (inputNameEl && !inputNameEl.value.trim() && savedName) {
+            inputNameEl.value = savedName;
+        }
+        if (phoneInputEl && !phoneInputEl.value.trim() && savedPhone) {
+            phoneInputEl.value = savedPhone;
+        }
+
+        // Update status validasi input phone saat modal terbuka
         if (phoneInputEl) {
             validateGuestPhone(phoneInputEl.value.trim().length > 0);
         }
@@ -648,18 +659,42 @@
                     btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
                 }
             } else {
-                // Simpan metadata pesanan aktif ke LocalStorage (TTL 12 Jam)
+                // Simpan identitas pemesan agar tidak perlu ketik ulang saat nambah pesanan
+                if (guestName) localStorage.setItem('master_cafe_guest_name', guestName);
+                if (guestPhone) localStorage.setItem('master_cafe_guest_phone', guestPhone);
+
+                // Simpan metadata pesanan aktif ke LocalStorage (TTL 12 Jam & Multi-Order Support)
                 if (data.order_token) {
                     const guestOrder = {
                         token: data.order_token,
                         id_pesanan: data.id_pesanan,
                         guest_name: data.guest_name,
                         id_meja: "{{ $meja->id ?? '' }}",
+                        label: "{{ isset($meja) ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Takeaway' }}",
+                        tipe_pesanan: '{{ $orderType ?? "dine_in" }}',
                         created_at: Date.now(),
                         expires_at: Date.now() + (12 * 60 * 60 * 1000)
                     };
                     localStorage.setItem('active_guest_order', JSON.stringify(guestOrder));
+
+                    // Tambahkan ke daftar pesanan aktif (Multi-Order Array)
+                    let orders = [];
+                    try {
+                        const rawOrders = localStorage.getItem('active_guest_orders');
+                        if (rawOrders) orders = JSON.parse(rawOrders);
+                        if (!Array.isArray(orders)) orders = [];
+                    } catch(e) { orders = []; }
+                    orders = orders.filter(o => o.token !== data.order_token);
+                    orders.unshift(guestOrder);
+                    localStorage.setItem('active_guest_orders', JSON.stringify(orders));
                 }
+
+                // Kosongkan keranjang setelah pesanan berhasil disubmit
+                try {
+                    cart = [];
+                    sessionStorage.removeItem(cartStorageKey);
+                    updateCartBar();
+                } catch(e) {}
 
                 // Redirect ke Checkout atau Tracking
                 if (data.checkout_url) {

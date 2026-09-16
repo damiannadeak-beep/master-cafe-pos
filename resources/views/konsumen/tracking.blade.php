@@ -99,6 +99,19 @@
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
 
+            <!-- Multi-Order Switcher Bar (Jika pelanggan memiliki lebih dari 1 pesanan aktif) -->
+            <div id="multi-order-switcher-bar" class="card tracking-card shadow-sm p-3 mb-3" style="display: none; border: 1px solid rgba(192, 142, 92, 0.35) !important;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <span class="text-white small fw-bold">
+                        <i class="bi bi-receipt-cutoff me-1" style="color: #c08e5c;"></i> Pesanan Aktif Anda di Kafe:
+                    </span>
+                    <span class="badge rounded-pill" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c;" id="multi-order-count-badge"></span>
+                </div>
+                <div class="d-flex gap-2 flex-wrap" id="multi-order-pills-container">
+                    <!-- Dynamic Order Switcher Pills -->
+                </div>
+            </div>
+
             @if($pesanan->status === 'completed')
                 <!-- Banner Pesanan Selesai & Tombol Selesai Utama -->
                 <div class="alert border-0 rounded-4 p-4 mb-4 text-center shadow-lg" style="background: rgba(35, 134, 54, 0.15); border: 1px solid rgba(46, 160, 67, 0.35) !important;">
@@ -166,13 +179,25 @@
                     </div>
                 </div>
 
-                <!-- Tombol Panggil Pelayan Cepat -->
+                <!-- Tombol Panggil Pelayan & Tambah Pesanan -->
                 @if($meja)
                     <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <small class="text-secondary">Butuh bantuan atau ingin menambah pesanan?</small>
-                        <button id="btnCallBell" onclick="callWaiter({{ $meja->id }})" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold">
-                            <i class="bi bi-bell-fill me-1"></i> Panggil Pelayan
-                        </button>
+                        <small class="text-secondary">Ingin menambah pesanan atau butuh bantuan?</small>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}" class="btn btn-sm rounded-pill px-3 fw-bold btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
+                                <i class="bi bi-plus-circle me-1"></i> Tambah Menu di Meja Ini
+                            </a>
+                            <button id="btnCallBell" onclick="callWaiter({{ $meja->id }})" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold btn-touch">
+                                <i class="bi bi-bell-fill me-1"></i> Panggil Pelayan
+                            </button>
+                        </div>
+                    </div>
+                @elseif(($pesanan->tipe_pesanan ?? '') === 'takeaway')
+                    <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <small class="text-secondary">Ingin memesan menu bungkus lainnya?</small>
+                        <a href="{{ route('menu_takeaway') }}" class="btn btn-sm rounded-pill px-3 fw-bold btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
+                            <i class="bi bi-plus-circle me-1"></i> Pesan Menu Tambahan (Bungkus)
+                        </a>
                     </div>
                 @endif
             </div>
@@ -415,18 +440,102 @@
     const orderToken = "{{ $pesanan->order_token }}";
     const pesananId = {{ $pesanan->id }};
     const trackingMejaId = {{ $meja ? $meja->id : 0 }};
+    const orderLabel = "{{ $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Takeaway' }}";
+    const orderType = "{{ $pesanan->tipe_pesanan ?? 'dine_in' }}";
+
+    // Fungsi Sinkronisasi Multi-Order di LocalStorage
+    function syncMultiOrders() {
+        let orders = [];
+        try {
+            const raw = localStorage.getItem('active_guest_orders');
+            if (raw) orders = JSON.parse(raw);
+            if (!Array.isArray(orders)) orders = [];
+        } catch(e) { orders = []; }
+
+        // Bersihkan order yang sudah completed / cancelled
+        if ("{{ $pesanan->status }}" === 'completed' || "{{ $pesanan->status }}" === 'cancelled') {
+            orders = orders.filter(o => o.token !== orderToken);
+            localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+            if (orders.length > 0) {
+                localStorage.setItem('active_guest_order', JSON.stringify(orders[0]));
+            } else {
+                localStorage.removeItem('active_guest_order');
+            }
+        } else {
+            // Pastikan pesanan saat ini tercatat di list
+            const idx = orders.findIndex(o => o.token === orderToken);
+            const currentObj = {
+                token: orderToken,
+                id: pesananId,
+                label: orderLabel,
+                type: orderType,
+                time: Date.now()
+            };
+            if (idx >= 0) {
+                orders[idx] = currentObj;
+            } else {
+                orders.unshift(currentObj);
+            }
+            localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+            localStorage.setItem('active_guest_order', JSON.stringify(currentObj));
+        }
+
+        // Render Switcher Bar jika ada lebih dari 1 pesanan aktif
+        const switcherBar = document.getElementById('multi-order-switcher-bar');
+        const countBadge = document.getElementById('multi-order-count-badge');
+        const pillsContainer = document.getElementById('multi-order-pills-container');
+
+        if (!switcherBar || !pillsContainer) return;
+
+        if (orders.length > 1) {
+            switcherBar.style.display = 'block';
+            if (countBadge) countBadge.innerText = orders.length + ' Pesanan';
+            pillsContainer.innerHTML = '';
+
+            orders.forEach(ord => {
+                const isCurrent = (ord.token === orderToken);
+                const pill = document.createElement('a');
+                pill.href = '/tracking/' + ord.token;
+                pill.className = 'btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 btn-touch ' + 
+                    (isCurrent ? 'text-white' : 'btn-outline-secondary text-light');
+                pill.style.fontSize = '0.78rem';
+                if (isCurrent) {
+                    pill.style.background = 'var(--gradient-bronze)';
+                    pill.style.border = 'none';
+                    pill.innerHTML = `<i class="bi bi-check-circle-fill"></i> Order #${ord.id} (${ord.label || 'Aktif'}) <span class="badge bg-dark bg-opacity-50 ms-1">Sedang Dilihat</span>`;
+                } else {
+                    pill.innerHTML = `<i class="bi bi-receipt"></i> Order #${ord.id} (${ord.label || 'Antrean'}) <i class="bi bi-arrow-right-short"></i>`;
+                }
+                pillsContainer.appendChild(pill);
+            });
+        } else {
+            switcherBar.style.display = 'none';
+        }
+    }
 
     // Fungsi Utama: Menyelesaikan Sesi Pesanan Konsumen & Kembali ke Menu Meja yang Sama
     function finishCustomerSession() {
         try {
-            localStorage.removeItem('active_guest_order');
-            localStorage.removeItem('master_cafe_guest_name');
-            localStorage.removeItem('master_cafe_guest_phone');
+            let orders = [];
+            const raw = localStorage.getItem('active_guest_orders');
+            if (raw) orders = JSON.parse(raw);
+            if (Array.isArray(orders)) {
+                orders = orders.filter(o => o.token !== orderToken);
+                localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+                if (orders.length > 0) {
+                    localStorage.setItem('active_guest_order', JSON.stringify(orders[0]));
+                } else {
+                    localStorage.removeItem('active_guest_order');
+                }
+            } else {
+                localStorage.removeItem('active_guest_order');
+            }
         } catch(e) {}
+
         @if($meja)
             window.location.href = "{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}";
         @else
-            window.location.href = "{{ url('/katalog') }}";
+            window.location.href = "{{ route('menu_takeaway') }}";
         @endif
     }
 
@@ -450,16 +559,27 @@
         .then(res => res.json())
         .then(data => {
             try {
-                localStorage.removeItem('active_guest_order');
-                localStorage.removeItem('master_cafe_guest_name');
-                localStorage.removeItem('master_cafe_guest_phone');
+                let orders = [];
+                const raw = localStorage.getItem('active_guest_orders');
+                if (raw) orders = JSON.parse(raw);
+                if (Array.isArray(orders)) {
+                    orders = orders.filter(o => o.token !== orderToken);
+                    localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+                    if (orders.length > 0) {
+                        localStorage.setItem('active_guest_order', JSON.stringify(orders[0]));
+                    } else {
+                        localStorage.removeItem('active_guest_order');
+                    }
+                } else {
+                    localStorage.removeItem('active_guest_order');
+                }
             } catch(e) {}
 
             alert(data.message || 'Pesanan berhasil dibatalkan.');
             @if($meja)
                 window.location.href = "{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}";
             @else
-                window.location.href = "{{ url('/katalog') }}";
+                window.location.href = "{{ route('menu_takeaway') }}";
             @endif
         })
         .catch(err => {
@@ -646,20 +766,14 @@
         }
     });
 
-    // Cleanup active order LocalStorage jika status sudah completed / cancelled
+    // Cleanup active order LocalStorage jika status sudah completed / cancelled & Sync Multi-Order
     document.addEventListener('DOMContentLoaded', () => {
         const trackingMejaId = {{ $meja ? $meja->id : 0 }};
         if (trackingMejaId) {
             checkCallBellCooldown(trackingMejaId);
         }
 
-        if (currentStatus === 'completed' || currentStatus === 'cancelled') {
-            try {
-                localStorage.removeItem('active_guest_order');
-                const banner = document.getElementById('active-order-recovery-banner');
-                if (banner) banner.style.display = 'none';
-            } catch(e) {}
-        }
+        syncMultiOrders();
 
         if (window.Echo) {
             window.Echo.channel('kasir-notifications')
