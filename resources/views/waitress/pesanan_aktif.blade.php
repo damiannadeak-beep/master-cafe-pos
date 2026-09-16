@@ -28,12 +28,6 @@
                     <span class="badge rounded-pill ms-1.5 shadow-sm" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);" id="tab-count-completed">{{ $completedOrders->count() }}</span>
                 </button>
             </div>
-
-            <!-- Tombol Refresh Cepat -->
-            <button type="button" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center btn-touch shadow-sm" 
-                    id="btn-refresh-orders" onclick="refreshCurrentTab()" title="Muat Ulang Pesanan" style="width: 38px; height: 38px;">
-                <i class="bi bi-arrow-clockwise text-light"></i>
-            </button>
         </div>
     </div>
 
