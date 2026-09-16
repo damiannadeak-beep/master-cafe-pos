@@ -117,17 +117,19 @@
                                 Rp {{ number_format($order->total, 0, ',', '.') }}
                             </span>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-info text-white flex-grow-1 fw-bold rounded-pill d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" 
-                                    style="font-size: 0.78rem; height: 34px;"
+                        <div class="d-flex flex-column gap-1.5">
+                            <button type="button" class="btn btn-sm text-white w-100 fw-bold rounded-pill d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" 
+                                    style="font-size: 0.8rem; height: 36px; background: linear-gradient(135deg, #0284c7, #0369a1); border: none;"
                                     onclick="window.printThermal({{ $order->id }})">
                                 <i class="bi bi-printer-fill me-1.5"></i> Cetak Struk
                             </button>
-                            <a href="{{ route('kasir.order.receipt', ['id' => $order->id]) }}" target="_blank" 
-                               class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 d-inline-flex align-items-center justify-content-center btn-touch text-white-50" 
-                               style="font-size: 0.78rem; height: 34px;" title="Buka Pratinjau Struk">
-                                <i class="bi bi-box-arrow-up-right"></i>
-                            </a>
+                            <div class="text-center">
+                                <a href="{{ route('kasir.order.receipt', ['id' => $order->id]) }}" target="_blank" 
+                                   class="text-white-50 text-decoration-none d-inline-flex align-items-center py-0.5" 
+                                   style="font-size: 0.72rem;" title="Buka Pratinjau Struk Digital di Tab Baru">
+                                    <i class="bi bi-eye me-1"></i> Pratinjau Struk Digital
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

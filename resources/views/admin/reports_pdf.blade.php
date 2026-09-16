@@ -133,24 +133,28 @@
         Periode Laporan: {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
     </div>
 
-    <!-- 1. KPI SUMMARY GRID -->
+    <!-- 1. KPI SUMMARY GRID (STANDAR P&L) -->
     <table class="kpi-grid">
         <tr>
-            <td width="25%">
-                <div class="kpi-label">Pendapatan Omzet</div>
-                <div class="kpi-value" style="color: #0d6efd;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
+            <td width="20%">
+                <div class="kpi-label">Omzet Penjualan</div>
+                <div class="kpi-value" style="color: #0d6efd; font-size: 11pt;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
             </td>
-            <td width="25%">
-                <div class="kpi-label">Pengeluaran Kasir</div>
-                <div class="kpi-value" style="color: #dc3545;">- Rp {{ number_format($totalPengeluaranKasir ?? 0, 0, ',', '.') }}</div>
+            <td width="20%">
+                <div class="kpi-label">HPP Bahan Baku</div>
+                <div class="kpi-value" style="color: #6c757d; font-size: 11pt;">- Rp {{ number_format($totalHpp ?? 0, 0, ',', '.') }}</div>
             </td>
-            <td width="25%">
-                <div class="kpi-label">Pengeluaran Bisnis</div>
-                <div class="kpi-value" style="color: #dc3545;">- Rp {{ number_format($totalPengeluaranBisnis ?? 0, 0, ',', '.') }}</div>
+            <td width="20%">
+                <div class="kpi-label">Laba Kotor ({{ $grossMarginPercent }}%)</div>
+                <div class="kpi-value" style="color: #0dcaf0; font-size: 11pt;">Rp {{ number_format($labaKotor, 0, ',', '.') }}</div>
             </td>
-            <td width="25%">
-                <div class="kpi-label">Pendapatan Bersih Owner</div>
-                <div class="kpi-value" style="color: {{ ($labaBersih ?? 0) >= 0 ? '#198754' : '#dc3545' }};">
+            <td width="20%">
+                <div class="kpi-label">Total Beban Usaha</div>
+                <div class="kpi-value" style="color: #dc3545; font-size: 11pt;">- Rp {{ number_format($totalPengeluaran ?? 0, 0, ',', '.') }}</div>
+            </td>
+            <td width="20%">
+                <div class="kpi-label">Laba Bersih ({{ $netMarginPercent }}%)</div>
+                <div class="kpi-value" style="color: {{ ($labaBersih ?? 0) >= 0 ? '#198754' : '#dc3545' }}; font-size: 11pt;">
                     Rp {{ number_format($labaBersih, 0, ',', '.') }}
                 </div>
             </td>

@@ -53,39 +53,54 @@
         </div>
     </div>
 
-    <!-- Summary Cards Laporan Finansial -->
+    <!-- Summary Cards Laporan Finansial (Standar P&L Akuntansi) -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3 col-sm-6">
+        <div class="col-lg col-md-4 col-sm-6">
             <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #3b82f6 !important;">
-                <div class="card-body">
-                    <span class="text-white-50 small d-block mb-1">Total Omzet Penjualan</span>
-                    <h4 class="fw-bold mb-0" style="color: #60a5fa;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h4>
+                <div class="card-body p-3">
+                    <span class="text-white-50 small d-block mb-1">1. Omzet Penjualan (Gross)</span>
+                    <h5 class="fw-bold mb-0" style="color: #60a5fa;">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h5>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #eab308 !important;">
-                <div class="card-body">
-                    <span class="text-white-50 small d-block mb-1">Pengeluaran Kasir (Laci)</span>
-                    <h4 class="fw-bold mb-0 text-warning">- Rp {{ number_format($totalPengeluaranKasir ?? 0, 0, ',', '.') }}</h4>
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #94a3b8 !important;">
+                <div class="card-body p-3">
+                    <span class="text-white-50 small d-block mb-1">2. HPP Bahan Baku (COGS)</span>
+                    <h5 class="fw-bold mb-0 text-secondary">- Rp {{ number_format($totalHpp ?? 0, 0, ',', '.') }}</h5>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-sm-6">
+        <div class="col-lg col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #38bdf8 !important;">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-white-50 small">3. Laba Kotor Usaha</span>
+                        <span class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.68rem;">{{ $grossMarginPercent }}%</span>
+                    </div>
+                    <h5 class="fw-bold mb-0" style="color: #38bdf8;">Rp {{ number_format($labaKotor, 0, ',', '.') }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg col-md-6 col-sm-6">
             <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #ef4444 !important;">
-                <div class="card-body">
-                    <span class="text-white-50 small d-block mb-1">Pengeluaran Bisnis (Owner)</span>
-                    <h4 class="fw-bold mb-0 text-danger">- Rp {{ number_format($totalPengeluaranBisnis ?? 0, 0, ',', '.') }}</h4>
+                <div class="card-body p-3">
+                    <span class="text-white-50 small d-block mb-1">4. Beban Operasional</span>
+                    <h5 class="fw-bold mb-0 text-danger">- Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h5>
+                    <small class="text-white-50" style="font-size: 0.7rem;">Laci: {{ number_format($totalPengeluaranKasir, 0, ',', '.') }} | Bisnis: {{ number_format($totalPengeluaranBisnis, 0, ',', '.') }}</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-sm-6">
+        <div class="col-lg col-md-6 col-sm-12">
             <div class="card border-0 shadow-sm text-white h-100" style="background-color: #161b22; border: 1px solid #21262d !important; border-left: 4px solid #22c55e !important;">
-                <div class="card-body">
-                    <span class="text-white-50 small d-block mb-1">Pendapatan Bersih Owner</span>
-                    <h4 class="fw-bold mb-0 {{ ($labaBersih ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-white-50 small">5. Laba Bersih Riil (Net)</span>
+                        <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.68rem;">{{ $netMarginPercent }}%</span>
+                    </div>
+                    <h5 class="fw-bold mb-0 {{ ($labaBersih ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
                         Rp {{ number_format($labaBersih, 0, ',', '.') }}
-                    </h4>
+                    </h5>
                 </div>
             </div>
         </div>

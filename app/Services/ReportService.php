@@ -87,8 +87,17 @@ class ReportService
             ->sum('nominal');
 
         $totalPengeluaran = $totalPengeluaranKasir + $totalPengeluaranBisnis;
-        $labaKotor = $totalPendapatan;
-        $labaBersih = $totalPendapatan - $totalPengeluaran;
+        
+        // Standar Akuntansi Laba Rugi (P&L / Income Statement):
+        // 1. Laba Kotor (Gross Profit) = Omzet Penjualan - Total HPP Bahan Baku (COGS)
+        $labaKotor = (float) $totalPendapatan - (float) $totalHpp;
+
+        // 2. Laba Bersih Operasional (Net Profit) = Laba Kotor - Total Biaya Operasional (Kasir + Bisnis)
+        $labaBersih = (float) $labaKotor - (float) $totalPengeluaran;
+
+        // 3. Rasio Margin Finansial (%)
+        $grossMarginPercent = $totalPendapatan > 0 ? round(($labaKotor / $totalPendapatan) * 100, 1) : 0;
+        $netMarginPercent = $totalPendapatan > 0 ? round(($labaBersih / $totalPendapatan) * 100, 1) : 0;
 
         $kasirShifts = KasirShift::with('user')
             ->whereBetween('waktu_buka', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
@@ -107,10 +116,12 @@ class ReportService
             'totalPendapatan',
             'totalHpp',
             'labaKotor',
+            'grossMarginPercent',
             'totalPengeluaranKasir',
             'totalPengeluaranBisnis',
             'totalPengeluaran',
             'labaBersih',
+            'netMarginPercent',
             'kasirShifts'
         );
     }

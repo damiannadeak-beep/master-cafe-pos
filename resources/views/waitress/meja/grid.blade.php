@@ -133,8 +133,20 @@
                         @endif
 
                         @if($activeOrder)
-                            <a href="{{ route('kasir.pesanan_aktif') }}" class="btn w-100 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" style="height: 40px; min-height: 40px; font-size: 0.875rem; border: 1px solid #c08e5c; color: #c08e5c; background: rgba(192, 142, 92, 0.1); transition: all 0.2s ease;">
-                                <i class="bi bi-eye me-2" style="font-size: 1.1rem;"></i> Buka di Pesanan Aktif
+                            <div class="d-flex gap-1.5 mb-1">
+                                <button type="button" class="btn btn-sm btn-outline-warning flex-grow-1 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" 
+                                        style="height: 36px; font-size: 0.75rem;"
+                                        onclick="openModalPindahMeja({{ $meja->id }}, '{{ addslashes($meja->nama_meja_atau_nomor) }}')">
+                                    <i class="bi bi-arrow-left-right me-1"></i> Pindah Meja
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info flex-grow-1 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" 
+                                        style="height: 36px; font-size: 0.75rem;"
+                                        onclick="openModalGabungMeja({{ $meja->id }}, '{{ addslashes($meja->nama_meja_atau_nomor) }}')">
+                                    <i class="bi bi-intersect me-1"></i> Gabung
+                                </button>
+                            </div>
+                            <a href="{{ route('kasir.pesanan_aktif') }}" class="btn w-100 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" style="height: 36px; min-height: 36px; font-size: 0.8rem; border: 1px solid #c08e5c; color: #c08e5c; background: rgba(192, 142, 92, 0.1); transition: all 0.2s ease;">
+                                <i class="bi bi-eye me-1.5" style="font-size: 1rem;"></i> Buka di Pesanan Aktif
                             </a>
                         @elseif(!$callNotif)
                             <div class="text-center">

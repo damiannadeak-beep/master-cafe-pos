@@ -284,6 +284,8 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Meja Waitress
         Route::get('/meja', [WaitressMejaController::class, 'index'])->name('kasir.meja.index');
         Route::put('/meja/{id}/toggle', [WaitressMejaController::class, 'toggle'])->name('kasir.meja.toggle');
+        Route::post('/meja/pindah', [WaitressMejaController::class, 'pindahMeja'])->name('kasir.meja.pindah');
+        Route::post('/meja/gabung', [WaitressMejaController::class, 'gabungMeja'])->name('kasir.meja.gabung');
 
         // Ketersediaan Menu Waitress
         Route::get('/stok', [\App\Http\Controllers\WaitressStokController::class, 'index'])->name('kasir.stok.index');

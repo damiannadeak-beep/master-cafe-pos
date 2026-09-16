@@ -13,6 +13,7 @@ use App\Models\{Pesanan, DetailPesanan, Pembayaran, Menu, Meja, Promo, Setting};
 use App\Services\OrderService;
 use App\Services\PaymentService;
 use App\Services\PrintService;
+use App\Services\PosService;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 use Mike42\Escpos\Printer;
 use Illuminate\Support\Facades\Hash;
@@ -88,124 +89,13 @@ class PosController extends Controller
 
     /**
      * Mengelompokkan pesanan aktif per Meja (Dine-In) atau per Tamu (Takeaway)
-     * agar waitress / kasir tidak bingung dengan pesanan terpisah.
+     * Delegasi ke PosService untuk arsitektur yang bersih.
      */
     public function groupActiveOrders($orders)
     {
-        $groups = [];
-
-        foreach ($orders as $order) {
-            if ($order->tipe_pesanan === 'dine_in') {
-                if ($order->id_meja) {
-                    $groupKey = 'table_' . $order->id_meja;
-                } else {
-                    $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
-                    $groupKey = 'dinein_nomeja_' . ($cleanPhone ?: strtolower(trim($order->customer_name ?: 'guest'))) . '_' . $order->id;
-                }
-            } else {
-                // Takeaway
-                $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
-                if (!empty($cleanPhone)) {
-                    $groupKey = 'takeaway_phone_' . $cleanPhone;
-                } else {
-                    $groupKey = 'takeaway_name_' . strtolower(trim($order->customer_name ?: 'guest'));
-                }
-            }
-
-            if (!isset($groups[$groupKey])) {
-                $groups[$groupKey] = [
-                    'group_key' => $groupKey,
-                    'tipe_pesanan' => $order->tipe_pesanan,
-                    'meja' => $order->meja,
-                    'id_meja' => $order->id_meja,
-                    'customer_name' => $order->customer_name,
-                    'guest_phone' => $order->guest_phone,
-                    'created_at' => $order->created_at,
-                    'latest_created_at' => $order->created_at,
-                    'orders' => collect([]),
-                ];
-            }
-
-            $groups[$groupKey]['orders']->push($order);
-            if ($order->created_at > $groups[$groupKey]['latest_created_at']) {
-                $groups[$groupKey]['latest_created_at'] = $order->created_at;
-            }
-        }
-
-        $result = collect([]);
-        foreach ($groups as $g) {
-            $ordersList = $g['orders'];
-            $orderIds = $ordersList->pluck('id')->all();
-            $primaryOrder = $ordersList->first();
-
-            $totalItems = 0;
-            $totalBill = 0;
-            $totalDiscount = 0;
-            $allPaid = true;
-            $hasPending = false;
-            $hasProcessing = false;
-            $unpaidAmount = 0;
-            $totalUangDiterima = 0;
-            $totalUangKembalian = 0;
-
-            foreach ($ordersList as $ord) {
-                $ordTotal = (int) (($ord->pembayaran && (float)$ord->pembayaran->total_bayar > 0) 
-                    ? $ord->pembayaran->total_bayar 
-                    : ($ord->total - ($ord->discount_amount ?? 0)));
-                $totalBill += $ordTotal;
-                $totalDiscount += (float) ($ord->discount_amount ?? 0);
-
-                $isThisPaid = ($ord->pembayaran && $ord->pembayaran->status === 'paid');
-                if (!$isThisPaid) {
-                    $allPaid = false;
-                    $unpaidAmount += $ordTotal;
-                }
-
-                if ($ord->pembayaran) {
-                    $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
-                    $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
-                }
-
-                if ($ord->status === 'pending') {
-                    $hasPending = true;
-                } elseif ($ord->status === 'processing') {
-                    $hasProcessing = true;
-                }
-
-                foreach ($ord->detail_pesanan as $detail) {
-                    $totalItems += $detail->jumlah;
-                }
-            }
-
-            $overallStatus = $hasPending ? 'pending' : ($hasProcessing ? 'processing' : 'completed');
-
-            $result->push((object) [
-                'group_key' => $g['group_key'],
-                'primary_order' => $primaryOrder,
-                'orders' => $ordersList,
-                'order_ids' => $orderIds,
-                'order_ids_string' => implode(' & #', $orderIds),
-                'order_ids_badge' => implode(', ', array_map(fn($id) => '#' . $id, $orderIds)),
-                'is_grouped' => count($ordersList) > 1,
-                'tipe_pesanan' => $g['tipe_pesanan'],
-                'meja' => $g['meja'],
-                'id_meja' => $g['id_meja'],
-                'customer_name' => $g['customer_name'],
-                'guest_phone' => $g['guest_phone'],
-                'created_at' => $g['created_at'],
-                'latest_created_at' => $g['latest_created_at'],
-                'total_items' => $totalItems,
-                'total_bill' => $totalBill,
-                'total_discount' => $totalDiscount,
-                'all_paid' => $allPaid,
-                'unpaid_amount' => $unpaidAmount,
-                'total_uang_diterima' => $totalUangDiterima,
-                'total_uang_kembalian' => $totalUangKembalian,
-                'overall_status' => $overallStatus,
-            ]);
-        }
-
-        return $result;
+        return app(PosService::class)->groupActiveOrders(
+            $orders instanceof \Illuminate\Support\Collection ? $orders : collect($orders)
+        );
     }
 
     /**
@@ -923,104 +813,16 @@ class PosController extends Controller
         ]);
 
         try {
-            DB::beginTransaction();
-
             $pesananAsli = Pesanan::with('detail_pesanan')->findOrFail($id_pesanan);
 
             if ($pesananAsli->pembayaran && $pesananAsli->pembayaran->status === 'paid') {
                 throw new \Exception('Pesanan sudah dibayar, tidak bisa dipisah.');
             }
 
-            // Simpan total asli sebelum split untuk menghitung rasio HPP
-            $totalAsliSebelumSplit = $pesananAsli->total;
-            $hppAsliSebelumSplit = $pesananAsli->total_hpp;
+            app(PosService::class)->splitOrder($pesananAsli, $validated['split_items']);
 
-            // 1. Buat Pesanan Baru (Clone)
-            $pesananBaru = $pesananAsli->replicate();
-            $pesananBaru->total = 0;
-            $pesananBaru->total_hpp = 0; // Reset HPP pesanan baru
-            $pesananBaru->discount_amount = 0; // Reset diskon
-            $pesananBaru->promo_id = null; // Promo tidak dipindah otomatis
-            $pesananBaru->save();
-
-            $totalBaru = 0;
-
-            // 2. Pindahkan Detail Pesanan
-            foreach ($validated['split_items'] as $item) {
-                $detail = DetailPesanan::where('id', $item['id_detail'])->where('id_pesanan', $pesananAsli->id)->first();
-                if ($detail) {
-                    if ($item['jumlah'] < $detail->jumlah) {
-                        // Pecah record detail pesanan
-                        $sisaJumlah = $detail->jumlah - $item['jumlah'];
-                        $hargaSatuan = $detail->subtotal / $detail->jumlah;
-                        
-                        $subtotalBaru = $hargaSatuan * $item['jumlah'];
-                        $subtotalSisa = $hargaSatuan * $sisaJumlah;
-                        
-                        $detail->update([
-                            'jumlah' => $sisaJumlah,
-                            'subtotal' => $subtotalSisa
-                        ]);
-
-                        DetailPesanan::create([
-                            'id_pesanan' => $pesananBaru->id,
-                            'id_menu' => $detail->id_menu,
-                            'jumlah' => $item['jumlah'],
-                            'subtotal' => $subtotalBaru
-                        ]);
-                        $totalBaru += $subtotalBaru;
-                    } else if ($item['jumlah'] >= $detail->jumlah) {
-                        // Pindah seluruhnya
-                        $totalBaru += $detail->subtotal;
-                        $detail->update(['id_pesanan' => $pesananBaru->id]);
-                    }
-                }
-            }
-
-            // =====================================================================
-            // FIX #3: Distribusi HPP secara proporsional berdasarkan rasio harga jual
-            // =====================================================================
-            $hppBaru = 0;
-            if ($totalAsliSebelumSplit > 0) {
-                // Rasio HPP = (total harga jual yang dipindah / total harga jual sebelum split) * HPP asli
-                $rasio = $totalBaru / $totalAsliSebelumSplit;
-                $hppBaru = round($hppAsliSebelumSplit * $rasio, 2);
-            }
-
-            // 3. Update Total Pesanan Baru (termasuk HPP)
-            $pesananBaru->update([
-                'total' => $totalBaru,
-                'total_hpp' => $hppBaru
-            ]);
-            Pembayaran::create([
-                'id_pesanan' => $pesananBaru->id,
-                'status' => 'unpaid',
-                'total_bayar' => $totalBaru
-            ]);
-
-            // 4. Update Total Pesanan Lama (Asli) termasuk HPP
-            $totalAsli = DetailPesanan::where('id_pesanan', $pesananAsli->id)->sum('subtotal');
-            $hppAsli = $hppAsliSebelumSplit - $hppBaru; // Sisa HPP = HPP awal - HPP yang dipindah
-            
-            $pesananAsli->update([
-                'total' => $totalAsli,
-                'total_hpp' => $hppAsli,
-                'promo_id' => null, // Hapus promo jika pesanan pecah
-                'discount_amount' => 0
-            ]);
-            $pesananAsli->pembayaran()->update([
-                'total_bayar' => $totalAsli
-            ]);
-
-            // Cek apakah pesanan asli jadi kosong, hapus jika iya
-            if ($totalAsli == 0) {
-                $pesananAsli->delete();
-            }
-
-            DB::commit();
             return response()->json(['message' => 'Pesanan berhasil dipisah.']);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }

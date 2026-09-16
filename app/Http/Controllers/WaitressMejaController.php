@@ -78,4 +78,105 @@ class WaitressMejaController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Memindahkan pesanan aktif dari meja asal ke meja tujuan
+     */
+    public function pindahMeja(Request $request)
+    {
+        $request->validate([
+            'from_meja_id' => 'required|exists:meja,id',
+            'to_meja_id' => 'required|exists:meja,id|different:from_meja_id',
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            $fromMeja = Meja::findOrFail($request->from_meja_id);
+            $toMeja = Meja::findOrFail($request->to_meja_id);
+
+            $activeOrders = \App\Models\Pesanan::where('id_meja', $fromMeja->id)
+                ->whereIn('status', ['pending', 'processing', 'ready'])
+                ->get();
+
+            if ($activeOrders->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => 'Tidak ada pesanan aktif di meja ini.'], 422);
+            }
+
+            foreach ($activeOrders as $order) {
+                $order->update(['id_meja' => $toMeja->id]);
+            }
+
+            // Meja asal sekarang kosong, meja tujuan sekarang terisi
+            $fromMeja->update(['is_available' => true]);
+            $toMeja->update(['is_available' => false]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            try {
+                broadcast(new \App\Events\MejaStatusUpdated($fromMeja));
+                broadcast(new \App\Events\MejaStatusUpdated($toMeja));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[WaitressMejaController] Gagal broadcast WebSocket pindah meja: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Pesanan berhasil dipindahkan dari {$fromMeja->nama_meja_atau_nomor} ke {$toMeja->nama_meja_atau_nomor}.",
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'Gagal memindahkan meja: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Menggabungkan pesanan dari satu meja ke meja tujuan
+     */
+    public function gabungMeja(Request $request)
+    {
+        $request->validate([
+            'source_meja_id' => 'required|exists:meja,id',
+            'target_meja_id' => 'required|exists:meja,id|different:source_meja_id',
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            $sourceMeja = Meja::findOrFail($request->source_meja_id);
+            $targetMeja = Meja::findOrFail($request->target_meja_id);
+
+            $sourceOrders = \App\Models\Pesanan::where('id_meja', $sourceMeja->id)
+                ->whereIn('status', ['pending', 'processing', 'ready'])
+                ->get();
+
+            if ($sourceOrders->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => 'Tidak ada pesanan aktif di meja asal.'], 422);
+            }
+
+            foreach ($sourceOrders as $order) {
+                $order->update(['id_meja' => $targetMeja->id]);
+            }
+
+            $sourceMeja->update(['is_available' => true]);
+            $targetMeja->update(['is_available' => false]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            try {
+                broadcast(new \App\Events\MejaStatusUpdated($sourceMeja));
+                broadcast(new \App\Events\MejaStatusUpdated($targetMeja));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[WaitressMejaController] Gagal broadcast WebSocket gabung meja: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Meja {$sourceMeja->nama_meja_atau_nomor} berhasil digabungkan ke {$targetMeja->nama_meja_atau_nomor}.",
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'Gagal menggabungkan meja: ' . $e->getMessage()], 500);
+        }
+    }
 }
