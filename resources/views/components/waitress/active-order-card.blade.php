@@ -255,9 +255,11 @@
                         <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.payGroupOrders('{{ $orderIdsStr }}', {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }})">
                             <i class="bi bi-cash-stack me-1"></i> Terima Bayar
                         </button>
-                        <button type="button" class="btn btn-sm btn-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.voidOrder({{ $primaryOrder->id }})">
-                            <i class="bi bi-trash me-1"></i> Void
-                        </button>
+                        @if($cardData->can_void)
+                            <button type="button" class="btn btn-sm btn-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.voidOrder({{ $primaryOrder->id }})" title="Void / Batalkan Pesanan Kasir">
+                                <i class="bi bi-trash me-1"></i> Void
+                            </button>
+                        @endif
                     @else
                         @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
                         @if($printerActive)

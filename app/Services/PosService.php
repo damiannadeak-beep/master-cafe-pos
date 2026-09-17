@@ -197,6 +197,7 @@ class PosService
                 'total_uang_diterima' => $totalUangDiterima,
                 'total_uang_kembalian' => $totalUangKembalian,
                 'overall_status' => $overallStatus,
+                'can_void' => $ordersList->every(fn($o) => !empty($o->id_kasir)),
             ]);
         }
 

@@ -579,6 +579,10 @@ class PosController extends Controller
                 throw new \Exception('Password yang dimasukkan salah.');
             }
 
+            if (empty($pesanan->id_kasir)) {
+                throw new \Exception('Pesanan ini dipesan langsung oleh konsumen dan tidak dapat dihapus/divoid karena merupakan tanggung jawab konsumen.');
+            }
+
             if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
                 throw new \Exception('Pesanan sudah dibayar lunas oleh konsumen dan tidak dapat dihapus/divoid sembarangan oleh kasir tanpa persetujuan konsumen.');
             }

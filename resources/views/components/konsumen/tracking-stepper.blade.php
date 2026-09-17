@@ -41,9 +41,6 @@
                             <a href="{{ url('/konsumen/checkout/' . $pesanan->id . '?token=' . $pesanan->order_token) }}" class="btn btn-sm rounded-pill px-2 py-1 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.75rem;">
                                 ⚡ Bayar Online (QRIS)
                             </a>
-                            <button type="button" onclick="cancelCurrentOrder()" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;">
-                                <i class="bi bi-trash3 me-1"></i> Batalkan
-                            </button>
                         </div>
                     @endif
                 </div>

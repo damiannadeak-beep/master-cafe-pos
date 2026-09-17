@@ -230,9 +230,8 @@ class OrderController extends Controller
                 throw new \Exception('Anda tidak berhak membatalkan pesanan ini.');
             }
 
-            if ($pesanan->status !== 'pending' || ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid')) {
-                throw new \Exception('Pesanan sudah diproses atau dibayar, tidak dapat dibatalkan.');
-            }
+            // Kebijakan kafe: Pesanan yang diinput oleh konsumen tidak dapat dibatalkan karena merupakan tanggung jawab pemesan
+            throw new \Exception('Pesanan yang telah dibuat oleh konsumen tidak dapat dibatalkan karena merupakan tanggung jawab pemesan.');
 
             $pesanan->cancelOrder();
 

@@ -128,4 +128,33 @@ class VoidOrderTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    /** TEST 6: Void gagal jika pesanan dibuat langsung oleh konsumen (tanggung jawab konsumen) */
+    public function test_void_gagal_jika_pesanan_dibuat_oleh_konsumen()
+    {
+        $kasir = User::factory()->create(['password' => bcrypt('password')]);
+        $kasir->assignRole('kasir');
+        $menu = Menu::create(['nama_menu' => 'Kopi Susu', 'harga' => 12000, 'stok' => 20, 'kategori' => 'minuman', 'is_available' => true]);
+
+        // Pesanan dibuat oleh konsumen mandiri (id_kasir = null)
+        $pesanan = Pesanan::create([
+            'id_kasir' => null, 'tipe_pesanan' => 'dine_in', 'status' => 'pending',
+            'total' => $menu->harga, 'total_hpp' => 0, 'tanggal' => now(),
+        ]);
+        DetailPesanan::create([
+            'id_pesanan' => $pesanan->id, 'id_menu' => $menu->id,
+            'jumlah' => 1, 'subtotal' => $menu->harga,
+        ]);
+        Pembayaran::create([
+            'id_pesanan' => $pesanan->id, 'status' => 'unpaid',
+            'total_bayar' => $menu->harga,
+        ]);
+
+        $response = $this->actingAs($kasir)->putJson("/kasir/order/{$pesanan->id}/void", [
+            'alasan' => 'Konsumen minta batal', 'password' => 'password',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['error' => 'Pesanan ini dipesan langsung oleh konsumen dan tidak dapat dihapus/divoid karena merupakan tanggung jawab konsumen.']);
+    }
 }
