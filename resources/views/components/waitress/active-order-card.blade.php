@@ -115,41 +115,37 @@
                                                         <span class="badge bg-dark border border-secondary text-info ms-1 py-0 px-1.5" style="font-size: 0.65rem; font-weight: normal;">{{ $subOrder->customer_name }}</span>
                                                     @endif
                                                 </span>
-                                                <div class="d-flex align-items-center gap-1 flex-wrap">
+                                                <div class="d-flex align-items-center gap-1.5 flex-wrap">
                                                     @if($subOrderPaid)
-                                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0.5 px-1.5" style="font-size: 0.65rem;">
-                                                            <i class="bi bi-check-circle-fill me-0.5"></i> Lunas {{ $subOrderMetode ? "($subOrderMetode)" : '' }}
+                                                        <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: rgba(46, 160, 67, 0.2); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.68rem;">
+                                                            <i class="bi bi-check-circle-fill me-1"></i>Lunas {{ $subOrderMetode ? "($subOrderMetode)" : '' }}
                                                         </span>
                                                     @else
-                                                        <span class="badge bg-danger text-white border border-danger py-0.5 px-1.5 fw-bold" style="font-size: 0.65rem; box-shadow: 0 0 6px rgba(220,53,69,0.4);">
-                                                            <i class="bi bi-exclamation-circle-fill me-0.5"></i> Belum Lunas (Rp {{ number_format($subOrderTotal, 0, ',', '.') }})
+                                                        <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: rgba(220, 53, 69, 0.25); color: #ff7b72; border: 1px solid rgba(220, 53, 69, 0.45); font-size: 0.68rem;">
+                                                            <i class="bi bi-exclamation-circle-fill me-1"></i>Belum Bayar (Rp {{ number_format($subOrderTotal, 0, ',', '.') }})
                                                         </span>
                                                     @endif
 
                                                     @if($subOrder->status === 'pending')
-                                                        <span class="badge bg-warning text-dark py-0.5 px-1.5" style="font-size: 0.65rem;">Pending</span>
+                                                        <span class="badge bg-warning text-dark py-0.5 px-1.5 rounded-pill" style="font-size: 0.65rem;">Pending</span>
                                                     @elseif($subOrder->status === 'processing')
-                                                        <span class="badge bg-primary py-0.5 px-1.5" style="font-size: 0.65rem;">Dimasak</span>
+                                                        <span class="badge bg-primary py-0.5 px-1.5 rounded-pill" style="font-size: 0.65rem;">Dimasak</span>
                                                     @endif
-                                                    <span class="text-white-50" style="font-size: 0.7rem;">{{ $subOrder->created_at->format('H:i') }} WIB</span>
+                                                    <span class="text-white-50 ms-1" style="font-size: 0.7rem;">{{ $subOrder->created_at->format('H:i') }} WIB</span>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                 @endif
                                 @foreach($subOrder->detail_pesanan as $item)
-                                    <tr style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.08); border-left: 3px solid #dc3545;' : '' }}">
+                                    <tr style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.06); border-left: 3px solid #dc3545;' : '' }}">
                                         <td class="text-white-50 ps-2" style="width: 30px; vertical-align: top;">{{ $item->jumlah }}x</td>
                                         <td class="fw-medium">
-                                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                                <span>{{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}</span>
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <span class="text-white">{{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}</span>
                                                 @if(!$subOrderPaid)
-                                                    <span class="badge bg-danger text-white py-0 px-1.5 fw-bold" style="font-size: 0.62rem; line-height: 1.3;">
-                                                        <i class="bi bi-x-circle me-0.5"></i> Belum Bayar
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 py-0 px-1" style="font-size: 0.62rem; line-height: 1.3;">
-                                                        <i class="bi bi-check2 me-0.5"></i> Lunas
+                                                    <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: rgba(220, 53, 69, 0.25); color: #ff7b72; border: 1px solid rgba(220, 53, 69, 0.45); font-size: 0.65rem;">
+                                                        <i class="bi bi-exclamation-circle-fill me-0.5"></i> Belum Bayar
                                                     </span>
                                                 @endif
                                             </div>
