@@ -60,6 +60,7 @@
         orderStatus: "{{ $pesanan->status }}",
         paymentStatus: "{{ $pembayaran->status ?? 'unpaid' }}",
         menuUrl: "{{ $meja ? URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) : route('menu_takeaway') }}",
+        finishSessionUrl: "{{ route('konsumen.selesai_sesi', ['redirect' => $meja ? URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) : route('menu_takeaway')]) }}",
         cancelUrl: "{{ url('/konsumen/order/' . $pesanan->id . '/cancel') }}",
         callBellUrl: "{{ url('/call-bell') }}",
         ratingUrl: "{{ url('/rating/store') }}",

@@ -356,7 +356,7 @@ class OrderController extends Controller
             ->whereDate('created_at', $orderDate)
             ->where('created_at', '>=', $orderTime->copy()->subHours(3))
             ->where('created_at', '<=', $orderTime->copy()->addHours(3))
-            ->whereNotIn('status', ['cancelled', 'void'])
+            ->whereIn('status', ['pending', 'processing'])
             ->where('id', '!=', $pesanan->id);
 
         $otherOrdersQuery->where(function ($q) use ($pesanan, $currentGuestName, $cleanPhone) {

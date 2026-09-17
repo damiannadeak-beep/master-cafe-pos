@@ -354,6 +354,18 @@ Route::group([], function () {
     Route::get('/konsumen/tracking/{order_token}', [OrderController::class, 'tracking']);
     Route::get('/tracking/{order_token}/receipt', [OrderController::class, 'downloadReceipt'])->name('order.receipt');
     Route::get('/api/tracking/{order_token}/status', [OrderController::class, 'getOrderStatus'])->name('order.status.api');
+
+    // Selesai Sesi Tamu / Konsumen (Clear session & redirect)
+    Route::get('/konsumen/selesai-sesi', function (\Illuminate\Http\Request $request) {
+        session()->forget(['order_token', 'active_order_id']);
+        $redirectUrl = $request->query('redirect', url('/katalog'));
+        return redirect($redirectUrl);
+    })->name('konsumen.selesai_sesi');
+    Route::get('/selesai-sesi', function (\Illuminate\Http\Request $request) {
+        session()->forget(['order_token', 'active_order_id']);
+        $redirectUrl = $request->query('redirect', url('/katalog'));
+        return redirect($redirectUrl);
+    });
 });
 
 // Fallback Route untuk foto profil konsumen (mencegah 404 pada cPanel multi-root)

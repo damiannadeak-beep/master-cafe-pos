@@ -124,7 +124,7 @@
             localStorage.removeItem('active_guest_order');
         } catch (e) { }
 
-        window.location.href = config.menuUrl || '/';
+        window.location.href = config.finishSessionUrl || config.menuUrl || '/';
     };
 
     // --- 3. PEMBATALAN PESANAN (JIKA BELUM DIBAYAR) ---
