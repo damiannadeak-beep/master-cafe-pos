@@ -264,8 +264,15 @@ class PaymentController extends Controller
                 }
             }
 
+            $paymentScope = $request->input('payment_scope', 'self');
             $cumulativeTableTotal = $priorUnpaidTotal + $totalTagihan;
-            $targetTotal = ($priorUnpaidTotal > 0) ? $cumulativeTableTotal : $totalTagihan;
+
+            if ($paymentScope === 'table' && $priorUnpaidTotal > 0) {
+                $targetTotal = $cumulativeTableTotal;
+            } else {
+                $targetTotal = $totalTagihan;
+                $paymentScope = 'self';
+            }
 
             $uangDiterima = null;
             $uangKembalian = 0;
@@ -274,11 +281,14 @@ class PaymentController extends Controller
             if ($isUangPas) {
                 $uangDiterima = $targetTotal;
                 $uangKembalian = 0;
-                $catatanKembalian = $priorUnpaidTotal > 0 ? 'Uang Pas Meja (Tanpa Kembalian)' : 'Uang Pas (Tanpa Kembalian)';
+                $catatanKembalian = ($paymentScope === 'table' && $priorUnpaidTotal > 0) 
+                    ? 'Uang Pas Seluruh Meja (Tanpa Kembalian)' 
+                    : 'Uang Pas (Tanpa Kembalian)';
             } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
                 $uangDiterima = (float) $nominalTunaiInput;
                 if ($uangDiterima < $targetTotal) {
-                    return redirect()->back()->with('error', 'Nominal uang yang disiapkan (Rp ' . number_format($uangDiterima, 0, ',', '.') . ') tidak boleh kurang dari total tagihan meja (Rp ' . number_format($targetTotal, 0, ',', '.') . ').');
+                    $scopeLabel = ($paymentScope === 'table') ? 'total tagihan seluruh meja' : 'total tagihan pesanan Anda';
+                    return redirect()->back()->with('error', 'Nominal uang yang disiapkan (Rp ' . number_format($uangDiterima, 0, ',', '.') . ') tidak boleh kurang dari ' . $scopeLabel . ' (Rp ' . number_format($targetTotal, 0, ',', '.') . ').');
                 }
                 $uangKembalian = max(0, $uangDiterima - $targetTotal);
                 if ($uangKembalian > 0) {
@@ -296,15 +306,14 @@ class PaymentController extends Controller
                 'catatan_kembalian' => $catatanKembalian,
             ]);
 
-            // Sinkronkan juga ke pesanan belum lunas lainnya di meja ini
-            // agar seluruh sesi meja memiliki nominal uang disiapkan dan kembalian yang sama persis
-            if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja && !empty($otherUnpaidOrders)) {
+            // HANYA sinkronkan ke pesanan lain di meja jika konsumen MEMILIH gabung bayar seluruh meja ('table')
+            if ($paymentScope === 'table' && $pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja && !empty($otherUnpaidOrders)) {
                 foreach ($otherUnpaidOrders as $other) {
                     if ($other->pembayaran && $other->pembayaran->status === 'unpaid') {
                         $other->pembayaran->update([
                             'uang_diterima' => $uangDiterima,
                             'uang_kembalian' => $uangKembalian,
-                            'catatan_kembalian' => $catatanKembalian,
+                            'catatan_kembalian' => $catatanKembalian . ' [Digabung oleh ' . ($pesanan->guest_name ?: 'Pesanan #' . $pesanan->id) . ']',
                         ]);
                     }
                 }

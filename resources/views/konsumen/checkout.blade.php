@@ -2,7 +2,10 @@
 
 @section('content')
 @php
-    $effectiveTotal = (isset($cumulativeTableTotal) && $cumulativeTableTotal > 0) ? (int)$cumulativeTableTotal : (int)$pembayaran->total_bayar;
+    $selfTotal = (int)$pembayaran->total_bayar;
+    $hasPriorUnpaid = isset($priorUnpaidTotal) && $priorUnpaidTotal > 0;
+    $tableTotal = $hasPriorUnpaid ? (int)$cumulativeTableTotal : $selfTotal;
+    $effectiveTotal = $selfTotal;
 @endphp
 <style>
     .upload-container {
@@ -48,10 +51,58 @@
                             @endforeach
                         </ul>
                         <div class="d-flex justify-content-between fw-bold fs-5 mt-3 pt-3 border-top border-secondary">
-                            <span class="text-secondary">Total Tagihan</span>
-                            <span style="color: #c08e5c;">Rp {{ number_format($pembayaran->total_bayar, 0, ',', '.') }}</span>
+                            <span class="text-secondary">Total Tagihan Pesanan Ini</span>
+                            <span style="color: #c08e5c;">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
+
+                    @if($hasPriorUnpaid)
+                        <!-- Selektor Cakupan Tagihan Meja (Bayar Sendiri vs Gabung Meja) -->
+                        <div class="card border-0 rounded-4 mb-4" style="background: #0e1217; border: 1px solid #30363d !important;">
+                            <div class="card-body p-3 p-md-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge rounded-pill bg-info bg-opacity-15 text-info border border-info border-opacity-25 px-2 py-1" style="font-size: 0.72rem;">
+                                        <i class="bi bi-people-fill me-1"></i> Multi-Pesanan Meja
+                                    </span>
+                                    <small class="text-white-50" style="font-size: 0.75rem;">Meja memiliki pesanan lain</small>
+                                </div>
+                                <h6 class="fw-bold text-white mb-1" style="font-size: 0.95rem;">Pilih Tagihan yang Ingin Anda Bayar:</h6>
+                                <p class="text-white-50 small mb-3" style="font-size: 0.78rem;">Pilih apakah Anda hanya membayar pesanan Anda sendiri (Split Bill) atau mentraktir seluruh pesanan di meja ini.</p>
+
+                                <div class="d-flex flex-column gap-2">
+                                    <!-- Opsi A: Bayar Sendiri (Default) -->
+                                    <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-scope-card" 
+                                           id="scope-card-self" 
+                                           onclick="switchPaymentScope('self')"
+                                           style="cursor: pointer; background: rgba(34, 197, 94, 0.1); border-color: #22c55e !important; transition: all 0.2s;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <input type="radio" name="scope_radio" id="radio-scope-self" value="self" checked class="form-check-input mt-0" style="cursor: pointer;">
+                                            <div>
+                                                <div class="fw-bold text-white small">Bayar Pesanan Saya Saja (Pisah Bill)</div>
+                                                <small class="text-white-50 d-block" style="font-size: 0.74rem;">Hanya pesanan yang Anda pesan di HP ini</small>
+                                            </div>
+                                        </div>
+                                        <span class="fw-bold text-success fs-6 text-nowrap">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
+                                    </label>
+
+                                    <!-- Opsi B: Bayar Seluruh Meja -->
+                                    <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-scope-card" 
+                                           id="scope-card-table" 
+                                           onclick="switchPaymentScope('table')"
+                                           style="cursor: pointer; background: rgba(255, 255, 255, 0.02); border-color: #21262d !important; transition: all 0.2s;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <input type="radio" name="scope_radio" id="radio-scope-table" value="table" class="form-check-input mt-0" style="cursor: pointer;">
+                                            <div>
+                                                <div class="fw-bold text-white small">Bayar Sekaligus Seluruh Meja (Traktir)</div>
+                                                <small class="text-white-50 d-block" style="font-size: 0.74rem;">Pesanan Anda + pesanan lain yang belum lunas di meja ini</small>
+                                            </div>
+                                        </div>
+                                        <span class="fw-bold text-warning fs-6 text-nowrap">Rp {{ number_format($tableTotal, 0, ',', '.') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     @if($pembayaran->status == 'pending_verification')
                         <div class="alert alert-warning text-center rounded-4" style="background-color: #2b200b; color: #ffc107; border: 1px solid #c08e5c;">
@@ -124,129 +175,63 @@
                                     </div>
                                 </div>
 
-                                 @php
-                                     $effectiveTotal = (isset($cumulativeTableTotal) && $cumulativeTableTotal > 0) ? (int)$cumulativeTableTotal : (int)$pembayaran->total_bayar;
-                                     $hasPriorUnpaid = isset($priorUnpaidTotal) && $priorUnpaidTotal > 0;
-                                     
-                                     // Otomatis arahkan ke nominal uang yang pernah dipilih tamu sebelumnya jika mencukupi tagihan meja
-                                     $hasPriorCashChoice = ($hasPriorUnpaid && isset($priorCashPrepared) && $priorCashPrepared >= $effectiveTotal);
-                                     $selectedPreset = $hasPriorCashChoice ? (int)$priorCashPrepared : $effectiveTotal;
-                                     $isDefaultPas = ($selectedPreset == $effectiveTotal);
-                                     $defaultKembalian = max(0, $selectedPreset - $effectiveTotal);
-                                     $nextCeil = $effectiveTotal > 100000 ? (int) (ceil(($effectiveTotal + 1000) / 50000) * 50000) : null;
-                                     $isCustomPreset = (!in_array($selectedPreset, array_filter([$effectiveTotal, 50000, 100000, $nextCeil])));
-                                 @endphp
+                                <form id="cash-payment-form" action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
+                                    @csrf
+                                    @if($pesanan->order_token)
+                                        <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
+                                    @endif
+                                    <input type="hidden" id="payment_scope" name="payment_scope" value="self">
+                                    <input type="hidden" id="is_uang_pas" name="is_uang_pas" value="1">
+                                    <input type="hidden" id="nominal_tunai_raw" name="nominal_tunai" value="{{ $selfTotal }}">
 
-                                 @if($hasPriorUnpaid)
-                                     <div class="p-3 mb-3 rounded-3" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
-                                         <div class="d-flex align-items-center mb-1">
-                                             <i class="bi bi-info-circle-fill text-info me-2 fs-5"></i>
-                                             <span class="text-white fw-bold small">Akumulasi Tagihan Meja</span>
-                                         </div>
-                                         <div class="text-white-50 small mb-2" style="font-size: 0.8rem; line-height: 1.4;">
-                                             Ada pesanan sebelumnya di meja Anda yang belum dibayar. Pilihan uang tunai disesuaikan dengan <strong>total seluruh tagihan meja</strong> agar waitress membawakan kembalian yang tepat sekaligus.
-                                         </div>
-                                         <div class="d-flex justify-content-between small text-white-50 mb-1">
-                                             <span>Pesanan Sebelumnya:</span>
-                                             <span class="text-white">Rp {{ number_format($priorUnpaidTotal, 0, ',', '.') }}</span>
-                                         </div>
-                                         <div class="d-flex justify-content-between small text-white-50 mb-1">
-                                             <span>Pesanan Ini:</span>
-                                             <span class="text-white">Rp {{ number_format($pembayaran->total_bayar, 0, ',', '.') }}</span>
-                                         </div>
-                                         <div class="d-flex justify-content-between border-top border-secondary border-opacity-50 pt-1 mt-1">
-                                             <span class="text-info fw-bold small">Total Seluruh Meja:</span>
-                                             <span class="text-info fw-bold">Rp {{ number_format($effectiveTotal, 0, ',', '.') }}</span>
-                                         </div>
-                                     </div>
-                                 @endif
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="form-label text-secondary small fw-bold mb-0">
+                                                <i class="bi bi-wallet2 me-1"></i> Siapkan Uang Pecahan Berapa?
+                                            </label>
+                                            <span id="scope-badge-indicator" class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50" style="font-size: 0.68rem;">
+                                                Hanya Pesanan Ini
+                                            </span>
+                                        </div>
 
-                                 <form id="cash-payment-form" action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
-                                     @csrf
-                                     @if($pesanan->order_token)
-                                         <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
-                                     @endif
-                                     <input type="hidden" id="is_uang_pas" name="is_uang_pas" value="{{ $isDefaultPas ? '1' : '0' }}">
-                                     <input type="hidden" id="nominal_tunai_raw" name="nominal_tunai" value="{{ $selectedPreset }}">
+                                        <!-- Container Tombol Preset Pecahan Uang Tunai (Di-render Dinamis oleh JS) -->
+                                        <div id="cash-preset-buttons-container" class="d-flex flex-wrap gap-2 mb-2">
+                                            <!-- Buttons generated dynamically -->
+                                        </div>
 
-                                     <div class="mb-3">
-                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                             <label class="form-label text-secondary small fw-bold mb-0">
-                                                 <i class="bi bi-wallet2 me-1"></i> Siapkan Uang Pecahan Berapa?
-                                             </label>
-                                             @if($hasPriorCashChoice)
-                                                 <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50" style="font-size: 0.68rem;">
-                                                     <i class="bi bi-arrow-repeat me-1"></i>Otomatis dari Pesanan Awal
-                                                 </span>
-                                             @endif
-                                         </div>
-                                         <div class="d-flex flex-wrap gap-2 mb-2">
-                                             <!-- Pilihan 1: Uang Pas -->
-                                             <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == $effectiveTotal ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('pas', {{ $effectiveTotal }}, this)">
-                                                 <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp {{ number_format($effectiveTotal, 0, ',', '.') }})
-                                             </button>
+                                        <!-- Input Custom Nominal -->
+                                        <div id="custom-nominal-container" class="mt-2" style="display: none;">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
+                                                <input type="number" id="custom_nominal_input" class="form-control bg-dark border-secondary text-white" placeholder="Contoh: 100000" min="{{ $selfTotal }}" step="1000" oninput="onCustomNominalChange(this.value)">
+                                            </div>
+                                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Ketik nominal uang kertas yang Anda siapkan.</small>
+                                        </div>
+                                    </div>
 
-                                             @if($effectiveTotal < 50000)
-                                                 <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == 50000 ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('fixed', 50000, this)">
-                                                     Rp 50.000
-                                                 </button>
-                                             @endif
+                                    <!-- Live Summary Kembalian -->
+                                    <div id="kembalian-card" class="p-3 rounded-3 mb-3" style="background: rgba(34, 197, 94, 0.08); border: 1px dashed rgba(34, 197, 94, 0.4);">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="text-white-50 small">Tagihan yang Dibayar:</span>
+                                            <span id="label-tagihan-target" class="text-white fw-bold">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="text-white-50 small">Uang yang disiapkan:</span>
+                                            <span id="label-uang-disiapkan" class="text-white fw-bold">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50 small">Kembalian Waitress:</span>
+                                            <span id="label-kembalian" class="text-success fw-bold fs-6">Rp 0 (Uang Pas)</span>
+                                        </div>
+                                        <div id="kembalian-alert-msg" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-white-50" style="font-size: 0.75rem;">
+                                            <i class="bi bi-check-circle text-success me-1"></i> Waitress akan langsung membawakan pesanan ke meja Anda tanpa kembalian.
+                                        </div>
+                                    </div>
 
-                                             @if($effectiveTotal < 100000 && $effectiveTotal != 50000)
-                                                 <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == 100000 ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('fixed', 100000, this)">
-                                                     Rp 100.000
-                                                 </button>
-                                             @endif
-
-                                             @if($effectiveTotal > 100000 && $nextCeil)
-                                                 <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == $nextCeil ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('fixed', {{ $nextCeil }}, this)">
-                                                     Rp {{ number_format($nextCeil, 0, ',', '.') }}
-                                                 </button>
-                                             @endif
-
-                                             <!-- Pilihan Nominal Lain -->
-                                             <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $isCustomPreset ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('custom', 0, this)">
-                                                 <i class="bi bi-pencil me-1"></i> Nominal Lain
-                                             </button>
-                                         </div>
-
-                                         <!-- Input Custom Nominal -->
-                                         <div id="custom-nominal-container" class="mt-2" style="{{ $isCustomPreset ? 'display: block;' : 'display: none;' }}">
-                                             <div class="input-group">
-                                                 <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
-                                                 <input type="number" id="custom_nominal_input" class="form-control bg-dark border-secondary text-white" placeholder="Contoh: 100000" value="{{ $isCustomPreset ? $selectedPreset : '' }}" min="{{ $effectiveTotal }}" step="1000" oninput="onCustomNominalChange(this.value)">
-                                             </div>
-                                             <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Ketik nominal uang kertas yang Anda siapkan.</small>
-                                         </div>
-                                     </div>
-
-                                     <!-- Live Summary Kembalian -->
-                                     <div id="kembalian-card" class="p-3 rounded-3 mb-3" style="background: {{ $defaultKembalian > 0 ? 'rgba(234, 179, 8, 0.09)' : 'rgba(34, 197, 94, 0.08)' }}; border: 1px dashed {{ $defaultKembalian > 0 ? 'rgba(234, 179, 8, 0.4)' : 'rgba(34, 197, 94, 0.4)' }};">
-                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                             <span class="text-white-50 small">Uang yang disiapkan:</span>
-                                             <span id="label-uang-disiapkan" class="text-white fw-bold">Rp {{ number_format($selectedPreset, 0, ',', '.') }}</span>
-                                         </div>
-                                         <div class="d-flex justify-content-between align-items-center">
-                                             <span class="text-white-50 small">Kembalian Waitress:</span>
-                                             @if($defaultKembalian > 0)
-                                                 <span id="label-kembalian" class="text-warning fw-bold fs-6">Rp {{ number_format($defaultKembalian, 0, ',', '.') }}</span>
-                                             @else
-                                                 <span id="label-kembalian" class="text-success fw-bold fs-6">Rp 0 (Uang Pas)</span>
-                                             @endif
-                                         </div>
-                                         <div id="kembalian-alert-msg" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-white-50" style="font-size: 0.75rem;">
-                                             @if($defaultKembalian > 0)
-                                                 <i class="bi bi-bell-fill text-warning me-1"></i> <strong>Waitress akan menyiapkan kembalian Rp {{ number_format($defaultKembalian, 0, ',', '.') }}</strong> untuk seluruh tagihan meja sebelum naik ke meja Anda.
-                                             @else
-                                                 <i class="bi bi-info-circle text-info me-1"></i> Waitress akan langsung membawakan pesanan ke meja Anda tanpa kembalian.
-                                             @endif
-                                         </div>
-                                     </div>
-
-                                     <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;">
-                                         💵 Pesan & Bayar Tunai ke Waitress <i class="bi bi-arrow-right ms-1"></i>
-                                     </button>
-                                 </form>
+                                    <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;">
+                                        💵 Pesan & Bayar Tunai ke Waitress <i class="bi bi-arrow-right ms-1"></i>
+                                    </button>
+                                </form>
                             </div>
 
                             <div class="alert alert-info border-0 rounded-4 text-center mb-0" style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2) !important; color: #93c5fd;">
@@ -320,10 +305,123 @@
         }
     }
 
-    const TOTAL_TAGIHAN = {{ (int)$effectiveTotal }};
+    const SELF_TOTAL = {{ (int)$selfTotal }};
+    const TABLE_TOTAL = {{ (int)$tableTotal }};
+    let TOTAL_TAGIHAN = SELF_TOTAL;
+    let currentScope = 'self';
 
     function formatRupiah(number) {
         return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(number);
+    }
+
+    function switchPaymentScope(scope) {
+        currentScope = scope;
+        const scopeInput = document.getElementById('payment_scope');
+        if (scopeInput) scopeInput.value = scope;
+
+        const cardSelf = document.getElementById('scope-card-self');
+        const cardTable = document.getElementById('scope-card-table');
+        const radioSelf = document.getElementById('radio-scope-self');
+        const radioTable = document.getElementById('radio-scope-table');
+        const badgeIndicator = document.getElementById('scope-badge-indicator');
+
+        if (scope === 'table') {
+            TOTAL_TAGIHAN = TABLE_TOTAL;
+            if (radioTable) radioTable.checked = true;
+            if (cardTable) {
+                cardTable.style.background = 'rgba(234, 179, 8, 0.12)';
+                cardTable.style.borderColor = '#eab308 !important';
+            }
+            if (cardSelf) {
+                cardSelf.style.background = 'rgba(255, 255, 255, 0.02)';
+                cardSelf.style.borderColor = '#21262d !important';
+            }
+            if (badgeIndicator) {
+                badgeIndicator.className = 'badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50';
+                badgeIndicator.innerText = 'Seluruh Meja (Traktir)';
+            }
+        } else {
+            TOTAL_TAGIHAN = SELF_TOTAL;
+            if (radioSelf) radioSelf.checked = true;
+            if (cardSelf) {
+                cardSelf.style.background = 'rgba(34, 197, 94, 0.1)';
+                cardSelf.style.borderColor = '#22c55e !important';
+            }
+            if (cardTable) {
+                cardTable.style.background = 'rgba(255, 255, 255, 0.02)';
+                cardTable.style.borderColor = '#21262d !important';
+            }
+            if (badgeIndicator) {
+                badgeIndicator.className = 'badge bg-success bg-opacity-25 text-success border border-success border-opacity-50';
+                badgeIndicator.innerText = 'Hanya Pesanan Ini';
+            }
+        }
+
+        const labelTarget = document.getElementById('label-tagihan-target');
+        if (labelTarget) labelTarget.innerText = 'Rp ' + formatRupiah(TOTAL_TAGIHAN);
+
+        renderCashPresetButtons(TOTAL_TAGIHAN);
+    }
+
+    function renderCashPresetButtons(total) {
+        const container = document.getElementById('cash-preset-buttons-container');
+        if (!container) return;
+
+        let nextCeil = total > 100000 ? Math.ceil((total + 1000) / 50000) * 50000 : null;
+
+        let html = `
+            <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-success active" onclick="selectCashPreset('pas', ${total}, this)">
+                <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${formatRupiah(total)})
+            </button>
+        `;
+
+        if (total < 50000) {
+            html += `
+                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('fixed', 50000, this)">
+                    Rp 50.000
+                </button>
+            `;
+        }
+
+        if (total < 100000 && total !== 50000) {
+            html += `
+                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('fixed', 100000, this)">
+                    Rp 100.000
+                </button>
+            `;
+        }
+
+        if (total > 100000 && nextCeil) {
+            html += `
+                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('fixed', ${nextCeil}, this)">
+                    Rp ${formatRupiah(nextCeil)}
+                </button>
+            `;
+        }
+
+        html += `
+            <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('custom', 0, this)">
+                <i class="bi bi-pencil me-1"></i> Nominal Lain
+            </button>
+        `;
+
+        container.innerHTML = html;
+
+        // Reset inputs to Uang Pas
+        const isUangPasInput = document.getElementById('is_uang_pas');
+        const nominalRawInput = document.getElementById('nominal_tunai_raw');
+        const customContainer = document.getElementById('custom-nominal-container');
+        const customInput = document.getElementById('custom_nominal_input');
+
+        if (isUangPasInput) isUangPasInput.value = '1';
+        if (nominalRawInput) nominalRawInput.value = total;
+        if (customContainer) customContainer.style.display = 'none';
+        if (customInput) {
+            customInput.value = '';
+            customInput.min = total;
+        }
+
+        updateKembalianUI(total, 0, true);
     }
 
     function selectCashPreset(type, amount, btnElement) {
@@ -443,6 +541,10 @@
             e.preventDefault();
             return false;
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renderCashPresetButtons(TOTAL_TAGIHAN);
     });
 </script>
 @endsection
