@@ -1,7 +1,74 @@
+<!-- Backdrop untuk Cart Drawer (Bottom Sheet) -->
+<div id="cartDrawerBackdrop" 
+     class="position-fixed top-0 start-0 w-100 h-100" 
+     style="background: rgba(0,0,0,0.65); backdrop-filter: blur(3px); z-index: 1028; display: none; opacity: 0; transition: opacity 0.3s ease;" 
+     onclick="closeCartDrawer()">
+</div>
 
-<div class="fixed-bottom shadow-lg" style="background-color: #161b22; border-top: 1px solid #21262d !important; z-index: 1030; border-radius: 24px 24px 0 0;">
-    <div class="container px-3 py-3">
-        <div class="mb-3">
+<style>
+    #cartItemsList::-webkit-scrollbar {
+        width: 4px;
+    }
+    #cartItemsList::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    #cartItemsList::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+    #cartItemsList::-webkit-scrollbar-thumb:hover {
+        background: #c08e5c;
+    }
+</style>
+
+<div id="cart-bottom-bar" class="fixed-bottom shadow-lg" style="background-color: #161b22; border-top: 1px solid #21262d !important; z-index: 1030; border-radius: 22px 22px 0 0; transition: all 0.3s ease;">
+    <!-- Pull Bar & Accordion Toggle Header -->
+    <div class="px-3 pt-2 pb-2 cursor-pointer border-bottom border-secondary border-opacity-10" 
+         onclick="toggleCartDrawer()" 
+         style="cursor: pointer; user-select: none;"
+         title="Klik untuk membuka / menutup rincian pesanan">
+        <div class="d-flex justify-content-center mb-1">
+            <div style="width: 38px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 4px;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div class="rounded-circle p-1 d-flex align-items-center justify-content-center" style="background: rgba(192, 142, 92, 0.18); width: 28px; height: 28px;">
+                    <i class="bi bi-cart3" style="color: #c08e5c; font-size: 0.95rem;"></i>
+                </div>
+                <span class="fw-bold text-white small" style="font-family: 'Outfit', sans-serif;">Rincian Pesanan</span>
+                <span id="cart-drawer-badge" class="badge rounded-pill px-2 py-1" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.35);">0 Item</span>
+            </div>
+            <div class="d-flex align-items-center gap-1 text-white-50 small">
+                <span id="cart-toggle-text" style="font-size: 0.8rem;">Lihat Rincian</span>
+                <i class="bi bi-chevron-up ms-1" id="cart-chevron-icon" style="transition: transform 0.3s ease; font-size: 0.85rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accordion Content / Drawer Daftar Menu Pesanan -->
+    <div id="cartDrawerCollapse" style="max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease; opacity: 0;">
+        <div class="px-3 py-2" style="background-color: #0e1217; border-bottom: 1px solid #21262d;">
+            <div class="d-flex justify-content-between align-items-center mb-2 pt-1">
+                <span class="text-secondary small fw-semibold">
+                    <i class="bi bi-receipt me-1 text-warning"></i> Menu yang Sedang Dipilih
+                </span>
+                <button type="button" onclick="clearCart()" class="btn btn-sm btn-outline-danger border-0 p-0 small" style="font-size: 0.75rem;">
+                    <i class="bi bi-trash3 me-1"></i>Kosongkan Keranjang
+                </button>
+            </div>
+            <!-- Scrollable Items List Container -->
+            <div id="cartItemsList" style="max-height: 38vh; overflow-y: auto; padding-right: 2px;">
+                <div class="text-center py-4 text-secondary small">
+                    <i class="bi bi-basket2 fs-3 d-block mb-1 opacity-50"></i>
+                    Belum ada menu yang dipilih
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kontrol Utama Bawah: Promo & Checkout -->
+    <div class="container px-3 py-2 py-md-3">
+        <div class="mb-2">
             <select name="promo_id" id="promo_id" class="form-select form-select-sm border-primary bg-primary bg-opacity-10 fw-bold rounded-pill px-3 py-2" style="color: #c08e5c;" onchange="updateCartUI()">
                 <option value="">🎟️ Tambah Promo (Opsional)</option>
                 @foreach($promos as $promo)
@@ -15,15 +82,16 @@
             </select>
         </div>
         <div class="d-flex justify-content-between align-items-center">
-            <div>
+            <div class="cursor-pointer" onclick="toggleCartDrawer()" style="cursor: pointer;" title="Klik untuk lihat rincian pesanan">
                 <small class="text-muted fw-bold d-block mb-0" style="font-size: 0.75rem;">Total Tagihan</small>
                 <div class="d-flex align-items-baseline gap-2">
-                    <h4 class="fw-bold text-white mb-0" id="cart-total">Rp 0</h4>
+                    <h4 class="fw-bold text-white mb-0" id="cart-total" style="font-family: 'Outfit', sans-serif;">Rp 0</h4>
                     <span id="cart-qty" class="badge rounded-pill px-2" style="background-color: rgba(178, 122, 77, 0.2); color: #c08e5c; border: 1px solid rgba(178, 122, 77, 0.4);">0 Item</span>
                 </div>
             </div>
-            <button onclick="openConfirmOrderModal()" class="btn px-4 py-2 btn-touch rounded-pill shadow-sm" style="background: var(--gradient-bronze); color: white; border: none; transition: transform 0.2s;">
-                Pesan <i class="bi bi-cart-check-fill ms-1"></i>
+            <button onclick="openConfirmOrderModal()" class="btn px-4 py-2 btn-touch rounded-pill shadow-sm d-flex align-items-center gap-2" style="background: var(--gradient-bronze); color: white; border: none; font-weight: 600;">
+                <span>Pesan</span>
+                <i class="bi bi-cart-check-fill"></i>
             </button>
         </div>
     </div>
