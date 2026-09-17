@@ -131,6 +131,23 @@ class OrderController extends Controller
 
             $orderToken = (string) \Illuminate\Support\Str::uuid();
 
+            // Jika meja ini masih memiliki pesanan lama yang SUDAH LUNAS (paid),
+            // otomatis selesaikan pesanan lama tersebut agar sesi lama tertutup rapi dan tidak tercampur dengan tamu baru ini.
+            if (!empty($id_meja) && $tipe_pesanan === 'dine_in') {
+                $oldPaidOrders = Pesanan::where('id_meja', $id_meja)
+                    ->whereIn('status', ['pending', 'processing'])
+                    ->whereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    })
+                    ->get();
+
+                foreach ($oldPaidOrders as $oldOrd) {
+                    $oldOrd->update([
+                        'status' => 'completed'
+                    ]);
+                }
+            }
+
             // Buat Pesanan & Pembayaran Baru
             $pesanan = Pesanan::create([
                 'id_konsumen' => auth()->id(),
@@ -181,29 +198,12 @@ class OrderController extends Controller
             // Simpan token ke session perangkat konsumen
             session(['order_token' => $orderToken, 'active_order_id' => $pesanan->id]);
 
-            // Trigger WebSocket Event & Push Notification (Hanya untuk Dine-In; Takeaway baru dikirim setelah LUNAS)
-            if ($tipe_pesanan !== 'takeaway') {
+            // Broadcast status meja terisi (PesananBaru baru dikirim ke Waitress setelah konsumen selesai memilih metode bayar)
+            if ($id_meja && $tipe_pesanan === 'dine_in' && $mejaModel) {
                 try {
-                    broadcast(new \App\Events\PesananBaru($pesanan));
-
-                    if ($id_meja && $tipe_pesanan === 'dine_in' && $mejaModel) {
-                        broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
-                    }
+                    broadcast(new \App\Events\MejaStatusUpdated($mejaModel));
                 } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal broadcast WebSocket: ' . $e->getMessage());
-                }
-
-                try {
-                    $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
-                    if ($adminsAndKasirs->isNotEmpty()) {
-                        \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
-                            'Pesanan Baru Masuk!',
-                            'Order #' . $pesanan->id . ' (' . $guestName . ') baru saja dibuat.',
-                            '/kasir/pesanan-aktif'
-                        ));
-                    }
-                } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal kirim Web Push: ' . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::warning('[OrderController] Gagal broadcast MejaStatusUpdated: ' . $e->getMessage());
                 }
             }
 
@@ -361,16 +361,53 @@ class OrderController extends Controller
         $pembayaran = $pesanan->pembayaran;
         $meja = $pesanan->meja;
 
-        // Cari semua pesanan aktif di meja yang sama (Dine-In) atau nomor HP yang sama (Takeaway)
+        // Cari semua pesanan terkait dalam sesi yang sama (Dine-In per Meja, Takeaway per Nomor HP)
         $activeTableOrders = collect([$pesanan]);
+        $orderDate = $pesanan->created_at ? $pesanan->created_at->toDateString() : now()->toDateString();
+        $orderTime = $pesanan->created_at ?: now();
 
         if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
-            $otherOrders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
+            $isCurrentCompleted = ($pesanan->status === 'completed');
+            $currentGuestName = trim($pesanan->guest_name ?? '');
+
+            $otherOrdersQuery = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
                 ->where('id_meja', $pesanan->id_meja)
-                ->whereIn('status', ['pending', 'processing'])
-                ->where('id', '!=', $pesanan->id)
-                ->orderBy('id', 'asc')
-                ->get();
+                ->whereDate('created_at', $orderDate)
+                ->whereNotIn('status', ['cancelled', 'void'])
+                ->where('id', '!=', $pesanan->id);
+
+            // Filter Guest Name jika ada nama tamu spesifik
+            if (!empty($currentGuestName)) {
+                $otherOrdersQuery->whereRaw("LOWER(TRIM(COALESCE(guest_name, ''))) = ?", [strtolower($currentGuestName)]);
+            } else {
+                $otherOrdersQuery->where(function ($q) {
+                    $q->whereNull('guest_name')
+                      ->orWhere('guest_name', '');
+                });
+            }
+
+            if ($isCurrentCompleted) {
+                // Pesanan yang sedang dilihat sudah SELESAI.
+                // HANYA ambil pesanan lain yang juga selesai dalam sesi yang sama (dibuat sebelum sesi selesai).
+                // JANGAN PERNAH menyertakan pesanan pending/processing dari tamu baru setelahnya!
+                $completionTime = $pesanan->updated_at ?: $pesanan->created_at;
+                $otherOrdersQuery->where('status', 'completed')
+                    ->where('created_at', '<=', $completionTime)
+                    ->where('created_at', '>=', $orderTime->copy()->subHours(2));
+            } else {
+                // Pesanan yang sedang dilihat MASIH AKTIF (pending / processing).
+                // Hanya gabungkan pesanan yang juga masih aktif di sesi meja saat ini,
+                // dan JANGAN sertakan pesanan dari tamu sebelumnya yang sudah selesai.
+                $otherOrdersQuery->where(function ($q) use ($pesanan) {
+                    $q->whereIn('status', ['pending', 'processing'])
+                      ->orWhere(function ($sub) use ($pesanan) {
+                          $sub->where('status', 'completed')
+                              ->where('created_at', '>=', $pesanan->created_at->copy()->subMinutes(30));
+                      });
+                });
+            }
+
+            $otherOrders = $otherOrdersQuery->orderBy('id', 'asc')->get();
 
             if ($otherOrders->isNotEmpty()) {
                 $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
@@ -380,11 +417,14 @@ class OrderController extends Controller
             if (!empty($cleanPhone)) {
                 $otherOrders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
                     ->where('tipe_pesanan', 'takeaway')
+                    ->whereDate('created_at', $orderDate)
+                    ->where('created_at', '>=', $orderTime->copy()->subHours(3))
+                    ->where('created_at', '<=', $orderTime->copy()->addHours(3))
                     ->where(function($q) use ($cleanPhone, $pesanan) {
                         $q->where('guest_phone', $pesanan->guest_phone)
                           ->orWhereRaw("REGEXP_REPLACE(guest_phone, '[^0-9]', '') = ?", [$cleanPhone]);
                     })
-                    ->whereIn('status', ['pending', 'processing'])
+                    ->whereNotIn('status', ['cancelled', 'void'])
                     ->where('id', '!=', $pesanan->id)
                     ->orderBy('id', 'asc')
                     ->get();
@@ -447,6 +487,11 @@ class OrderController extends Controller
             return;
         }
 
+        // Jika konsumen sudah memilih bayar tunai (cash) dan tidak sedang kembali dari redirect Midtrans, abaikan
+        if ($pesanan->pembayaran->metode === 'cash' && (!$request || (!$request->has('paid') && !$request->has('order_id')))) {
+            return;
+        }
+
         $isPaid = false;
         $metodeBayar = $pesanan->pembayaran->metode ?: 'qris';
 
@@ -457,7 +502,7 @@ class OrderController extends Controller
             $qStatus = $request->query('transaction_status');
             $qCode = $request->query('status_code');
 
-            if ($qPaid == '1' || $qAuto == '1' || in_array($qStatus, ['capture', 'settlement']) || in_array($qCode, ['200', '201'])) {
+            if ($qAuto == '1' || in_array($qStatus, ['capture', 'settlement']) || ($qPaid == '1' && in_array($qCode, ['200', '201']))) {
                 $isPaid = true;
                 if ($request->query('payment_type')) {
                     $metodeBayar = in_array($request->query('payment_type'), ['qris', 'gopay', 'shopeepay']) ? 'qris' : 'bank_transfer';
@@ -483,7 +528,11 @@ class OrderController extends Controller
                 if (session('midtrans_order_id_' . $pesanan->id)) {
                     $candidates[] = session('midtrans_order_id_' . $pesanan->id);
                 }
-                $candidates[] = 'ORDER-' . $pesanan->id;
+
+                $candidates = array_unique(array_filter($candidates));
+                if (empty($candidates)) {
+                    return;
+                }
 
                 try {
                     \Midtrans\Config::$serverKey = $serverKey;

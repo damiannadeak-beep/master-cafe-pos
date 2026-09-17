@@ -62,15 +62,11 @@
                            value="{{ auth()->check() ? auth()->user()->name : '' }}" required maxlength="50">
                 </div>
 
+                @if(!isset($meja))
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label for="inputGuestPhone" class="form-label text-white small fw-bold mb-0">
-                            No. WhatsApp / HP 
-                            @if(!isset($meja))
-                                <span class="text-danger">* (Wajib)</span>
-                            @else
-                                <span class="text-secondary fw-normal" style="font-size: 0.78rem;">(Opsional)</span>
-                            @endif
+                            No. WhatsApp / HP <span class="text-danger">* (Wajib)</span>
                         </label>
                         <span id="phoneDigitCounter" class="badge rounded-pill bg-dark border border-secondary text-secondary" style="font-size: 0.7rem; font-weight: 500;">0 digit</span>
                     </div>
@@ -86,20 +82,17 @@
                                maxlength="15" 
                                style="background-color: #0e1217; border: 1px solid #30363d; border-left: none; font-size: 1rem;" 
                                autocomplete="tel"
-                               {{ !isset($meja) ? 'required' : '' }}>
+                               required>
                     </div>
 
                     <!-- Feedback Pesan Validasi Real-time -->
                     <div id="phoneValidationFeedback" class="mt-1" style="font-size: 0.78rem; display: none;"></div>
 
                     <small class="text-secondary d-block mt-1" style="font-size: 0.76rem; line-height: 1.35;">
-                        @if(!isset($meja))
-                            <i class="bi bi-info-circle me-1 text-warning"></i> Digunakan kasir & dapur untuk konfirmasi via WhatsApp saat pesanan selesai dibungkus (diawali <strong>08</strong> atau <strong>628</strong>, 10–14 angka).
-                        @else
-                            <i class="bi bi-info-circle me-1 text-secondary"></i> Boleh diisi jika ingin menerima notifikasi status pesanan atau struk digital via WhatsApp (diawali <strong>08</strong>/<strong>628</strong>).
-                        @endif
+                        <i class="bi bi-info-circle me-1 text-warning"></i> Digunakan kasir & dapur untuk konfirmasi via WhatsApp saat pesanan selesai dibungkus (diawali <strong>08</strong> atau <strong>628</strong>, 10–14 angka).
                     </small>
                 </div>
+                @endif
 
                 <div class="p-3 rounded-3 mt-3" style="background-color: #0e1217; border: 1px solid #21262d;">
                     <div class="d-flex justify-content-between align-items-center mb-1">

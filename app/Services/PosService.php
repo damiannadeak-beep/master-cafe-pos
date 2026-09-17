@@ -17,10 +17,16 @@ class PosService
             ->whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
             ->where(function ($sub) {
-                $sub->where('tipe_pesanan', '!=', 'takeaway')
-                    ->orWhereNotNull('id_kasir')
+                // 1. Dibuat langsung oleh Kasir di POS
+                $sub->whereNotNull('id_kasir')
+                    // 2. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid');
+                        $p->where('status', 'paid')
+                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai & nominal uang yang disiapkan
+                          ->orWhere(function ($cashQ) {
+                              $cashQ->where('status', 'unpaid')
+                                    ->where('metode', 'cash');
+                          });
                     });
             });
     }
@@ -46,7 +52,9 @@ class PosService
         foreach ($orders as $order) {
             if ($order->tipe_pesanan === 'dine_in') {
                 if ($order->id_meja) {
-                    $groupKey = 'table_' . $order->id_meja;
+                    $cleanCust = strtolower(trim($order->guest_name ?? ''));
+                    $guestSuffix = !empty($cleanCust) ? ('_' . $cleanCust) : '';
+                    $groupKey = 'table_' . $order->id_meja . $guestSuffix;
                 } else {
                     $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
                     $groupKey = 'dinein_nomeja_' . ($cleanPhone ?: strtolower(trim($order->customer_name ?: 'guest'))) . '_' . $order->id;
@@ -82,7 +90,7 @@ class PosService
 
         $result = collect([]);
         foreach ($groups as $g) {
-            $ordersList = $g['orders'];
+            $ordersList = $g['orders']->sortBy('id')->values();
             $orderIds = $ordersList->pluck('id')->all();
             $primaryOrder = $ordersList->first();
 
@@ -96,6 +104,11 @@ class PosService
             $totalUangDiterima = 0;
             $totalUangKembalian = 0;
 
+            $unpaidPreparedCashList = [];
+            $hasCashUnpaid = false;
+            $paidUangDiterima = 0;
+            $paidUangKembalian = 0;
+
             foreach ($ordersList as $ord) {
                 $ordTotal = (int) (($ord->pembayaran && (float)$ord->pembayaran->total_bayar > 0) 
                     ? $ord->pembayaran->total_bayar 
@@ -107,11 +120,17 @@ class PosService
                 if (!$isThisPaid) {
                     $allPaid = false;
                     $unpaidAmount += $ordTotal;
-                }
-
-                if ($ord->pembayaran) {
-                    $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
-                    $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                    if ($ord->pembayaran && $ord->pembayaran->metode === 'cash') {
+                        $hasCashUnpaid = true;
+                        if ((float)($ord->pembayaran->uang_diterima ?? 0) > 0) {
+                            $unpaidPreparedCashList[] = (float)$ord->pembayaran->uang_diterima;
+                        }
+                    }
+                } else {
+                    if ($ord->pembayaran) {
+                        $paidUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
+                        $paidUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                    }
                 }
 
                 if ($ord->status === 'pending') {
@@ -122,6 +141,34 @@ class PosService
 
                 foreach ($ord->detail_pesanan as $detail) {
                     $totalItems += $detail->jumlah;
+                }
+            }
+
+            if ($allPaid) {
+                $totalUangDiterima = $paidUangDiterima;
+                $totalUangKembalian = $paidUangKembalian;
+            } else {
+                // Jika ada pesanan yang belum lunas
+                if (!empty($unpaidPreparedCashList)) {
+                    // Ambil nominal uang TERAKHIR yang dipilih tamu pada pesanan terbarunya,
+                    // karena pilihan terbaru mencerminkan uang riil yang dipegang tamu saat ini
+                    // (misal awalnya pilih 100k, lalu di pesanan berikutnya mengganti ke 50k).
+                    $nominalDisiapkan = end($unpaidPreparedCashList);
+                    if ($nominalDisiapkan >= $unpaidAmount) {
+                        $totalUangDiterima = (int) $nominalDisiapkan;
+                        $totalUangKembalian = (int) ($nominalDisiapkan - $unpaidAmount);
+                    } else {
+                        // Jika nominal yang disiapkan sebelumnya kurang dari total tagihan baru,
+                        // asumsikan uang pas sejumlah sisa tagihan belum lunas
+                        $totalUangDiterima = (int) $unpaidAmount;
+                        $totalUangKembalian = 0;
+                    }
+                } elseif ($hasCashUnpaid) {
+                    $totalUangDiterima = (int) $unpaidAmount;
+                    $totalUangKembalian = 0;
+                } else {
+                    $totalUangDiterima = 0;
+                    $totalUangKembalian = 0;
                 }
             }
 
@@ -157,11 +204,121 @@ class PosService
     }
 
     /**
+     * Mengelompokkan riwayat pesanan selesai per Meja / Tamu dalam sesi waktu berdekatan
+     */
+    public function groupCompletedOrders(Collection $orders): Collection
+    {
+        $groups = [];
+
+        foreach ($orders as $order) {
+            $windowBlock = $order->created_at ? (floor($order->created_at->hour / 3)) : 0;
+            $datePrefix = $order->created_at ? $order->created_at->format('Y-m-d') : 'today';
+
+            if ($order->tipe_pesanan === 'dine_in') {
+                if ($order->id_meja) {
+                    $groupKey = 'table_' . $order->id_meja . '_' . $datePrefix . '_b' . $windowBlock;
+                } else {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
+                    $groupKey = 'dinein_nomeja_' . ($cleanPhone ?: strtolower(trim($order->customer_name ?: 'guest'))) . '_' . $datePrefix . '_b' . $windowBlock;
+                }
+            } else {
+                $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
+                if (!empty($cleanPhone)) {
+                    $groupKey = 'takeaway_phone_' . $cleanPhone . '_' . $datePrefix . '_b' . $windowBlock;
+                } else {
+                    $groupKey = 'takeaway_name_' . strtolower(trim($order->customer_name ?: 'guest')) . '_' . $datePrefix . '_b' . $windowBlock;
+                }
+            }
+
+            if (!isset($groups[$groupKey])) {
+                $groups[$groupKey] = [
+                    'group_key' => $groupKey,
+                    'tipe_pesanan' => $order->tipe_pesanan,
+                    'meja' => $order->meja,
+                    'id_meja' => $order->id_meja,
+                    'customer_name' => $order->customer_name,
+                    'guest_phone' => $order->guest_phone,
+                    'created_at' => $order->created_at,
+                    'latest_created_at' => $order->created_at,
+                    'orders' => collect([]),
+                ];
+            }
+
+            $groups[$groupKey]['orders']->push($order);
+            if ($order->created_at > $groups[$groupKey]['latest_created_at']) {
+                $groups[$groupKey]['latest_created_at'] = $order->created_at;
+            }
+        }
+
+        $result = collect([]);
+        foreach ($groups as $g) {
+            $ordersList = $g['orders']->sortBy('id')->values();
+            $orderIds = $ordersList->pluck('id')->all();
+            $primaryOrder = $ordersList->first();
+
+            $totalItems = 0;
+            $totalBill = 0;
+            $totalDiscount = 0;
+            $allPaid = true;
+            $totalUangDiterima = 0;
+            $totalUangKembalian = 0;
+
+            foreach ($ordersList as $ord) {
+                $ordTotal = (int) (($ord->pembayaran && (float)$ord->pembayaran->total_bayar > 0) 
+                    ? $ord->pembayaran->total_bayar 
+                    : ($ord->total - ($ord->discount_amount ?? 0)));
+                $totalBill += $ordTotal;
+                $totalDiscount += (float) ($ord->discount_amount ?? 0);
+
+                $isThisPaid = ($ord->pembayaran && $ord->pembayaran->status === 'paid');
+                if (!$isThisPaid) {
+                    $allPaid = false;
+                }
+
+                if ($ord->pembayaran) {
+                    $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
+                    $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                }
+
+                foreach ($ord->detail_pesanan as $detail) {
+                    $totalItems += $detail->jumlah;
+                }
+            }
+
+            $result->push((object) [
+                'group_key' => $g['group_key'],
+                'primary_order' => $primaryOrder,
+                'orders' => $ordersList,
+                'order_ids' => $orderIds,
+                'order_ids_string' => implode(',', $orderIds),
+                'order_ids_display' => implode(' & #', $orderIds),
+                'order_ids_badge' => implode(', ', array_map(fn($id) => '#' . $id, $orderIds)),
+                'is_grouped' => count($ordersList) > 1,
+                'tipe_pesanan' => $g['tipe_pesanan'],
+                'meja' => $g['meja'],
+                'id_meja' => $g['id_meja'],
+                'customer_name' => $g['customer_name'],
+                'guest_phone' => $g['guest_phone'],
+                'created_at' => $g['created_at'],
+                'latest_created_at' => $g['latest_created_at'],
+                'total_items' => $totalItems,
+                'total_bill' => $totalBill,
+                'total_discount' => $totalDiscount,
+                'all_paid' => $allPaid,
+                'total_uang_diterima' => $totalUangDiterima,
+                'total_uang_kembalian' => $totalUangKembalian,
+            ]);
+        }
+
+        return $result;
+    }
+
+    /**
      * Helper proaktif untuk sinkronisasi status Midtrans
      */
     public function checkAndUpdateMidtransStatus(Pesanan $pesanan): void
     {
-        if (!$pesanan || !$pesanan->pembayaran || $pesanan->pembayaran->status === 'paid') {
+        if (!$pesanan || !$pesanan->pembayaran || $pesanan->pembayaran->status === 'paid' || $pesanan->pembayaran->metode === 'cash') {
             return;
         }
 
@@ -177,7 +334,10 @@ class PosService
         if (!empty($pesanan->pembayaran->midtrans_order_id)) {
             $candidates[] = $pesanan->pembayaran->midtrans_order_id;
         }
-        $candidates[] = 'ORDER-' . $pesanan->id;
+
+        if (empty($candidates)) {
+            return;
+        }
 
         $trxStatus = null;
         $paymentType = null;
@@ -200,7 +360,8 @@ class PosService
             if ($trxStatus && in_array($trxStatus, ['settlement', 'capture'])) {
                 $pembayaran = $pesanan->pembayaran;
                 $pembayaran->status = 'paid';
-                $pembayaran->metode = $paymentType ? strtoupper($paymentType) : 'MIDTRANS';
+                $normType = strtolower($paymentType ?? '');
+                $pembayaran->metode = in_array($normType, ['qris', 'gopay', 'shopeepay']) ? 'qris' : ($normType ?: 'qris');
                 $pembayaran->tanggal = now();
                 $pembayaran->save();
 
@@ -315,10 +476,16 @@ class PosService
         $activeOrdersQuery = Pesanan::whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
             ->where(function ($sub) {
-                $sub->where('tipe_pesanan', '!=', 'takeaway')
-                    ->orWhereNotNull('id_kasir')
+                // 1. Dibuat langsung oleh Kasir di POS
+                $sub->whereNotNull('id_kasir')
+                    // 2. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid');
+                        $p->where('status', 'paid')
+                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai & nominal uang yang disiapkan
+                          ->orWhere(function ($cashQ) {
+                              $cashQ->where('status', 'unpaid')
+                                    ->where('metode', 'cash');
+                          });
                     });
             });
 

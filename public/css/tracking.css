@@ -1,0 +1,116 @@
+/**
+ * Master Cafe POS - Consumer Tracking Styles
+ * File: public/css/tracking.css
+ */
+
+.tracking-card {
+    background-color: #161b22;
+    border: 1px solid #21262d !important;
+    border-radius: 1.25rem;
+}
+
+.stepper-item {
+    position: relative;
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    animation: none !important;
+    transform: none !important;
+}
+
+.stepper-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 1.2rem;
+    top: 2.2rem;
+    bottom: 0;
+    width: 2px;
+    background-color: #30363d;
+}
+
+.stepper-item.active:not(:last-child)::before {
+    background: var(--gradient-bronze);
+}
+
+.stepper-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #21262d;
+    color: #8b949e;
+    flex-shrink: 0;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.stepper-item.active .stepper-icon {
+    background: var(--gradient-bronze);
+    color: white;
+    box-shadow: 0 0 15px rgba(192, 142, 92, 0.4);
+}
+
+.stepper-item.completed .stepper-icon {
+    background-color: #238636;
+    color: white;
+}
+
+/* Hanya bulatan icon yang bergerak dan berdenyut */
+.pulse-icon,
+.stepper-item.pulse-animation .stepper-icon {
+    animation: stepperIconPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes stepperIconPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(192, 142, 92, 0.7);
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 10px rgba(192, 142, 92, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(192, 142, 92, 0);
+    }
+}
+
+.stepper-item.pulse-animation {
+    animation: none !important;
+    transform: none !important;
+}
+
+.pulse-animation:not(.stepper-item) {
+    animation: pulseGlow 1.8s infinite;
+}
+
+@keyframes pulseGlow {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(192, 142, 92, 0.5);
+    }
+    70% {
+        transform: scale(1.03);
+        box-shadow: 0 0 0 10px rgba(192, 142, 92, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(192, 142, 92, 0);
+    }
+}
+
+.rating-star {
+    font-size: 1.8rem;
+    color: #484f58;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.rating-star:hover,
+.rating-star.active {
+    color: #e3b341;
+    transform: scale(1.15);
+}

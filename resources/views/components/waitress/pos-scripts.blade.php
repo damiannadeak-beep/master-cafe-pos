@@ -5,4 +5,18 @@
     window.csrfToken = "{{ csrf_token() }}";
     window.manualOrderUrl = "{{ url('/kasir/manual-order') }}";
 </script>
-<script src="{{ asset('js/waitress/pos-order.js') }}?v={{ file_exists(public_path('js/waitress/pos-order.js')) ? filemtime(public_path('js/waitress/pos-order.js')) : '1.0' }}"></script>
+
+{{-- Modular Waitress POS Order Scripts --}}
+@php
+    $posModules = [
+        'js/waitress/modules/pos/pos-cart.js',
+        'js/waitress/modules/pos/pos-catalog.js',
+        'js/waitress/modules/pos/pos-variant.js',
+        'js/waitress/modules/pos/pos-checkout.js',
+        'js/waitress/pos-order.js',
+    ];
+@endphp
+
+@foreach ($posModules as $pMod)
+    <script src="{{ asset($pMod) }}?v={{ file_exists(public_path($pMod)) ? filemtime(public_path($pMod)) : '1.0' }}"></script>
+@endforeach

@@ -152,12 +152,6 @@
 <!-- Hero Section -->
 <section class="hero-mastercafe">
     <div class="container text-center hero-content">
-        <div class="d-inline-block mb-4">
-            <span class="badge-premium">
-                <i class="bi bi-star-fill me-2"></i> EST. 2024
-            </span>
-        </div>
-
         <h1 class="hero-title-premium mb-2">
             MASTER
             <span class="font-cursive hero-title-cursive">Cafe</span>

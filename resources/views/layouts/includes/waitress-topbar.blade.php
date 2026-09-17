@@ -20,8 +20,8 @@
                         <i class="bi bi-cart-plus me-1"></i> Pesanan Manual
                     </a>
                     <a class="nav-pill-btn {{ request()->routeIs('kasir.pesanan_aktif') ? 'active' : '' }}" href="{{ route('kasir.pesanan_aktif') }}">
-                        <i class="bi bi-bell me-1"></i> Pesanan Aktif
-                        <span class="badge bg-danger rounded-pill ms-1 shadow-sm" id="badge-active-orders" style="display: none;">0</span>
+                        <i class="bi bi-bell me-2"></i> Pesanan Aktif
+                        <span class="badge bg-danger rounded-pill ms-2 px-2 shadow-sm" id="badge-active-orders" style="display: none;">0</span>
                     </a>
                     <!-- Notifikasi Panggilan Meja (Call Bell) -->
                     <div class="dropdown">

@@ -87,7 +87,7 @@ class PaymentController extends Controller
                 $customerName = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu Master Cafe');
                 $customerEmail = $pesanan->konsumen?->email ?? 'guest@mastercafe.local';
 
-                $midtransOrderId = 'ORDER-' . $pesanan->id;
+                $midtransOrderId = 'ORDER-' . $pesanan->id . '-' . time();
 
                 $midtransParams = [
                     'transaction_details' => [
@@ -122,7 +122,36 @@ class PaymentController extends Controller
 
         $isSandboxMock = empty($snapToken) && (empty($serverKey) || str_contains($serverKey, 'xxxxxx'));
 
-        return view('konsumen.checkout', compact('pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock', 'snapError'));
+        // Deteksi akumulasi tagihan meja jika ada pesanan sebelumnya yang belum dibayar
+        $priorUnpaidTotal = 0;
+        $priorOrders = collect([]);
+        $priorCashPrepared = null;
+        if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
+            $priorOrders = Pesanan::where('id_meja', $pesanan->id_meja)
+                ->where('id', '!=', $pesanan->id)
+                ->whereIn('status', ['pending', 'processing'])
+                ->whereHas('pembayaran', function ($p) {
+                    $p->where('status', '!=', 'paid');
+                })
+                ->with('pembayaran')
+                ->get();
+
+            foreach ($priorOrders as $prior) {
+                $priorTotal = (float) (($prior->pembayaran && (float)$prior->pembayaran->total_bayar > 0)
+                    ? $prior->pembayaran->total_bayar
+                    : ($prior->total - ($prior->discount_amount ?? 0)));
+                $priorUnpaidTotal += $priorTotal;
+                if ($prior->pembayaran && (float)($prior->pembayaran->uang_diterima ?? 0) > 0) {
+                    $priorCashPrepared = (float)$prior->pembayaran->uang_diterima;
+                }
+            }
+        }
+        $cumulativeTableTotal = $priorUnpaidTotal + (float)$pembayaran->total_bayar;
+
+        return view('konsumen.checkout', compact(
+            'pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock', 'snapError',
+            'priorUnpaidTotal', 'cumulativeTableTotal', 'priorOrders', 'priorCashPrepared'
+        ));
     }
 
     public function simulateMidtransPay(Request $request, $id_pesanan)
@@ -215,20 +244,43 @@ class PaymentController extends Controller
             $isUangPas = $request->boolean('is_uang_pas');
             $nominalTunaiInput = $request->input('nominal_tunai');
 
+            // Cek apakah meja memiliki tagihan aktif sebelumnya yang belum dibayar
+            $priorUnpaidTotal = 0;
+            if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
+                $otherUnpaidOrders = Pesanan::where('id_meja', $pesanan->id_meja)
+                    ->where('id', '!=', $pesanan->id)
+                    ->whereIn('status', ['pending', 'processing'])
+                    ->whereHas('pembayaran', function ($p) {
+                        $p->where('status', '!=', 'paid');
+                    })
+                    ->with('pembayaran')
+                    ->get();
+
+                foreach ($otherUnpaidOrders as $other) {
+                    $otherTotal = (float) (($other->pembayaran && (float)$other->pembayaran->total_bayar > 0)
+                        ? $other->pembayaran->total_bayar
+                        : ($other->total - ($other->discount_amount ?? 0)));
+                    $priorUnpaidTotal += $otherTotal;
+                }
+            }
+
+            $cumulativeTableTotal = $priorUnpaidTotal + $totalTagihan;
+            $targetTotal = ($priorUnpaidTotal > 0) ? $cumulativeTableTotal : $totalTagihan;
+
             $uangDiterima = null;
             $uangKembalian = 0;
             $catatanKembalian = null;
 
             if ($isUangPas) {
-                $uangDiterima = $totalTagihan;
+                $uangDiterima = $targetTotal;
                 $uangKembalian = 0;
-                $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+                $catatanKembalian = $priorUnpaidTotal > 0 ? 'Uang Pas Meja (Tanpa Kembalian)' : 'Uang Pas (Tanpa Kembalian)';
             } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
                 $uangDiterima = (float) $nominalTunaiInput;
-                if ($uangDiterima < $totalTagihan) {
-                    return redirect()->back()->with('error', 'Nominal uang yang disiapkan (Rp ' . number_format($uangDiterima, 0, ',', '.') . ') tidak boleh kurang dari total tagihan (Rp ' . number_format($totalTagihan, 0, ',', '.') . ').');
+                if ($uangDiterima < $targetTotal) {
+                    return redirect()->back()->with('error', 'Nominal uang yang disiapkan (Rp ' . number_format($uangDiterima, 0, ',', '.') . ') tidak boleh kurang dari total tagihan meja (Rp ' . number_format($targetTotal, 0, ',', '.') . ').');
                 }
-                $uangKembalian = max(0, $uangDiterima - $totalTagihan);
+                $uangKembalian = max(0, $uangDiterima - $targetTotal);
                 if ($uangKembalian > 0) {
                     $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Siapkan Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
                 } else {
@@ -243,6 +295,20 @@ class PaymentController extends Controller
                 'uang_kembalian' => $uangKembalian,
                 'catatan_kembalian' => $catatanKembalian,
             ]);
+
+            // Sinkronkan juga ke pesanan belum lunas lainnya di meja ini
+            // agar seluruh sesi meja memiliki nominal uang disiapkan dan kembalian yang sama persis
+            if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja && !empty($otherUnpaidOrders)) {
+                foreach ($otherUnpaidOrders as $other) {
+                    if ($other->pembayaran && $other->pembayaran->status === 'unpaid') {
+                        $other->pembayaran->update([
+                            'uang_diterima' => $uangDiterima,
+                            'uang_kembalian' => $uangKembalian,
+                            'catatan_kembalian' => $catatanKembalian,
+                        ]);
+                    }
+                }
+            }
 
             // Ubah status pesanan agar langsung diproses dimasak dapur
             $pesanan->update(['status' => 'processing']);
@@ -337,7 +403,9 @@ class PaymentController extends Controller
         $orderIdParts = explode('-', $request->order_id);
         $id_pesanan = isset($orderIdParts[1]) ? $orderIdParts[1] : $orderIdParts[0];
 
-        $pembayaran = Pembayaran::where('id_pesanan', $id_pesanan)->first();
+        $pembayaran = Pembayaran::where('midtrans_order_id', $request->order_id)
+            ->orWhere('id_pesanan', $id_pesanan)
+            ->first();
         if (!$pembayaran) return response()->json(['message' => 'Not Found'], 404);
 
         $pesanan = Pesanan::with(['meja', 'konsumen'])->find($id_pesanan);

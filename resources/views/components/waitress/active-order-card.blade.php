@@ -10,7 +10,7 @@
         $cardUangDiterima = (int) $cardData->total_uang_diterima;
         $cardUangKembalian = (int) $cardData->total_uang_kembalian;
     @endphp
-    <div class="col-md-6 col-lg-4" id="order-card-{{ $primaryOrder->id }}" data-order-ids="{{ $orderIdsStr }}" data-total="{{ $cardTotalPay }}" data-uang-diterima="{{ $cardUangDiterima }}" data-uang-kembalian="{{ $cardUangKembalian }}">
+    <div class="col-md-6 col-lg-4 order-card-item" id="order-card-{{ $primaryOrder->id }}" data-order-ids="{{ $orderIdsStr }}" data-total="{{ $cardTotalPay }}" data-uang-diterima="{{ $cardUangDiterima }}" data-uang-kembalian="{{ $cardUangKembalian }}">
         <div class="card shadow-sm border-0 h-100 rounded-4">
             <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center rounded-top-4">
                 <div>
@@ -104,6 +104,9 @@
                                                 <span class="fw-bold {{ $subIdx === 0 ? 'text-white' : 'text-warning' }}">
                                                     <i class="bi {{ $subIdx === 0 ? 'bi-receipt text-secondary' : 'bi-plus-circle-fill text-warning' }} me-1"></i>
                                                     {{ $subIdx === 0 ? 'Pesanan Awal (#' . $subOrder->id . ')' : 'Tambahan (#' . $subOrder->id . ')' }}
+                                                    @if(!empty($subOrder->customer_name) && strtolower(trim($subOrder->customer_name)) !== strtolower(trim($cardData->customer_name)))
+                                                        <span class="badge bg-dark border border-secondary text-info ms-1 py-0 px-1.5" style="font-size: 0.65rem; font-weight: normal;">{{ $subOrder->customer_name }}</span>
+                                                    @endif
                                                 </span>
                                                 <div class="d-flex align-items-center gap-1">
                                                     @if($subOrder->status === 'pending')

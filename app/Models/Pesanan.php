@@ -76,6 +76,11 @@ class Pesanan extends Model
         return $this->hasOne(Rating::class, 'id_pesanan');
     }
 
+    public function voidLog()
+    {
+        return $this->hasOne(VoidLog::class, 'pesanan_id');
+    }
+
     /**
      * Mengembalikan stok menu yang sudah terpotong.
      */

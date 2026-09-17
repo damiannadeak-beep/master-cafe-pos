@@ -268,7 +268,14 @@
                             }
                         })
                         .catch(() => {
-                            // Gagal fetch status / order expired
+                            // Order tidak ditemukan / sudah dihapus di database, bersihkan dari LocalStorage
+                            orders = orders.filter(o => o.token !== latestOrder.token);
+                            localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+                            if (orders.length === 0) {
+                                localStorage.removeItem('active_guest_order');
+                                const banner = document.getElementById('active-order-recovery-banner');
+                                if (banner) banner.style.display = 'none';
+                            }
                         });
                 }
             } catch (e) {

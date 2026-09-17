@@ -262,6 +262,10 @@
         }, 60);
     }
 
+    // Inisialisasi event listener navigasi SPA
+    function initSpaNavigation() {
+        ProgressBar.init();
+
         // Smart Hover Prefetching (120ms hover intent) untuk navigasi instan 0ms
         let hoverTimer = null;
         document.body.addEventListener('pointerenter', function(e) {

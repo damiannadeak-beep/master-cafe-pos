@@ -121,84 +121,129 @@
                                     </div>
                                 </div>
 
-                                <form id="cash-payment-form" action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
-                                    @csrf
-                                    @if($pesanan->order_token)
-                                        <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
-                                    @endif
-                                    <input type="hidden" id="is_uang_pas" name="is_uang_pas" value="1">
-                                    <input type="hidden" id="nominal_tunai_raw" name="nominal_tunai" value="{{ (int)$pembayaran->total_bayar }}">
+                                 @php
+                                     $effectiveTotal = (isset($cumulativeTableTotal) && $cumulativeTableTotal > 0) ? (int)$cumulativeTableTotal : (int)$pembayaran->total_bayar;
+                                     $hasPriorUnpaid = isset($priorUnpaidTotal) && $priorUnpaidTotal > 0;
+                                     
+                                     // Otomatis arahkan ke nominal uang yang pernah dipilih tamu sebelumnya jika mencukupi tagihan meja
+                                     $hasPriorCashChoice = ($hasPriorUnpaid && isset($priorCashPrepared) && $priorCashPrepared >= $effectiveTotal);
+                                     $selectedPreset = $hasPriorCashChoice ? (int)$priorCashPrepared : $effectiveTotal;
+                                     $isDefaultPas = ($selectedPreset == $effectiveTotal);
+                                     $defaultKembalian = max(0, $selectedPreset - $effectiveTotal);
+                                     $nextCeil = $effectiveTotal > 100000 ? (int) (ceil(($effectiveTotal + 1000) / 50000) * 50000) : null;
+                                     $isCustomPreset = (!in_array($selectedPreset, array_filter([$effectiveTotal, 50000, 100000, $nextCeil])));
+                                 @endphp
 
-                                    <div class="mb-3">
-                                        <label class="form-label text-secondary small fw-bold mb-2">
-                                            <i class="bi bi-wallet2 me-1"></i> Siapkan Uang Pecahan Berapa?
-                                        </label>
-                                        <div class="d-flex flex-wrap gap-2 mb-2">
-                                            <!-- Pilihan 1: Uang Pas -->
-                                            <button type="button" class="btn btn-sm btn-outline-success cash-preset-btn active rounded-pill px-3 py-2 fw-bold" onclick="selectCashPreset('pas', {{ (int)$pembayaran->total_bayar }}, this)">
-                                                <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp {{ number_format($pembayaran->total_bayar, 0, ',', '.') }})
-                                            </button>
+                                 @if($hasPriorUnpaid)
+                                     <div class="p-3 mb-3 rounded-3" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+                                         <div class="d-flex align-items-center mb-1">
+                                             <i class="bi bi-info-circle-fill text-info me-2 fs-5"></i>
+                                             <span class="text-white fw-bold small">Akumulasi Tagihan Meja</span>
+                                         </div>
+                                         <div class="text-white-50 small mb-2" style="font-size: 0.8rem; line-height: 1.4;">
+                                             Ada pesanan sebelumnya di meja Anda yang belum dibayar. Pilihan uang tunai disesuaikan dengan <strong>total seluruh tagihan meja</strong> agar waitress membawakan kembalian yang tepat sekaligus.
+                                         </div>
+                                         <div class="d-flex justify-content-between small text-white-50 mb-1">
+                                             <span>Pesanan Sebelumnya:</span>
+                                             <span class="text-white">Rp {{ number_format($priorUnpaidTotal, 0, ',', '.') }}</span>
+                                         </div>
+                                         <div class="d-flex justify-content-between small text-white-50 mb-1">
+                                             <span>Pesanan Ini:</span>
+                                             <span class="text-white">Rp {{ number_format($pembayaran->total_bayar, 0, ',', '.') }}</span>
+                                         </div>
+                                         <div class="d-flex justify-content-between border-top border-secondary border-opacity-50 pt-1 mt-1">
+                                             <span class="text-info fw-bold small">Total Seluruh Meja:</span>
+                                             <span class="text-info fw-bold">Rp {{ number_format($effectiveTotal, 0, ',', '.') }}</span>
+                                         </div>
+                                     </div>
+                                 @endif
 
-                                            @php
-                                                $total = (int)$pembayaran->total_bayar;
-                                            @endphp
+                                 <form id="cash-payment-form" action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
+                                     @csrf
+                                     @if($pesanan->order_token)
+                                         <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
+                                     @endif
+                                     <input type="hidden" id="is_uang_pas" name="is_uang_pas" value="{{ $isDefaultPas ? '1' : '0' }}">
+                                     <input type="hidden" id="nominal_tunai_raw" name="nominal_tunai" value="{{ $selectedPreset }}">
 
-                                            @if($total < 50000)
-                                                <button type="button" class="btn btn-sm btn-outline-secondary cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectCashPreset('fixed', 50000, this)">
-                                                    Rp 50.000
-                                                </button>
-                                            @endif
+                                     <div class="mb-3">
+                                         <div class="d-flex justify-content-between align-items-center mb-2">
+                                             <label class="form-label text-secondary small fw-bold mb-0">
+                                                 <i class="bi bi-wallet2 me-1"></i> Siapkan Uang Pecahan Berapa?
+                                             </label>
+                                             @if($hasPriorCashChoice)
+                                                 <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50" style="font-size: 0.68rem;">
+                                                     <i class="bi bi-arrow-repeat me-1"></i>Otomatis dari Pesanan Awal
+                                                 </span>
+                                             @endif
+                                         </div>
+                                         <div class="d-flex flex-wrap gap-2 mb-2">
+                                             <!-- Pilihan 1: Uang Pas -->
+                                             <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == $effectiveTotal ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('pas', {{ $effectiveTotal }}, this)">
+                                                 <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp {{ number_format($effectiveTotal, 0, ',', '.') }})
+                                             </button>
 
-                                            @if($total < 100000 && $total != 50000)
-                                                <button type="button" class="btn btn-sm btn-outline-secondary cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectCashPreset('fixed', 100000, this)">
-                                                    Rp 100.000
-                                                </button>
-                                            @endif
+                                             @if($effectiveTotal < 50000)
+                                                 <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == 50000 ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('fixed', 50000, this)">
+                                                     Rp 50.000
+                                                 </button>
+                                             @endif
 
-                                            @if($total > 100000)
-                                                @php
-                                                    $nextCeil = (int) (ceil(($total + 1000) / 50000) * 50000);
-                                                @endphp
-                                                <button type="button" class="btn btn-sm btn-outline-secondary cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectCashPreset('fixed', {{ $nextCeil }}, this)">
-                                                    Rp {{ number_format($nextCeil, 0, ',', '.') }}
-                                                </button>
-                                            @endif
+                                             @if($effectiveTotal < 100000 && $effectiveTotal != 50000)
+                                                 <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == 100000 ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('fixed', 100000, this)">
+                                                     Rp 100.000
+                                                 </button>
+                                             @endif
 
-                                            <!-- Pilihan Nominal Lain -->
-                                            <button type="button" class="btn btn-sm btn-outline-secondary cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="selectCashPreset('custom', 0, this)">
-                                                <i class="bi bi-pencil me-1"></i> Nominal Lain
-                                            </button>
-                                        </div>
+                                             @if($effectiveTotal > 100000 && $nextCeil)
+                                                 <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $selectedPreset == $nextCeil ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('fixed', {{ $nextCeil }}, this)">
+                                                     Rp {{ number_format($nextCeil, 0, ',', '.') }}
+                                                 </button>
+                                             @endif
 
-                                        <!-- Input Custom Nominal -->
-                                        <div id="custom-nominal-container" class="mt-2" style="display: none;">
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
-                                                <input type="number" id="custom_nominal_input" class="form-control bg-dark border-secondary text-white" placeholder="Contoh: 100000" min="{{ (int)$pembayaran->total_bayar }}" step="1000" oninput="onCustomNominalChange(this.value)">
-                                            </div>
-                                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Ketik nominal uang kertas yang Anda siapkan.</small>
-                                        </div>
-                                    </div>
+                                             <!-- Pilihan Nominal Lain -->
+                                             <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold {{ $isCustomPreset ? 'btn-outline-success active' : 'btn-outline-secondary' }}" onclick="selectCashPreset('custom', 0, this)">
+                                                 <i class="bi bi-pencil me-1"></i> Nominal Lain
+                                             </button>
+                                         </div>
 
-                                    <!-- Live Summary Kembalian -->
-                                    <div id="kembalian-card" class="p-3 rounded-3 mb-3" style="background: rgba(34, 197, 94, 0.08); border: 1px dashed rgba(34, 197, 94, 0.4);">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="text-white-50 small">Uang yang disiapkan:</span>
-                                            <span id="label-uang-disiapkan" class="text-white fw-bold">Rp {{ number_format($pembayaran->total_bayar, 0, ',', '.') }}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-white-50 small">Kembalian Waitress:</span>
-                                            <span id="label-kembalian" class="text-success fw-bold fs-6">Rp 0 (Uang Pas)</span>
-                                        </div>
-                                        <div id="kembalian-alert-msg" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-white-50" style="font-size: 0.75rem;">
-                                            <i class="bi bi-info-circle text-info me-1"></i> Waitress akan langsung membawakan pesanan ke meja Anda tanpa kembalian.
-                                        </div>
-                                    </div>
+                                         <!-- Input Custom Nominal -->
+                                         <div id="custom-nominal-container" class="mt-2" style="{{ $isCustomPreset ? 'display: block;' : 'display: none;' }}">
+                                             <div class="input-group">
+                                                 <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
+                                                 <input type="number" id="custom_nominal_input" class="form-control bg-dark border-secondary text-white" placeholder="Contoh: 100000" value="{{ $isCustomPreset ? $selectedPreset : '' }}" min="{{ $effectiveTotal }}" step="1000" oninput="onCustomNominalChange(this.value)">
+                                             </div>
+                                             <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Ketik nominal uang kertas yang Anda siapkan.</small>
+                                         </div>
+                                     </div>
 
-                                    <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;">
-                                        💵 Pesan & Bayar Tunai ke Waitress <i class="bi bi-arrow-right ms-1"></i>
-                                    </button>
-                                </form>
+                                     <!-- Live Summary Kembalian -->
+                                     <div id="kembalian-card" class="p-3 rounded-3 mb-3" style="background: {{ $defaultKembalian > 0 ? 'rgba(234, 179, 8, 0.09)' : 'rgba(34, 197, 94, 0.08)' }}; border: 1px dashed {{ $defaultKembalian > 0 ? 'rgba(234, 179, 8, 0.4)' : 'rgba(34, 197, 94, 0.4)' }};">
+                                         <div class="d-flex justify-content-between align-items-center mb-1">
+                                             <span class="text-white-50 small">Uang yang disiapkan:</span>
+                                             <span id="label-uang-disiapkan" class="text-white fw-bold">Rp {{ number_format($selectedPreset, 0, ',', '.') }}</span>
+                                         </div>
+                                         <div class="d-flex justify-content-between align-items-center">
+                                             <span class="text-white-50 small">Kembalian Waitress:</span>
+                                             @if($defaultKembalian > 0)
+                                                 <span id="label-kembalian" class="text-warning fw-bold fs-6">Rp {{ number_format($defaultKembalian, 0, ',', '.') }}</span>
+                                             @else
+                                                 <span id="label-kembalian" class="text-success fw-bold fs-6">Rp 0 (Uang Pas)</span>
+                                             @endif
+                                         </div>
+                                         <div id="kembalian-alert-msg" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-white-50" style="font-size: 0.75rem;">
+                                             @if($defaultKembalian > 0)
+                                                 <i class="bi bi-bell-fill text-warning me-1"></i> <strong>Waitress akan menyiapkan kembalian Rp {{ number_format($defaultKembalian, 0, ',', '.') }}</strong> untuk seluruh tagihan meja sebelum naik ke meja Anda.
+                                             @else
+                                                 <i class="bi bi-info-circle text-info me-1"></i> Waitress akan langsung membawakan pesanan ke meja Anda tanpa kembalian.
+                                             @endif
+                                         </div>
+                                     </div>
+
+                                     <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;">
+                                         💵 Pesan & Bayar Tunai ke Waitress <i class="bi bi-arrow-right ms-1"></i>
+                                     </button>
+                                 </form>
                             </div>
 
                             <div class="alert alert-info border-0 rounded-4 text-center mb-0" style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2) !important; color: #93c5fd;">
@@ -272,7 +317,7 @@
         }
     }
 
-    const TOTAL_TAGIHAN = {{ (int)$pembayaran->total_bayar }};
+    const TOTAL_TAGIHAN = {{ (int)$effectiveTotal }};
 
     function formatRupiah(number) {
         return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(number);

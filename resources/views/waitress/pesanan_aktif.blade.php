@@ -20,12 +20,16 @@
         <div class="d-flex align-items-center gap-2">
             <div class="d-flex align-items-center gap-1 p-1 rounded-pill border border-secondary border-opacity-25 shadow-sm" style="background-color: rgba(22, 27, 34, 0.85);">
                 <button type="button" class="nav-pill-btn active btn-touch" id="tab-btn-active" onclick="switchOrderTab('active')">
-                    <i class="bi bi-fire me-1.5 text-warning"></i> Pesanan Aktif
-                    <span class="badge bg-danger rounded-pill ms-1.5 shadow-sm" id="tab-count-active">{{ $orders->count() }}</span>
+                    <i class="bi bi-fire me-2 text-warning"></i> Pesanan Aktif
+                    <span class="badge bg-danger rounded-pill ms-2 px-2 shadow-sm" id="tab-count-active">{{ $orders->count() }}</span>
                 </button>
                 <button type="button" class="nav-pill-btn btn-touch" id="tab-btn-completed" onclick="switchOrderTab('completed')">
-                    <i class="bi bi-check2-all me-1.5 text-success"></i> Riwayat Selesai
-                    <span class="badge rounded-pill ms-1.5 shadow-sm" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);" id="tab-count-completed">{{ $completedOrders->count() }}</span>
+                    <i class="bi bi-check2-all me-2 text-success"></i> Riwayat Selesai
+                    <span class="badge rounded-pill ms-2 px-2 shadow-sm" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);" id="tab-count-completed">{{ isset($groupedCompletedOrders) ? $groupedCompletedOrders->count() : $completedOrders->count() }}</span>
+                </button>
+                <button type="button" class="nav-pill-btn btn-touch" id="tab-btn-voided" onclick="switchOrderTab('voided')">
+                    <i class="bi bi-trash3 me-2 text-danger"></i> Riwayat Dibatalkan
+                    <span class="badge rounded-pill ms-2 px-2 shadow-sm" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" id="tab-count-voided">{{ $voidedOrders->count() }}</span>
                 </button>
             </div>
         </div>
@@ -55,7 +59,7 @@
                 </div>
                 <div class="col-12 col-md-6 col-lg-8 d-flex justify-content-md-end align-items-center gap-2">
                     <span class="badge rounded-pill bg-dark border border-secondary text-secondary small px-3 py-1.5" id="completed-filter-info">
-                        Menampilkan {{ $completedOrders->count() }} pesanan selesai hari ini
+                        Menampilkan {{ isset($groupedCompletedOrders) ? $groupedCompletedOrders->count() : $completedOrders->count() }} sesi pesanan selesai hari ini
                     </span>
                 </div>
             </div>
@@ -63,6 +67,34 @@
 
         <div class="row g-4" id="completed-orders-container">
             @include("components.waitress.completed-order-card")
+        </div>
+    </div>
+
+    <!-- PANE 3: Riwayat Pesanan Dibatalkan (Void / Cancelled) -->
+    <div id="pane-voided-orders" style="display: none;">
+        <!-- Search & Filter Bar untuk Riwayat Dibatalkan -->
+        <div class="card border-0 rounded-4 p-3 mb-4 shadow-sm" style="background-color: rgba(22, 27, 34, 0.85); border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control bg-dark border-secondary border-opacity-25 text-white" 
+                               id="search-voided-input" placeholder="Cari Order #, Meja, Alasan, Kasir..." 
+                               onkeyup="filterVoidedOrders(this.value)">
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-8 d-flex justify-content-md-end align-items-center gap-2">
+                    <span class="badge rounded-pill bg-dark border border-secondary text-secondary small px-3 py-1.5" id="voided-filter-info">
+                        Menampilkan {{ $voidedOrders->count() }} pesanan dibatalkan
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4" id="voided-orders-container">
+            @include("components.waitress.voided-order-card")
         </div>
     </div>
 </div>

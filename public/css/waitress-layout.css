@@ -1,0 +1,195 @@
+/**
+ * Master Cafe POS - Waitress Layout Theme Styles
+ * File: public/css/waitress-layout.css
+ */
+
+.kasir-layout {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.kasir-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-base);
+    overflow: hidden;
+    padding: 1.5rem;
+    min-height: 0;
+}
+
+.kasir-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 0 0.5rem 2rem 0.5rem;
+    width: 100%;
+}
+
+.kasir-navbar {
+    background: var(--gradient-surface) !important;
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+    z-index: 1050;
+    box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25);
+    flex-shrink: 0;
+}
+
+.kasir-navbar .navbar-brand {
+    color: #f0e9dd;
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+}
+
+.kasir-navbar .navbar-text,
+.kasir-navbar .nav-link {
+    color: #f0e9dd !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kasir-navbar .nav-link.active {
+    color: #c08e5c !important;
+    font-weight: 700;
+}
+
+.kasir-navbar .nav-link:hover {
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.offcanvas.offcanvas-start {
+    width: 320px;
+    background-color: #0e1217;
+    border-right: 1px solid #21262d;
+}
+
+/* Custom Scrollbar for inner containers */
+.kasir-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.kasir-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.kasir-container::-webkit-scrollbar-thumb {
+    background: #21262d;
+    border-radius: 4px;
+}
+
+.kasir-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(152, 108, 67, 0.5);
+}
+
+/* Sembunyikan tombol mata default browser Edge/IE agar tidak bertumpuk */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+/* Modern Segmented Pill Navbar Styles */
+.bg-surface-dark {
+    background-color: rgba(14, 18, 23, 0.75);
+}
+
+.nav-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.42rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #d0d7de;
+    text-decoration: none;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.nav-pill-btn:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.nav-pill-btn.active {
+    color: #ffffff !important;
+    background: var(--gradient-bronze, linear-gradient(135deg, #c08e5c 0%, #986c43 100%)) !important;
+    border-color: rgba(192, 142, 92, 0.6);
+    box-shadow: 0 2px 10px rgba(192, 142, 92, 0.35);
+}
+
+.kasir-dropdown {
+    background-color: #161b22 !important;
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1)) !important;
+    border-radius: 12px;
+    padding: 0.4rem;
+    min-width: 210px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+.kasir-dropdown .dropdown-item {
+    color: #e6edf3;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.15s ease;
+}
+
+.kasir-dropdown .dropdown-item:hover {
+    background-color: rgba(192, 142, 92, 0.15);
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.kasir-dropdown .dropdown-item.active {
+    background-color: var(--primary-bronze, #c08e5c) !important;
+    color: #ffffff !important;
+}
+
+.kasir-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #2ea043;
+    box-shadow: 0 0 8px rgba(46, 160, 67, 0.8);
+    display: inline-block;
+    animation: kasirStatusPulse 2s infinite;
+}
+
+@keyframes kasirStatusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.6);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(46, 160, 67, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(46, 160, 67, 0);
+    }
+}
+
+.spin-animation {
+    animation: spinRotate 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spinRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
