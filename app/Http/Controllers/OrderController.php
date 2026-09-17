@@ -351,43 +351,23 @@ class OrderController extends Controller
         $orderTime = $pesanan->created_at ?: now();
 
         if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
-            $isCurrentCompleted = ($pesanan->status === 'completed');
             $currentGuestName = trim($pesanan->guest_name ?? '');
 
             $otherOrdersQuery = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
                 ->where('id_meja', $pesanan->id_meja)
                 ->whereDate('created_at', $orderDate)
+                ->where('created_at', '>=', $orderTime->copy()->subHours(3))
+                ->where('created_at', '<=', $orderTime->copy()->addHours(3))
                 ->whereNotIn('status', ['cancelled', 'void'])
                 ->where('id', '!=', $pesanan->id);
 
-            // Filter Guest Name jika ada nama tamu spesifik
+            // Filter Guest Name jika ada nama tamu spesifik agar sesi tamu tidak tertukar
             if (!empty($currentGuestName)) {
                 $otherOrdersQuery->whereRaw("LOWER(TRIM(COALESCE(guest_name, ''))) = ?", [strtolower($currentGuestName)]);
             } else {
                 $otherOrdersQuery->where(function ($q) {
                     $q->whereNull('guest_name')
                       ->orWhere('guest_name', '');
-                });
-            }
-
-            if ($isCurrentCompleted) {
-                // Pesanan yang sedang dilihat sudah SELESAI.
-                // HANYA ambil pesanan lain yang juga selesai dalam sesi yang sama (dibuat sebelum sesi selesai).
-                // JANGAN PERNAH menyertakan pesanan pending/processing dari tamu baru setelahnya!
-                $completionTime = $pesanan->updated_at ?: $pesanan->created_at;
-                $otherOrdersQuery->where('status', 'completed')
-                    ->where('created_at', '<=', $completionTime)
-                    ->where('created_at', '>=', $orderTime->copy()->subHours(2));
-            } else {
-                // Pesanan yang sedang dilihat MASIH AKTIF (pending / processing).
-                // Hanya gabungkan pesanan yang juga masih aktif di sesi meja saat ini,
-                // dan JANGAN sertakan pesanan dari tamu sebelumnya yang sudah selesai.
-                $otherOrdersQuery->where(function ($q) use ($pesanan) {
-                    $q->whereIn('status', ['pending', 'processing'])
-                      ->orWhere(function ($sub) use ($pesanan) {
-                          $sub->where('status', 'completed')
-                              ->where('created_at', '>=', $pesanan->created_at->copy()->subMinutes(30));
-                      });
                 });
             }
 
