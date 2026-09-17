@@ -97,10 +97,17 @@
                     <table class="table table-dark text-white border-secondary table-sm table-borderless mb-0">
                         <tbody>
                             @foreach($cardData->orders as $subIdx => $subOrder)
+                                @php
+                                    $subOrderPaid = ($subOrder->pembayaran && $subOrder->pembayaran->status === 'paid');
+                                    $subOrderMetode = $subOrder->pembayaran ? strtoupper($subOrder->pembayaran->metode ?? '') : '';
+                                    $subOrderTotal = (float) (($subOrder->pembayaran && (float)$subOrder->pembayaran->total_bayar > 0)
+                                        ? $subOrder->pembayaran->total_bayar
+                                        : ($subOrder->total - ($subOrder->discount_amount ?? 0)));
+                                @endphp
                                 @if($cardData->is_grouped)
                                     <tr class="table-active">
                                         <td colspan="3" class="py-1 px-2 rounded-2" style="background: rgba(255, 255, 255, 0.08); font-size: 0.75rem;">
-                                            <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
                                                 <span class="fw-bold {{ $subIdx === 0 ? 'text-white' : 'text-warning' }}">
                                                     <i class="bi {{ $subIdx === 0 ? 'bi-receipt text-secondary' : 'bi-plus-circle-fill text-warning' }} me-1"></i>
                                                     {{ $subIdx === 0 ? 'Pesanan Awal (#' . $subOrder->id . ')' : 'Tambahan (#' . $subOrder->id . ')' }}
@@ -108,11 +115,21 @@
                                                         <span class="badge bg-dark border border-secondary text-info ms-1 py-0 px-1.5" style="font-size: 0.65rem; font-weight: normal;">{{ $subOrder->customer_name }}</span>
                                                     @endif
                                                 </span>
-                                                <div class="d-flex align-items-center gap-1">
+                                                <div class="d-flex align-items-center gap-1 flex-wrap">
+                                                    @if($subOrderPaid)
+                                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0.5 px-1.5" style="font-size: 0.65rem;">
+                                                            <i class="bi bi-check-circle-fill me-0.5"></i> Lunas {{ $subOrderMetode ? "($subOrderMetode)" : '' }}
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-danger text-white border border-danger py-0.5 px-1.5 fw-bold" style="font-size: 0.65rem; box-shadow: 0 0 6px rgba(220,53,69,0.4);">
+                                                            <i class="bi bi-exclamation-circle-fill me-0.5"></i> Belum Lunas (Rp {{ number_format($subOrderTotal, 0, ',', '.') }})
+                                                        </span>
+                                                    @endif
+
                                                     @if($subOrder->status === 'pending')
-                                                        <span class="badge bg-warning text-dark py-0 px-1.5" style="font-size: 0.65rem;">Pending</span>
+                                                        <span class="badge bg-warning text-dark py-0.5 px-1.5" style="font-size: 0.65rem;">Pending</span>
                                                     @elseif($subOrder->status === 'processing')
-                                                        <span class="badge bg-primary py-0 px-1.5" style="font-size: 0.65rem;">Dimasak</span>
+                                                        <span class="badge bg-primary py-0.5 px-1.5" style="font-size: 0.65rem;">Dimasak</span>
                                                     @endif
                                                     <span class="text-white-50" style="font-size: 0.7rem;">{{ $subOrder->created_at->format('H:i') }} WIB</span>
                                                 </div>
@@ -121,10 +138,21 @@
                                     </tr>
                                 @endif
                                 @foreach($subOrder->detail_pesanan as $item)
-                                    <tr>
-                                        <td class="text-white-50" style="width: 30px; vertical-align: top;">{{ $item->jumlah }}x</td>
+                                    <tr style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.08); border-left: 3px solid #dc3545;' : '' }}">
+                                        <td class="text-white-50 ps-2" style="width: 30px; vertical-align: top;">{{ $item->jumlah }}x</td>
                                         <td class="fw-medium">
-                                            {{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}
+                                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                                <span>{{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}</span>
+                                                @if(!$subOrderPaid)
+                                                    <span class="badge bg-danger text-white py-0 px-1.5 fw-bold" style="font-size: 0.62rem; line-height: 1.3;">
+                                                        <i class="bi bi-x-circle me-0.5"></i> Belum Bayar
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 py-0 px-1" style="font-size: 0.62rem; line-height: 1.3;">
+                                                        <i class="bi bi-check2 me-0.5"></i> Lunas
+                                                    </span>
+                                                @endif
+                                            </div>
                                             @if($item->selected_variants)
                                                 @php 
                                                     $variants = json_decode($item->selected_variants, true); 
@@ -141,7 +169,7 @@
                                                 <div class="small text-danger fst-italic"><i class="bi bi-chat-text me-1"></i>Catatan: {{ $item->catatan }}</div>
                                             @endif
                                         </td>
-                                        <td class="text-end text-white-50" style="vertical-align: top;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                        <td class="text-end text-white-50 pe-2" style="vertical-align: top;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
                             @endforeach
@@ -171,6 +199,22 @@
                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"><i class="bi bi-x-circle"></i> Belum Lunas (Rp {{ number_format($cardData->unpaid_amount, 0, ',', '.') }})</span>
                     @endif
                 </div>
+
+                @if($cardData->is_grouped && !$cardData->all_paid)
+                    @php
+                        $unpaidOrderList = $cardData->orders->filter(fn($o) => !($o->pembayaran && $o->pembayaran->status === 'paid'));
+                    @endphp
+                    @if($unpaidOrderList->isNotEmpty())
+                        <div class="small text-danger fw-semibold mb-2 text-end" style="font-size: 0.75rem;">
+                            <i class="bi bi-info-circle-fill me-1"></i> Belum lunas dari pesanan: 
+                            <strong>
+                                @foreach($unpaidOrderList as $uOrd)
+                                    #{{ $uOrd->id }}{{ !$loop->last ? ', ' : '' }}
+                                @endforeach
+                            </strong>
+                        </div>
+                    @endif
+                @endif
 
                 @if($cardData->tipe_pesanan === 'dine_in' && !$cardData->all_paid && $cardData->total_uang_diterima > 0)
                     <div class="p-2 mb-3 rounded-3" style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35);">

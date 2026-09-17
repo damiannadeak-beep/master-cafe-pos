@@ -39,7 +39,7 @@
                     <div class="d-flex align-items-center gap-1">
                         @if($subPaid)
                             <span class="badge bg-success bg-opacity-25 text-success border border-success" style="font-size: 0.7rem;">
-                                <i class="bi bi-check-circle me-1"></i>Lunas ({{ strtoupper($subOrder->pembayaran->metode ?? 'QRIS') }}
+                                <i class="bi bi-check-circle me-1"></i>Lunas ({{ strtoupper($subOrder->pembayaran->metode ?? 'QRIS') }})
                             </span>
                         @else
                             <span class="badge bg-danger bg-opacity-25 text-danger border border-danger" style="font-size: 0.7rem;">
