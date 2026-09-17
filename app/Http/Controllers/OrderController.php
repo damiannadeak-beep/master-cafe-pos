@@ -347,56 +347,50 @@ class OrderController extends Controller
 
         // Cari semua pesanan terkait dalam sesi yang sama (Dine-In per Meja, Takeaway per Nomor HP)
         $activeTableOrders = collect([$pesanan]);
+        $currentGuestName = trim($pesanan->guest_name ?? '');
+        $cleanPhone = !empty($pesanan->guest_phone) ? preg_replace('/[^0-9]/', '', $pesanan->guest_phone) : null;
         $orderDate = $pesanan->created_at ? $pesanan->created_at->toDateString() : now()->toDateString();
         $orderTime = $pesanan->created_at ?: now();
 
-        if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
-            $currentGuestName = trim($pesanan->guest_name ?? '');
+        $otherOrdersQuery = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
+            ->whereDate('created_at', $orderDate)
+            ->where('created_at', '>=', $orderTime->copy()->subHours(3))
+            ->where('created_at', '<=', $orderTime->copy()->addHours(3))
+            ->whereNotIn('status', ['cancelled', 'void'])
+            ->where('id', '!=', $pesanan->id);
 
-            $otherOrdersQuery = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
-                ->where('id_meja', $pesanan->id_meja)
-                ->whereDate('created_at', $orderDate)
-                ->where('created_at', '>=', $orderTime->copy()->subHours(3))
-                ->where('created_at', '<=', $orderTime->copy()->addHours(3))
-                ->whereNotIn('status', ['cancelled', 'void'])
-                ->where('id', '!=', $pesanan->id);
+        $otherOrdersQuery->where(function ($q) use ($pesanan, $currentGuestName, $cleanPhone) {
+            // 1. Jika pengguna login
+            if (auth()->check() && auth()->id()) {
+                $q->orWhere('id_konsumen', auth()->id());
+            }
 
-            // Filter Guest Name jika ada nama tamu spesifik agar sesi tamu tidak tertukar
-            if (!empty($currentGuestName)) {
-                $otherOrdersQuery->whereRaw("LOWER(TRIM(COALESCE(guest_name, ''))) = ?", [strtolower($currentGuestName)]);
-            } else {
-                $otherOrdersQuery->where(function ($q) {
-                    $q->whereNull('guest_name')
-                      ->orWhere('guest_name', '');
+            // 2. Berdasarkan nomor telepon tamu (Takeaway maupun Dine-In)
+            if (!empty($cleanPhone)) {
+                $q->orWhere('guest_phone', $pesanan->guest_phone)
+                  ->orWhereRaw("REGEXP_REPLACE(COALESCE(guest_phone, ''), '[^0-9]', '') = ?", [$cleanPhone]);
+            }
+
+            // 3. Berdasarkan meja yang sama
+            if (!empty($pesanan->id_meja)) {
+                $q->orWhere(function ($sub) use ($pesanan, $currentGuestName) {
+                    $sub->where('id_meja', $pesanan->id_meja);
+                    if (!empty($currentGuestName)) {
+                        $sub->whereRaw("LOWER(TRIM(COALESCE(guest_name, ''))) = ?", [strtolower($currentGuestName)]);
+                    }
                 });
             }
 
-            $otherOrders = $otherOrdersQuery->orderBy('id', 'asc')->get();
-
-            if ($otherOrders->isNotEmpty()) {
-                $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
+            // 4. Berdasarkan nama tamu yang sama (menggabungkan Dine-In dan Takeaway dalam sesi yang sama)
+            if (!empty($currentGuestName) && !str_starts_with(strtolower($currentGuestName), 'tamu meja')) {
+                $q->orWhereRaw("LOWER(TRIM(COALESCE(guest_name, ''))) = ?", [strtolower($currentGuestName)]);
             }
-        } elseif ($pesanan->tipe_pesanan === 'takeaway' && !empty($pesanan->guest_phone)) {
-            $cleanPhone = preg_replace('/[^0-9]/', '', $pesanan->guest_phone);
-            if (!empty($cleanPhone)) {
-                $otherOrders = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'meja', 'rating'])
-                    ->where('tipe_pesanan', 'takeaway')
-                    ->whereDate('created_at', $orderDate)
-                    ->where('created_at', '>=', $orderTime->copy()->subHours(3))
-                    ->where('created_at', '<=', $orderTime->copy()->addHours(3))
-                    ->where(function($q) use ($cleanPhone, $pesanan) {
-                        $q->where('guest_phone', $pesanan->guest_phone)
-                          ->orWhereRaw("REGEXP_REPLACE(guest_phone, '[^0-9]', '') = ?", [$cleanPhone]);
-                    })
-                    ->whereNotIn('status', ['cancelled', 'void'])
-                    ->where('id', '!=', $pesanan->id)
-                    ->orderBy('id', 'asc')
-                    ->get();
+        });
 
-                if ($otherOrders->isNotEmpty()) {
-                    $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
-                }
-            }
+        $otherOrders = $otherOrdersQuery->orderBy('id', 'asc')->get();
+
+        if ($otherOrders->isNotEmpty()) {
+            $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
         }
 
         return view('konsumen.tracking', compact('pesanan', 'pembayaran', 'meja', 'activeTableOrders'));

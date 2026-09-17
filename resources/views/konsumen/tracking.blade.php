@@ -23,23 +23,29 @@
     $serverOrdersList = [];
     if (isset($activeTableOrders) && $activeTableOrders->count() > 0) {
         foreach ($activeTableOrders as $act) {
+            $actLabel = ($act->tipe_pesanan === 'takeaway')
+                ? 'Bungkus'
+                : ($act->meja ? 'Meja ' . $act->meja->nama_meja_atau_nomor : ($meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Meja'));
             $serverOrdersList[] = [
                 'token' => $act->order_token,
                 'id' => $act->id,
-                'label' => $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Takeaway',
+                'label' => $actLabel,
                 'type' => $act->tipe_pesanan,
                 'status' => $act->status,
-                'time' => $act->created_at->timestamp * 1000
+                'time' => $act->created_at ? $act->created_at->timestamp * 1000 : now()->timestamp * 1000
             ];
         }
     } else {
+        $actLabel = ($pesanan->tipe_pesanan === 'takeaway')
+            ? 'Bungkus'
+            : ($meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Meja');
         $serverOrdersList[] = [
             'token' => $pesanan->order_token,
             'id' => $pesanan->id,
-            'label' => $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Takeaway',
+            'label' => $actLabel,
             'type' => $pesanan->tipe_pesanan,
             'status' => $pesanan->status,
-            'time' => $pesanan->created_at->timestamp * 1000
+            'time' => $pesanan->created_at ? $pesanan->created_at->timestamp * 1000 : now()->timestamp * 1000
         ];
     }
 @endphp

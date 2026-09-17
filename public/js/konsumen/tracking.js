@@ -83,18 +83,32 @@
 
             orders.forEach(ord => {
                 const isCurrent = (ord.token === orderToken);
+                const isTakeaway = (ord.type === 'takeaway');
                 const pill = document.createElement('a');
                 pill.href = '/tracking/' + ord.token;
-                pill.className = 'btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1 btn-touch ' +
+                pill.className = 'btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 btn-touch ' +
                     (isCurrent ? 'text-white' : 'btn-outline-secondary text-light');
                 pill.style.fontSize = '0.78rem';
+                
+                let statusBadge = '';
+                if (ord.status === 'processing') {
+                    statusBadge = '<span class="badge bg-primary py-0 px-1 ms-1" style="font-size: 0.65rem;">Dimasak</span>';
+                } else if (ord.status === 'completed') {
+                    statusBadge = '<span class="badge bg-success py-0 px-1 ms-1" style="font-size: 0.65rem;">Selesai</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-warning text-dark py-0 px-1 ms-1" style="font-size: 0.65rem;">Menunggu</span>';
+                }
+
+                const iconClass = isCurrent ? 'bi-check-circle-fill' : (isTakeaway ? 'bi-bag' : 'bi-geo-alt');
+                const activeBadge = isCurrent ? '<span class="badge bg-dark bg-opacity-50 text-white ms-1" style="font-size: 0.65rem;">Aktif</span>' : '';
+
                 if (isCurrent) {
                     pill.style.background = 'var(--gradient-bronze)';
                     pill.style.border = 'none';
-                    pill.innerHTML = `<i class="bi bi-check-circle-fill"></i> Order #${ord.id} (${ord.label || 'Aktif'}) <span class="badge bg-dark bg-opacity-50 ms-1">Sedang Dilihat</span>`;
-                } else {
-                    pill.innerHTML = `<i class="bi bi-receipt"></i> Order #${ord.id} (${ord.label || 'Antrean'}) <i class="bi bi-arrow-right-short"></i>`;
+                    pill.style.boxShadow = '0 2px 8px rgba(192,142,92,0.4)';
                 }
+                
+                pill.innerHTML = `<i class="bi ${iconClass}"></i> <span>${ord.label || 'Pesanan'} (#${ord.id})</span>${statusBadge}${activeBadge}`;
                 pillsContainer.appendChild(pill);
             });
         } else {

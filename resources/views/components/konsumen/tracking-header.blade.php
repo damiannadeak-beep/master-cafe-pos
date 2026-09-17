@@ -1,48 +1,143 @@
-{{-- Multi-Order Switcher Bar (Jika pelanggan memiliki lebih dari 1 pesanan aktif) --}}
+{{-- Multi-Order Switcher Bar (Accordion / Buka-Tutup agar hemat ruang) --}}
 @if(isset($activeTableOrders) && $activeTableOrders->count() > 1)
-    <div class="card tracking-card shadow-sm p-3 mb-3" style="border: 1px solid rgba(192, 142, 92, 0.4) !important; background: linear-gradient(135deg, rgba(192, 142, 92, 0.12) 0%, rgba(22, 27, 34, 0.95) 100%);">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-            <span class="text-white small fw-bold">
-                <i class="bi bi-layers-fill me-1 text-warning"></i> Anda Memiliki <strong>{{ $activeTableOrders->count() }} Pesanan Aktif</strong> di {{ $meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Antrean' }}:
-            </span>
-            <span class="badge rounded-pill bg-warning text-dark fw-bold px-2 py-1" style="font-size: 0.72rem;">
-                {{ $activeTableOrders->count() }} Pesanan
-            </span>
+    <div class="card tracking-card shadow-sm mb-3 rounded-4 overflow-hidden" style="border: 1px solid rgba(192, 142, 92, 0.4) !important; background: linear-gradient(135deg, rgba(192, 142, 92, 0.12) 0%, rgba(22, 27, 34, 0.95) 100%);">
+        <!-- Header Strip Accordion (Bisa Diklik untuk Buka / Tutup) -->
+        <div class="p-3 cursor-pointer d-flex justify-content-between align-items-center" 
+             onclick="toggleMultiOrderAccordion()" 
+             style="cursor: pointer; user-select: none;"
+             title="Klik untuk membuka/menutup daftar pesanan">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <div class="rounded-circle p-1.5 d-flex align-items-center justify-content-center flex-shrink-0" style="background: rgba(192, 142, 92, 0.2); width: 34px; height: 34px;">
+                    <i class="bi bi-layers-fill" style="color: #c08e5c; font-size: 1.05rem;"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="text-white small fw-bold" style="font-family: 'Outfit', sans-serif;">Daftar Pesanan Anda</span>
+                        <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(192, 142, 92, 0.25); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.4);">
+                            {{ $activeTableOrders->count() }} Pesanan
+                        </span>
+                    </div>
+                    <small class="text-white-50 text-truncate d-block" style="font-size: 0.74rem;">
+                        Sedang Dilihat: <strong>#{{ $pesanan->id }}</strong> ({{ $pesanan->tipe_pesanan === 'takeaway' ? 'Bawa Pulang / Bungkus' : 'Dine In Meja ' . ($meja->nama_meja_atau_nomor ?? '') }})
+                    </small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1 text-white-50 small flex-shrink-0 ms-2">
+                <span id="multi-order-toggle-text" style="font-size: 0.78rem;">Buka</span>
+                <i class="bi bi-chevron-down" id="multi-order-chevron-icon" style="transition: transform 0.3s ease; font-size: 0.85rem;"></i>
+            </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            @foreach($activeTableOrders as $idx => $actOrd)
-                @php $isCurrent = ($actOrd->id === $pesanan->id); @endphp
-                <a href="{{ url('/tracking/' . $actOrd->order_token) }}" 
-                   class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 btn-touch {{ $isCurrent ? 'text-white' : 'btn-outline-secondary text-light' }}"
-                   style="font-size: 0.8rem; {{ $isCurrent ? 'background: var(--gradient-bronze); border: none; box-shadow: 0 2px 8px rgba(192,142,92,0.4);' : '' }}">
-                    <i class="bi {{ $isCurrent ? 'bi-check-circle-fill' : 'bi-receipt' }}"></i>
-                    <span>{{ $idx === 0 ? 'Pesanan Awal' : 'Tambahan' }} (#{{ $actOrd->id }})</span>
-                    @if($actOrd->status === 'processing')
-                        <span class="badge bg-primary py-0 px-1 ms-1" style="font-size: 0.65rem;">Dimasak</span>
-                    @elseif($actOrd->status === 'completed')
-                        <span class="badge bg-success py-0 px-1 ms-1" style="font-size: 0.65rem;">Selesai</span>
-                    @else
-                        <span class="badge bg-warning text-dark py-0 px-1 ms-1" style="font-size: 0.65rem;">Menunggu</span>
-                    @endif
-                    @if($isCurrent)
-                        <span class="badge bg-dark bg-opacity-50 text-white-50 ms-1" style="font-size: 0.65rem;">Sedang Dilihat</span>
-                    @endif
-                </a>
-            @endforeach
+
+        <!-- Accordion Body (Collapsible Pills) -->
+        <div id="multiOrderCollapse" style="max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease; opacity: 0;">
+            <div class="px-3 pb-3 pt-2 border-top border-secondary border-opacity-25" style="background: rgba(14, 18, 23, 0.65);">
+                <small class="text-secondary d-block mb-2" style="font-size: 0.73rem;">
+                    <i class="bi bi-hand-index-thumb me-1 text-warning"></i> Ketuk pesanan untuk beralih dan melihat rinciannya:
+                </small>
+                <div class="d-flex gap-2 flex-wrap">
+                    @foreach($activeTableOrders as $idx => $actOrd)
+                        @php 
+                            $isCurrent = ($actOrd->id === $pesanan->id); 
+                            $isTakeaway = ($actOrd->tipe_pesanan === 'takeaway');
+                        @endphp
+                        <a href="{{ url('/tracking/' . $actOrd->order_token) }}" 
+                           class="btn btn-sm rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 btn-touch {{ $isCurrent ? 'text-white' : 'btn-outline-secondary text-light' }}"
+                           style="font-size: 0.78rem; {{ $isCurrent ? 'background: var(--gradient-bronze); border: none; box-shadow: 0 2px 8px rgba(192,142,92,0.4);' : '' }}">
+                            <i class="bi {{ $isCurrent ? 'bi-check-circle-fill' : ($isTakeaway ? 'bi-bag' : 'bi-geo-alt') }}"></i>
+                            <span>
+                                @if($isTakeaway)
+                                    Bungkus (#{{ $actOrd->id }})
+                                @else
+                                    Meja {{ $actOrd->meja->nama_meja_atau_nomor ?? '1' }} (#{{ $actOrd->id }})
+                                @endif
+                            </span>
+
+                            @if($actOrd->status === 'processing')
+                                <span class="badge bg-primary py-0 px-1 ms-1" style="font-size: 0.65rem;">Dimasak</span>
+                            @elseif($actOrd->status === 'completed')
+                                <span class="badge bg-success py-0 px-1 ms-1" style="font-size: 0.65rem;">Selesai</span>
+                            @else
+                                <span class="badge bg-warning text-dark py-0 px-1 ms-1" style="font-size: 0.65rem;">Menunggu</span>
+                            @endif
+
+                            @if($isCurrent)
+                                <span class="badge bg-dark bg-opacity-50 text-white ms-1" style="font-size: 0.65rem;">Aktif</span>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        let isMultiOrderOpen = false;
+        function toggleMultiOrderAccordion() {
+            const collapse = document.getElementById('multiOrderCollapse');
+            const chevron = document.getElementById('multi-order-chevron-icon');
+            const text = document.getElementById('multi-order-toggle-text');
+            if (!collapse) return;
+
+            if (isMultiOrderOpen) {
+                collapse.style.maxHeight = '0';
+                collapse.style.opacity = '0';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+                if (text) text.innerText = 'Buka';
+                isMultiOrderOpen = false;
+            } else {
+                collapse.style.maxHeight = '60vh';
+                collapse.style.opacity = '1';
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+                if (text) text.innerText = 'Tutup';
+                isMultiOrderOpen = true;
+            }
+        }
+    </script>
 @else
-    <div id="multi-order-switcher-bar" class="card tracking-card shadow-sm p-3 mb-3" style="display: none; border: 1px solid rgba(192, 142, 92, 0.35) !important;">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-            <span class="text-white small fw-bold">
-                <i class="bi bi-receipt-cutoff me-1" style="color: #c08e5c;"></i> Pesanan Aktif Anda di Kafe:
-            </span>
-            <span class="badge rounded-pill" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c;" id="multi-order-count-badge"></span>
+    <div id="multi-order-switcher-bar" class="card tracking-card shadow-sm mb-3 rounded-4 overflow-hidden" style="display: none; border: 1px solid rgba(192, 142, 92, 0.35) !important;">
+        <div class="p-3 cursor-pointer d-flex justify-content-between align-items-center" onclick="toggleMultiOrderAccordionClient()" style="cursor: pointer; user-select: none;">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-layers-fill" style="color: #c08e5c;"></i>
+                <span class="text-white small fw-bold">Daftar Pesanan Anda</span>
+                <span class="badge rounded-pill" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c;" id="multi-order-count-badge"></span>
+            </div>
+            <div class="d-flex align-items-center gap-1 text-white-50 small">
+                <span id="multi-order-client-toggle-text">Buka</span>
+                <i class="bi bi-chevron-down" id="multi-order-client-chevron-icon"></i>
+            </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap" id="multi-order-pills-container">
-            <!-- Dynamic Order Switcher Pills -->
+        <div id="multiOrderClientCollapse" style="max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0;">
+            <div class="px-3 pb-3 pt-2 border-top border-secondary border-opacity-25" style="background: rgba(14, 18, 23, 0.65);">
+                <div class="d-flex gap-2 flex-wrap" id="multi-order-pills-container">
+                    <!-- Dynamic Order Switcher Pills -->
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        let isMultiOrderClientOpen = false;
+        function toggleMultiOrderAccordionClient() {
+            const collapse = document.getElementById('multiOrderClientCollapse');
+            const chevron = document.getElementById('multi-order-client-chevron-icon');
+            const text = document.getElementById('multi-order-client-toggle-text');
+            if (!collapse) return;
+
+            if (isMultiOrderClientOpen) {
+                collapse.style.maxHeight = '0';
+                collapse.style.opacity = '0';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+                if (text) text.innerText = 'Buka';
+                isMultiOrderClientOpen = false;
+            } else {
+                collapse.style.maxHeight = '60vh';
+                collapse.style.opacity = '1';
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+                if (text) text.innerText = 'Tutup';
+                isMultiOrderClientOpen = true;
+            }
+        }
+    </script>
 @endif
 
 @if($pesanan->status === 'completed')
