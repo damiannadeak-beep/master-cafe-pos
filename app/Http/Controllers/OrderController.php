@@ -131,22 +131,6 @@ class OrderController extends Controller
 
             $orderToken = (string) \Illuminate\Support\Str::uuid();
 
-            // Jika meja ini masih memiliki pesanan lama yang SUDAH LUNAS (paid),
-            // otomatis selesaikan pesanan lama tersebut agar sesi lama tertutup rapi dan tidak tercampur dengan tamu baru ini.
-            if (!empty($id_meja) && $tipe_pesanan === 'dine_in') {
-                $oldPaidOrders = Pesanan::where('id_meja', $id_meja)
-                    ->whereIn('status', ['pending', 'processing'])
-                    ->whereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid');
-                    })
-                    ->get();
-
-                foreach ($oldPaidOrders as $oldOrd) {
-                    $oldOrd->update([
-                        'status' => 'completed'
-                    ]);
-                }
-            }
 
             // Buat Pesanan & Pembayaran Baru
             $pesanan = Pesanan::create([
