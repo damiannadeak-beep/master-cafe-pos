@@ -1,6 +1,9 @@
 @extends('layouts.app') 
 
 @section('content')
+@php
+    $effectiveTotal = (isset($cumulativeTableTotal) && $cumulativeTableTotal > 0) ? (int)$cumulativeTableTotal : (int)$pembayaran->total_bayar;
+@endphp
 <style>
     .upload-container {
         border: 2px dashed #21262d;
