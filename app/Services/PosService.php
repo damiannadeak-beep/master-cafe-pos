@@ -166,18 +166,35 @@ class PosService
             } else {
                 // Jika ada pesanan yang belum lunas
                 if (!empty($unpaidPreparedCashList)) {
-                    // Ambil nominal uang TERAKHIR yang dipilih tamu pada pesanan terbarunya,
-                    // karena pilihan terbaru mencerminkan uang riil yang dipegang tamu saat ini
-                    // (misal awalnya pilih 100k, lalu di pesanan berikutnya mengganti ke 50k).
-                    $nominalDisiapkan = end($unpaidPreparedCashList);
-                    if ($nominalDisiapkan >= $unpaidAmount) {
-                        $totalUangDiterima = (int) $nominalDisiapkan;
-                        $totalUangKembalian = (int) ($nominalDisiapkan - $unpaidAmount);
+                    $uniquePrepared = array_unique($unpaidPreparedCashList);
+                    // Jika semua pesanan memiliki nominal uang disiapkan yang SAMA (hasil sinkronisasi gabungan 'table' - Aturan 1)
+                    if (count($uniquePrepared) === 1) {
+                        $nominalDisiapkan = reset($uniquePrepared);
+                        if ($nominalDisiapkan >= $unpaidAmount) {
+                            $totalUangDiterima = (int) $nominalDisiapkan;
+                            $totalUangKembalian = (int) ($nominalDisiapkan - $unpaidAmount);
+                        } else {
+                            $totalUangDiterima = (int) $unpaidAmount;
+                            $totalUangKembalian = 0;
+                        }
                     } else {
-                        // Jika nominal yang disiapkan sebelumnya kurang dari total tagihan baru,
-                        // asumsikan uang pas sejumlah sisa tagihan belum lunas
-                        $totalUangDiterima = (int) $unpaidAmount;
-                        $totalUangKembalian = 0;
+                        // Jika masing-masing pesanan membayar sendiri (Split bill 'self' - Aturan 2)
+                        // Akumulasikan uang tunai & kembalian dari masing-masing pesanan di meja
+                        $sumDiterima = 0;
+                        $sumKembalian = 0;
+                        foreach ($ordersList as $ord) {
+                            if ($ord->pembayaran && $ord->pembayaran->status !== 'paid') {
+                                $ordTagihan = (float) (($ord->pembayaran && (float)$ord->pembayaran->total_bayar > 0)
+                                    ? $ord->pembayaran->total_bayar 
+                                    : ($ord->total - ($ord->discount_amount ?? 0)));
+                                $ordDiterima = (float) ($ord->pembayaran->uang_diterima ?? $ordTagihan);
+                                $ordKembalian = (float) ($ord->pembayaran->uang_kembalian ?? max(0, $ordDiterima - $ordTagihan));
+                                $sumDiterima += $ordDiterima;
+                                $sumKembalian += $ordKembalian;
+                            }
+                        }
+                        $totalUangDiterima = (int) $sumDiterima;
+                        $totalUangKembalian = (int) $sumKembalian;
                     }
                 } elseif ($hasCashUnpaid) {
                     $totalUangDiterima = (int) $unpaidAmount;
