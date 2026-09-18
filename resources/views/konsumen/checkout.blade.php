@@ -1,4 +1,4 @@
-﻿@extends('layouts.app') 
+@extends('layouts.app') 
 
 @section('content')
 @php
@@ -217,7 +217,7 @@
                                     </div>
 
                                     <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;" disabled>
-                                        ðŸ’µ Pesan & Bayar Tunai <i class="bi bi-arrow-right ms-1"></i>
+                                        <i class="bi bi-cash-stack me-1"></i> Pesan & Bayar Tunai <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
                                 </form>
                             </div>
