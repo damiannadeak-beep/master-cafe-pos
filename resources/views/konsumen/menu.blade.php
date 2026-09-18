@@ -32,7 +32,7 @@
         @include('components.konsumen.kategori-filter')
     </div>
     
-    <div class="row g-4">
+    <div class="row g-3 g-md-4 align-items-start">
         @include('components.konsumen.menu-card')
     </div>
     
