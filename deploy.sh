@@ -23,6 +23,7 @@ find storage bootstrap/cache -type d -exec chmod 755 {} \; 2>/dev/null || true
 find storage bootstrap/cache -type f -exec chmod 644 {} \; 2>/dev/null || true
 
 # 6. Refresh cache Laravel
+php artisan view:clear
 php artisan view:cache
 php artisan route:cache
 php artisan config:cache
