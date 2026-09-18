@@ -67,17 +67,18 @@
     </div>
 
     <!-- Daftar Menu -->
-    <div class="row g-4 align-items-stretch" id="menu-container">
+    <div class="row g-3 g-md-4 align-items-start" id="menu-container">
         @forelse($menus as $menu)
-        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}">
-            <div class="card h-100 shadow-lg border-0 rounded-4 overflow-hidden hover-lift" 
-                 onclick="openKatalogDetail({{ $loop->index }})"
-                 style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer;"
-                 title="Klik untuk melihat detail menu">
+        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" style="align-self: flex-start;">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card" 
+                 id="menu-card-{{ $loop->index }}"
+                 onclick="toggleMenuDetail({{ $loop->index }})"
+                 style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; align-self: flex-start;"
+                 title="Sentuh untuk melihat / menutup detail deskripsi">
                 <div class="position-relative">
                     <!-- Gambar -->
                     @if($menu->image)
-                        <div class="text-center w-100 p-3" style="background-color: #14171c; border-bottom: 1px solid #21262d; aspect-ratio: 4/3;">
+                        <div class="text-center w-100 p-2 p-md-3" style="background-color: #14171c; border-bottom: 1px solid #21262d; aspect-ratio: 4/3;">
                             <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='/images/logo.png';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
                         </div>
                     @else
@@ -123,19 +124,25 @@
                 </div>
                 
                 <div class="card-body p-3 p-md-4 d-flex flex-column">
-                    <h5 class="fw-bold mb-1 mb-md-2 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
+                    <h5 class="fw-bold mb-1 mb-md-2 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
                     <div class="mb-2">
                         <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
                             {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                         </span>
                     </div>
-                    <p class="flex-grow-1 mb-3 small" style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;" title="Klik kartu untuk membaca selengkapnya">
-                        {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
-                    </p>
+
+                    <!-- Area Deskripsi: Default ringkas 2 baris, saat ditekan memanjang ke bawah -->
+                    <div class="menu-desc-container mb-3">
+                        <p class="menu-desc-text small mb-0" id="desc-{{ $loop->index }}" 
+                           style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; line-height: 1.5; min-height: 2.4em; transition: color 0.3s ease;">
+                            {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
+                        </p>
+                    </div>
                     
                     <div class="mt-auto">
-                        <div class="text-center py-2 rounded-pill fw-bold" style="background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; font-size: 0.75rem; border: 1px solid rgba(192, 142, 92, 0.25);">
-                            <i class="bi bi-eye me-1"></i> Lihat Detail
+                        <div class="detail-toggle-btn text-center py-2 rounded-pill fw-bold" id="btn-detail-{{ $loop->index }}" style="background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; font-size: 0.75rem; border: 1px solid rgba(192, 142, 92, 0.25); transition: all 0.25s ease;">
+                            <i class="bi bi-chevron-down me-1" id="icon-detail-{{ $loop->index }}"></i> 
+                            <span id="text-detail-{{ $loop->index }}">Lihat Detail</span>
                         </div>
                     </div>
                 </div>
@@ -153,72 +160,12 @@
     </div>
 </div>
 
-<!-- Modal Detail Menu (Bottom Sheet di HP, Centered Glassmorphic Modal di Desktop) -->
-<div class="modal fade modal-bottom-sheet" id="katalogDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
-    <div class="modal-dialog modal-dialog-bottom-sheet" style="max-width: 420px; margin: auto;">
-        <div class="modal-content border-0 shadow-lg overflow-hidden" id="katalogModalContentBox" style="background-color: #161b22; display: flex; flex-direction: column; border-radius: 20px;">
-            
-            <!-- Area Header & Drag Handle (Bisa ditarik ke bawah untuk menutup di HP) -->
-            <div class="modal-drag-zone" id="katalogModalDragZone" style="cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;">
-                <div class="bottom-sheet-drag-handle-wrapper pt-3 pb-1 text-center">
-                    <div class="bottom-sheet-drag-handle" title="Tarik ke bawah untuk menutup"></div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center px-4 pt-3 pt-md-4 pb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" id="katalogModalCategory" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.35); color: #c08e5c; font-size: 0.75rem; letter-spacing: 0.05em; line-height: 1.2;">
-                            Kategori
-                        </span>
-                        <div id="katalogModalStockContainer"></div>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.85rem;"></button>
-                </div>
-            </div>
-
-            <div class="modal-body px-4 py-3" id="katalogModalScrollBody" style="overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: calc(88vh - 160px);">
-                <!-- Foto Menu -->
-                <div class="rounded-4 overflow-hidden mb-3 text-center position-relative" style="background: radial-gradient(circle at center, rgba(192, 142, 92, 0.08) 0%, #14171c 100%); border: 1px solid #21262d; max-height: 170px;">
-                    <img id="katalogModalImg" src="" alt="Menu Image" onerror="this.onerror=null; this.src='/images/logo.png';" style="width: 100%; height: 170px; object-fit: contain; padding: 12px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));">
-                    <div id="katalogModalPromoBadge" class="position-absolute top-0 end-0 m-2" style="display: none;">
-                        <span class="badge shadow-sm px-3 py-1 rounded-pill" style="background-color: #c08e5c; font-size: 0.75rem;"><i class="bi bi-tag-fill me-1"></i> Promo Spesial</span>
-                    </div>
-                </div>
-
-                <!-- Info Menu (Font Outfit Sans-Serif Modern) -->
-                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
-                    <h5 class="fw-bold text-white mb-0" id="katalogModalTitle" style="font-family: 'Outfit', sans-serif !important; font-size: 1.25rem;"></h5>
-                    <span class="fw-bold fs-4 text-nowrap" id="katalogModalPrice" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;"></span>
-                </div>
-
-                <!-- Deskripsi Lengkap dengan Jarak Lega -->
-                <div class="p-3 px-3 rounded-4 mb-2" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); max-height: 130px; overflow-y: auto;">
-                    <label class="text-secondary small fw-bold text-uppercase d-block mb-2" style="letter-spacing: 0.05em; font-size: 0.72rem;">Deskripsi Hidangan</label>
-                    <p class="text-white-50 mb-0" id="katalogModalDesc" style="font-size: 0.875rem; line-height: 1.6;"></p>
-                </div>
-            </div>
-
-            <!-- Footer Bawah Sticky -->
-            <div class="modal-footer border-top px-4 py-3" style="background-color: #161b22; border-color: rgba(255,255,255,0.08) !important; flex-shrink: 0; padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 16px));">
-                <div class="w-100 text-center">
-                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-white w-100" style="background: var(--gradient-bronze);">
-                        <i class="bi bi-bag-check me-1"></i> Pesan Takeaway
-                    </a>
-                    <p class="text-white-50 small mt-2 mb-0">
-                        <i class="bi bi-qr-code-scan me-1 text-warning"></i> Makan di tempat? Scan QR di meja Anda.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
 <style>
     .hover-lift {
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
     }
     .hover-lift:hover {
-        transform: translateY(-6px);
+        transform: translateY(-4px);
         box-shadow: 0 1.25rem 2.5rem rgba(0,0,0,0.4) !important;
         border-color: rgba(178, 122, 77, 0.5) !important;
     }
@@ -227,51 +174,51 @@
         background-color: #c08e5c !important;
         color: #ffffff !important;
     }
+
+    /* Menu Card Expand (Hanya kartu yang ditekan yang memanjang ke bawah) */
+    .katalog-menu-card {
+        will-change: height, transform;
+    }
+    .katalog-menu-card.is-expanded {
+        border-color: rgba(192, 142, 92, 0.7) !important;
+        background: linear-gradient(180deg, #161b22 0%, #1c222b 100%) !important;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55) !important;
+    }
+    .katalog-menu-card.is-expanded .menu-desc-text {
+        display: block !important;
+        -webkit-line-clamp: unset !important;
+        overflow: visible !important;
+        color: #e2e8f0 !important;
+        min-height: 0 !important;
+        line-height: 1.6 !important;
+    }
+    .katalog-menu-card.is-expanded .detail-toggle-btn {
+        background-color: rgba(192, 142, 92, 0.28) !important;
+        color: #f7d0a1 !important;
+        border-color: rgba(192, 142, 92, 0.6) !important;
+    }
 </style>
 
 <script>
-    const katalogMenus = @json($menus);
-    const promoIds = @json($promoMenuIds ?? []);
+    function toggleMenuDetail(index) {
+        const card = document.getElementById('menu-card-' + index);
+        const text = document.getElementById('text-detail-' + index);
+        const icon = document.getElementById('icon-detail-' + index);
+        if (!card) return;
 
-    function openKatalogDetail(index) {
-        const menu = katalogMenus[index];
-        if (!menu) return;
+        const isExpanded = card.classList.toggle('is-expanded');
 
-        document.getElementById('katalogModalTitle').innerText = menu.nama_menu;
-        document.getElementById('katalogModalPrice').innerText = (menu.is_dynamic_price || Number(menu.harga) === 0) ? 'Sesuai Timbangan' : 'Rp ' + Number(menu.harga).toLocaleString('id-ID');
-        document.getElementById('katalogModalDesc').innerText = menu.deskripsi || 'Hidangan istimewa racikan Master Cafe dengan kualitas bahan pilihan terbaik.';
-        
-        // Kategori
-        const catEl = document.getElementById('katalogModalCategory');
-        catEl.innerText = (menu.kategori ? menu.kategori.toUpperCase() : 'MENU');
-
-        // Gambar
-        const imgEl = document.getElementById('katalogModalImg');
-        imgEl.onerror = function() { this.onerror = null; this.src = '/images/logo.png'; };
-        imgEl.src = menu.image_url || (menu.image ? (menu.image.startsWith('http') ? menu.image : '/storage/' + menu.image) : '/images/logo.png');
-
-        // Promo badge
-        const promoEl = document.getElementById('katalogModalPromoBadge');
-        if (promoIds.includes(menu.id)) {
-            promoEl.style.display = 'block';
+        if (isExpanded) {
+            if (text) text.innerText = 'Tutup Detail';
+            if (icon) {
+                icon.className = 'bi bi-chevron-up me-1';
+            }
         } else {
-            promoEl.style.display = 'none';
+            if (text) text.innerText = 'Lihat Detail';
+            if (icon) {
+                icon.className = 'bi bi-chevron-down me-1';
+            }
         }
-
-        // Stok
-        const stockContainer = document.getElementById('katalogModalStockContainer');
-        if (menu.is_available) {
-            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-check-circle me-1"></i> Tersedia</span>`;
-        } else {
-            stockContainer.innerHTML = `<span class="badge py-2 px-3 rounded-pill fw-semibold" style="background-color: rgba(245, 101, 101, 0.15); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3); font-size: 0.75rem; line-height: 1.2;"><i class="bi bi-x-circle me-1"></i> Habis</span>`;
-        }
-
-        const modalEl = document.getElementById('katalogDetailModal');
-        let modal = bootstrap.Modal.getInstance(modalEl);
-        if (!modal) {
-            modal = new bootstrap.Modal(modalEl);
-        }
-        modal.show();
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -295,13 +242,12 @@
                 
                 menuItems.forEach(item => {
                     if (target === 'semua' || item.getAttribute('data-kategori') === target) {
-                        item.style.display = 'block';
-                        // Add a small animation effect
+                        item.style.display = '';
                         item.animate([
-                            { opacity: 0, transform: 'scale(0.95)' },
+                            { opacity: 0, transform: 'scale(0.96)' },
                             { opacity: 1, transform: 'scale(1)' }
                         ], {
-                            duration: 300,
+                            duration: 250,
                             easing: 'ease-out'
                         });
                     } else {
@@ -310,105 +256,6 @@
                 });
             });
         });
-
-        // Swipe Down gesture to close katalogDetailModal on mobile
-        const katalogModalEl = document.getElementById('katalogDetailModal');
-        const katalogDragZone = document.getElementById('katalogModalDragZone');
-        const katalogContentBox = document.getElementById('katalogModalContentBox');
-        const katalogScrollBody = document.getElementById('katalogModalScrollBody');
-
-        if (katalogModalEl && katalogDragZone && katalogContentBox) {
-            let startY = 0, currentY = 0, isDragging = false, startTime = 0;
-
-            function startDrag(y) {
-                if (window.innerWidth >= 768) return;
-                startY = y;
-                currentY = y;
-                startTime = Date.now();
-                isDragging = true;
-                katalogContentBox.style.transition = 'none';
-            }
-
-            function moveDrag(y) {
-                if (!isDragging) return;
-                currentY = y;
-                const deltaY = currentY - startY;
-                if (deltaY > 0) {
-                    katalogContentBox.style.transform = `translate3d(0, ${deltaY}px, 0)`;
-                } else {
-                    katalogContentBox.style.transform = `translate3d(0, ${deltaY * 0.2}px, 0)`;
-                }
-            }
-
-            function endDrag() {
-                if (!isDragging) return;
-                isDragging = false;
-                const deltaY = currentY - startY;
-                const duration = Date.now() - startTime;
-                const velocity = deltaY / Math.max(duration, 1);
-
-                katalogContentBox.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-
-                if (deltaY > 65 || (deltaY > 25 && velocity > 0.4)) {
-                    katalogContentBox.style.transform = 'translate3d(0, 100%, 0)';
-                    setTimeout(function() {
-                        const bsModal = bootstrap.Modal.getInstance(katalogModalEl);
-                        if (bsModal) bsModal.hide();
-                        katalogContentBox.style.transform = '';
-                        katalogContentBox.style.transition = '';
-                    }, 180);
-                } else {
-                    katalogContentBox.style.transform = 'translate3d(0, 0, 0)';
-                    setTimeout(function() {
-                        katalogContentBox.style.transform = '';
-                        katalogContentBox.style.transition = '';
-                    }, 250);
-                }
-            }
-
-            katalogDragZone.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientY), { passive: true });
-            katalogDragZone.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientY), { passive: true });
-            katalogDragZone.addEventListener('touchend', endDrag, { passive: true });
-            katalogDragZone.addEventListener('touchcancel', endDrag, { passive: true });
-
-            if (katalogScrollBody) {
-                let bodyTouchStartY = 0;
-                katalogScrollBody.addEventListener('touchstart', (e) => { bodyTouchStartY = e.touches[0].clientY; }, { passive: true });
-                katalogScrollBody.addEventListener('touchmove', (e) => {
-                    if (katalogScrollBody.scrollTop <= 0) {
-                        const touchY = e.touches[0].clientY;
-                        if (!isDragging && touchY - bodyTouchStartY > 15) startDrag(touchY);
-                        if (isDragging) moveDrag(touchY);
-                    }
-                }, { passive: true });
-                katalogScrollBody.addEventListener('touchend', () => { if (isDragging) endDrag(); }, { passive: true });
-            }
-
-            katalogDragZone.addEventListener('mousedown', (e) => {
-                startDrag(e.clientY);
-                function onMouseMove(ev) { moveDrag(ev.clientY); }
-                function onMouseUp() {
-                    endDrag();
-                    window.removeEventListener('mousemove', onMouseMove);
-                    window.removeEventListener('mouseup', onMouseUp);
-                }
-                window.addEventListener('mousemove', onMouseMove);
-                window.addEventListener('mouseup', onMouseUp);
-            });
-
-            const handleEl = katalogDragZone.querySelector('.bottom-sheet-drag-handle');
-            if (handleEl) {
-                handleEl.addEventListener('click', () => {
-                    const bsModal = bootstrap.Modal.getInstance(katalogModalEl);
-                    if (bsModal) bsModal.hide();
-                });
-            }
-
-            katalogModalEl.addEventListener('hidden.bs.modal', () => {
-                katalogContentBox.style.transform = '';
-                katalogContentBox.style.transition = '';
-            });
-        }
     });
 </script>
 @endsection
