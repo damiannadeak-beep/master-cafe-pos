@@ -240,9 +240,9 @@
         <!-- Kolom Pengaturan Geofencing GPS Meja -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
+                <div class="card-header text-white d-flex justify-content-between align-items-center py-3 border-0" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2 text-danger"></i>Proteksi Lokasi Pemesanan Meja (Geofencing GPS)</h5>
-                    <span class="badge {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'bg-success' : 'bg-secondary' }}">
+                    <span class="badge {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'bg-success' : 'bg-secondary' }}" id="geofenceStatusBadge">
                         {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'Proteksi Aktif' : 'Nonaktif' }}
                     </span>
                 </div>
@@ -261,24 +261,24 @@
                                 <label class="form-label fw-bold text-white mb-2">Pilih Status Proteksi GPS:</label>
                                 <div class="row g-2 mb-3">
                                     <div class="col-6">
-                                        <label class="card p-3 text-center border h-100 geofence-card-select" id="cardGeofenceOff" style="cursor: pointer; transition: all 0.2s ease; background-color: #0e1217;">
-                                            <input type="radio" name="geofence_active" value="0" class="d-none" id="radioGeofenceOff" onchange="setGeofenceMode('0')" {{ !isset($settings['geofence_active']) || $settings['geofence_active'] != '1' ? 'checked' : '' }}>
+                                        <div class="card p-3 text-center border h-100 geofence-card-select" id="cardGeofenceOff" onclick="window.setGeofenceMode('0')" style="cursor: pointer; transition: all 0.2s ease; background-color: #0e1217; user-select: none;">
+                                            <input type="radio" name="geofence_active" value="0" class="d-none" id="radioGeofenceOff" onchange="window.setGeofenceMode('0')" {{ !isset($settings['geofence_active']) || $settings['geofence_active'] != '1' ? 'checked' : '' }}>
                                             <div class="d-flex align-items-center justify-content-center mb-1">
                                                 <i class="bi bi-x-circle-fill fs-4 text-danger me-2"></i>
                                                 <span class="fw-bold fs-6 text-white">OFF (NONAKTIF)</span>
                                             </div>
                                             <small class="text-white-50" style="font-size: 0.75rem;">Bebas pesan dari mana saja (Untuk Testing)</small>
-                                        </label>
+                                        </div>
                                     </div>
                                     <div class="col-6">
-                                        <label class="card p-3 text-center border h-100 geofence-card-select" id="cardGeofenceOn" style="cursor: pointer; transition: all 0.2s ease; background-color: #0e1217;">
-                                            <input type="radio" name="geofence_active" value="1" class="d-none" id="radioGeofenceOn" onchange="setGeofenceMode('1')" {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'checked' : '' }}>
+                                        <div class="card p-3 text-center border h-100 geofence-card-select" id="cardGeofenceOn" onclick="window.setGeofenceMode('1')" style="cursor: pointer; transition: all 0.2s ease; background-color: #0e1217; user-select: none;">
+                                            <input type="radio" name="geofence_active" value="1" class="d-none" id="radioGeofenceOn" onchange="window.setGeofenceMode('1')" {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'checked' : '' }}>
                                             <div class="d-flex align-items-center justify-content-center mb-1">
                                                 <i class="bi bi-check-circle-fill fs-4 text-success me-2"></i>
                                                 <span class="fw-bold fs-6 text-white">ON (AKTIF)</span>
                                             </div>
                                             <small class="text-white-50" style="font-size: 0.75rem;">Wajib berada di kafe untuk pesan meja</small>
-                                        </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -337,7 +337,7 @@
         <!-- Kolom Pengaturan Kontak -->
         <div class="col-12 mt-4">
             <div class="card admin-card border-0 shadow-sm">
-                <div class="card-header text-white" style="background-color: #161b22; border: 1px solid #21262d !important;" py-3 border-0">
+                <div class="card-header text-white py-3 border-0" style="background-color: #161b22; border: 1px solid #21262d !important;">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2 text-warning"></i>Pengaturan Halaman Kontak</h5>
                 </div>
                 <div class="card-body">
@@ -452,25 +452,33 @@
 </div>
 
 <script>
-function setGeofenceMode(val) {
+window.setGeofenceMode = function(val) {
     const isValOn = (val === '1' || val === 1 || val === true);
     const cardOff = document.getElementById('cardGeofenceOff');
     const cardOn = document.getElementById('cardGeofenceOn');
     const radioOff = document.getElementById('radioGeofenceOff');
     const radioOn = document.getElementById('radioGeofenceOn');
     const banner = document.getElementById('geofenceStatusBanner');
+    const badge = document.getElementById('geofenceStatusBadge');
 
     if (isValOn) {
         if (radioOn) radioOn.checked = true;
+        if (radioOff) radioOff.checked = false;
         if (cardOn) {
             cardOn.style.setProperty('border-color', '#198754', 'important');
-            cardOn.style.setProperty('background-color', 'rgba(25, 135, 84, 0.15)', 'important');
+            cardOn.style.setProperty('background-color', 'rgba(25, 135, 84, 0.18)', 'important');
             cardOn.style.setProperty('border-width', '2px', 'important');
+            cardOn.style.setProperty('box-shadow', '0 0 15px rgba(25, 135, 84, 0.25)', 'important');
         }
         if (cardOff) {
             cardOff.style.setProperty('border-color', '#30363d', 'important');
             cardOff.style.setProperty('background-color', '#0e1217', 'important');
             cardOff.style.setProperty('border-width', '1px', 'important');
+            cardOff.style.setProperty('box-shadow', 'none', 'important');
+        }
+        if (badge) {
+            badge.className = 'badge bg-success';
+            badge.textContent = 'Proteksi Aktif';
         }
         if (banner) {
             banner.style.setProperty('background-color', 'rgba(25, 135, 84, 0.12)', 'important');
@@ -487,15 +495,22 @@ function setGeofenceMode(val) {
         }
     } else {
         if (radioOff) radioOff.checked = true;
+        if (radioOn) radioOn.checked = false;
         if (cardOff) {
             cardOff.style.setProperty('border-color', '#dc3545', 'important');
-            cardOff.style.setProperty('background-color', 'rgba(220, 53, 69, 0.15)', 'important');
+            cardOff.style.setProperty('background-color', 'rgba(220, 53, 69, 0.18)', 'important');
             cardOff.style.setProperty('border-width', '2px', 'important');
+            cardOff.style.setProperty('box-shadow', '0 0 15px rgba(220, 53, 69, 0.25)', 'important');
         }
         if (cardOn) {
             cardOn.style.setProperty('border-color', '#30363d', 'important');
             cardOn.style.setProperty('background-color', '#0e1217', 'important');
             cardOn.style.setProperty('border-width', '1px', 'important');
+            cardOn.style.setProperty('box-shadow', 'none', 'important');
+        }
+        if (badge) {
+            badge.className = 'badge bg-secondary';
+            badge.textContent = 'Nonaktif';
         }
         if (banner) {
             banner.style.setProperty('background-color', 'rgba(220, 53, 69, 0.1)', 'important');
@@ -511,30 +526,46 @@ function setGeofenceMode(val) {
             `;
         }
     }
+};
+
+window.initGeofenceAdmin = function() {
+    const radioOn = document.getElementById('radioGeofenceOn');
+    let isChecked = false;
+    if (radioOn) {
+        isChecked = radioOn.checked;
+    } else {
+        isChecked = {{ isset($settings['geofence_active']) && $settings['geofence_active'] == '1' ? 'true' : 'false' }};
+    }
+    if (typeof window.setGeofenceMode === 'function') {
+        window.setGeofenceMode(isChecked ? '1' : '0');
+    }
+};
+
+// Eksekusi inisialisasi langsung & pasang listener
+window.initGeofenceAdmin();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.initGeofenceAdmin);
 }
+window.addEventListener('admin:page-loaded', window.initGeofenceAdmin);
 
-document.addEventListener('DOMContentLoaded', function() {
-    const initialGeofenceVal = '{{ isset($settings["geofence_active"]) && $settings["geofence_active"] == "1" ? "1" : "0" }}';
-    setGeofenceMode(initialGeofenceVal);
-});
-
-function getCafeLocation() {
+window.getCafeLocation = function() {
     const status = document.getElementById('cafe-location-status');
     const latInput = document.getElementById('cafe_latitude');
     const lngInput = document.getElementById('cafe_longitude');
 
     if (!navigator.geolocation) {
-        status.innerHTML = "<span class='text-danger'>Geolocation tidak didukung oleh browser Anda.</span>";
+        if (status) status.innerHTML = "<span class='text-danger'>Geolocation tidak didukung oleh browser Anda.</span>";
         return;
     }
 
-    status.innerHTML = "<span class='text-primary'><span class='spinner-border spinner-border-sm me-1'></span> Mendeteksi lokasi GPS Anda...</span>";
+    if (status) status.innerHTML = "<span class='text-primary'><span class='spinner-border spinner-border-sm me-1'></span> Mendeteksi lokasi GPS Anda...</span>";
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            latInput.value = position.coords.latitude;
-            lngInput.value = position.coords.longitude;
-            status.innerHTML = "<span class='text-success'>Lokasi kafe berhasil didapatkan! (Akurasi: " + Math.round(position.coords.accuracy) + " meter)</span>";
+            if (latInput) latInput.value = position.coords.latitude;
+            if (lngInput) lngInput.value = position.coords.longitude;
+            if (status) status.innerHTML = "<span class='text-success'>Lokasi kafe berhasil didapatkan! (Akurasi: " + Math.round(position.coords.accuracy) + " meter)</span>";
         },
         (error) => {
             let msg = "";
@@ -544,29 +575,29 @@ function getCafeLocation() {
                 case error.TIMEOUT: msg = "Waktu pencarian lokasi habis."; break;
                 default: msg = "Terjadi kesalahan."; break;
             }
-            status.innerHTML = "<span class='text-danger'>" + msg + "</span>";
+            if (status) status.innerHTML = "<span class='text-danger'>" + msg + "</span>";
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-}
+};
 
-function getCurrentLocation() {
+window.getCurrentLocation = function() {
     const status = document.getElementById('location-status');
     const latInput = document.getElementById('warung_latitude');
     const lngInput = document.getElementById('warung_longitude');
 
     if (!navigator.geolocation) {
-        status.innerHTML = "<span class='text-danger'>Geolocation tidak didukung oleh browser Anda.</span>";
+        if (status) status.innerHTML = "<span class='text-danger'>Geolocation tidak didukung oleh browser Anda.</span>";
         return;
     }
 
-    status.innerHTML = "<span class='text-primary'>Mencari lokasi Anda...</span>";
+    if (status) status.innerHTML = "<span class='text-primary'>Mencari lokasi Anda...</span>";
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            latInput.value = position.coords.latitude;
-            lngInput.value = position.coords.longitude;
-            status.innerHTML = "<span class='text-success'>Lokasi berhasil didapatkan! (Akurasi: " + Math.round(position.coords.accuracy) + " meter)</span>";
+            if (latInput) latInput.value = position.coords.latitude;
+            if (lngInput) lngInput.value = position.coords.longitude;
+            if (status) status.innerHTML = "<span class='text-success'>Lokasi berhasil didapatkan! (Akurasi: " + Math.round(position.coords.accuracy) + " meter)</span>";
         },
         (error) => {
             let msg = "";
@@ -576,20 +607,21 @@ function getCurrentLocation() {
                 case error.TIMEOUT: msg = "Waktu pencarian lokasi habis."; break;
                 default: msg = "Terjadi kesalahan yang tidak diketahui."; break;
             }
-            status.innerHTML = "<span class='text-danger'>" + msg + "</span>";
+            if (status) status.innerHTML = "<span class='text-danger'>" + msg + "</span>";
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-}
+};
 
-function addSosmedRow() {
+window.addSosmedRow = function() {
     const container = document.getElementById('sosmed-container');
+    if (!container) return;
     const row = document.createElement('div');
     row.className = 'row g-2 mb-3 align-items-end sosmed-row';
     row.innerHTML = `
         <div class="col-md-3">
             <label class="form-label small fw-bold">Platform</label>
-            <select class="form-select text-white border-secondary  sosmed-platform" name="sosmed[platform][]" onchange="updateSosmedIcon(this)">
+            <select class="form-select text-white border-secondary sosmed-platform" name="sosmed[platform][]" onchange="window.updateSosmedIcon(this)">
                 <option value="Instagram" data-icon="bi-instagram">Instagram</option>
                 <option value="TikTok" data-icon="bi-tiktok">TikTok</option>
                 <option value="Facebook" data-icon="bi-facebook">Facebook</option>
@@ -608,20 +640,25 @@ function addSosmedRow() {
         </div>
         <div class="col-md-1 text-end">
             <input type="hidden" name="sosmed[icon][]" class="sosmed-icon-input" value="bi-link-45deg">
-            <button type="button" class="btn btn-outline-danger btn-icon" onclick="removeSosmedRow(this)" title="Hapus"><i class="bi bi-trash"></i></button>
+            <button type="button" class="btn btn-outline-danger btn-icon" onclick="window.removeSosmedRow(this)" title="Hapus"><i class="bi bi-trash"></i></button>
         </div>
     `;
     container.appendChild(row);
-}
+};
 
-function removeSosmedRow(button) {
-    button.closest('.sosmed-row').remove();
-}
+window.removeSosmedRow = function(button) {
+    if (button && button.closest('.sosmed-row')) {
+        button.closest('.sosmed-row').remove();
+    }
+};
 
-function updateSosmedIcon(select) {
-    const iconInput = select.closest('.sosmed-row').querySelector('.sosmed-icon-input');
+window.updateSosmedIcon = function(select) {
+    if (!select) return;
+    const iconInput = select.closest('.sosmed-row')?.querySelector('.sosmed-icon-input');
     const selectedOption = select.options[select.selectedIndex];
-    iconInput.value = selectedOption.getAttribute('data-icon');
-}
+    if (iconInput && selectedOption) {
+        iconInput.value = selectedOption.getAttribute('data-icon');
+    }
+};
 </script>
 @endsection
