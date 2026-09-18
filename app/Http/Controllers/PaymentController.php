@@ -125,7 +125,6 @@ class PaymentController extends Controller
         // Deteksi akumulasi tagihan meja jika ada pesanan sebelumnya yang belum dibayar
         $priorUnpaidTotal = 0;
         $priorOrders = collect([]);
-        $priorCashPrepared = null;
         if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
             $priorOrders = Pesanan::where('id_meja', $pesanan->id_meja)
                 ->where('id', '!=', $pesanan->id)
@@ -141,16 +140,13 @@ class PaymentController extends Controller
                     ? $prior->pembayaran->total_bayar
                     : ($prior->total - ($prior->discount_amount ?? 0)));
                 $priorUnpaidTotal += $priorTotal;
-                if ($prior->pembayaran && (float)($prior->pembayaran->uang_diterima ?? 0) > 0) {
-                    $priorCashPrepared = (float)$prior->pembayaran->uang_diterima;
-                }
             }
         }
         $cumulativeTableTotal = $priorUnpaidTotal + (float)$pembayaran->total_bayar;
 
         return view('konsumen.checkout', compact(
             'pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock', 'snapError',
-            'priorUnpaidTotal', 'cumulativeTableTotal', 'priorOrders', 'priorCashPrepared'
+            'priorUnpaidTotal', 'cumulativeTableTotal', 'priorOrders'
         ));
     }
 
@@ -241,11 +237,11 @@ class PaymentController extends Controller
         $pembayaran = $pesanan->pembayaran;
         if ($pembayaran && $pembayaran->status !== 'paid') {
             $totalTagihan = (float) $pembayaran->total_bayar;
-            $isUangPas = $request->boolean('is_uang_pas');
-            $nominalTunaiInput = $request->input('nominal_tunai');
+            $cashMode = $request->input('cash_mode', 'bayar_pas'); // 'kasir' atau 'bayar_pas'
+            $catatanCash = $request->input('catatan_cash', '');
 
             // Cek apakah meja memiliki tagihan aktif sebelumnya yang belum dibayar
-            $priorUnpaidTotal = 0;
+            $otherUnpaidOrders = collect([]);
             if ($pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja) {
                 $otherUnpaidOrders = Pesanan::where('id_meja', $pesanan->id_meja)
                     ->where('id', '!=', $pesanan->id)
@@ -255,64 +251,39 @@ class PaymentController extends Controller
                     })
                     ->with('pembayaran')
                     ->get();
-
-                foreach ($otherUnpaidOrders as $other) {
-                    $otherTotal = (float) (($other->pembayaran && (float)$other->pembayaran->total_bayar > 0)
-                        ? $other->pembayaran->total_bayar
-                        : ($other->total - ($other->discount_amount ?? 0)));
-                    $priorUnpaidTotal += $otherTotal;
-                }
             }
 
             $paymentScope = $request->input('payment_scope', 'self');
-            $cumulativeTableTotal = $priorUnpaidTotal + $totalTagihan;
 
-            if ($paymentScope === 'table' && $priorUnpaidTotal > 0) {
-                $targetTotal = $cumulativeTableTotal;
-            } else {
-                $targetTotal = $totalTagihan;
-                $paymentScope = 'self';
+            // Buat catatan untuk waitress/kasir
+            $catatanKembalian = $cashMode === 'kasir' 
+                ? 'Tamu akan datang ke kasir' 
+                : 'Bayar tunai di meja';
+            
+            if (!empty($catatanCash)) {
+                $catatanKembalian .= ' | Catatan: ' . $catatanCash;
             }
 
-            $uangDiterima = null;
-            $uangKembalian = 0;
-            $catatanKembalian = null;
-
-            if ($isUangPas) {
-                $uangDiterima = $targetTotal;
-                $uangKembalian = 0;
-                $catatanKembalian = ($paymentScope === 'table' && $priorUnpaidTotal > 0) 
-                    ? 'Uang Pas Seluruh Meja (Tanpa Kembalian)' 
-                    : 'Uang Pas (Tanpa Kembalian)';
-            } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
-                $uangDiterima = (float) $nominalTunaiInput;
-                if ($uangDiterima < $targetTotal) {
-                    $scopeLabel = ($paymentScope === 'table') ? 'total tagihan seluruh meja' : 'total tagihan pesanan Anda';
-                    return redirect()->back()->with('error', 'Nominal uang yang disiapkan (Rp ' . number_format($uangDiterima, 0, ',', '.') . ') tidak boleh kurang dari ' . $scopeLabel . ' (Rp ' . number_format($targetTotal, 0, ',', '.') . ').');
-                }
-                $uangKembalian = max(0, $uangDiterima - $targetTotal);
-                if ($uangKembalian > 0) {
-                    $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Siapkan Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
-                } else {
-                    $catatanKembalian = 'Uang Pas (Rp ' . number_format($uangDiterima, 0, ',', '.') . ')';
-                }
+            if ($paymentScope === 'table' && $otherUnpaidOrders->isNotEmpty()) {
+                $catatanKembalian .= ' [Gabung seluruh meja]';
             }
 
             $pembayaran->update([
                 'status' => 'unpaid',
                 'metode' => 'cash',
-                'uang_diterima' => $uangDiterima,
-                'uang_kembalian' => $uangKembalian,
+                'uang_diterima' => $totalTagihan, // Set = total tagihan (uang pas)
+                'uang_kembalian' => 0,
                 'catatan_kembalian' => $catatanKembalian,
             ]);
 
-            // HANYA sinkronkan ke pesanan lain di meja jika konsumen MEMILIH gabung bayar seluruh meja ('table')
-            if ($paymentScope === 'table' && $pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja && !empty($otherUnpaidOrders)) {
+            // Sinkronkan ke pesanan lain di meja jika scope 'table'
+            if ($paymentScope === 'table' && $pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja && $otherUnpaidOrders->isNotEmpty()) {
                 foreach ($otherUnpaidOrders as $other) {
                     if ($other->pembayaran && $other->pembayaran->status === 'unpaid') {
+                        $otherTotal = (float) $other->pembayaran->total_bayar;
                         $other->pembayaran->update([
-                            'uang_diterima' => $uangDiterima,
-                            'uang_kembalian' => $uangKembalian,
+                            'uang_diterima' => $otherTotal,
+                            'uang_kembalian' => 0,
                             'catatan_kembalian' => $catatanKembalian . ' [Digabung oleh ' . ($pesanan->guest_name ?: 'Pesanan #' . $pesanan->id) . ']',
                         ]);
                     }
@@ -335,10 +306,13 @@ class PaymentController extends Controller
             $namaMeja = $pesanan->meja ? $pesanan->meja->nama_meja_atau_nomor : 'Meja';
             
             $notifMsg = 'Pesanan Bayar Tunai: ' . $namaMeja . ' (' . $namaKonsumen . ') - Total Rp ' . number_format($pembayaran->total_bayar, 0, ',', '.');
-            if ($uangKembalian > 0) {
-                $notifMsg .= ' [SIAPKAN KEMBALIAN: Rp ' . number_format($uangKembalian, 0, ',', '.') . ' (Uang Tamu: Rp ' . number_format($uangDiterima, 0, ',', '.') . ')]';
-            } elseif ($uangDiterima) {
-                $notifMsg .= ' [Uang Pas]';
+            if ($cashMode === 'kasir') {
+                $notifMsg .= ' [TAMU DATANG KE KASIR]';
+            } else {
+                $notifMsg .= ' [BAYAR DI MEJA]';
+            }
+            if (!empty($catatanCash)) {
+                $notifMsg .= ' Catatan: ' . $catatanCash;
             }
 
             \App\Models\Notification::create([

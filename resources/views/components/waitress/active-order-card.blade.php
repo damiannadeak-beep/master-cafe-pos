@@ -262,21 +262,32 @@
                 @endif
 
                 @if($cardData->tipe_pesanan === 'dine_in' && !$cardData->all_paid && $cardData->total_uang_diterima > 0)
+                    @php
+                        // Ambil catatan dari pembayaran pertama yang unpaid
+                        $cashNote = '';
+                        $cashMode = 'bayar_pas';
+                        foreach ($cardData->orders as $ord) {
+                            if ($ord->pembayaran && $ord->pembayaran->status !== 'paid' && $ord->pembayaran->metode === 'cash') {
+                                $cashNote = $ord->pembayaran->catatan_kembalian ?? '';
+                                if (str_contains($cashNote, 'datang ke kasir')) {
+                                    $cashMode = 'kasir';
+                                }
+                                break;
+                            }
+                        }
+                    @endphp
                     <div class="p-2 mb-3 rounded-3" style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35);">
                         <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="badge bg-warning text-dark fw-bold"><i class="bi bi-cash-stack me-1"></i>BAYAR TUNAI DI MEJA</span>
-                            <small class="text-warning fw-bold">Siapkan Uang</small>
+                            <span class="badge bg-warning text-dark fw-bold"><i class="bi bi-cash-stack me-1"></i>BAYAR TUNAI</span>
+                            @if($cashMode === 'kasir')
+                                <span class="badge bg-info bg-opacity-25 text-info border border-info" style="font-size: 0.7rem;"><i class="bi bi-shop me-1"></i>Datang ke Kasir</span>
+                            @else
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success" style="font-size: 0.7rem;"><i class="bi bi-cash-coin me-1"></i>Bayar di Meja</span>
+                            @endif
                         </div>
-                        @if($cardData->total_uang_kembalian > 0)
-                            <div class="small text-white fw-bold">
-                                ⚠️ Siapkan Kembalian: <span class="text-warning fs-6">Rp {{ number_format($cardData->total_uang_kembalian, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="small text-white-50">
-                                (Tamu bayar uang: Rp {{ number_format($cardData->total_uang_diterima, 0, ',', '.') }})
-                            </div>
-                        @else
-                            <div class="small text-success fw-bold">
-                                ✅ Uang Pas: Rp {{ number_format($cardData->total_uang_diterima, 0, ',', '.') }} (Tanpa Kembalian)
+                        @if(!empty($cashNote))
+                            <div class="small text-white-50 mt-1" style="font-size: 0.78rem;">
+                                <i class="bi bi-chat-left-text me-1"></i> {{ $cashNote }}
                             </div>
                         @endif
                     </div>

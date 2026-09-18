@@ -1,42 +1,13 @@
-@extends('layouts.app') 
+﻿@extends('layouts.app') 
 
 @section('content')
 @php
     $selfTotal = (int)$pembayaran->total_bayar;
     $hasPriorUnpaid = isset($priorUnpaidTotal) && $priorUnpaidTotal > 0;
     $tableTotal = $hasPriorUnpaid ? (int)$cumulativeTableTotal : $selfTotal;
-    $priorCash = (isset($priorCashPrepared) && (float)$priorCashPrepared > 0) ? (float)$priorCashPrepared : null;
 
-    // Sesuai Aturan 1 & 2:
-    // Jika ada pesanan sebelumnya di meja yang belum lunas, default alami konsumen yang menambah pesanan
-    // adalah menggabungkan tagihan mejanya ('table'). Opsi pisah bill ('self') tetap bisa dipilih jika split bill.
     $defaultScope = $hasPriorUnpaid ? 'table' : 'self';
-    $effectiveInitialTotal = ($defaultScope === 'table') ? $tableTotal : $selfTotal;
-    $usePriorAsInitial = ($defaultScope === 'table' && $priorCash && $priorCash >= $tableTotal);
-    $initialNominalTunai = $usePriorAsInitial ? (int)$priorCash : $effectiveInitialTotal;
-    $initialIsUangPas = $usePriorAsInitial ? '0' : '1';
 @endphp
-<style>
-    .upload-container {
-        border: 2px dashed #21262d;
-        border-radius: 1rem;
-        padding: 2rem;
-        text-align: center;
-        background: #0e1217;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    .upload-container:hover {
-        border-color: #c08e5c;
-        background: #161b22;
-    }
-    .upload-preview {
-        max-height: 200px;
-        border-radius: 0.5rem;
-        display: none;
-        margin: 0 auto;
-    }
-</style>
 
 <div class="container mt-4 mb-5 pb-5">
     <div class="row justify-content-center">
@@ -145,12 +116,12 @@
 
                             @if(!empty($snapToken))
                                 <button id="pay-button" onclick="payWithSnap()" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
-                                    ⚡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
+                                    âš¡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                             @else
                                 @if(app()->isProduction())
                                     <div class="alert alert-warning small py-2 px-3 rounded-3 mb-0 text-start" style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.3); color: #feefc3; font-size: 0.85rem;">
-                                        <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> Pembayaran Online (Midtrans) tidak dapat dihubungi. Silakan pilih opsi <strong>Bayar Tunai di Meja</strong> di bawah ini.
+                                        <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> Pembayaran Online (Midtrans) tidak dapat dihubungi. Silakan pilih opsi <strong>Bayar Tunai</strong> di bawah ini.
                                     </div>
                                 @else
                                     <form action="{{ url('konsumen/order/' . $pesanan->id . '/simulate-midtrans-pay' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
@@ -159,7 +130,7 @@
                                             <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
                                         @endif
                                         <button type="submit" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
-                                            ⚡ [Simulasi Testing] Bayar Sekarang via QRIS <i class="bi bi-arrow-right ms-1"></i>
+                                            âš¡ [Simulasi Testing] Bayar Sekarang via QRIS <i class="bi bi-arrow-right ms-1"></i>
                                         </button>
                                     </form>
                                 @endif
@@ -172,15 +143,15 @@
                                 <small><i class="bi bi-shield-lock-fill me-1"></i> Pesanan Bawa Pulang (Takeaway) <strong>wajib dibayar lunas di depan</strong> via QRIS / E-Wallet / Virtual Account agar dapur dapat langsung memasak & membungkus pesanan Anda.</small>
                             </div>
                         @else
-                            <!-- Opsi 2: Pembayaran Tunai (Cash) Saat Makanan Diantar (Khusus Dine-In) -->
+                            <!-- Opsi 2: Pembayaran Tunai (Cash) - Pilih Mode -->
                             <div class="p-3 rounded-4 mb-3" style="background: #12161c; border: 1px solid rgba(255, 255, 255, 0.12);">
                                 <div class="d-flex align-items-center gap-3 mb-3">
                                     <div class="rounded-circle p-2 d-flex align-items-center justify-content-center bg-dark border border-secondary" style="width: 44px; height: 44px; color: #22c55e;">
                                         <i class="bi bi-cash-stack" style="font-size: 1.35rem;"></i>
                                     </div>
                                     <div>
-                                        <h6 class="text-white fw-bold mb-0">Bayar Tunai (Cash) di Meja</h6>
-                                        <small class="text-white-50">Waitress akan mengantar pesanan & menjemput pembayaran</small>
+                                        <h6 class="text-white fw-bold mb-0">Bayar Tunai (Cash)</h6>
+                                        <small class="text-white-50">Pilih cara Anda membayar secara tunai</small>
                                     </div>
                                 </div>
 
@@ -190,55 +161,63 @@
                                         <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
                                     @endif
                                     <input type="hidden" id="payment_scope" name="payment_scope" value="{{ $defaultScope }}">
-                                    <input type="hidden" id="is_uang_pas" name="is_uang_pas" value="{{ $initialIsUangPas }}">
-                                    <input type="hidden" id="nominal_tunai_raw" name="nominal_tunai" value="{{ $initialNominalTunai }}">
+                                    <input type="hidden" id="cash_mode" name="cash_mode" value="">
 
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <label class="form-label text-secondary small fw-bold mb-0">
-                                                <i class="bi bi-wallet2 me-1"></i> Siapkan Uang Pecahan Berapa?
-                                            </label>
-                                            <span id="scope-badge-indicator" class="badge {{ $defaultScope === 'table' ? 'bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50' : 'bg-success bg-opacity-25 text-success border border-success border-opacity-50' }}" style="font-size: 0.68rem;">
-                                                {{ $defaultScope === 'table' ? 'Seluruh Meja (Traktir / Tambah Menu)' : 'Hanya Pesanan Ini (Pisah Bill)' }}
-                                            </span>
-                                        </div>
-
-                                        <!-- Container Tombol Preset Pecahan Uang Tunai (Di-render Dinamis oleh JS) -->
-                                        <div id="cash-preset-buttons-container" class="d-flex flex-wrap gap-2 mb-2">
-                                            <!-- Buttons generated dynamically -->
-                                        </div>
-
-                                        <!-- Input Custom Nominal -->
-                                        <div id="custom-nominal-container" class="mt-2" style="display: none;">
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
-                                                <input type="number" id="custom_nominal_input" class="form-control bg-dark border-secondary text-white" placeholder="Contoh: 100000" min="{{ $selfTotal }}" step="1000" oninput="onCustomNominalChange(this.value)">
+                                    <!-- Pilihan Mode Cash -->
+                                    <div class="d-flex flex-column gap-2 mb-3">
+                                        <!-- Opsi A: Datang ke Kasir -->
+                                        <label class="p-3 rounded-3 border d-flex align-items-start gap-3 cash-mode-card" 
+                                               id="mode-card-kasir"
+                                               onclick="selectCashMode('kasir')"
+                                               style="cursor: pointer; background: rgba(255, 255, 255, 0.02); border-color: #21262d !important; transition: all 0.2s;">
+                                            <input type="radio" name="cash_mode_radio" id="radio-mode-kasir" value="kasir" class="form-check-input mt-1" style="cursor: pointer;">
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold text-white small d-flex align-items-center gap-2">
+                                                    <i class="bi bi-shop text-info"></i> Datang ke Kasir
+                                                </div>
+                                                <small class="text-white-50 d-block mt-1" style="font-size: 0.74rem;">Saya akan bayar langsung di meja kasir setelah makan / kapanpun siap</small>
                                             </div>
-                                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.75rem;">Ketik nominal uang kertas yang Anda siapkan.</small>
-                                        </div>
+                                        </label>
+
+                                        <!-- Opsi B: Bayar Pas di Meja -->
+                                        <label class="p-3 rounded-3 border d-flex align-items-start gap-3 cash-mode-card" 
+                                               id="mode-card-bayar_pas"
+                                               onclick="selectCashMode('bayar_pas')"
+                                               style="cursor: pointer; background: rgba(255, 255, 255, 0.02); border-color: #21262d !important; transition: all 0.2s;">
+                                            <input type="radio" name="cash_mode_radio" id="radio-mode-bayar_pas" value="bayar_pas" class="form-check-input mt-1" style="cursor: pointer;">
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold text-white small d-flex align-items-center gap-2">
+                                                    <i class="bi bi-cash-coin text-success"></i> Bayar Pas di Meja
+                                                </div>
+                                                <small class="text-white-50 d-block mt-1" style="font-size: 0.74rem;">Waitress akan mengantar pesanan & menjemput uang tunai di meja saya</small>
+                                            </div>
+                                        </label>
                                     </div>
 
-                                    <!-- Live Summary Kembalian -->
-                                    <div id="kembalian-card" class="p-3 rounded-3 mb-3" style="background: rgba(34, 197, 94, 0.08); border: 1px dashed rgba(34, 197, 94, 0.4);">
+                                    <!-- Catatan Opsional (Bawa Duit Berapa) -->
+                                    <div id="cash-note-container" class="mb-3" style="display: none;">
+                                        <label class="form-label small text-secondary fw-bold mb-1">
+                                            <i class="bi bi-pencil-square me-1"></i> Catatan Opsional
+                                        </label>
+                                        <input type="text" id="catatan_cash" name="catatan_cash" class="form-control bg-dark border-secondary text-white" 
+                                               placeholder="Contoh: Bawa duit 50rb, Minta kembalian, dll" 
+                                               maxlength="200"
+                                               style="font-size: 0.9rem;">
+                                        <small class="text-white-50 mt-1 d-block" style="font-size: 0.72rem;">Opsional: beri tahu waitress berapa uang yang Anda bawa atau catatan lainnya</small>
+                                    </div>
+
+                                    <!-- Info Tagihan -->
+                                    <div id="cash-summary-card" class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.04); border: 1px dashed rgba(255, 255, 255, 0.15); display: none;">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="text-white-50 small">Tagihan yang Dibayar:</span>
+                                            <span class="text-white-50 small">Total Tagihan:</span>
                                             <span id="label-tagihan-target" class="text-white fw-bold">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
                                         </div>
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="text-white-50 small">Uang yang disiapkan:</span>
-                                            <span id="label-uang-disiapkan" class="text-white fw-bold">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-white-50 small">Kembalian Waitress:</span>
-                                            <span id="label-kembalian" class="text-success fw-bold fs-6">Rp 0 (Uang Pas)</span>
-                                        </div>
-                                        <div id="kembalian-alert-msg" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-white-50" style="font-size: 0.75rem;">
-                                            <i class="bi bi-check-circle text-success me-1"></i> Waitress akan langsung membawakan pesanan ke meja Anda tanpa kembalian.
+                                        <div id="cash-mode-info" class="mt-2 pt-2 border-top border-secondary border-opacity-25 small" style="font-size: 0.8rem;">
                                         </div>
                                     </div>
 
-                                    <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;">
-                                        💵 Pesan & Bayar Tunai ke Waitress <i class="bi bi-arrow-right ms-1"></i>
+                                    <button type="submit" id="btn-submit-cash" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;" disabled>
+                                        ðŸ’µ Pesan & Bayar Tunai <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
                                 </form>
                             </div>
@@ -283,40 +262,8 @@
 @endif
 
 <script>
-    function previewFile(input) {
-        const file = input.files[0];
-        const preview = document.getElementById('preview-image');
-        const placeholder = document.getElementById('upload-placeholder');
-        const submitBtn = document.getElementById('btn-submit');
-        const uploadBox = document.getElementById('upload-box');
-        
-        if (file) {
-            if(file.size > 2 * 1024 * 1024) {
-                alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
-                input.value = '';
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                placeholder.style.display = 'none';
-                uploadBox.style.padding = '1rem';
-                submitBtn.disabled = false;
-            }
-            reader.readAsDataURL(file);
-        } else {
-            preview.style.display = 'none';
-            placeholder.style.display = 'block';
-            uploadBox.style.padding = '2rem';
-            submitBtn.disabled = true;
-        }
-    }
-
     const SELF_TOTAL = {{ (int)$selfTotal }};
     const TABLE_TOTAL = {{ (int)$tableTotal }};
-    const PRIOR_CASH_PREPARED = {{ $priorCash ? (int)$priorCash : 'null' }};
     let currentScope = '{{ $defaultScope }}';
     let TOTAL_TAGIHAN = (currentScope === 'table') ? TABLE_TOTAL : SELF_TOTAL;
 
@@ -333,7 +280,6 @@
         const cardTable = document.getElementById('scope-card-table');
         const radioSelf = document.getElementById('radio-scope-self');
         const radioTable = document.getElementById('radio-scope-table');
-        const badgeIndicator = document.getElementById('scope-badge-indicator');
 
         if (scope === 'table') {
             TOTAL_TAGIHAN = TABLE_TOTAL;
@@ -346,10 +292,6 @@
                 cardSelf.style.background = 'rgba(255, 255, 255, 0.02)';
                 cardSelf.style.borderColor = '#21262d !important';
             }
-            if (badgeIndicator) {
-                badgeIndicator.className = 'badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50';
-                badgeIndicator.innerText = 'Seluruh Meja (Traktir / Tambah Menu)';
-            }
         } else {
             TOTAL_TAGIHAN = SELF_TOTAL;
             if (radioSelf) radioSelf.checked = true;
@@ -361,231 +303,84 @@
                 cardTable.style.background = 'rgba(255, 255, 255, 0.02)';
                 cardTable.style.borderColor = '#21262d !important';
             }
-            if (badgeIndicator) {
-                badgeIndicator.className = 'badge bg-success bg-opacity-25 text-success border border-success border-opacity-50';
-                badgeIndicator.innerText = 'Hanya Pesanan Ini (Pisah Bill)';
-            }
         }
 
-        const labelTarget = document.getElementById('label-tagihan-target');
-        if (labelTarget) labelTarget.innerText = 'Rp ' + formatRupiah(TOTAL_TAGIHAN);
-
-        renderCashPresetButtons(TOTAL_TAGIHAN);
-    }
-
-    function renderCashPresetButtons(total) {
-        const container = document.getElementById('cash-preset-buttons-container');
-        if (!container) return;
-
-        const isUangPasInput = document.getElementById('is_uang_pas');
-        const nominalRawInput = document.getElementById('nominal_tunai_raw');
-        const customContainer = document.getElementById('custom-nominal-container');
-        const customInput = document.getElementById('custom_nominal_input');
-
-        // Aturan 1: Jika memilih bayar seluruh meja dan sebelumnya sudah ada uang tunai yang disiapkan
-        // dan uang tersebut cukup untuk menutup total tagihan gabungan
-        const canUsePriorCash = (currentScope === 'table' && PRIOR_CASH_PREPARED && PRIOR_CASH_PREPARED >= total);
-
-        let html = '';
-
-        if (canUsePriorCash) {
-            // Preset uang sebelumnya otomatis terpilih (Active)
-            html += `
-                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-success active" onclick="selectCashPreset('fixed', ${PRIOR_CASH_PREPARED}, this)">
-                    <i class="bi bi-arrow-repeat me-1"></i> Uang Sebelumnya (Rp ${formatRupiah(PRIOR_CASH_PREPARED)})
-                </button>
-            `;
-            html += `
-                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('pas', ${total}, this)">
-                    <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${formatRupiah(total)})
-                </button>
-            `;
-        } else {
-            // Default Uang Pas terpilih
-            html += `
-                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-success active" onclick="selectCashPreset('pas', ${total}, this)">
-                    <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${formatRupiah(total)})
-                </button>
-            `;
-        }
-
-        if (total < 50000 && (!canUsePriorCash || PRIOR_CASH_PREPARED !== 50000)) {
-            html += `
-                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('fixed', 50000, this)">
-                    Rp 50.000
-                </button>
-            `;
-        }
-
-        if (total < 100000 && total !== 50000 && (!canUsePriorCash || PRIOR_CASH_PREPARED !== 100000)) {
-            html += `
-                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('fixed', 100000, this)">
-                    Rp 100.000
-                </button>
-            `;
-        }
-
-        let nextCeil = total > 100000 ? Math.ceil((total + 1000) / 50000) * 50000 : null;
-        if (total > 100000 && nextCeil && (!canUsePriorCash || PRIOR_CASH_PREPARED !== nextCeil)) {
-            html += `
-                <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('fixed', ${nextCeil}, this)">
-                    Rp ${formatRupiah(nextCeil)}
-                </button>
-            `;
-        }
-
-        html += `
-            <button type="button" class="btn btn-sm cash-preset-btn rounded-pill px-3 py-2 fw-bold btn-outline-secondary" onclick="selectCashPreset('custom', 0, this)">
-                <i class="bi bi-pencil me-1"></i> Nominal Lain
-            </button>
-        `;
-
-        container.innerHTML = html;
-
-        if (customContainer) customContainer.style.display = 'none';
-        if (customInput) {
-            customInput.value = '';
-            customInput.min = total;
-        }
-
-        if (canUsePriorCash) {
-            if (isUangPasInput) isUangPasInput.value = '0';
-            if (nominalRawInput) nominalRawInput.value = PRIOR_CASH_PREPARED;
-            const kembalian = PRIOR_CASH_PREPARED - total;
-            updateKembalianUI(PRIOR_CASH_PREPARED, kembalian, false, false, false, true);
-        } else {
-            if (isUangPasInput) isUangPasInput.value = '1';
-            if (nominalRawInput) nominalRawInput.value = total;
-            updateKembalianUI(total, 0, true);
+        // Update summary jika mode sudah dipilih
+        const modeInput = document.getElementById('cash_mode');
+        if (modeInput && modeInput.value) {
+            updateCashSummary(modeInput.value);
         }
     }
 
-    function selectCashPreset(type, amount, btnElement) {
-        // Update styling of buttons
-        document.querySelectorAll('.cash-preset-btn').forEach(btn => {
-            btn.classList.remove('btn-outline-success', 'active');
-            btn.classList.add('btn-outline-secondary');
+    function selectCashMode(mode) {
+        const modeInput = document.getElementById('cash_mode');
+        modeInput.value = mode;
+
+        // Update radio
+        document.querySelectorAll('.cash-mode-card').forEach(card => {
+            card.style.background = 'rgba(255, 255, 255, 0.02)';
+            card.style.borderColor = '#21262d !important';
         });
-        btnElement.classList.remove('btn-outline-secondary');
-        btnElement.classList.add('btn-outline-success', 'active');
+        const activeCard = document.getElementById('mode-card-' + mode);
+        const activeRadio = document.getElementById('radio-mode-' + mode);
+        if (activeRadio) activeRadio.checked = true;
 
-        const customContainer = document.getElementById('custom-nominal-container');
-        const isUangPasInput = document.getElementById('is_uang_pas');
-        const nominalRawInput = document.getElementById('nominal_tunai_raw');
-        const customInput = document.getElementById('custom_nominal_input');
-
-        if (type === 'pas') {
-            customContainer.style.display = 'none';
-            isUangPasInput.value = '1';
-            nominalRawInput.value = TOTAL_TAGIHAN;
-            updateKembalianUI(TOTAL_TAGIHAN, 0, true);
-        } else if (type === 'fixed') {
-            customContainer.style.display = 'none';
-            isUangPasInput.value = '0';
-            nominalRawInput.value = amount;
-            const kembalian = Math.max(0, amount - TOTAL_TAGIHAN);
-            const isPrior = (currentScope === 'table' && PRIOR_CASH_PREPARED && amount === PRIOR_CASH_PREPARED);
-            updateKembalianUI(amount, kembalian, false, false, false, isPrior);
-        } else if (type === 'custom') {
-            customContainer.style.display = 'block';
-            customInput.focus();
-            isUangPasInput.value = '0';
-            if (customInput.value) {
-                onCustomNominalChange(customInput.value);
-            } else {
-                updateKembalianUI(0, 0, false, true);
-            }
+        if (mode === 'kasir') {
+            activeCard.style.background = 'rgba(13, 202, 240, 0.1)';
+            activeCard.style.borderColor = '#0dcaf0 !important';
+        } else {
+            activeCard.style.background = 'rgba(34, 197, 94, 0.1)';
+            activeCard.style.borderColor = '#22c55e !important';
         }
+
+        // Tampilkan catatan opsional
+        const noteContainer = document.getElementById('cash-note-container');
+        noteContainer.style.display = 'block';
+
+        // Enable submit
+        document.getElementById('btn-submit-cash').disabled = false;
+
+        updateCashSummary(mode);
     }
 
-    function onCustomNominalChange(val) {
-        const nominal = parseInt(val) || 0;
-        const nominalRawInput = document.getElementById('nominal_tunai_raw');
-        nominalRawInput.value = nominal;
+    function updateCashSummary(mode) {
+        const summaryCard = document.getElementById('cash-summary-card');
+        const modeInfo = document.getElementById('cash-mode-info');
+        const labelTagihan = document.getElementById('label-tagihan-target');
+        summaryCard.style.display = 'block';
 
-        if (nominal < TOTAL_TAGIHAN) {
-            updateKembalianUI(nominal, 0, false, false, true);
+        labelTagihan.innerText = 'Rp ' + formatRupiah(TOTAL_TAGIHAN);
+
+        if (mode === 'kasir') {
+            summaryCard.style.background = 'rgba(13, 202, 240, 0.08)';
+            summaryCard.style.borderColor = 'rgba(13, 202, 240, 0.3)';
+            modeInfo.innerHTML = '<i class="bi bi-shop text-info me-1"></i> <span class="text-info">Anda akan bayar langsung di kasir.</span> Pesanan tetap langsung diproses dapur.';
         } else {
-            const kembalian = nominal - TOTAL_TAGIHAN;
-            updateKembalianUI(nominal, kembalian, kembalian === 0);
-        }
-    }
-
-    function updateKembalianUI(nominal, kembalian, isPas, isNeedInput = false, isUnderpaid = false, isPrior = false) {
-        const labelUang = document.getElementById('label-uang-disiapkan');
-        const labelKembalian = document.getElementById('label-kembalian');
-        const alertMsg = document.getElementById('kembalian-alert-msg');
-        const card = document.getElementById('kembalian-card');
-        const submitBtn = document.getElementById('btn-submit-cash');
-
-        if (!card) return;
-
-        if (isUnderpaid) {
-            labelUang.innerText = 'Rp ' + formatRupiah(nominal);
-            labelKembalian.innerHTML = '<span class="text-danger">⚠️ Uang Kurang</span>';
-            alertMsg.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> Nominal uang disiapkan kurang dari total tagihan (Rp ' + formatRupiah(TOTAL_TAGIHAN) + ').</span>';
-            card.style.background = 'rgba(239, 68, 68, 0.08)';
-            card.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-            submitBtn.disabled = true;
-            return;
-        }
-
-        if (isNeedInput) {
-            labelUang.innerText = '-';
-            labelKembalian.innerText = '-';
-            alertMsg.innerHTML = '<i class="bi bi-pencil-square text-warning me-1"></i> Silakan ketik jumlah uang yang Anda siapkan di atas.';
-            card.style.background = 'rgba(255, 255, 255, 0.04)';
-            card.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            submitBtn.disabled = true;
-            return;
-        }
-
-        submitBtn.disabled = false;
-        labelUang.innerText = 'Rp ' + formatRupiah(nominal);
-
-        if (isPas || kembalian === 0) {
-            labelKembalian.innerHTML = '<span class="text-success">Rp 0 (Uang Pas)</span>';
-            alertMsg.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i> Waitress akan langsung mengantar pesanan tanpa perlu kembalian.';
-            card.style.background = 'rgba(34, 197, 94, 0.08)';
-            card.style.borderColor = 'rgba(34, 197, 94, 0.4)';
-        } else {
-            labelKembalian.innerHTML = '<span class="text-warning fw-bold fs-6">Rp ' + formatRupiah(kembalian) + '</span>';
-            if (isPrior) {
-                alertMsg.innerHTML = '<i class="bi bi-arrow-repeat text-success me-1"></i> <strong class="text-success">Uang Rp ' + formatRupiah(nominal) + ' dari pesanan meja Anda tetap digunakan.</strong> Kembalian disesuaikan menjadi <strong class="text-warning">Rp ' + formatRupiah(kembalian) + '</strong> karena ada tambahan menu Rp ' + formatRupiah(SELF_TOTAL) + '.';
-            } else {
-                alertMsg.innerHTML = '<i class="bi bi-bell-fill text-warning me-1"></i> <strong>Waitress akan menyiapkan uang kembalian Rp ' + formatRupiah(kembalian) + '</strong> sebelum naik ke meja Anda.';
-            }
-            card.style.background = 'rgba(234, 179, 8, 0.09)';
-            card.style.borderColor = 'rgba(234, 179, 8, 0.4)';
+            summaryCard.style.background = 'rgba(34, 197, 94, 0.08)';
+            summaryCard.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+            modeInfo.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i> <span class="text-success">Waitress akan mengantar pesanan & menjemput uang tunai di meja.</span>';
         }
     }
 
     document.getElementById('cash-payment-form')?.addEventListener('submit', function(e) {
-        const isPas = document.getElementById('is_uang_pas').value === '1';
-        const nominal = parseInt(document.getElementById('nominal_tunai_raw').value) || 0;
-        
-        if (!isPas && nominal < TOTAL_TAGIHAN) {
+        const mode = document.getElementById('cash_mode').value;
+        if (!mode) {
             e.preventDefault();
-            alert('Nominal uang yang disiapkan tidak boleh kurang dari total tagihan (Rp ' + formatRupiah(TOTAL_TAGIHAN) + ').');
+            alert('Silakan pilih cara bayar tunai terlebih dahulu.');
             return false;
         }
 
-        let confirmMsg = 'Kirim pesanan dengan pembayaran Tunai (Cash)?';
-        if (isPas) {
-            confirmMsg = 'Konfirmasi: Anda membayar dengan Uang Pas Rp ' + formatRupiah(TOTAL_TAGIHAN) + ' saat makanan diantar?';
+        let confirmMsg = '';
+        if (mode === 'kasir') {
+            confirmMsg = 'Konfirmasi: Anda akan bayar tunai langsung di kasir (Rp ' + formatRupiah(TOTAL_TAGIHAN) + ')?';
         } else {
-            const kembalian = nominal - TOTAL_TAGIHAN;
-            confirmMsg = 'Konfirmasi: Uang yang Anda siapkan Rp ' + formatRupiah(nominal) + ' (Waitress akan membawakan kembalian Rp ' + formatRupiah(kembalian) + ')?';
+            confirmMsg = 'Konfirmasi: Bayar tunai di meja saat makanan diantar (Rp ' + formatRupiah(TOTAL_TAGIHAN) + ')?';
         }
 
         if (!confirm(confirmMsg)) {
             e.preventDefault();
             return false;
         }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        renderCashPresetButtons(TOTAL_TAGIHAN);
     });
 </script>
 @endsection

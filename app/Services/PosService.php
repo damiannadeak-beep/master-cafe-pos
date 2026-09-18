@@ -119,11 +119,7 @@ class PosService
             $unpaidAmount = 0;
             $totalUangDiterima = 0;
             $totalUangKembalian = 0;
-
-            $unpaidPreparedCashList = [];
             $hasCashUnpaid = false;
-            $paidUangDiterima = 0;
-            $paidUangKembalian = 0;
 
             foreach ($ordersList as $ord) {
                 $ordTotal = (int) (($ord->pembayaran && (float)$ord->pembayaran->total_bayar > 0) 
@@ -138,14 +134,11 @@ class PosService
                     $unpaidAmount += $ordTotal;
                     if ($ord->pembayaran && $ord->pembayaran->metode === 'cash') {
                         $hasCashUnpaid = true;
-                        if ((float)($ord->pembayaran->uang_diterima ?? 0) > 0) {
-                            $unpaidPreparedCashList[] = (float)$ord->pembayaran->uang_diterima;
-                        }
                     }
                 } else {
                     if ($ord->pembayaran) {
-                        $paidUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
-                        $paidUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
+                        $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
+                        $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
                     }
                 }
 
@@ -160,33 +153,10 @@ class PosService
                 }
             }
 
-            if ($allPaid) {
-                $totalUangDiterima = $paidUangDiterima;
-                $totalUangKembalian = $paidUangKembalian;
-            } else {
-                // Jika ada pesanan yang belum lunas
-                if (!empty($unpaidPreparedCashList)) {
-                    // Ambil nilai MAX dari uang yang disiapkan tamu.
-                    // Ini benar untuk semua skenario:
-                    // - Gabung meja (table scope): semua pesanan di-sync ke nominal yg sama → max = nominal tsb
-                    // - Campuran table+self: pesanan table punya nominal tinggi, self punya nominal rendah → max = nominal table
-                    // - Self semua: max = nominal terbesar dari tamu
-                    $maxDisiapkan = max($unpaidPreparedCashList);
-                    if ($maxDisiapkan >= $unpaidAmount) {
-                        $totalUangDiterima = (int) $maxDisiapkan;
-                        $totalUangKembalian = (int) ($maxDisiapkan - $unpaidAmount);
-                    } else {
-                        // Uang yang disiapkan tidak cukup untuk total tagihan meja
-                        $totalUangDiterima = (int) $unpaidAmount;
-                        $totalUangKembalian = 0;
-                    }
-                } elseif ($hasCashUnpaid) {
-                    $totalUangDiterima = (int) $unpaidAmount;
-                    $totalUangKembalian = 0;
-                } else {
-                    $totalUangDiterima = 0;
-                    $totalUangKembalian = 0;
-                }
+            // Jika belum lunas dan ada cash unpaid, set uang_diterima = unpaid amount (uang pas)
+            if (!$allPaid && $hasCashUnpaid) {
+                $totalUangDiterima = (int) $unpaidAmount;
+                $totalUangKembalian = 0;
             }
 
             $overallStatus = $hasPending ? 'pending' : ($hasProcessing ? 'processing' : 'completed');
