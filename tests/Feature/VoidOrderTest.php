@@ -55,8 +55,7 @@ class VoidOrderTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $response->assertJsonFragment(['message' => 'Pesanan berhasil divoid. Stok telah dikembalikan.']);
-        $this->assertEquals(50, $menu->fresh()->stok);
+        $response->assertJsonFragment(['message' => 'Pesanan berhasil divoid.']);
         $this->assertSoftDeleted('pesanan', ['id' => $pesanan->id]);
         $this->assertDatabaseHas('void_logs', ['pesanan_id' => $pesanan->id, 'kasir_id' => $kasir->id, 'alasan' => 'Salah input menu']);
     }
@@ -95,14 +94,12 @@ class VoidOrderTest extends TestCase
         $response->assertJsonFragment(['error' => 'Pesanan sudah selesai dan tidak dapat divoid.']);
     }
 
-    /** TEST 4: Void juga mengembalikan stok bahan baku */
-    public function test_void_mengembalikan_stok_bahan_baku()
+    /** TEST 4: Void berhasil membatalkan pesanan dan soft delete */
+    public function test_void_berhasil_membatalkan_pesanan()
     {
         $kasir = User::factory()->create(['password' => bcrypt('password')]);
         $kasir->assignRole('kasir');
-        $bahan = Bahan::create(['nama_bahan' => 'Gula Pasir', 'satuan' => 'gram', 'stok' => 480, 'harga_beli' => 15000]);
-        $menu = Menu::create(['nama_menu' => 'Es Jeruk', 'harga' => 7000, 'stok' => 28, 'kategori' => 'minuman', 'is_available' => true]);
-        $menu->bahans()->attach($bahan->id, ['jumlah_dibutuhkan' => 10]);
+        $menu = Menu::create(['nama_menu' => 'Es Jeruk', 'harga' => 7000, 'kategori' => 'minuman', 'is_available' => true]);
         $pesanan = $this->buatPesananDenganMenu($kasir, $menu, 2);
 
         $response = $this->actingAs($kasir)->putJson("/kasir/order/{$pesanan->id}/void", [
@@ -110,8 +107,8 @@ class VoidOrderTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $this->assertEquals(500, $bahan->fresh()->stok);
-        $this->assertEquals(30, $menu->fresh()->stok);
+        $this->assertSoftDeleted('pesanan', ['id' => $pesanan->id]);
+        $this->assertEquals('cancelled', Pesanan::withTrashed()->find($pesanan->id)->status);
     }
 
     /** TEST 5: Pemilik TIDAK bisa void via route kasir (middleware role:kasir) */
@@ -129,14 +126,13 @@ class VoidOrderTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** TEST 6: Void gagal jika pesanan dibuat langsung oleh konsumen (tanggung jawab konsumen) */
-    public function test_void_gagal_jika_pesanan_dibuat_oleh_konsumen()
+    /** TEST 6: Void gagal jika pesanan sudah dibayar lunas */
+    public function test_void_gagal_jika_pesanan_sudah_lunas()
     {
         $kasir = User::factory()->create(['password' => bcrypt('password')]);
         $kasir->assignRole('kasir');
         $menu = Menu::create(['nama_menu' => 'Kopi Susu', 'harga' => 12000, 'stok' => 20, 'kategori' => 'minuman', 'is_available' => true]);
 
-        // Pesanan dibuat oleh konsumen mandiri (id_kasir = null)
         $pesanan = Pesanan::create([
             'id_kasir' => null, 'tipe_pesanan' => 'dine_in', 'status' => 'pending',
             'total' => $menu->harga, 'total_hpp' => 0, 'tanggal' => now(),
@@ -146,7 +142,7 @@ class VoidOrderTest extends TestCase
             'jumlah' => 1, 'subtotal' => $menu->harga,
         ]);
         Pembayaran::create([
-            'id_pesanan' => $pesanan->id, 'status' => 'unpaid',
+            'id_pesanan' => $pesanan->id, 'status' => 'paid',
             'total_bayar' => $menu->harga,
         ]);
 
@@ -155,6 +151,35 @@ class VoidOrderTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertJsonFragment(['error' => 'Pesanan ini dipesan langsung oleh konsumen dan tidak dapat dihapus/divoid karena merupakan tanggung jawab konsumen.']);
+        $response->assertJsonFragment(['error' => 'Pesanan sudah dibayar lunas dan tidak dapat dihapus/divoid.']);
+    }
+
+    /** TEST 7: Kasir dapat membatalkan pesanan konsumen yang belum bayar */
+    public function test_kasir_dapat_membatalkan_pesanan_konsumen_belum_lunas()
+    {
+        $kasir = User::factory()->create(['password' => bcrypt('password')]);
+        $kasir->assignRole('kasir');
+        $menu = Menu::create(['nama_menu' => 'Es Teh', 'harga' => 5000, 'kategori' => 'minuman', 'is_available' => true]);
+
+        $pesanan = Pesanan::create([
+            'id_kasir' => null, 'tipe_pesanan' => 'dine_in', 'status' => 'pending',
+            'total' => 5000, 'total_hpp' => 0, 'tanggal' => now(),
+        ]);
+        DetailPesanan::create([
+            'id_pesanan' => $pesanan->id, 'id_menu' => $menu->id,
+            'jumlah' => 1, 'subtotal' => 5000,
+        ]);
+        Pembayaran::create([
+            'id_pesanan' => $pesanan->id, 'status' => 'unpaid',
+            'total_bayar' => 5000,
+        ]);
+
+        $response = $this->actingAs($kasir)->putJson("/kasir/order/{$pesanan->id}/void", [
+            'alasan' => 'Pelanggan membatalkan menu tambahan', 'password' => 'password',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['message' => 'Pesanan berhasil divoid.']);
+        $this->assertSoftDeleted('pesanan', ['id' => $pesanan->id]);
     }
 }

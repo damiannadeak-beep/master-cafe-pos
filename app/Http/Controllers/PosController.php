@@ -22,6 +22,13 @@ use App\Http\Requests\Pos\{StoreManualOrderRequest, VoidOrderRequest, SplitOrder
 
 class PosController extends Controller
 {
+    public function __construct(
+        protected PosService $posService,
+        protected OrderService $orderService,
+        protected PaymentService $paymentService,
+        protected PrintService $printService
+    ) {}
+
     /**
      * Menampilkan Halaman POS untuk Kasir
      */
@@ -48,39 +55,21 @@ class PosController extends Controller
 
         foreach ($pendingCheckOrders as $order) {
             if ($order->pembayaran && $order->pembayaran->status !== 'paid') {
-                app(PosService::class)->checkAndUpdateMidtransStatus($order);
+                $this->posService->checkAndUpdateMidtransStatus($order);
             }
         }
 
-        // 2. Ambil pesanan aktif:
-        // 2. Ambil pesanan aktif:
-        // - Dibuat langsung oleh Kasir di POS (id_kasir != null)
-        // - Sudah LUNAS (QRIS / Transfer Midtrans / Tunai di Kasir)
-        // - Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai & nominal uang yang disiapkan
-        $orders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
-            ->whereIn('status', ['pending', 'processing'])
-            ->whereNotIn('status', ['cancelled', 'void'])
-            ->where(function ($sub) {
-                $sub->whereNotNull('id_kasir')
-                    ->orWhereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid')
-                          ->orWhere(function ($cashQ) {
-                              $cashQ->where('status', 'unpaid')
-                                    ->where('metode', 'cash');
-                          });
-                    });
-            })
+        // 2. Ambil pesanan aktif via PosService:
+        // - Termasuk pesanan pending, processing, dan pesanan selesai dimasak namun belum lunas
+        $orders = $this->posService->getActiveOrdersQuery()
             ->orderBy('created_at', 'asc')
             ->get();
 
         $groupedOrders = $this->groupActiveOrders($orders);
 
-        // 3. Ambil pesanan selesai terbaru (History pesanan selesai untuk Tablet Waitress)
-        $completedOrders = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir'])
-            ->where('status', 'completed')
-            ->orderBy('updated_at', 'desc')
-            ->take(50)
-            ->get();
+        // 3. Ambil pesanan selesai terbaru (History pesanan selesai untuk Tablet Waitress / Kasir)
+        // Hanya pesanan yang sudah selesai dimasak DAN lunas yang masuk ke history selesai
+        $completedOrders = $this->posService->getCompletedOrdersQuery(50)->get();
 
         $groupedCompletedOrders = $this->groupCompletedOrders($completedOrders);
 
@@ -116,7 +105,7 @@ class PosController extends Controller
      */
     public function groupActiveOrders($orders)
     {
-        return app(PosService::class)->groupActiveOrders(
+        return $this->posService->groupActiveOrders(
             $orders instanceof \Illuminate\Support\Collection ? $orders : collect($orders)
         );
     }
@@ -126,7 +115,7 @@ class PosController extends Controller
      */
     public function groupCompletedOrders($orders)
     {
-        return app(PosService::class)->groupCompletedOrders(
+        return $this->posService->groupCompletedOrders(
             $orders instanceof \Illuminate\Support\Collection ? $orders : collect($orders)
         );
     }
@@ -134,15 +123,15 @@ class PosController extends Controller
     /**
      * Mengambil jumlah pesanan aktif untuk badge notifikasi
      */
-    public function activeOrdersCount(PosService $posService)
+    public function activeOrdersCount()
     {
-        return response()->json($posService->getActiveOrdersCountData());
+        return response()->json($this->posService->getActiveOrdersCountData());
     }
 
     /**
      * Memproses pesanan manual dari Kasir
      */
-    public function storeManualOrder(StoreManualOrderRequest $request, OrderService $orderService)
+    public function storeManualOrder(StoreManualOrderRequest $request)
     {
         $validated = $request->validated();
 
@@ -185,12 +174,12 @@ class PosController extends Controller
             }
 
             // 3. Proses item pesanan via OrderService (lock stok, kurangi bahan, buat detail)
-            $result = $orderService->processOrderItems($pesanan, $validated['items']);
+            $result = $this->orderService->processOrderItems($pesanan, $validated['items']);
             $totalSemua = $result['total'];
             $total_hpp = $result['total_hpp'];
 
             // 4. Hitung diskon via OrderService
-            $discountAmount = $orderService->calculateDiscount(
+            $discountAmount = $this->orderService->calculateDiscount(
                 $totalSemua,
                 $validated['promo_id'] ?? null,
                 $validated['items']
@@ -207,7 +196,7 @@ class PosController extends Controller
 
             // 5. Proses Status Pembayaran
             $statusBayar = $validated['pembayaran_langsung'] ? 'paid' : 'unpaid';
-            $metodeBayar = $validated['pembayaran_langsung'] ? ($validated['metode_pembayaran'] ?? 'cash') : null;
+            $metodeBayar = !empty($validated['metode_pembayaran']) ? $validated['metode_pembayaran'] : ($validated['pembayaran_langsung'] ? 'cash' : null);
 
             $uangDiterima = null;
             $uangKembalian = 0;
@@ -243,14 +232,67 @@ class PosController extends Controller
                 'catatan_kembalian' => $catatanKembalian,
             ]);
 
+            $snapData = null;
+            if ($metodeBayar === 'qris' && !$validated['pembayaran_langsung']) {
+                try {
+                    $snapData = $this->paymentService->createSnapToken($pesanan);
+                } catch (\Throwable $snapErr) {
+                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal generate Snap token manual order: ' . $snapErr->getMessage());
+                }
+            }
+
             DB::commit();
             return response()->json([
                 'message' => 'Pesanan manual berhasil diproses.',
-                'id_pesanan' => $pesanan->id
+                'id_pesanan' => $pesanan->id,
+                'snap_token' => $snapData['snap_token'] ?? null,
+                'client_key' => $snapData['client_key'] ?? null,
+                'is_production' => $snapData['is_production'] ?? false,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Dapatkan Snap Token Midtrans untuk pesanan aktif kasir
+     */
+    public function getKasirSnapToken($id)
+    {
+        try {
+            $pesanan = Pesanan::findOrFail($id);
+            $snapData = $this->paymentService->createSnapToken($pesanan);
+            return response()->json($snapData);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Konfirmasi pelunasan QRIS Midtrans dari kasir
+     */
+    public function markQrisPaid(Request $request, $id)
+    {
+        try {
+            $pesanan = $this->paymentService->processPayment(
+                $id,
+                'qris',
+                $request->input('email_pelanggan'),
+                auth()->id()
+            );
+
+            if ($pesanan->status === 'pending') {
+                $pesanan->update(['status' => 'processing']);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran QRIS Midtrans berhasil diverifikasi (LUNAS).',
+                'id_pesanan' => $pesanan->id
+            ]);
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
@@ -288,13 +330,18 @@ class PosController extends Controller
                 // set meja menjadi tersedia kembali (is_available = true)
                 if ($targetStatus === 'completed' && $pesanan->id_meja) {
                     $hasRemaining = Pesanan::where('id_meja', $pesanan->id_meja)
-                        ->where('id', '!=', $pesanan->id)
-                        ->whereNotIn('status', ['completed', 'cancelled', 'void'])
-                        ->where(function ($sub) {
-                            $sub->whereIn('status', ['pending', 'processing'])
-                                ->orWhereHas('pembayaran', function ($p) {
-                                    $p->where('status', 'unpaid');
-                                });
+                        ->whereNotIn('status', ['cancelled', 'void'])
+                        ->where(function ($q) {
+                            $q->whereIn('status', ['pending', 'processing'])
+                              ->orWhere(function ($sub) {
+                                  $sub->where('status', 'completed')
+                                      ->where(function ($pSub) {
+                                          $pSub->whereDoesntHave('pembayaran')
+                                               ->orWhereHas('pembayaran', function ($p) {
+                                                   $p->where('status', '!=', 'paid');
+                                               });
+                                      });
+                              });
                         })
                         ->exists();
 
@@ -418,7 +465,7 @@ class PosController extends Controller
         }
     }
 
-    public function payOrder(PayOrderRequest $request, $id_pesanan, PaymentService $paymentService)
+    public function payOrder(PayOrderRequest $request, $id_pesanan)
     {
         $validated = $request->validated();
 
@@ -461,7 +508,7 @@ class PosController extends Controller
                 : null;
 
             if (count($unpaidList) === 1) {
-                $lastPesanan = $paymentService->processPayment(
+                $lastPesanan = $this->paymentService->processPayment(
                     $unpaidList[0]->id,
                     $metode,
                     $validated['email_pelanggan'] ?? null,
@@ -498,7 +545,7 @@ class PosController extends Controller
                     $firstOrderCash = $nominalTunai - $subordersTotal;
 
                     // Bayar pesanan pertama
-                    $lastPesanan = $paymentService->processPayment(
+                    $lastPesanan = $this->paymentService->processPayment(
                         $unpaidList[0]->id,
                         'cash',
                         $validated['email_pelanggan'] ?? null,
@@ -509,9 +556,9 @@ class PosController extends Controller
 
                     // Bayar pesanan lainnya sebagai uang pas
                     for ($i = 1; $i < count($unpaidList); $i++) {
-                        $paymentService->processPayment(
+                        $this->paymentService->processPayment(
                             $unpaidList[$i]->id,
-                            'cash',
+                            $metode,
                             $validated['email_pelanggan'] ?? null,
                             auth()->id(),
                             $bills[$unpaidList[$i]->id],
@@ -521,7 +568,7 @@ class PosController extends Controller
                 } else {
                     // Non-tunai atau Uang Pas: setiap pesanan dibayar sesuai tagihannya masing-masing
                     foreach ($unpaidList as $p) {
-                        $lastPesanan = $paymentService->processPayment(
+                        $lastPesanan = $this->paymentService->processPayment(
                             $p->id,
                             $metode,
                             $validated['email_pelanggan'] ?? null,
@@ -547,19 +594,19 @@ class PosController extends Controller
     /**
      * Cetak struk pesanan (Thermal 58mm / HTML View)
      */
-    public function printReceipt($id, PrintService $printService)
+    public function printReceipt($id)
     {
-        $order = $printService->prepareReceiptOrder($id);
+        $order = $this->printService->prepareReceiptOrder($id);
         return view('waitress.receipt', compact('order'));
     }
 
     /**
      * Cetak struk langsung ke Printer Thermal (Raw ESC/POS Network)
      */
-    public function printThermalReceipt($id, PrintService $printService)
+    public function printThermalReceipt($id)
     {
         try {
-            $printService->printReceipt($id);
+            $this->printService->printThermalReceipt($id);
             return response()->json(['message' => 'Struk berhasil dikirim ke printer thermal.']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -579,12 +626,9 @@ class PosController extends Controller
                 throw new \Exception('Password yang dimasukkan salah.');
             }
 
-            if (empty($pesanan->id_kasir)) {
-                throw new \Exception('Pesanan ini dipesan langsung oleh konsumen dan tidak dapat dihapus/divoid karena merupakan tanggung jawab konsumen.');
-            }
-
+            // Pesanan yang SUDAH LUNAS tidak dapat sembarangan divoid oleh kasir
             if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
-                throw new \Exception('Pesanan sudah dibayar lunas oleh konsumen dan tidak dapat dihapus/divoid sembarangan oleh kasir tanpa persetujuan konsumen.');
+                throw new \Exception('Pesanan sudah dibayar lunas dan tidak dapat dihapus/divoid.');
             }
 
             if ($pesanan->status === 'completed') {
@@ -609,7 +653,7 @@ class PosController extends Controller
             $pesanan->cancelOrder();
 
             DB::commit();
-            return response()->json(['message' => 'Pesanan berhasil divoid. Stok telah dikembalikan.']);
+            return response()->json(['message' => 'Pesanan berhasil divoid.']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 422);
@@ -619,18 +663,18 @@ class PosController extends Controller
     /**
      * Cetak struk dapur (tanpa harga).
      */
-    public function printKitchenReceipt($id, PrintService $printService)
+    public function printKitchenReceipt($id)
     {
         if (request()->ajax() || request()->wantsJson()) {
             try {
-                $printService->printKitchenReceipt($id);
+                $this->printService->printKitchenReceipt($id);
                 return response()->json(['message' => 'Tiket dapur berhasil dikirim ke printer thermal.']);
             } catch (\Exception $e) {
                 return response()->json(['error' => $e->getMessage()], 500);
             }
         }
 
-        $order = $printService->prepareKitchenReceiptOrder($id);
+        $order = $this->printService->prepareKitchenReceiptOrder($id);
         return view('waitress.kitchen_receipt', compact('order'));
     }
 
@@ -676,7 +720,7 @@ class PosController extends Controller
                 throw new \Exception('Pesanan sudah dibayar, tidak bisa dipisah.');
             }
 
-            app(PosService::class)->splitOrder($pesananAsli, $validated['split_items']);
+            $this->posService->splitOrder($pesananAsli, $validated['split_items']);
 
             return response()->json(['message' => 'Pesanan berhasil dipisah.']);
         } catch (\Exception $e) {

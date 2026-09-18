@@ -149,4 +149,97 @@ class PaymentService
             }
         }
     }
+
+    /**
+     * Generate Midtrans Snap Token untuk transaksi pesanan kasir / online.
+     *
+     * @param Pesanan $pesanan
+     * @return array
+     * @throws \Exception
+     */
+    public function createSnapToken(Pesanan $pesanan): array
+    {
+        $serverKey = trim(\App\Models\Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey')));
+        $clientKey = trim(\App\Models\Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey')));
+        $rawIsProd = \App\Models\Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction'));
+        $isProduction = filter_var($rawIsProd, FILTER_VALIDATE_BOOLEAN);
+
+        if (empty($serverKey)) {
+            throw new \Exception('Midtrans Server Key belum diatur di sistem.');
+        }
+
+        \Midtrans\Config::$serverKey = $serverKey;
+        \Midtrans\Config::$isProduction = $isProduction;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $pesanan->loadMissing(['detail_pesanan.menu', 'pembayaran', 'konsumen']);
+        $totalBayar = (int) round(($pesanan->pembayaran && (float)$pesanan->pembayaran->total_bayar > 0)
+            ? $pesanan->pembayaran->total_bayar
+            : ($pesanan->total - ($pesanan->discount_amount ?? 0)));
+
+        if ($totalBayar <= 0) {
+            throw new \Exception('Total tagihan pesanan harus lebih besar dari Rp 0.');
+        }
+
+        $midtransOrderId = 'POS-' . $pesanan->id . '-' . time();
+
+        $itemDetails = [];
+        foreach ($pesanan->detail_pesanan as $detail) {
+            $itemDetails[] = [
+                'id' => (string) $detail->id_menu,
+                'price' => (int) round($detail->subtotal / max(1, $detail->jumlah)),
+                'quantity' => (int) $detail->jumlah,
+                'name' => mb_substr($detail->menu->nama_menu ?? 'Item Menu', 0, 50),
+            ];
+        }
+
+        if (($pesanan->discount_amount ?? 0) > 0) {
+            $itemDetails[] = [
+                'id' => 'DISCOUNT',
+                'price' => -(int) $pesanan->discount_amount,
+                'quantity' => 1,
+                'name' => 'Diskon Promo',
+            ];
+        }
+
+        $customerName = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Pelanggan POS Kasir');
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $midtransOrderId,
+                'gross_amount' => $totalBayar,
+            ],
+            'customer_details' => [
+                'first_name' => $customerName,
+                'email' => $pesanan->konsumen?->email ?? 'kasir@mastercafe.local',
+                'phone' => $pesanan->guest_phone ?? '08123456789',
+            ],
+        ];
+
+        if (!empty($itemDetails)) {
+            $params['item_details'] = $itemDetails;
+        }
+
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+        // Simpan ke record pembayaran
+        $pembayaran = Pembayaran::firstOrCreate(
+            ['id_pesanan' => $pesanan->id],
+            ['status' => 'unpaid', 'total_bayar' => $totalBayar]
+        );
+        $pembayaran->update([
+            'snap_token' => $snapToken,
+            'midtrans_order_id' => $midtransOrderId,
+            'total_bayar' => $totalBayar,
+        ]);
+
+        return [
+            'snap_token' => $snapToken,
+            'client_key' => $clientKey,
+            'is_production' => $isProduction,
+            'midtrans_order_id' => $midtransOrderId,
+            'total_bayar' => $totalBayar,
+        ];
+    }
 }

@@ -82,20 +82,11 @@ class Pesanan extends Model
     }
 
     /**
-     * Mengembalikan stok menu yang sudah terpotong.
+     * Mengembalikan stok/status menu saat dibatalkan (ketersediaan menu dikelola via toggle Tersedia/Habis).
      */
     public function restoreStock()
     {
-        foreach ($this->detail_pesanan as $detail) {
-            $menu = Menu::lockForUpdate()->find($detail->id_menu);
-            if ($menu) {
-                // Kembalikan stok produk jadi/menu
-                $menu->increment('stok', $detail->jumlah);
-                if (!$menu->is_available && $menu->stok > 0) {
-                    $menu->update(['is_available' => true]);
-                }
-            }
-        }
+        // Ketersediaan menu diatur secara manual oleh waitress/barista melalui tablet POS (is_available).
     }
 
     /**

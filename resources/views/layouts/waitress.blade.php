@@ -29,12 +29,23 @@
     @include('components.webpush')
 
     <!-- Waitress Layout Global Scripts -->
+    @php
+        $rawIsProd = \App\Models\Setting::getVal('midtrans_is_production', config('services.midtrans.isProduction'));
+        $isProduction = filter_var($rawIsProd, FILTER_VALIDATE_BOOLEAN);
+        $snapJsUrl = $isProduction ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js';
+        $clientKey = trim(\App\Models\Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey')));
+    @endphp
+    @if(!empty($clientKey))
+        <script src="{{ $snapJsUrl }}" data-client-key="{{ $clientKey }}"></script>
+    @endif
+
     <script>
         window.WaitressLayoutConfig = {
             activeOrdersCountUrl: "{{ route('kasir.active_orders_count') }}",
             notificationsUrl: "{{ url('/kasir/api/notifications') }}",
             csrfToken: "{{ csrf_token() }}",
-            bellAudioSrc: "{{ asset('sounds/bell.wav') }}"
+            bellAudioSrc: "{{ asset('sounds/bell.wav') }}",
+            clientKey: "{{ $clientKey }}"
         };
     </script>
     <script src="{{ asset('js/waitress/toast.js') }}?v={{ file_exists(public_path('js/waitress/toast.js')) ? filemtime(public_path('js/waitress/toast.js')) : '1.0' }}"></script>

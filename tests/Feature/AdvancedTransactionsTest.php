@@ -151,6 +151,6 @@ class AdvancedTransactionsTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $response->assertJson(['message' => 'Pelayan segera datang ke meja Anda.']);
+        $response->assertJson(['message' => 'Pelayan telah dipanggil dan segera menuju meja Anda.']);
     }
 }

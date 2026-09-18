@@ -125,13 +125,17 @@
         const idLabel = ids.length > 1 ? `#${ids.join(' & #')}` : `#${primaryId}`;
         const idParam = ids.join(',');
 
-        // ⚡ OPTIMISTIC UPDATE: Langsung ubah badge & tombol di layar kasir dalam 0 milidetik!
+        // ⚡ OPTIMISTIC UPDATE: Langsung ubah badge & tombol di layar kasir dengan layout proporsional
+        if (btnElement) {
+            btnElement.disabled = true;
+        }
+
         if (status === 'processing') {
             if (badgeContainer) {
                 badgeContainer.outerHTML = '<span class="badge bg-primary"><i class="bi bi-fire"></i> DIMASAK</span>';
             }
             if (btnElement) {
-                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus('${idParam}', 'completed', this)">
+                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-success flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus('${idParam}', 'completed', this)">
                     <i class="bi bi-check2-all me-1"></i> Selesai Dimasak
                 </button>`;
             }
@@ -141,7 +145,7 @@
                 badgeContainer.outerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> SELESAI</span>';
             }
             if (btnElement) {
-                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.showOrderCompletedModal('${idParam}')">
+                btnElement.outerHTML = `<button type="button" class="btn btn-sm btn-outline-success flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.showOrderCompletedModal('${idParam}')">
                     <i class="bi bi-printer me-1"></i> Cetak Struk
                 </button>`;
             }
@@ -151,7 +155,7 @@
             window.showOrderCompletedModal(idParam);
         }
 
-        // Kirim permintaan ke server di background tanpa menghalangi kasir
+        // Kirim permintaan ke server di background
         fetch(`/kasir/order/${primaryId}/status`, {
             method: 'PUT',
             headers: {
@@ -173,6 +177,9 @@
                     if (typeof fetchActiveOrdersCount === 'function') {
                         fetchActiveOrdersCount();
                     }
+                    if (typeof window.reloadActiveOrdersCards === 'function') {
+                        window.reloadActiveOrdersCards(true);
+                    }
                     if (status === 'completed' && typeof window.reloadCompletedOrders === 'function') {
                         window.reloadCompletedOrders(true);
                     }
@@ -187,6 +194,70 @@
             });
     };
 
+    // Update Status Sub-Pesanan Tertentu Saja (Per-Order Granular)
+    window.updateSingleOrderStatus = function (orderId, targetStatus, btnElement) {
+        orderId = parseInt(orderId);
+        if (!orderId) return;
+
+        // Optimistic UI feedback
+        if (btnElement) {
+            btnElement.style.pointerEvents = 'none';
+            if (targetStatus === 'processing') {
+                btnElement.className = 'badge bg-primary text-white py-0.5 px-2 rounded-pill border-0 d-inline-flex align-items-center gap-1 text-decoration-none';
+                btnElement.innerHTML = '<i class="bi bi-check2"></i> Selesai';
+                btnElement.setAttribute('onclick', `event.stopPropagation(); window.updateSingleOrderStatus(${orderId}, 'completed', this)`);
+                btnElement.setAttribute('title', `Tandai pesanan #${orderId} selesai dimasak`);
+                btnElement.style.pointerEvents = '';
+            } else if (targetStatus === 'completed') {
+                btnElement.outerHTML = '<span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0.5 px-2 rounded-pill d-inline-flex align-items-center gap-1" style="font-size: 0.62rem;"><i class="bi bi-check2-circle"></i> Selesai</span>';
+            }
+        }
+
+        if (window.showToast) {
+            const msg = targetStatus === 'completed'
+                ? `Pesanan #${orderId} telah ditandai selesai dimasak!`
+                : `Pesanan #${orderId} mulai dimasak!`;
+            window.showToast(msg, 'success');
+        }
+
+        fetch(`/kasir/order/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ status: targetStatus, order_ids: [orderId] })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                if (window.showToast) window.showToast(data.error, 'danger');
+                else alert(data.error);
+                if (typeof window.reloadActiveOrdersCards === 'function') {
+                    window.reloadActiveOrdersCards(true);
+                }
+            } else {
+                if (typeof fetchActiveOrdersCount === 'function') {
+                    fetchActiveOrdersCount();
+                }
+                if (typeof window.reloadActiveOrdersCards === 'function') {
+                    window.reloadActiveOrdersCards(true);
+                }
+                if (targetStatus === 'completed' && typeof window.reloadCompletedOrders === 'function') {
+                    window.reloadCompletedOrders(true);
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            if (window.showToast) window.showToast('Gagal update status pesanan #' + orderId, 'danger');
+            if (typeof window.reloadActiveOrdersCards === 'function') {
+                window.reloadActiveOrdersCards(true);
+            }
+        });
+    };
+
     // Inisialisasi event saat modal selesai ditutup
     document.addEventListener('DOMContentLoaded', function () {
         const completedModalEl = document.getElementById('orderCompletedModal');
@@ -199,5 +270,13 @@
             });
         }
     });
+
+    if (window.WaitressApp) {
+        window.WaitressApp.modules.status = {
+            update: window.updateOrderStatus,
+            updateSingle: window.updateSingleOrderStatus,
+            showCompletedModal: window.showOrderCompletedModal
+        };
+    }
 
 })();

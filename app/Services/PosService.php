@@ -14,8 +14,21 @@ class PosService
     public function getActiveOrdersQuery()
     {
         return Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
-            ->whereIn('status', ['pending', 'processing'])
             ->whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($statusQ) {
+                // 1. Pesanan yang sedang diproses di dapur (pending / processing)
+                $statusQ->whereIn('status', ['pending', 'processing'])
+                    // 2. ATAU pesanan yang sudah selesai dimasak (completed) tetapi BELUM LUNAS
+                    ->orWhere(function ($compUnpaidQ) {
+                        $compUnpaidQ->where('status', 'completed')
+                            ->where(function ($pSub) {
+                                $pSub->whereDoesntHave('pembayaran')
+                                     ->orWhereHas('pembayaran', function ($p) {
+                                         $p->where('status', '!=', 'paid');
+                                     });
+                            });
+                    });
+            })
             ->where(function ($sub) {
                 // 1. Dibuat langsung oleh Kasir di POS
                 $sub->whereNotNull('id_kasir')
@@ -38,6 +51,9 @@ class PosService
     {
         return Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir'])
             ->where('status', 'completed')
+            ->whereHas('pembayaran', function ($p) {
+                $p->where('status', 'paid');
+            })
             ->orderBy('updated_at', 'desc')
             ->take($limit);
     }
@@ -174,6 +190,28 @@ class PosService
 
             $overallStatus = $hasPending ? 'pending' : ($hasProcessing ? 'processing' : 'completed');
 
+            // Filter pesanan yang memenuhi syarat untuk divoid (belum lunas dan belum selesai dibuat/dimasak)
+            $voidableOrders = $ordersList->filter(function ($ord) {
+                $isPaid = ($ord->pembayaran && $ord->pembayaran->status === 'paid');
+                $isCompleted = ($ord->status === 'completed');
+                $isCancelled = in_array($ord->status, ['cancelled', 'void']);
+                return !$isPaid && !$isCompleted && !$isCancelled;
+            })->values();
+
+            $voidOrderOptions = $voidableOrders->map(function ($o) {
+                $tot = (float) (($o->pembayaran && (float)$o->pembayaran->total_bayar > 0)
+                    ? $o->pembayaran->total_bayar
+                    : ($o->total - ($o->discount_amount ?? 0)));
+                return [
+                    'id' => $o->id,
+                    'label' => 'Pesanan #' . $o->id . ' (Belum Bayar - Rp ' . number_format($tot, 0, ',', '.') . ')',
+                    'is_paid' => false,
+                ];
+            })->all();
+
+            $canVoid = !empty($voidOrderOptions);
+            $primaryVoidId = $voidableOrders->first()?->id ?? $primaryOrder->id;
+
             $result->push((object) [
                 'group_key' => $g['group_key'],
                 'primary_order' => $primaryOrder,
@@ -197,7 +235,10 @@ class PosService
                 'total_uang_diterima' => $totalUangDiterima,
                 'total_uang_kembalian' => $totalUangKembalian,
                 'overall_status' => $overallStatus,
-                'can_void' => $ordersList->every(fn($o) => !empty($o->id_kasir)),
+                'can_void' => $canVoid,
+                'voidable_orders' => $voidableOrders,
+                'void_order_options' => $voidOrderOptions,
+                'primary_void_id' => $primaryVoidId,
             ]);
         }
 
@@ -390,8 +431,9 @@ class PosService
                 'id_kasir' => auth()->id() ?? $pesananAsli->id_kasir,
                 'status' => $pesananAsli->status,
                 'tipe_pesanan' => $pesananAsli->tipe_pesanan,
-                'customer_name' => $pesananAsli->customer_name,
+                'guest_name' => $pesananAsli->guest_name,
                 'guest_phone' => $pesananAsli->guest_phone,
+                'tanggal' => now(),
                 'total' => 0,
                 'total_hpp' => 0
             ]);
@@ -474,8 +516,21 @@ class PosService
      */
     public function getActiveOrdersCountData(): array
     {
-        $activeOrdersQuery = Pesanan::whereIn('status', ['pending', 'processing'])
-            ->whereNotIn('status', ['cancelled', 'void'])
+        $activeOrdersQuery = Pesanan::whereNotIn('status', ['cancelled', 'void'])
+            ->where(function ($statusQ) {
+                // 1. Pesanan yang sedang diproses di dapur (pending / processing)
+                $statusQ->whereIn('status', ['pending', 'processing'])
+                    // 2. ATAU pesanan yang sudah selesai dimasak (completed) tetapi BELUM LUNAS
+                    ->orWhere(function ($compUnpaidQ) {
+                        $compUnpaidQ->where('status', 'completed')
+                            ->where(function ($pSub) {
+                                $pSub->whereDoesntHave('pembayaran')
+                                     ->orWhereHas('pembayaran', function ($p) {
+                                         $p->where('status', '!=', 'paid');
+                                     });
+                            });
+                    });
+            })
             ->where(function ($sub) {
                 // 1. Dibuat langsung oleh Kasir di POS
                 $sub->whereNotNull('id_kasir')
@@ -504,8 +559,8 @@ class PosService
             })
             ->join('|');
 
-        $completedMax = Pesanan::where('status', 'completed')->max('updated_at') ?? '';
-        $completedCount = Pesanan::where('status', 'completed')->whereDate('created_at', today())->count();
+        $completedMax = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->max('updated_at') ?? '';
+        $completedCount = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->whereDate('created_at', today())->count();
         $activeHash .= "|comp:{$completedCount}-{$completedMax}";
 
         return [

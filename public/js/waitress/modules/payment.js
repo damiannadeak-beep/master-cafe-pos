@@ -340,4 +340,101 @@
             });
     };
 
+    // --- INTEGRASI QRIS DINAMIS MIDTRANS SANDBOX (PESANAN AKTIF) ---
+    window.openActiveOrderMidtransSnap = function () {
+        const orderId = currentOrderId || activeOrderPayState.id;
+        if (!orderId) return alert('Pesanan tidak ditemukan.');
+
+        const btnSnap = document.getElementById('btn-active-order-midtrans-qris');
+        if (btnSnap) {
+            btnSnap.disabled = true;
+            btnSnap.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menghubungkan Midtrans...';
+        }
+
+        fetch(`/kasir/order/${orderId}/snap-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (btnSnap) {
+                    btnSnap.disabled = false;
+                    btnSnap.innerHTML = '<i class="bi bi-lightning-charge-fill me-1"></i> Tampilkan QRIS Dinamis Midtrans';
+                }
+
+                if (data.error) {
+                    alert('Gagal mengambil kode Midtrans: ' + data.error);
+                    return;
+                }
+
+                if (!data.snap_token) {
+                    alert('Gagal mendapatkan token Midtrans QRIS.');
+                    return;
+                }
+
+                if (typeof window.snap === 'undefined') {
+                    alert('Script Midtrans Snap belum termuat. Periksa koneksi internet Anda.');
+                    return;
+                }
+
+                window.closeModalById('qrisScanModal');
+
+                window.snap.pay(data.snap_token, {
+                    onSuccess: function (result) {
+                        let emailInput = document.getElementById('email_pelanggan');
+                        let emailVal = emailInput ? emailInput.value : '';
+
+                        fetch(`/kasir/order/${orderId}/qris-success`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': getCsrfToken(),
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ email_pelanggan: emailVal, midtrans_result: result })
+                        })
+                            .then(res => res.json())
+                            .then(resSuccess => {
+                                if (window.showToast) window.showToast('✅ Pembayaran QRIS Midtrans LUNAS!', 'success');
+                                if (confirm('✅ Pembayaran QRIS Berhasil (LUNAS)!\n\nIngin mencetak struk sekarang?')) {
+                                    window.open(`/kasir/order/${orderId}/receipt`, '_blank');
+                                }
+                                if (typeof window.reloadActiveOrdersCards === 'function') {
+                                    window.reloadActiveOrdersCards(true);
+                                }
+                            })
+                            .catch(() => {
+                                if (typeof window.reloadActiveOrdersCards === 'function') {
+                                    window.reloadActiveOrdersCards(true);
+                                }
+                            });
+                    },
+                    onPending: function (result) {
+                        alert('⏳ Pembayaran QRIS sedang diproses oleh pelanggan (Pending).');
+                        if (typeof window.reloadActiveOrdersCards === 'function') {
+                            window.reloadActiveOrdersCards(true);
+                        }
+                    },
+                    onError: function (result) {
+                        alert('❌ Pembayaran QRIS Midtrans gagal diproses.');
+                    },
+                    onClose: function () {
+                        // Jendela ditutup oleh kasir/pelanggan
+                    }
+                });
+            })
+            .catch(err => {
+                if (btnSnap) {
+                    btnSnap.disabled = false;
+                    btnSnap.innerHTML = '<i class="bi bi-lightning-charge-fill me-1"></i> Tampilkan QRIS Dinamis Midtrans';
+                }
+                alert('Terjadi kesalahan jaringan: ' + err.message);
+            });
+    };
+
 })();
+

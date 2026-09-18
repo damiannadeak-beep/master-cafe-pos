@@ -61,59 +61,10 @@ Route::get('/sitemap.xml', function () {
 
 
 
-// Route Pembaca Gambar Fail-Safe (Ganti Symlink di Hostings cPanel)
-Route::get('/storage/{path}', function ($path) {
-    $homeDir = env('HOME') ?: getenv('HOME') ?: '/home/nadp3189';
-    
-    // Cari file di SELURUH kemungkinan lokasi folder cPanel
-    $searchPaths = [
-        storage_path('app/public/' . $path),
-        public_path('storage/' . $path),
-        // Folder utama home
-        $homeDir . '/mastercafe.nadeak.net/public/storage/' . $path,
-        $homeDir . '/mastercafe.nadeak.net/storage/app/public/' . $path,
-        $homeDir . '/mastercafe.nadeak.net/storage/' . $path,
-        // Folder public_html langsung
-        $homeDir . '/public_html/storage/app/public/' . $path,
-        $homeDir . '/public_html/storage/' . $path,
-        $homeDir . '/public_html/public/storage/' . $path,
-        // Folder public_html/mastercafe.nadeak.net
-        $homeDir . '/public_html/mastercafe.nadeak.net/public/storage/' . $path,
-        $homeDir . '/public_html/mastercafe.nadeak.net/storage/app/public/' . $path,
-        $homeDir . '/public_html/mastercafe.nadeak.net/storage/' . $path,
-        // Folder repositories
-        $homeDir . '/repositories/master-cafe-pos/storage/app/public/' . $path,
-        $homeDir . '/repositories/master-cafe-pos/public/storage/' . $path,
-    ];
-
-    if (isset($_SERVER['DOCUMENT_ROOT'])) {
-        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
-        $searchPaths[] = $docRoot . '/storage/' . $path;
-        $searchPaths[] = $docRoot . '/public/storage/' . $path;
-        $searchPaths[] = $docRoot . '/storage/app/public/' . $path;
-    }
-
-    foreach (array_unique($searchPaths) as $candidate) {
-        if (file_exists($candidate) && is_file($candidate)) {
-            $mime = mime_content_type($candidate) ?: 'image/png';
-            return response()->file($candidate, ['Content-Type' => $mime, 'Cache-Control' => 'public, max-age=86400']);
-        }
-    }
-    
-    // Fail-safe: jika gambar tidak ditemukan, kembalikan logo resmi Master Cafe
-    $logoPaths = [
-        public_path('images/logo.png'),
-        base_path('public/images/logo.png'),
-        $homeDir . '/public_html/mastercafe.nadeak.net/images/logo.png',
-        $homeDir . '/repositories/master-cafe-pos/public/images/logo.png',
-    ];
-    foreach ($logoPaths as $logo) {
-        if (file_exists($logo) && is_file($logo)) {
-            return response()->file($logo, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=86400']);
-        }
-    }
-    return redirect('/images/logo.png');
-})->where('path', '.*');
+// Route Pembaca Gambar Fail-Safe (Ganti Symlink di Hosting cPanel)
+Route::get('/storage/{path}', [\App\Http\Controllers\StorageFallbackController::class, 'show'])
+    ->where('path', '.*')
+    ->name('storage.fallback');
 
 
 
@@ -263,6 +214,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/manual-order', [PosController::class, 'storeManualOrder']);
         Route::put('/order/{id_pesanan}/status', [PosController::class, 'updateOrderStatus']);
         Route::put('/order/{id_pesanan}/pay', [PosController::class, 'payOrder']);
+        Route::post('/order/{id_pesanan}/snap-token', [PosController::class, 'getKasirSnapToken'])->name('kasir.order.snap_token');
+        Route::post('/order/{id_pesanan}/qris-success', [PosController::class, 'markQrisPaid'])->name('kasir.order.qris_success');
         Route::put('/order/{id_pesanan}/verify-payment', [PosController::class, 'verifyPayment']);
         Route::put('/order/{id_pesanan}/reject-payment', [PosController::class, 'rejectPayment']);
         Route::put('/order/{id_pesanan}/void', [PosController::class, 'voidOrder'])->name('kasir.order.void');
@@ -340,6 +293,8 @@ Route::group([], function () {
     Route::post('/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
     Route::post('/konsumen/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
     Route::post('/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
+    Route::post('/konsumen/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti'])->name('konsumen.upload_bukti');
+    Route::post('/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
 
     // Panggil Pelayan (Call Bell) dari Meja
     Route::post('/konsumen/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');

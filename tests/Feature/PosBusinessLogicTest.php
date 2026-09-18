@@ -28,27 +28,17 @@ class PosBusinessLogicTest extends TestCase
         $this->withoutMiddleware(\App\Http\Middleware\EnsureShiftOpen::class);
     }
 
-    public function test_stok_bahan_berkurang_saat_pesanan_dibuat()
+    public function test_pesanan_berhasil_dibuat_saat_menu_tersedia()
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
 
-        $bahan = Bahan::create([
-            'nama_bahan' => 'Kopi',
-            'satuan' => 'gram',
-            'stok' => 1000,
-            'harga_beli' => 50000
-        ]);
-
         $menu = Menu::create([
             'nama_menu' => 'Kopi Hitam',
             'harga' => 10000,
-            'stok' => 100,
             'kategori' => 'minuman',
             'is_available' => true
         ]);
-
-        $menu->bahans()->attach($bahan->id, ['jumlah_dibutuhkan' => 20]);
 
         $meja = Meja::create([
             'nama_meja_atau_nomor' => '1',
@@ -68,35 +58,25 @@ class PosBusinessLogicTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-
-        // Stok Kopi = 1000 - (2 * 20) = 960
-        $this->assertDatabaseHas('bahans', [
-            'id' => $bahan->id,
-            'stok' => 960
+        $this->assertDatabaseHas('pesanan', [
+            'id_kasir' => $kasir->id,
+            'id_meja' => $meja->id,
+            'status' => 'pending'
         ]);
+        $this->assertFalse((bool) $meja->fresh()->is_available);
     }
 
-    public function test_pesanan_bisa_divoid_dan_stok_kembali()
+    public function test_pesanan_bisa_divoid_dan_status_dibatalkan()
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
 
-        $bahan = Bahan::create([
-            'nama_bahan' => 'Gula',
-            'satuan' => 'gram',
-            'stok' => 500,
-            'harga_beli' => 20000
-        ]);
-
         $menu = Menu::create([
             'nama_menu' => 'Teh Manis',
             'harga' => 5000,
-            'stok' => 100,
             'kategori' => 'minuman',
             'is_available' => true
         ]);
-
-        $menu->bahans()->attach($bahan->id, ['jumlah_dibutuhkan' => 15]);
 
         $pesanan = Pesanan::create([
             'id_kasir' => $kasir->id,
@@ -113,10 +93,6 @@ class PosBusinessLogicTest extends TestCase
             'subtotal' => 5000
         ]);
 
-        // Simulasikan stok sudah berkurang
-        $bahan->stok = 485;
-        $bahan->save();
-
         $response = $this->actingAs($kasir)->putJson("/kasir/order/{$pesanan->id}/void", [
             'alasan' => 'Salah input',
             'password' => 'password' // password default user factory
@@ -124,14 +100,9 @@ class PosBusinessLogicTest extends TestCase
 
         $response->assertStatus(200, 'Void order failed: ' . json_encode($response->json()));
 
-        // Stok kembali ke 500
-        $this->assertDatabaseHas('bahans', [
-            'id' => $bahan->id,
-            'stok' => 500
-        ]);
-
         $this->assertSoftDeleted('pesanan', [
             'id' => $pesanan->id
         ]);
+        $this->assertEquals('cancelled', Pesanan::withTrashed()->find($pesanan->id)->status);
     }
 }

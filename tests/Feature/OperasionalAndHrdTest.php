@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\Pengeluaran;
-use App\Models\PermintaanBelanja;
+use App\Models\PengeluaranBisnis;
 use App\Models\Absensi;
 
 class OperasionalAndHrdTest extends TestCase
@@ -42,49 +42,24 @@ class OperasionalAndHrdTest extends TestCase
         ]);
     }
 
-    /** Test 2: Kasir mengajukan permintaan belanja */
-    public function test_kasir_dapat_mengajukan_permintaan_belanja()
-    {
-        $kasir = User::factory()->create();
-        $kasir->assignRole('kasir');
-
-        $response = $this->actingAs($kasir)->post('/kasir/permintaan-belanja', [
-            'nama_barang' => 'Kopi Robusta 1kg',
-            'sisa_stok' => 'Tinggal 100 gram',
-            'jumlah_diminta' => '3 bungkus',
-            'catatan' => 'Merek Liong Bulan',
-        ]);
-
-        $response->assertRedirect('/kasir/permintaan-belanja');
-        $this->assertDatabaseHas('permintaan_belanjas', [
-            'user_id' => $kasir->id,
-            'nama_barang' => 'Kopi Robusta 1kg',
-            'status' => 'menunggu',
-        ]);
-    }
-
-    /** Test 3: Admin menyetujui permintaan belanja kasir */
-    public function test_admin_dapat_menyetujui_permintaan_belanja()
+    /** Test 2: Admin dapat mencatat pengeluaran bisnis / usaha */
+    public function test_admin_dapat_mencatat_pengeluaran_bisnis()
     {
         $admin = User::factory()->create();
         $admin->assignRole('pemilik');
 
-        $kasir = User::factory()->create();
-        $kasir->assignRole('kasir');
-
-        $permintaan = PermintaanBelanja::create([
-            'user_id' => $kasir->id,
-            'nama_barang' => 'Gula Pasir Gulaku',
-            'jumlah_diminta' => '5 kg',
-            'status' => 'menunggu',
-        ]);
-
-        $response = $this->actingAs($admin)->put("/admin/permintaan-belanja/{$permintaan->id}", [
-            'status' => 'sudah_dibeli',
+        $response = $this->actingAs($admin)->post('/admin/pengeluaran-bisnis', [
+            'tanggal' => date('Y-m-d'),
+            'kategori' => 'stok_bahan',
+            'deskripsi' => 'Beli Biji Kopi Arabika 5kg',
+            'nominal' => 350000,
         ]);
 
         $response->assertRedirect();
-        $this->assertEquals('sudah_dibeli', $permintaan->fresh()->status);
+        $this->assertDatabaseHas('pengeluaran_bisnis', [
+            'deskripsi' => 'Beli Biji Kopi Arabika 5kg',
+            'nominal' => 350000,
+        ]);
     }
 
     /** Test 4: Kasir melakukan absensi clock-in dengan koordinat GPS */

@@ -17,11 +17,39 @@
             '';
     }
 
-    window.voidOrder = function (id) {
+    window.voidOrder = function (id, orderOptions = null) {
         currentVoidOrderId = id;
 
+        const containerSelect = document.getElementById('void-order-selection-container');
+        const idSelect = document.getElementById('void-order-id-select');
         const idDisplay = document.getElementById('void-order-id-display');
-        if (idDisplay) idDisplay.innerText = id;
+
+        if (orderOptions && Array.isArray(orderOptions) && orderOptions.length > 1) {
+            if (containerSelect && idSelect) {
+                containerSelect.classList.remove('d-none');
+                idSelect.innerHTML = '';
+
+                // Prioritaskan pesanan yang belum bayar sebagai default terpilih
+                let defaultSelectedId = id;
+                const unpaidFirst = orderOptions.find(o => !o.is_paid);
+                if (unpaidFirst) {
+                    defaultSelectedId = unpaidFirst.id;
+                    currentVoidOrderId = unpaidFirst.id;
+                }
+
+                orderOptions.forEach(opt => {
+                    const optEl = document.createElement('option');
+                    optEl.value = opt.id;
+                    optEl.innerText = opt.label;
+                    if (opt.id === defaultSelectedId) optEl.selected = true;
+                    idSelect.appendChild(optEl);
+                });
+            }
+        } else {
+            if (containerSelect) containerSelect.classList.add('d-none');
+        }
+
+        if (idDisplay) idDisplay.innerText = currentVoidOrderId;
 
         const errorAlert = document.getElementById('void-error-alert');
         if (errorAlert) {
@@ -62,6 +90,12 @@
         setTimeout(() => {
             if (passInput) passInput.focus();
         }, 300);
+    };
+
+    window.handleVoidOrderSelection = function (selectEl) {
+        currentVoidOrderId = selectEl.value;
+        const idDisplay = document.getElementById('void-order-id-display');
+        if (idDisplay) idDisplay.innerText = currentVoidOrderId;
     };
 
     window.handleVoidReasonChange = function (selectEl) {
@@ -202,5 +236,15 @@
                 }
             });
     };
+
+    if (window.WaitressApp) {
+        window.WaitressApp.modules.void = {
+            openModal: window.voidOrder,
+            submit: window.submitVoidOrder,
+            handleOrderSelection: window.handleVoidOrderSelection,
+            handleReasonChange: window.handleVoidReasonChange,
+            togglePasswordVisibility: window.toggleVoidPasswordVisibility
+        };
+    }
 
 })();

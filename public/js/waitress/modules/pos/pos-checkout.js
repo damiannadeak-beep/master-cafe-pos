@@ -44,6 +44,130 @@
         window.submitOrder(1, 'qris');
     };
 
+    // --- INTEGRASI QRIS DINAMIS MIDTRANS SANDBOX (POS KASIR) ---
+    window.startPosMidtransQris = function () {
+        const cart = window.posCart || [];
+        if (cart.length === 0) return alert('Keranjang masih kosong!');
+
+        const modalEl = document.getElementById('qrisModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        const tipePesanan = document.querySelector('select[name="tipe_pesanan"]')?.value || 'dine_in';
+        const mejaSelect = document.querySelector('select[name="id_meja"]');
+        const idMeja = tipePesanan === 'takeaway' ? null : (mejaSelect ? mejaSelect.value : null);
+
+        if (tipePesanan === 'dine_in' && !idMeja) {
+            return alert('Silakan pilih nomor meja untuk pesanan Makan di Tempat (Dine In)!');
+        }
+
+        const btnQris = document.getElementById('btn-start-midtrans-qris');
+        if (btnQris) {
+            btnQris.disabled = true;
+            btnQris.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menghubungkan Midtrans...';
+        }
+
+        const formData = {
+            _token: getCsrfToken(),
+            id_meja: idMeja,
+            tipe_pesanan: tipePesanan,
+            promo_id: document.querySelector('select[name="promo_id"]')?.value || null,
+            pembayaran_langsung: 0,
+            metode_pembayaran: 'qris',
+            items: cart
+        };
+
+        fetch(window.manualOrderUrl || '/kasir/manual-order', {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCsrfToken()
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (btnQris) {
+                    btnQris.disabled = false;
+                    btnQris.innerHTML = '<i class="bi bi-lightning-charge-fill me-1"></i> QRIS Dinamis Midtrans';
+                }
+
+                if (data.error) {
+                    alert('Gagal memproses pesanan: ' + data.error);
+                    return;
+                }
+
+                if (!data.snap_token) {
+                    alert('Gagal mendapatkan token Midtrans QRIS. Silakan gunakan opsi QRIS Statis Toko.');
+                    return;
+                }
+
+                if (typeof window.snap === 'undefined') {
+                    alert('Script Midtrans Snap belum termuat. Periksa koneksi internet Anda.');
+                    return;
+                }
+
+                // Buka Popup Resmi Midtrans Snap Sandbox
+                window.snap.pay(data.snap_token, {
+                    onSuccess: function (result) {
+                        fetch(`/kasir/order/${data.id_pesanan}/qris-success`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": getCsrfToken()
+                            },
+                            body: JSON.stringify({ midtrans_result: result })
+                        })
+                            .then(res => res.json())
+                            .then(resSuccess => {
+                                localStorage.removeItem('kasir_cart');
+                                window.posCart = [];
+
+                                if (confirm('✅ Pembayaran QRIS Berhasil (LUNAS)!\n\nIngin mencetak struk sekarang?')) {
+                                    if (window.printerActive) {
+                                        fetch(`/kasir/order/${data.id_pesanan}/print-thermal`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() }
+                                        }).finally(() => location.reload());
+                                    } else {
+                                        window.open(`/kasir/order/${data.id_pesanan}/receipt`, '_blank');
+                                        location.reload();
+                                    }
+                                } else {
+                                    location.reload();
+                                }
+                            })
+                            .catch(() => location.reload());
+                    },
+                    onPending: function (result) {
+                        alert('⏳ Pembayaran QRIS sedang menunggu transaksi (Pending).\nPesanan tersimpan di antrean monitor kasir.');
+                        localStorage.removeItem('kasir_cart');
+                        window.posCart = [];
+                        window.location.href = '/kasir/pesanan-aktif';
+                    },
+                    onError: function (result) {
+                        alert('❌ Pembayaran QRIS Midtrans gagal diproses.');
+                    },
+                    onClose: function () {
+                        if (confirm('Jendela QRIS ditutup. Pesanan #' + data.id_pesanan + ' telah tersimpan di antrean kasir sebagai Belum Bayar.\n\nBuka monitor antrean kasir sekarang?')) {
+                            localStorage.removeItem('kasir_cart');
+                            window.posCart = [];
+                            window.location.href = '/kasir/pesanan-aktif';
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                if (btnQris) {
+                    btnQris.disabled = false;
+                    btnQris.innerHTML = '<i class="bi bi-lightning-charge-fill me-1"></i> QRIS Dinamis Midtrans';
+                }
+                alert('Terjadi kesalahan jaringan: ' + err.message);
+            });
+    };
+
     // --- LOGIKA PEMBAYARAN TUNAI ---
     window.showCashModal = function () {
         const cart = window.posCart || [];

@@ -21,6 +21,14 @@
 
                     <div id="void-error-alert" class="alert alert-warning small py-2 px-3 rounded-3 mb-3 d-none"></div>
 
+                    <!-- Pilihan Nomor Pesanan (Jika Sesi Terdiri dari Beberapa Sub-Order) -->
+                    <div id="void-order-selection-container" class="mb-3 d-none">
+                        <label class="form-label text-white-50 small fw-bold mb-1">Pilih Pesanan yang Dibatalkan</label>
+                        <select id="void-order-id-select" class="form-select form-select-sm text-white" style="background-color: #0e1217; border-color: #21262d;" onchange="window.handleVoidOrderSelection(this)">
+                        </select>
+                        <small class="text-white-50" style="font-size: 10px;">Pilih nomor pesanan yang ingin dihapus / dibatalkan.</small>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label text-white-50 small fw-bold mb-1">Alasan Pembatalan (Wajib)</label>
                         <select id="void-alasan-select" class="form-select form-select-sm text-white mb-2" style="background-color: #0e1217; border-color: #21262d;" onchange="window.handleVoidReasonChange(this)">

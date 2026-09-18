@@ -45,7 +45,6 @@ class ManualOrderTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('pesanan', ['id_kasir' => $kasir->id, 'tipe_pesanan' => 'dine_in', 'status' => 'pending']);
-        $this->assertEquals(47, $menu->fresh()->stok);
     }
 
     /** TEST 2: Manual order takeaway berhasil (tetap butuh id_meja) */
@@ -53,7 +52,7 @@ class ManualOrderTest extends TestCase
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
-        $menu = Menu::create(['nama_menu' => 'Nasi Goreng', 'harga' => 15000, 'stok' => 20, 'kategori' => 'makanan', 'is_available' => true]);
+        $menu = Menu::create(['nama_menu' => 'Nasi Goreng', 'harga' => 15000, 'kategori' => 'makanan', 'is_available' => true]);
         $meja = $this->buatMeja();
 
         $response = $this->actingAs($kasir)->postJson('/kasir/manual-order', [
@@ -63,51 +62,31 @@ class ManualOrderTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('pesanan', ['id_kasir' => $kasir->id, 'tipe_pesanan' => 'takeaway']);
-        $this->assertEquals(19, $menu->fresh()->stok);
     }
 
-    /** TEST 3: Stok bahan baku ikut berkurang saat order */
-    public function test_stok_bahan_berkurang_saat_order()
+    /** TEST 3: Order gagal jika status menu tidak tersedia (habis) */
+    public function test_order_gagal_jika_menu_tidak_tersedia()
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
-        $bahan = Bahan::create(['nama_bahan' => 'Kopi Bubuk', 'satuan' => 'gram', 'stok' => 1000, 'harga_beli' => 50000]);
-        $menu = Menu::create(['nama_menu' => 'Kopi Hitam', 'harga' => 10000, 'stok' => 100, 'kategori' => 'minuman', 'is_available' => true]);
-        $menu->bahans()->attach($bahan->id, ['jumlah_dibutuhkan' => 20]);
+        $menu = Menu::create(['nama_menu' => 'Roti Bakar', 'harga' => 10000, 'kategori' => 'makanan', 'is_available' => false]);
         $meja = $this->buatMeja();
 
         $response = $this->actingAs($kasir)->postJson('/kasir/manual-order', [
             'id_meja' => $meja->id, 'tipe_pesanan' => 'dine_in', 'pembayaran_langsung' => false,
-            'items' => [['id_menu' => $menu->id, 'jumlah' => 2]],
-        ]);
-
-        $response->assertStatus(200);
-        $this->assertEquals(960, $bahan->fresh()->stok);
-    }
-
-    /** TEST 4: Order gagal jika stok menu habis */
-    public function test_order_gagal_jika_stok_habis()
-    {
-        $kasir = User::factory()->create();
-        $kasir->assignRole('kasir');
-        $menu = Menu::create(['nama_menu' => 'Roti Bakar', 'harga' => 10000, 'stok' => 1, 'kategori' => 'makanan', 'is_available' => true]);
-        $meja = $this->buatMeja();
-
-        $response = $this->actingAs($kasir)->postJson('/kasir/manual-order', [
-            'id_meja' => $meja->id, 'tipe_pesanan' => 'dine_in', 'pembayaran_langsung' => false,
-            'items' => [['id_menu' => $menu->id, 'jumlah' => 5]],
+            'items' => [['id_menu' => $menu->id, 'jumlah' => 1]],
         ]);
 
         $response->assertStatus(422);
     }
 
-    /** TEST 5: Order dengan multiple menu */
+    /** TEST 4: Order dengan multiple menu berhasil */
     public function test_order_dengan_multiple_menu()
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
-        $menu1 = Menu::create(['nama_menu' => 'Es Teh', 'harga' => 5000, 'stok' => 50, 'kategori' => 'minuman', 'is_available' => true]);
-        $menu2 = Menu::create(['nama_menu' => 'Nasi Goreng', 'harga' => 15000, 'stok' => 30, 'kategori' => 'makanan', 'is_available' => true]);
+        $menu1 = Menu::create(['nama_menu' => 'Es Teh', 'harga' => 5000, 'kategori' => 'minuman', 'is_available' => true]);
+        $menu2 = Menu::create(['nama_menu' => 'Nasi Goreng', 'harga' => 15000, 'kategori' => 'makanan', 'is_available' => true]);
         $meja = $this->buatMeja();
 
         $response = $this->actingAs($kasir)->postJson('/kasir/manual-order', [
@@ -119,7 +98,6 @@ class ManualOrderTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $this->assertEquals(48, $menu1->fresh()->stok);
-        $this->assertEquals(29, $menu2->fresh()->stok);
+        $this->assertDatabaseCount('detail_pesanan', 2);
     }
 }

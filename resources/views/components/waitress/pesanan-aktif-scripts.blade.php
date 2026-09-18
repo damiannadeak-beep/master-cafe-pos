@@ -1,6 +1,7 @@
 <script>
     window.WaitressConfig = Object.assign(window.WaitressConfig || {}, {
         pesananAktifUrl: "{{ route('kasir.pesanan_aktif') }}",
+        ordersCountUrl: "{{ route('kasir.active_orders_count') }}",
         csrfToken: "{{ csrf_token() }}"
     });
 </script>

@@ -206,7 +206,7 @@
         }
     };
 
-    // --- Realtime Dynamic Cards Loader (Tanpa Refresh Halaman) ---
+    // --- Realtime Dynamic Cards Loader (Tanpa Refresh Halaman & State Preserving) ---
     window.reloadActiveOrdersCards = function (silent = false) {
         if (isReloadingCards) return;
         const container = document.getElementById('active-orders-container');
@@ -219,6 +219,9 @@
             if (icon) icon.classList.add('spin-animation');
             refreshBtn.disabled = true;
         }
+
+        // Simpan posisi scroll vertikal sebelum DOM diganti
+        const prevScrollY = window.scrollY || document.documentElement.scrollTop;
 
         fetch(getPesananAktifUrl() + '?cards_only=1&_t=' + Date.now(), {
             headers: {
@@ -233,6 +236,15 @@
                 const anyModalOpen = document.querySelector('.modal.show');
                 if (!anyModalOpen && !window.activeCompletedOrderId) {
                     container.innerHTML = html;
+                    
+                    // Pulihkan state accordion yang dilipat
+                    if (typeof window.restoreCollapsedSubOrders === 'function') {
+                        window.restoreCollapsedSubOrders();
+                    }
+
+                    // Kembalikan posisi scroll secara mulus dan instan tanpa loncat
+                    window.scrollTo({ top: prevScrollY, behavior: 'instant' });
+
                     let totalOrdersCount = 0;
                     const activeCards = container.querySelectorAll('.order-card-item, [data-order-ids]');
                     activeCards.forEach(card => {
@@ -260,19 +272,85 @@
             });
     };
 
-    // Auto-sync berkala tiap 12 detik jika kasir sedang di tab aktif dan idle (tidak ada modal terbuka)
-    setInterval(() => {
-        if (!document.hidden && !document.querySelector('.modal.show') && !window.activeCompletedOrderId) {
-            if (!isReloadingCards) {
-                window.reloadActiveOrdersCards(true);
-            }
-            if (typeof window.reloadCompletedOrders === 'function' && !isReloadingCompleted) {
-                window.reloadCompletedOrders(true);
-            }
-            if (typeof window.reloadVoidedOrders === 'function' && !isReloadingVoided) {
-                window.reloadVoidedOrders(true);
-            }
+    // --- SMART HASH-BASED REALTIME SYNC (Enterprise Standard) ---
+    // Memeriksa hash pembaruan data ringan (~100 bytes) alih-alih request render HTML penuh (~30 KB)
+    let lastKnownHash = null;
+    let isCheckingHash = false;
+
+    window.resetSyncHash = function () {
+        lastKnownHash = null;
+    };
+
+    function checkDataHashAndSync() {
+        if (isCheckingHash || document.hidden || document.querySelector('.modal.show') || window.activeCompletedOrderId) {
+            return;
         }
-    }, 12000);
+
+        const countUrl = window.WaitressHelper?.getOrdersCountUrl?.() || '/kasir/api/active-orders-count';
+        isCheckingHash = true;
+
+        fetch(countUrl + '?_t=' + Date.now(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.hash) return;
+
+                // Perbarui badge jumlah pesanan secara langsung tanpa render ulang
+                const badgeActive = document.getElementById('tab-count-active');
+                if (badgeActive && typeof data.count !== 'undefined') {
+                    badgeActive.innerText = data.count;
+                }
+                const badgeCompleted = document.getElementById('tab-count-completed');
+                if (badgeCompleted && typeof data.completed_count !== 'undefined') {
+                    badgeCompleted.innerText = data.completed_count;
+                }
+
+                // Inisialisasi hash pertama kali tanpa render ulang
+                if (lastKnownHash === null) {
+                    lastKnownHash = data.hash;
+                    return;
+                }
+
+                // HANYA jika hash data berbeda (terjadi perubahan pesanan riil di kafe):
+                if (data.hash !== lastKnownHash) {
+                    lastKnownHash = data.hash;
+
+                    if (currentOrderTab === 'active' && !isReloadingCards) {
+                        window.reloadActiveOrdersCards(true);
+                    } else if (currentOrderTab === 'completed' && !isReloadingCompleted) {
+                        window.reloadCompletedOrders(true);
+                    } else if (currentOrderTab === 'voided' && !isReloadingVoided) {
+                        window.reloadVoidedOrders(true);
+                    }
+                }
+            })
+            .catch(err => {
+                // Silent catch: Jangan ganggu kasir saat koneksi wifi berkedip sesaat
+            })
+            .finally(() => {
+                isCheckingHash = false;
+            });
+    }
+
+    // Jalankan Smart Polling setiap 5 detik (sangat ringan, hanya hitungan milidetik)
+    setInterval(checkDataHashAndSync, 5000);
+
+    // Registrasi ke WaitressApp namespace
+    if (window.WaitressApp) {
+        window.WaitressApp.modules.sync = {
+            switchOrderTab: window.switchOrderTab,
+            refreshCurrentTab: window.refreshCurrentTab,
+            reloadActiveOrdersCards: window.reloadActiveOrdersCards,
+            reloadCompletedOrders: window.reloadCompletedOrders,
+            reloadVoidedOrders: window.reloadVoidedOrders,
+            checkDataHashAndSync: checkDataHashAndSync,
+            resetSyncHash: window.resetSyncHash
+        };
+    }
 
 })();

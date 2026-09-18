@@ -1,23 +1,48 @@
 <!-- Modal QRIS -->
 <div class="modal fade" id="qrisModal" tabindex="-1" aria-labelledby="qrisModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
         <div class="modal-content text-center rounded-4 border-0 shadow">
             <div class="modal-header border-0 pb-0">
                 <button type="button" class="btn-close btn-touch" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body px-4 pb-4">
-                <h5 class="fw-bold mb-3">Scan QRIS</h5>
-                @php $qrisImage = \App\Models\Setting::getVal('qris_image'); @endphp
-                @if($qrisImage)
-                    <img src="{{ asset('storage/'.$qrisImage) }}" alt="QRIS" class="img-fluid rounded mb-3 border p-2">
-                    <p class="small text-muted mb-4">Silakan arahkan pelanggan untuk scan Barcode di atas. Pastikan saldo sudah masuk sebelum menekan tombol Selesai.</p>
-                    <button type="button" onclick="confirmQrisPayment()" class="btn btn-primary fw-bold w-100 rounded-pill btn-touch">Selesai & Cetak Struk</button>
-                @else
-                    <div class="p-4 rounded mb-3">
-                        <i class="bi bi-qr-code text-muted" style="font-size: 3rem;"></i>
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 56px; height: 56px;">
+                    <i class="bi bi-qr-code-scan fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-1">Pembayaran QRIS</h5>
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small mb-3">
+                    <i class="bi bi-shield-check me-1"></i> Midtrans Sandbox Mode
+                </span>
+                
+                <p class="small text-muted mb-3">Pilih metode pembayaran QRIS untuk pelanggan:</p>
+
+                <!-- Tombol Utama: Dynamic QRIS Midtrans -->
+                <button type="button" id="btn-start-midtrans-qris" onclick="startPosMidtransQris()" class="btn btn-primary fw-bold w-100 rounded-pill py-2.5 mb-2 shadow-sm btn-touch">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> QRIS Dinamis Midtrans
+                </button>
+                <small class="d-block text-muted mb-3" style="font-size: 0.75rem;">Nominal tagihan otomatis terkunci di m-Banking / e-Wallet pelanggan & langsung auto-lunas.</small>
+
+                <!-- Collapsible QRIS Statis Toko (Cadangan Manual) -->
+                <div class="border-top pt-3">
+                    <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 small" type="button" data-bs-toggle="collapse" data-bs-target="#staticQrisCollapse" aria-expanded="false">
+                        <i class="bi bi-image me-1"></i> Opsi Cadangan: QRIS Statis Toko
+                    </button>
+                    <div class="collapse mt-2 text-center" id="staticQrisCollapse">
+                        @php $qrisImage = \App\Models\Setting::getVal('qris_image'); @endphp
+                        @if($qrisImage)
+                            <img src="{{ asset('storage/'.$qrisImage) }}" alt="QRIS" class="img-fluid rounded mb-2 border p-2" style="max-height: 180px;">
+                            <p class="text-muted" style="font-size: 0.72rem;">Pelanggan ketik nominal manual. Pastikan uang masuk sebelum konfirmasi.</p>
+                            <button type="button" onclick="confirmQrisPayment()" class="btn btn-outline-secondary btn-sm fw-bold w-100 rounded-pill btn-touch">
+                                Konfirmasi Manual & Cetak Struk
+                            </button>
+                        @else
+                            <div class="p-3 bg-light rounded mb-2">
+                                <i class="bi bi-qr-code text-muted fs-3"></i>
+                            </div>
+                            <p class="text-danger small fw-bold mb-0">Admin belum mengatur gambar QRIS statis.</p>
+                        @endif
                     </div>
-                    <p class="text-danger small fw-bold mb-0">Admin belum mengatur gambar QRIS.</p>
-                @endif
+                </div>
             </div>
         </div>
     </div>
