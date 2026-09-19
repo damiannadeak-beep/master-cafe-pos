@@ -19,7 +19,7 @@
                         <small class="fw-bold text-danger" style="font-size: 0.8rem;">
                             <i class="bi bi-exclamation-circle me-1"></i> Ada Tagihan Belum Dibayar (Open Bill)
                         </small>
-                        <a href="{{ url('konsumen/checkout/' . $pesananAktif->id) }}" class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill fw-semibold" style="font-size: 0.72rem;">
+                        <a href="{{ url('konsumen/checkout/' . $pesananAktif->id . ($pesananAktif->order_token ? '?token=' . $pesananAktif->order_token : '')) }}" class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill fw-semibold" style="font-size: 0.72rem;">
                             Lihat / Bayar Tagihan <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                     </div>

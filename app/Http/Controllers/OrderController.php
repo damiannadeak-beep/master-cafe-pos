@@ -25,6 +25,8 @@ class OrderController extends Controller
             return response()->view('konsumen.meja_not_found', compact('id_meja'), 404);
         }
         
+        session(['id_meja' => $id_meja]);
+        
         // Cek apakah ada pesanan 'unpaid' aktif di meja ini (Konsep Open Bill)
         $pesananAktif = Pesanan::where('id_meja', $id_meja)
             ->where('status', '!=', 'completed')

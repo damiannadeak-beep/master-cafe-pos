@@ -35,6 +35,8 @@ class PaymentController extends Controller
             $isAuthorized = true;
         } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
             $isAuthorized = true;
+        } elseif ($pesanan->id_meja && (session('id_meja') == $pesanan->id_meja || (auth()->check() && in_array(auth()->user()->role, ['admin', 'kasir', 'pemilik', 'waitress'])))) {
+            $isAuthorized = true;
         }
 
         if (!$isAuthorized) {
