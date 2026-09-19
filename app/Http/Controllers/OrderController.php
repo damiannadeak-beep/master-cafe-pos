@@ -27,11 +27,12 @@ class OrderController extends Controller
         
         session(['id_meja' => $id_meja]);
         
-        // Cek apakah ada pesanan 'unpaid' aktif di meja ini (Konsep Open Bill)
+        // Cek apakah ada pesanan 'unpaid' aktif di meja ini yang sudah dikonfirmasi pembayarannya (Konsep Open Bill Resmi)
         $pesananAktif = Pesanan::where('id_meja', $id_meja)
             ->where('status', '!=', 'completed')
             ->whereHas('pembayaran', function($q) {
-                $q->where('status', 'unpaid');
+                $q->where('status', 'unpaid')
+                  ->where('metode', 'cash');
             })->first();
 
         $menus = Menu::orderBy('is_available', 'desc')->orderBy('nama_menu', 'asc')->get();

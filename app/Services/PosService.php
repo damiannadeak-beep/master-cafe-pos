@@ -32,15 +32,10 @@ class PosService
             ->where(function ($sub) {
                 // 1. Dibuat langsung oleh Kasir di POS
                 $sub->whereNotNull('id_kasir')
-                    // 2. Pesanan Dine-In (Makan di Tempat) dengan Meja Aktif (Open Bill)
-                    ->orWhere(function ($dineInQ) {
-                        $dineInQ->where('tipe_pesanan', 'dine_in')
-                                ->whereNotNull('id_meja');
-                    })
-                    // 3. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
+                    // 2. Sudah dikonfirmasi pembayarannya (Lunas via QRIS/VA atau memilih opsi Bayar Tunai di Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
                         $p->where('status', 'paid')
-                          // 4. Tunai di Meja (Cash)
+                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai di kasir
                           ->orWhere(function ($cashQ) {
                               $cashQ->where('status', 'unpaid')
                                     ->where('metode', 'cash');
@@ -510,15 +505,10 @@ class PosService
             ->where(function ($sub) {
                 // 1. Dibuat langsung oleh Kasir di POS
                 $sub->whereNotNull('id_kasir')
-                    // 2. Pesanan Dine-In (Makan di Tempat) dengan Meja Aktif (Open Bill)
-                    ->orWhere(function ($dineInQ) {
-                        $dineInQ->where('tipe_pesanan', 'dine_in')
-                                ->whereNotNull('id_meja');
-                    })
-                    // 3. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
+                    // 2. Sudah dikonfirmasi pembayarannya (Lunas via QRIS/VA atau memilih opsi Bayar Tunai di Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
                         $p->where('status', 'paid')
-                          // 4. Tunai di Meja (Cash)
+                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai di kasir
                           ->orWhere(function ($cashQ) {
                               $cashQ->where('status', 'unpaid')
                                     ->where('metode', 'cash');
