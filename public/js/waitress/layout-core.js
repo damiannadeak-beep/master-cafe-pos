@@ -175,7 +175,8 @@
                     if (callBells.length > 0) {
                         let itemsHtml = '<li class="dropdown-header text-white-50 fw-bold small border-bottom border-secondary border-opacity-25 pb-2 mb-1"><i class="bi bi-bell-fill me-1 text-warning"></i> Panggilan Meja Aktif (' + callBells.length + ')</li>';
                         callBells.forEach(c => {
-                            itemsHtml += '<li class="px-2 py-1"><div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded-3 border border-secondary border-opacity-25"><div><strong class="text-warning small d-block"><i class="bi bi-bell-fill me-1"></i>' + c.message + '</strong><small class="text-white-50" style="font-size: 0.72rem;">Konsumen memanggil pelayan</small></div><button onclick="dismissCallBellNotif(' + c.id + ')" class="btn btn-sm btn-warning rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;"><i class="bi bi-check2"></i> Tanggapi</button></div></li>';
+                            const cleanMsg = (c.message || '').replace(/^🔔\s*/, '');
+                            itemsHtml += '<li class="px-2 py-1"><div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded-3 border border-secondary border-opacity-25"><div><strong class="text-warning small d-block"><i class="bi bi-bell-fill me-1"></i>' + cleanMsg + '</strong><small class="text-white-50" style="font-size: 0.72rem;">Konsumen memanggil pelayan</small></div><button onclick="dismissCallBellNotif(' + c.id + ')" class="btn btn-sm btn-warning rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;"><i class="bi bi-check2"></i> Tanggapi</button></div></li>';
                         });
                         listContainer.innerHTML = itemsHtml;
                     } else {
@@ -192,7 +193,8 @@
                             }
                             if (window.showToast) {
                                 const isCallBell = notif.type === 'call_bell';
-                                window.showToast((isCallBell ? '🔔 ' : '📦 ') + notif.message, isCallBell ? 'warning' : 'success');
+                                const cleanMsg = (notif.message || '').replace(/^🔔\s*/, '');
+                                window.showToast((isCallBell ? '🔔 ' : '📦 ') + cleanMsg, isCallBell ? 'warning' : 'success');
                             }
                             if (typeof window.reloadMejaGrid === 'function') {
                                 window.reloadMejaGrid(true);

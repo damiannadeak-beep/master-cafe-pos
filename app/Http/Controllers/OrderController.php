@@ -280,10 +280,14 @@ class OrderController extends Controller
             return response()->json(['error' => 'Pelayan sudah dipanggil dan sedang menuju ke meja Anda.'], 429);
         }
 
+        $tableName = preg_match('/^meja\s+/i', $meja->nama_meja_atau_nomor) 
+            ? ucwords($meja->nama_meja_atau_nomor) 
+            : 'Meja ' . ucwords($meja->nama_meja_atau_nomor);
+
         \App\Models\Notification::create([
             'type' => 'call_bell',
             'id_meja' => $meja->id,
-            'message' => '🔔 Panggilan Pelayan dari Meja ' . $meja->nama_meja_atau_nomor . '!',
+            'message' => 'Panggilan Pelayan dari ' . $tableName . '!',
             'is_read' => false
         ]);
 
@@ -297,8 +301,8 @@ class OrderController extends Controller
         // Trigger Push Notification to Admin and Kasir
         $adminsAndKasirs = \App\Models\User::role(['pemilik', 'kasir'])->with('pushSubscriptions')->get();
         \Illuminate\Support\Facades\Notification::send($adminsAndKasirs, new \App\Notifications\WebPushNotification(
-            '🔔 Panggilan Pelayan!',
-            'Meja ' . $meja->nama_meja_atau_nomor . ' membutuhkan bantuan pelayan.',
+            'Panggilan Pelayan!',
+            $tableName . ' membutuhkan bantuan pelayan.',
             '/kasir/pesanan-aktif'
         ));
 
