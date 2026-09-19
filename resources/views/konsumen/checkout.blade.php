@@ -333,9 +333,15 @@
             activeCard.style.borderColor = '#22c55e !important';
         }
 
-        // Tampilkan catatan opsional
+        // Tampilkan catatan opsional HANYA jika memilih "Bayar Pas di Meja"
         const noteContainer = document.getElementById('cash-note-container');
-        noteContainer.style.display = 'block';
+        const noteInput = document.getElementById('catatan_cash');
+        if (mode === 'bayar_pas') {
+            if (noteContainer) noteContainer.style.display = 'block';
+        } else {
+            if (noteContainer) noteContainer.style.display = 'none';
+            if (noteInput) noteInput.value = '';
+        }
 
         // Enable submit
         document.getElementById('btn-submit-cash').disabled = false;

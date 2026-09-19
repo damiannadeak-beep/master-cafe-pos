@@ -240,7 +240,7 @@ class PaymentController extends Controller
         if ($pembayaran && $pembayaran->status !== 'paid') {
             $totalTagihan = (float) $pembayaran->total_bayar;
             $cashMode = $request->input('cash_mode', 'bayar_pas'); // 'kasir' atau 'bayar_pas'
-            $catatanCash = $request->input('catatan_cash', '');
+            $catatanCash = $cashMode === 'kasir' ? '' : trim((string)$request->input('catatan_cash', ''));
 
             // Cek apakah meja memiliki tagihan aktif sebelumnya yang belum dibayar
             $otherUnpaidOrders = collect([]);
@@ -262,7 +262,7 @@ class PaymentController extends Controller
                 ? 'Tamu akan datang ke kasir' 
                 : 'Bayar tunai di meja';
             
-            if (!empty($catatanCash)) {
+            if ($cashMode === 'bayar_pas' && !empty($catatanCash)) {
                 $catatanKembalian .= ' | Catatan: ' . $catatanCash;
             }
 
