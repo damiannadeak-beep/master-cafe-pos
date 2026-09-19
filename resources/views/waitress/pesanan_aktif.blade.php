@@ -1,7 +1,7 @@
 @extends('layouts.waitress')
 
 @section('content')
-<div class="container-fluid px-0 py-3" style="height: 100%; overflow-y: auto; overflow-x: hidden; padding-bottom: 5rem !important;">
+<div class="container-fluid px-0 py-3" style="padding-bottom: 5rem !important;">
     <!-- Top Header & Segmented Pill Tabs -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>

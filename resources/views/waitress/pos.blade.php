@@ -17,8 +17,9 @@
 @include("components.waitress.pos-scripts")
 
 <style>
-    .kasir-main { padding: 0 !important; }
-    .kasir-container { padding: 0 !important; overflow: hidden !important; }
+    html, body, .kasir-layout { height: 100vh !important; overflow: hidden !important; }
+    .kasir-main { padding: 0 !important; overflow: hidden !important; }
+    .kasir-container { padding: 0 !important; overflow: hidden !important; height: 100% !important; }
 
     .item-menu:hover { background-color: #F0E9DD; transform: translateY(-3px); border: 1px solid #3E2723 !important; }
 

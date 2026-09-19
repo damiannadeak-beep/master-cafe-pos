@@ -4,12 +4,11 @@
  */
 
 .kasir-layout {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     margin: 0;
     padding: 0;
-    overflow: hidden;
 }
 
 .kasir-main {
@@ -17,16 +16,11 @@
     display: flex;
     flex-direction: column;
     background: var(--bg-base);
-    overflow: hidden;
     padding: 1.5rem;
-    min-height: 0;
 }
 
 .kasir-container {
     flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
     max-width: 1360px;
     margin: 0 auto;
     padding: 0 0.5rem 2rem 0.5rem;
@@ -71,22 +65,23 @@
     border-right: 1px solid #21262d;
 }
 
-/* Custom Scrollbar for inner containers */
-.kasir-container::-webkit-scrollbar {
+/* Custom Scrollbar */
+::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
 }
 
-.kasir-container::-webkit-scrollbar-track {
-    background: transparent;
+::-webkit-scrollbar-track {
+    background: #0e1217;
 }
 
-.kasir-container::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: #21262d;
     border-radius: 4px;
 }
 
-.kasir-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(152, 108, 67, 0.5);
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(192, 142, 92, 0.5);
 }
 
 /* Sembunyikan tombol mata default browser Edge/IE agar tidak bertumpuk */
