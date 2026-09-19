@@ -32,10 +32,15 @@ class PosService
             ->where(function ($sub) {
                 // 1. Dibuat langsung oleh Kasir di POS
                 $sub->whereNotNull('id_kasir')
-                    // 2. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
+                    // 2. Pesanan Dine-In (Makan di Tempat) dengan Meja Aktif (Open Bill)
+                    ->orWhere(function ($dineInQ) {
+                        $dineInQ->where('tipe_pesanan', 'dine_in')
+                                ->whereNotNull('id_meja');
+                    })
+                    // 3. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
                         $p->where('status', 'paid')
-                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai & nominal uang yang disiapkan
+                          // 4. Tunai di Meja (Cash)
                           ->orWhere(function ($cashQ) {
                               $cashQ->where('status', 'unpaid')
                                     ->where('metode', 'cash');
@@ -505,10 +510,15 @@ class PosService
             ->where(function ($sub) {
                 // 1. Dibuat langsung oleh Kasir di POS
                 $sub->whereNotNull('id_kasir')
-                    // 2. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
+                    // 2. Pesanan Dine-In (Makan di Tempat) dengan Meja Aktif (Open Bill)
+                    ->orWhere(function ($dineInQ) {
+                        $dineInQ->where('tipe_pesanan', 'dine_in')
+                                ->whereNotNull('id_meja');
+                    })
+                    // 3. Sudah Lunas (QRIS, Transfer, atau Tunai Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
                         $p->where('status', 'paid')
-                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai & nominal uang yang disiapkan
+                          // 4. Tunai di Meja (Cash)
                           ->orWhere(function ($cashQ) {
                               $cashQ->where('status', 'unpaid')
                                     ->where('metode', 'cash');
