@@ -116,7 +116,7 @@
 
                             @if(!empty($snapToken))
                                 <button id="pay-button" onclick="payWithSnap()" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
-                                    âš¡ Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
+                                    <i class="bi bi-lightning-charge-fill me-1"></i> Bayar Sekarang via QRIS / VA <i class="bi bi-arrow-right ms-1"></i>
                                 </button>
                             @else
                                 @if(app()->isProduction())
@@ -130,7 +130,7 @@
                                             <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
                                         @endif
                                         <button type="submit" class="btn btn-lg w-100 fw-bold rounded-pill shadow btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 1rem;">
-                                            âš¡ [Simulasi Testing] Bayar Sekarang via QRIS <i class="bi bi-arrow-right ms-1"></i>
+                                            <i class="bi bi-lightning-charge-fill me-1"></i> [Simulasi Testing] Bayar Sekarang via QRIS <i class="bi bi-arrow-right ms-1"></i>
                                         </button>
                                     </form>
                                 @endif
