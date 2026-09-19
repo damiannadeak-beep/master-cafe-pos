@@ -55,13 +55,16 @@ class ShiftController extends Controller
             return redirect()->route('kasir.pos');
         }
 
-        // Kalkulasi pemasukan tunai selama shift (hanya pesanan kasir ini)
+        // Kalkulasi pemasukan tunai selama shift (pesanan kasir ini & pesanan online/QR)
         // FIX #9: Sum dari pembayaran.total_bayar (setelah diskon), bukan pesanan.total (sebelum diskon)
         $totalTunai = Pembayaran::where('status', 'paid')
             ->where('metode', 'cash')
             ->where('updated_at', '>=', $shift->waktu_buka)
-            ->whereHas('pesanan', function($q) {
-                $q->where('id_kasir', auth()->id());
+            ->whereHas('pesanan', function($q) use ($shift) {
+                $q->where(function($sub) use ($shift) {
+                    $sub->where('id_kasir', $shift->user_id)
+                        ->orWhereNull('id_kasir');
+                });
             })->sum('total_bayar');
 
         // Kalkulasi pengeluaran kasir selama shift
@@ -111,7 +114,10 @@ class ShiftController extends Controller
 
         $query = Pembayaran::with('pesanan.detail_pesanan.menu')
             ->whereHas('pesanan', function($q) use ($kasir_id) {
-                $q->where('id_kasir', $kasir_id);
+                $q->where(function($sub) use ($kasir_id) {
+                    $sub->where('id_kasir', $kasir_id)
+                        ->orWhereNull('id_kasir');
+                });
             })
             ->where('status', 'paid')
             ->where('updated_at', '>=', $shift->waktu_buka);

@@ -70,6 +70,8 @@ class PaymentService
 
         if ($kasir_id) {
             $pesanan->update(['id_kasir' => $kasir_id]);
+        } elseif (auth()->check()) {
+            $pesanan->update(['id_kasir' => auth()->id()]);
         }
 
         // Otomatis bebaskan meja jika sudah lunas dan tidak ada pesanan aktif lain di meja tersebut
