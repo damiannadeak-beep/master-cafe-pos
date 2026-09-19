@@ -22,7 +22,7 @@
                     <label class="form-label fw-bold">Total Uang Fisik Aktual di Laci (Rp)</label>
                     <div class="input-group input-group-lg">
                         <span class="input-group-text  text-white border-end-0">Rp</span>
-                        <input type="number" class="form-control text-white border-secondary  border-start-0 ps-0" name="uang_fisik_aktual" placeholder="Contoh: 650000" min="0" required autofocus>
+                        <input type="number" class="form-control text-white border-secondary  border-start-0 ps-0" name="uang_fisik_aktual" placeholder="Contoh: 650000" min="0" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" required autofocus>
                     </div>
                     <small class="text-white-50 mt-2 d-block">Sistem akan secara otomatis mencocokkan jumlah ini dengan histori pesanan tunai Anda selama shift berlangsung.</small>
                     @error('uang_fisik_aktual')

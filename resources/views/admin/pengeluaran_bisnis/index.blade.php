@@ -244,7 +244,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-white-50 fw-semibold">Nominal Pengeluaran (Rp) <span class="text-danger">*</span></label>
-                        <input type="number" name="nominal" class="form-control text-white fs-5 fw-bold" style="background-color: #0e1217; border-color: #21262d; color: #f56565 !important;" placeholder="0" min="1" required>
+                        <input type="number" name="nominal" class="form-control text-white fs-5 fw-bold" style="background-color: #0e1217; border-color: #21262d; color: #f56565 !important;" placeholder="0" min="1" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-white-50 fw-semibold">Keterangan / Rincian Tambahan (Opsional)</label>
@@ -296,7 +296,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-white-50 fw-semibold">Nominal Pengeluaran (Rp) <span class="text-danger">*</span></label>
-                        <input type="number" name="nominal" id="edit_nominal" class="form-control text-white fs-5 fw-bold" style="background-color: #0e1217; border-color: #21262d; color: #f56565 !important;" min="1" required>
+                        <input type="number" name="nominal" id="edit_nominal" class="form-control text-white fs-5 fw-bold" style="background-color: #0e1217; border-color: #21262d; color: #f56565 !important;" min="1" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-white-50 fw-semibold">Keterangan Tambahan</label>

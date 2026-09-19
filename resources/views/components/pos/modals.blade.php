@@ -117,7 +117,7 @@
                     <div id="pos-custom-nominal-container" class="mt-2" style="display: none;">
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
-                            <input type="number" id="pos-custom-nominal-input" class="form-control bg-dark border-secondary text-white form-control-lg" placeholder="Contoh: 100000" step="1000" oninput="onPosCustomNominalChange(this.value)">
+                            <input type="number" id="pos-custom-nominal-input" class="form-control bg-dark border-secondary text-white form-control-lg" placeholder="Contoh: 100000" min="0" step="1000" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" oninput="onPosCustomNominalChange(this.value)">
                         </div>
                     </div>
                 </div>

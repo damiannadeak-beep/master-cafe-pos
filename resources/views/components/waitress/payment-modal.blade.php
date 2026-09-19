@@ -38,7 +38,7 @@
                     <div id="active-order-custom-nominal-container" class="mt-2 mb-3" style="display: none;">
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary text-white-50">Rp</span>
-                            <input type="number" id="active-order-custom-nominal" class="form-control bg-dark border-secondary text-white form-control-lg" placeholder="Contoh: 100000" step="1000" oninput="window.onActiveOrderCustomNominalChange(this.value)">
+                            <input type="number" id="active-order-custom-nominal" class="form-control bg-dark border-secondary text-white form-control-lg" placeholder="Contoh: 100000" min="0" step="1000" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" oninput="window.onActiveOrderCustomNominalChange(this.value)">
                         </div>
                     </div>
 

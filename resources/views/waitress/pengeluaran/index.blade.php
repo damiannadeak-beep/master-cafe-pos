@@ -34,7 +34,7 @@
                             <label class="form-label small fw-bold text-white-50">Nominal (Rp)</label>
                             <div class="input-group input-group-lg shadow-sm">
                                 <span class="input-group-text  text-white border-0 text-white-50">Rp</span>
-                                <input type="number" name="nominal" class="form-control text-white border-secondary  text-white border-0 ps-2" min="0" required>
+                                <input type="number" name="nominal" class="form-control text-white border-secondary  text-white border-0 ps-2" min="0" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" required>
                             </div>
                         </div>
                         <div class="mb-4">

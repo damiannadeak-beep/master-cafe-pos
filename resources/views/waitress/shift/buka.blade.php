@@ -24,7 +24,7 @@
                     <label class="form-label fw-bold">Modal Awal (Rp)</label>
                     <div class="input-group input-group-lg">
                         <span class="input-group-text  text-white border-end-0">Rp</span>
-                        <input type="number" class="form-control text-white border-secondary  border-start-0 ps-0" name="modal_awal" placeholder="Contoh: 100000" min="0" required autofocus>
+                        <input type="number" class="form-control text-white border-secondary  border-start-0 ps-0" name="modal_awal" placeholder="Contoh: 100000" min="0" onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();" required autofocus>
                     </div>
                     @error('modal_awal')
                         <div class="text-danger small mt-1">{{ $message }}</div>
