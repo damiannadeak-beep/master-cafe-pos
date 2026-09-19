@@ -541,4 +541,48 @@ class PosService
             'hash' => md5($activeHash),
         ];
     }
+
+    /**
+     * Membatalkan pesanan dari kasir (Void).
+     */
+    public function voidOrder(int $idPesanan, string $password, ?string $alasan, $user)
+    {
+        DB::beginTransaction();
+        try {
+            $pesanan = Pesanan::findOrFail($idPesanan);
+
+            if (!\Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+                throw new \Exception('Password yang dimasukkan salah.');
+            }
+
+            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
+                throw new \Exception('Pesanan sudah dibayar lunas dan tidak dapat dihapus/divoid.');
+            }
+
+            if ($pesanan->status === 'completed') {
+                throw new \Exception('Pesanan sudah selesai dan tidak dapat divoid.');
+            }
+
+            if ($pesanan->status === 'cancelled') {
+                throw new \Exception('Pesanan sudah dibatalkan sebelumnya.');
+            }
+
+            DB::table('void_logs')->insert([
+                'pesanan_id' => $pesanan->id,
+                'kasir_id' => $user->id,
+                'alasan' => $alasan ?? 'Batal',
+                'total_nilai' => $pesanan->total,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            $pesanan->cancelOrder();
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 }

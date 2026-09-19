@@ -22,6 +22,9 @@ use App\Http\Controllers\WaitressPengeluaranController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\WaitressMejaController;
 
+use App\Http\Controllers\SeoController;
+use App\Http\Controllers\SystemController;
+
 // ================= AREA PUBLIK =================
 // Halaman yang bisa diakses tanpa perlu login
 Route::get('/', [PublicController::class, 'home']);
@@ -30,34 +33,8 @@ Route::get('/lokasi', [PublicController::class, 'lokasi']);
 Route::get('/kontak', [PublicController::class, 'kontak']);
 
 // Route SEO untuk Google Search & Web Crawler
-Route::get('/robots.txt', function () {
-    $content = "User-agent: *\n" .
-               "Allow: /\n" .
-               "Allow: /katalog\n" .
-               "Allow: /lokasi\n" .
-               "Allow: /kontak\n" .
-               "Allow: /images/\n" .
-               "Disallow: /admin/\n" .
-               "Disallow: /kasir/\n" .
-               "Disallow: /waitress/\n" .
-               "Disallow: /dapur/\n" .
-               "Disallow: /login\n\n" .
-               "Sitemap: " . url('/sitemap.xml') . "\n";
-    return response($content, 200)->header('Content-Type', 'text/plain');
-});
-
-Route::get('/sitemap.xml', function () {
-    $baseUrl = url('/');
-    $lastMod = date('Y-m-d');
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n" .
-           '  <url><loc>' . $baseUrl . '/</loc><lastmod>' . $lastMod . '</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>' . "\n" .
-           '  <url><loc>' . $baseUrl . '/katalog</loc><lastmod>' . $lastMod . '</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>' . "\n" .
-           '  <url><loc>' . $baseUrl . '/lokasi</loc><lastmod>' . $lastMod . '</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>' . "\n" .
-           '  <url><loc>' . $baseUrl . '/kontak</loc><lastmod>' . $lastMod . '</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>' . "\n" .
-           '</urlset>';
-    return response($xml, 200)->header('Content-Type', 'application/xml');
-});
+Route::get('/robots.txt', [SeoController::class, 'robots']);
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap']);
 
 
 
@@ -141,11 +118,8 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('/backup', [AdminController::class, 'backupDatabase'])->name('backup');
 
-        // Route Bantuan (Clear Cache Ã¢â‚¬â€ hanya pemilik yang boleh)
-        Route::get('/clear-cache', function() {
-            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-            return redirect()->back()->with('success', 'Cache berhasil dibersihkan.');
-        })->name('clear_cache');
+        // Route Bantuan (Clear Cache — hanya pemilik yang boleh)
+        Route::get('/clear-cache', [SystemController::class, 'clearCache'])->name('clear_cache');
         
         // Laporan Absensi
         Route::get('/absensi', [AdminController::class, 'absensiReport'])->name('absensi.index');
@@ -311,44 +285,12 @@ Route::group([], function () {
     Route::get('/api/tracking/{order_token}/status', [OrderController::class, 'getOrderStatus'])->name('order.status.api');
 
     // Selesai Sesi Tamu / Konsumen (Clear session & redirect)
-    Route::get('/konsumen/selesai-sesi', function (\Illuminate\Http\Request $request) {
-        session()->forget(['order_token', 'active_order_id']);
-        $redirectUrl = $request->query('redirect', url('/katalog'));
-        return redirect($redirectUrl);
-    })->name('konsumen.selesai_sesi');
-    Route::get('/selesai-sesi', function (\Illuminate\Http\Request $request) {
-        session()->forget(['order_token', 'active_order_id']);
-        $redirectUrl = $request->query('redirect', url('/katalog'));
-        return redirect($redirectUrl);
-    });
+    Route::get('/konsumen/selesai-sesi', [SystemController::class, 'selesaiSesi'])->name('konsumen.selesai_sesi');
+    Route::get('/selesai-sesi', [SystemController::class, 'selesaiSesi']);
 });
 
 // Fallback Route untuk foto profil konsumen (mencegah 404 pada cPanel multi-root)
-Route::get('/uploads/profil/{filename}', function ($filename) {
-    $cleanName = basename($filename);
-    $searchPaths = [
-        public_path('uploads/profil/' . $cleanName),
-        base_path('public/uploads/profil/' . $cleanName),
-        '/home/nadp3189/repositories/master-cafe-pos/public/uploads/profil/' . $cleanName,
-        '/home/nadp3189/public_html/mastercafe.nadeak.net/uploads/profil/' . $cleanName,
-        '/home/nadp3189/public_html/uploads/profil/' . $cleanName,
-    ];
-
-    foreach ($searchPaths as $path) {
-        if (file_exists($path)) {
-            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $mimeType = match ($ext) {
-                'png' => 'image/png',
-                'webp' => 'image/webp',
-                'gif' => 'image/gif',
-                default => 'image/jpeg',
-            };
-            return response()->file($path, ['Content-Type' => $mimeType]);
-        }
-    }
-
-    $name = auth()->check() ? auth()->user()->name : 'User';
-    return redirect('https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=c08e5c&color=fff&size=120');
-})->where('filename', '[a-zA-Z0-9._-]+');
+Route::get('/uploads/profil/{filename}', [SystemController::class, 'profileImageFallback'])
+    ->where('filename', '[a-zA-Z0-9._-]+');
 
 

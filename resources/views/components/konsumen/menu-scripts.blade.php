@@ -11,4 +11,6 @@
     };
 </script>
 
+<script src="{{ asset('js/konsumen/modules/menu-catalog.js') }}?v={{ file_exists(public_path('js/konsumen/modules/menu-catalog.js')) ? filemtime(public_path('js/konsumen/modules/menu-catalog.js')) : '1.0' }}"></script>
+<script src="{{ asset('js/konsumen/modules/menu-cart.js') }}?v={{ file_exists(public_path('js/konsumen/modules/menu-cart.js')) ? filemtime(public_path('js/konsumen/modules/menu-cart.js')) : '1.0' }}"></script>
 <script src="{{ asset('js/konsumen/menu-order.js') }}?v={{ file_exists(public_path('js/konsumen/menu-order.js')) ? filemtime(public_path('js/konsumen/menu-order.js')) : '1.0' }}"></script>

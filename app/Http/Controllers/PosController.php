@@ -619,43 +619,14 @@ class PosController extends Controller
     public function voidOrder(VoidOrderRequest $request, $id_pesanan)
     {
         try {
-            DB::beginTransaction();
-            $pesanan = Pesanan::findOrFail($id_pesanan);
-
-            if (!Hash::check($request->input('password'), auth()->user()->password)) {
-                throw new \Exception('Password yang dimasukkan salah.');
-            }
-
-            // Pesanan yang SUDAH LUNAS tidak dapat sembarangan divoid oleh kasir
-            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
-                throw new \Exception('Pesanan sudah dibayar lunas dan tidak dapat dihapus/divoid.');
-            }
-
-            if ($pesanan->status === 'completed') {
-                throw new \Exception('Pesanan sudah selesai dan tidak dapat divoid.');
-            }
-
-            if ($pesanan->status === 'cancelled') {
-                throw new \Exception('Pesanan sudah dibatalkan sebelumnya.');
-            }
-
-            // Simpan log void
-            DB::table('void_logs')->insert([
-                'pesanan_id' => $pesanan->id,
-                'kasir_id' => auth()->id(),
-                'alasan' => $request->input('alasan') ?? 'Batal',
-                'total_nilai' => $pesanan->total,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // Batalkan pesanan dan restore stok
-            $pesanan->cancelOrder();
-
-            DB::commit();
+            $this->posService->voidOrder(
+                (int) $id_pesanan,
+                (string) $request->input('password'),
+                $request->input('alasan'),
+                auth()->user()
+            );
             return response()->json(['message' => 'Pesanan berhasil divoid.']);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }

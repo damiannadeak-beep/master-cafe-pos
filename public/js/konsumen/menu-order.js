@@ -498,7 +498,7 @@
                                 ${varDetails}
                                 <div class="d-flex align-items-center gap-2 mt-1">
                                     <span class="fw-bold small" style="color: #c08e5c; font-size: 0.82rem;">Rp ${subtotal.toLocaleString('id-ID')}</span>
-                                    <small class="text-white-50" style="font-size: 0.72rem;">(@ Rp ${item.harga.toLocaleString('id-ID')})</small>
+                                    ${item.jumlah > 1 ? `<small class="text-white-50" style="font-size: 0.72rem;">(Rp ${item.harga.toLocaleString('id-ID')} / porsi)</small>` : ''}
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-1 bg-dark border border-secondary border-opacity-25 rounded-pill p-1 flex-shrink-0">
