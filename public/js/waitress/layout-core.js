@@ -319,13 +319,11 @@
         window.fetchWaitressNotifications();
 
         let syncInterval = setInterval(() => {
-            window.fetchActiveOrdersCount();
             window.fetchWaitressNotifications();
-        }, 3500);
+        }, 8000);
 
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                window.fetchActiveOrdersCount();
                 window.fetchWaitressNotifications();
             }
         });

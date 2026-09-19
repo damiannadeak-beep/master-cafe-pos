@@ -704,9 +704,11 @@ class PosController extends Controller
      */
     public function getNotifications()
     {
-        $notifications = \App\Models\Notification::where('is_read', false)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $notifications = \Illuminate\Support\Facades\Cache::remember('unread_notifications_data', 2, function () {
+            return \App\Models\Notification::where('is_read', false)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        });
             
         return response()->json($notifications);
     }
@@ -716,6 +718,7 @@ class PosController extends Controller
      */
     public function readNotification($id)
     {
+        \Illuminate\Support\Facades\Cache::forget('unread_notifications_data');
         $notif = \App\Models\Notification::find($id);
         if ($notif) {
             $notif->update(['is_read' => true]);

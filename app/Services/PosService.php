@@ -487,59 +487,57 @@ class PosService
      */
     public function getActiveOrdersCountData(): array
     {
-        $activeOrdersQuery = Pesanan::whereNotIn('status', ['cancelled', 'void'])
-            ->where(function ($statusQ) {
-                // 1. Pesanan yang sedang diproses di dapur (pending / processing)
-                $statusQ->whereIn('status', ['pending', 'processing'])
-                    // 2. ATAU pesanan yang sudah selesai dimasak (completed) tetapi BELUM LUNAS
-                    ->orWhere(function ($compUnpaidQ) {
-                        $compUnpaidQ->where('status', 'completed')
-                            ->where(function ($pSub) {
-                                $pSub->whereDoesntHave('pembayaran')
-                                     ->orWhereHas('pembayaran', function ($p) {
-                                         $p->where('status', '!=', 'paid');
-                                     });
-                            });
-                    });
-            })
-            ->where(function ($sub) {
-                // 1. Dibuat langsung oleh Kasir di POS
-                $sub->whereNotNull('id_kasir')
-                    // 2. Sudah dikonfirmasi pembayarannya (Lunas via QRIS/VA atau memilih opsi Bayar Tunai di Kasir)
-                    ->orWhereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid')
-                          // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai di kasir
-                          ->orWhere(function ($cashQ) {
-                              $cashQ->where('status', 'unpaid')
-                                    ->where('metode', 'cash');
-                          });
-                    });
-            });
+        return \Illuminate\Support\Facades\Cache::remember('active_orders_count_data', 2, function () {
+            $activeOrdersQuery = Pesanan::whereNotIn('status', ['cancelled', 'void'])
+                ->where(function ($statusQ) {
+                    $statusQ->whereIn('status', ['pending', 'processing'])
+                        ->orWhere(function ($compUnpaidQ) {
+                            $compUnpaidQ->where('status', 'completed')
+                                ->where(function ($pSub) {
+                                    $pSub->whereDoesntHave('pembayaran')
+                                         ->orWhereHas('pembayaran', function ($p) {
+                                             $p->where('status', '!=', 'paid');
+                                         });
+                                });
+                        });
+                })
+                ->where(function ($sub) {
+                    $sub->whereNotNull('id_kasir')
+                        ->orWhereHas('pembayaran', function ($p) {
+                            $p->where('status', 'paid')
+                              ->orWhere(function ($cashQ) {
+                                  $cashQ->where('status', 'unpaid')
+                                        ->where('metode', 'cash');
+                              });
+                        });
+                });
 
-        $count = (clone $activeOrdersQuery)->count();
-        $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
+            $count = (clone $activeOrdersQuery)->count();
+            $latestId = (clone $activeOrdersQuery)->max('id') ?? 0;
 
-        $activeHash = (clone $activeOrdersQuery)
-            ->with('pembayaran')
-            ->get()
-            ->map(function ($o) {
+            $activeOrdersList = (clone $activeOrdersQuery)
+                ->select(['id', 'status', 'updated_at'])
+                ->with(['pembayaran:id,id_pesanan,status,updated_at'])
+                ->get();
+
+            $activeHash = $activeOrdersList->map(function ($o) {
                 $payStatus = $o->pembayaran?->status ?? 'unpaid';
                 $payTime = $o->pembayaran?->updated_at?->timestamp ?? 0;
                 $orderTime = $o->updated_at?->timestamp ?? 0;
                 return "{$o->id}-{$o->status}-{$payStatus}-{$payTime}-{$orderTime}";
-            })
-            ->join('|');
+            })->join('|');
 
-        $completedMax = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->max('updated_at') ?? '';
-        $completedCount = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->whereDate('created_at', today())->count();
-        $activeHash .= "|comp:{$completedCount}-{$completedMax}";
+            $completedMax = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->max('updated_at') ?? '';
+            $completedCount = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->whereDate('created_at', today())->count();
+            $activeHash .= "|comp:{$completedCount}-{$completedMax}";
 
-        return [
-            'count' => $count,
-            'latest_id' => $latestId,
-            'completed_count' => $completedCount,
-            'hash' => md5($activeHash),
-        ];
+            return [
+                'count' => $count,
+                'latest_id' => $latestId,
+                'completed_count' => $completedCount,
+                'hash' => md5($activeHash),
+            ];
+        });
     }
 
     /**
