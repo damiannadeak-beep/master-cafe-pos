@@ -132,6 +132,16 @@ class ShiftController extends Controller
         $totalQris = $pembayarans->where('metode', 'qris')->sum('total_bayar');
         $totalSemua = $totalCash + $totalQris;
 
+        // Hitung real-time total pengeluaran selama shift ini
+        $pengeluaranQuery = Pengeluaran::where('user_id', $kasir_id)
+            ->where('created_at', '>=', $shift->waktu_buka);
+
+        if ($shift->waktu_tutup) {
+            $pengeluaranQuery->where('created_at', '<=', $shift->waktu_tutup);
+        }
+
+        $totalPengeluaran = $pengeluaranQuery->sum('nominal');
+
         // Hitung rekap menu terjual
         $rekapMenu = [];
         $totalItemTerjual = 0;
@@ -151,7 +161,7 @@ class ShiftController extends Controller
             }
         }
 
-        return compact('totalCash', 'totalQris', 'totalSemua', 'pembayarans', 'shift', 'rekapMenu', 'totalItemTerjual');
+        return compact('totalCash', 'totalQris', 'totalSemua', 'pembayarans', 'shift', 'rekapMenu', 'totalItemTerjual', 'totalPengeluaran');
     }
 
     /**
@@ -215,12 +225,14 @@ class ShiftController extends Controller
             $html .= '<tr>';
             $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Kas Tunai (Laci Kas)</td>';
             $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Non-Tunai (QRIS)</td>';
-            $html .= '<td colspan="2" style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Omzet Shift</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Pengeluaran</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Omzet Shift</td>';
             $html .= '</tr>';
             $html .= '<tr>';
             $html .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format($data["totalCash"], 0, ",", ".") . '</td>';
             $html .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format($data["totalQris"], 0, ",", ".") . '</td>';
-            $html .= '<td colspan="2" style="text-align: center; font-size: 12pt; font-weight: bold;">Rp ' . number_format($data["totalSemua"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 12pt; color: #dc3545;">Rp ' . number_format($data["totalPengeluaran"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 12pt; font-weight: bold;">Rp ' . number_format($data["totalSemua"], 0, ",", ".") . '</td>';
             $html .= '</tr>';
             $html .= '</table>';
             

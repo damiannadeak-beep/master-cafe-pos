@@ -147,7 +147,7 @@
             </tr>
             <tr>
                 <td style="background-color: #f8f9fa; font-weight: bold;">Pengeluaran Kasir:</td>
-                <td style="color: #dc3545; font-weight: bold;">Rp {{ number_format($shift->total_pengeluaran ?? 0, 0, ',', '.') }}</td>
+                <td style="color: #dc3545; font-weight: bold;">Rp {{ number_format($totalPengeluaran ?? ($shift->total_pengeluaran ?? 0), 0, ',', '.') }}</td>
                 <td style="background-color: #f8f9fa; font-weight: bold;">Uang Fisik Aktual:</td>
                 <td style="text-align: right; font-weight: bold;">Rp {{ number_format($shift->uang_fisik_aktual ?? 0, 0, ',', '.') }}</td>
             </tr>

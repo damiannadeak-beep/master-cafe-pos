@@ -162,7 +162,7 @@
         </tr>
         <tr>
             <td class="summary-label">Pengeluaran Kasir (Shift):</td>
-            <td style="color: #dc3545; font-weight: bold;">Rp {{ number_format($shift->total_pengeluaran ?? 0, 0, ',', '.') }}</td>
+            <td style="color: #dc3545; font-weight: bold;">Rp {{ number_format($totalPengeluaran ?? ($shift->total_pengeluaran ?? 0), 0, ',', '.') }}</td>
             <td class="summary-label">Uang Fisik Aktual:</td>
             <td class="summary-val">Rp {{ number_format($shift->uang_fisik_aktual ?? 0, 0, ',', '.') }}</td>
         </tr>
