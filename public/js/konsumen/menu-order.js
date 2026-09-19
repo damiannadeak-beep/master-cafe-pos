@@ -418,10 +418,8 @@
         let qty = 0;
 
         document.querySelectorAll('[id^="qty-"]').forEach(el => el.innerText = '0');
-        document.querySelectorAll('[id^="catatan-container-"]').forEach(el => el.style.display = 'none');
 
         let aggregatedQty = {};
-        let aggregatedVariantsHtml = {};
 
         cart.forEach(item => {
             total += (item.harga * item.jumlah);
@@ -429,34 +427,13 @@
 
             if (!aggregatedQty[item.id_menu]) {
                 aggregatedQty[item.id_menu] = 0;
-                aggregatedVariantsHtml[item.id_menu] = '';
             }
             aggregatedQty[item.id_menu] += item.jumlah;
-            let variantsHtml = '';
-            if (item.variants && item.variants.length > 0) {
-                const varText = item.variants.map(v => {
-                    return (v.qty && v.qty > 1) ? `${v.qty}x ${v.name}` : v.name;
-                }).join(', ');
-                variantsHtml = `<div class="small text-white mb-1"><i class="bi bi-tags me-1"></i>${varText}</div>`;
-            }
-            if (item.catatan) {
-                variantsHtml += `<div class="small fst-italic" style="color: #c08e5c;"><i class="bi bi-chat-text me-1 text-warning"></i>"${item.catatan}"</div>`;
-            }
-            // HANYA tampilkan di kartu jika memang ada varian atau catatan (mencegah teks '1x: ' menggantung tanpa konten)
-            if (variantsHtml !== '') {
-                aggregatedVariantsHtml[item.id_menu] += `<div class="mb-1">${item.jumlah}x: ${variantsHtml}</div>`;
-            }
         });
 
         Object.keys(aggregatedQty).forEach(menuId => {
             let qtyDisplay = document.getElementById('qty-' + menuId);
             if (qtyDisplay) qtyDisplay.innerText = aggregatedQty[menuId];
-
-            let catatanContainer = document.getElementById('catatan-container-' + menuId);
-            if (catatanContainer && aggregatedVariantsHtml[menuId] !== '') {
-                catatanContainer.style.display = 'block';
-                catatanContainer.innerHTML = aggregatedVariantsHtml[menuId];
-            }
         });
 
         // Update Drawer Accordion Badge

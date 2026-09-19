@@ -135,10 +135,6 @@
                     @endif
                 </div>
 
-                <!-- Kontainer Catatan / Varian Aktif -->
-                <div id="catatan-container-{{ $menu->id }}" class="mt-2 small" style="color: #c08e5c; display: none;">
-                    <!-- variants shown here by JS -->
-                </div>
             </div>
         </div>
     </div>
