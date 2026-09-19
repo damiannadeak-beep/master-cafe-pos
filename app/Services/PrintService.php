@@ -189,9 +189,18 @@ class PrintService
             $discount = 0;
             $totalUangDiterima = 0;
             $totalUangKembalian = 0;
+            $paymentBreakdown = [];
+
             foreach ($orders as $ord) {
                 $total += $ord->total;
                 $discount += ($ord->discount_amount ?? 0);
+                
+                $mName = strtoupper($ord->pembayaran->metode ?? 'CASH');
+                if (!isset($paymentBreakdown[$mName])) {
+                    $paymentBreakdown[$mName] = 0;
+                }
+                $paymentBreakdown[$mName] += (float) ($ord->pembayaran->total_bayar ?? $ord->total);
+
                 if ($ord->pembayaran) {
                     $totalUangDiterima += (int) ($ord->pembayaran->uang_diterima ?? 0);
                     $totalUangKembalian += (int) ($ord->pembayaran->uang_kembalian ?? 0);
@@ -208,6 +217,15 @@ class PrintService
             }
             $order->setRelation('detail_pesanan', $allDetails);
             $order->combined_ids = implode(' & #', $ids);
+            
+            $order->payment_breakdown = $paymentBreakdown;
+            $order->is_mixed_payment = count($paymentBreakdown) > 1;
+            if (count($paymentBreakdown) === 1) {
+                $order->payment_method_label = array_key_first($paymentBreakdown);
+            } else {
+                $order->payment_method_label = 'CAMPURAN';
+            }
+
             return $order;
         }
 

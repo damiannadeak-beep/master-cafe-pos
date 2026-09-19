@@ -164,10 +164,23 @@
                 <td class="fw-bold">Total Tagihan</td>
                 <td class="text-right fw-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
             </tr>
+            @if(!empty($order->is_mixed_payment) && !empty($order->payment_breakdown))
             <tr>
                 <td>Metode</td>
-                <td class="text-right">{{ strtoupper($order->pembayaran->metode ?? 'CASH') }}</td>
+                <td class="text-right fw-bold">CAMPURAN</td>
             </tr>
+            @foreach($order->payment_breakdown as $mName => $mAmount)
+            <tr>
+                <td style="font-size: 10px; padding-left: 8px;">- {{ $mName }}</td>
+                <td class="text-right" style="font-size: 10px;">Rp {{ number_format($mAmount, 0, ',', '.') }}</td>
+            </tr>
+            @endforeach
+            @else
+            <tr>
+                <td>Metode</td>
+                <td class="text-right">{{ strtoupper($order->payment_method_label ?? ($order->pembayaran->metode ?? 'CASH')) }}</td>
+            </tr>
+            @endif
             @if($order->pembayaran && $order->pembayaran->uang_diterima)
             <tr>
                 <td>Bayar</td>
