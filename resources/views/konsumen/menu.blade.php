@@ -8,16 +8,21 @@
             <div>
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                     <h5 class="text-white fw-bold mb-0 text-nowrap" style="font-family: 'Outfit', sans-serif !important;">
-                        <i class="bi bi-geo-alt-fill me-1" style="color: #c08e5c;"></i> Meja {{ ucwords($meja->nama_meja_atau_nomor) }}
+                        <i class="bi bi-geo-alt-fill me-1" style="color: #c08e5c;"></i> {{ preg_match('/^meja\s+/i', $meja->nama_meja_atau_nomor) ? ucwords($meja->nama_meja_atau_nomor) : 'Meja ' . ucwords($meja->nama_meja_atau_nomor) }}
                     </h5>
                     <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.7rem;">
                         Dine In
                     </span>
                 </div>
                 @if($pesananAktif)
-                    <small class="fw-bold d-block text-danger" style="font-size: 0.8rem;">
-                        <i class="bi bi-exclamation-circle me-1"></i> Ada Tagihan Belum Dibayar (Open Bill)
-                    </small>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+                        <small class="fw-bold text-danger" style="font-size: 0.8rem;">
+                            <i class="bi bi-exclamation-circle me-1"></i> Ada Tagihan Belum Dibayar (Open Bill)
+                        </small>
+                        <a href="{{ url('konsumen/checkout/' . $pesananAktif->id) }}" class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill fw-semibold" style="font-size: 0.72rem;">
+                            Lihat / Bayar Tagihan <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
                 @else
                     <small class="text-secondary d-block" style="font-size: 0.82rem;">Silakan pilih menu pesanan Anda</small>
                 @endif
