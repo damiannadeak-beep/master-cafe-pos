@@ -123,6 +123,19 @@
                     @endif
                 </div>
 
+                <!-- Input Catatan Khusus Pesanan (Tampil HANYA Jika Menu Sudah Dipesan / Qty > 0) -->
+                <div class="consumer-note-box mt-2" id="consumer-note-box-{{ $menu->id }}" style="display: none;" onclick="event.stopPropagation();">
+                    <label class="form-label text-secondary mb-1 d-flex align-items-center gap-1" style="font-size: 0.72rem; font-weight: 600;">
+                        <i class="bi bi-pencil-square" style="color: #c08e5c;"></i> Catatan Pesanan (Opsional)
+                    </label>
+                    <input type="text" 
+                           id="menu-note-{{ $menu->id }}" 
+                           class="form-control text-white border-0 rounded-pill px-3 py-1" 
+                           style="background-color: #0e1217; border: 1px solid #30363d !important; font-size: 0.78rem;" 
+                           placeholder="Misal: jangan manis, kurangi es, pisah saus..." 
+                           onclick="event.stopPropagation();"
+                           oninput="handleMenuNoteChange({{ $menu->id }}, this.value)">
+                </div>
             </div>
         </div>
     </div>
@@ -164,6 +177,14 @@
             } else {
                 if (icon) icon.className = 'bi bi-chevron-down';
                 if (text) text.innerText = 'Detail';
+            }
+        };
+    }
+
+    if (typeof window.handleMenuNoteChange === 'undefined') {
+        window.handleMenuNoteChange = function(id, val) {
+            if (typeof window.updateCatatan === 'function') {
+                window.updateCatatan(id, val);
             }
         };
     }

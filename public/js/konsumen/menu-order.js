@@ -418,6 +418,7 @@
         let qty = 0;
 
         document.querySelectorAll('[id^="qty-"]').forEach(el => el.innerText = '0');
+        document.querySelectorAll('[id^="consumer-note-box-"]').forEach(el => el.style.display = 'none');
 
         let aggregatedQty = {};
 
@@ -432,8 +433,23 @@
         });
 
         Object.keys(aggregatedQty).forEach(menuId => {
+            let numId = Number(menuId);
             let qtyDisplay = document.getElementById('qty-' + menuId);
             if (qtyDisplay) qtyDisplay.innerText = aggregatedQty[menuId];
+
+            let noteBox = document.getElementById('consumer-note-box-' + menuId);
+            if (noteBox) {
+                if (aggregatedQty[menuId] > 0) {
+                    noteBox.style.display = 'block';
+                    let noteInput = document.getElementById('menu-note-' + menuId);
+                    let item = cart.find(i => i.id_menu === numId || i.id_menu == menuId);
+                    if (noteInput && item && document.activeElement !== noteInput) {
+                        noteInput.value = item.catatan || '';
+                    }
+                } else {
+                    noteBox.style.display = 'none';
+                }
+            }
         });
 
         // Update Drawer Accordion Badge
