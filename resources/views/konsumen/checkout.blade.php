@@ -96,6 +96,14 @@
                             </a>
                         </div>
                     @else
+                        @if($pembayaran->status !== 'paid' && $pesanan->status === 'pending')
+                            <!-- Countdown Batas Waktu Pembayaran (15 Menit) -->
+                            <div id="checkout-timer-box" class="alert border-0 rounded-4 py-2 px-3 mb-3 d-flex align-items-center justify-content-between" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25) !important; color: #fca5a5;">
+                                <span class="small"><i class="bi bi-clock-history me-1 text-danger"></i> Batas Waktu Pembayaran:</span>
+                                <span class="badge bg-danger bg-opacity-75 text-white font-monospace fs-6 px-2 py-1" id="checkout-countdown">15:00</span>
+                            </div>
+                        @endif
+
                         <!-- Opsi 1: Pembayaran QRIS & VA Midtrans -->
                         <div class="p-3 rounded-4 mb-3" style="background: linear-gradient(135deg, rgba(192, 142, 92, 0.12) 0%, rgba(22, 27, 34, 0.9) 100%); border: 1px solid rgba(192, 142, 92, 0.4);">
                             <div class="d-flex align-items-center gap-3 mb-3">
@@ -124,6 +132,7 @@
                                         <i class="bi bi-exclamation-triangle-fill me-1 text-warning"></i> Pembayaran Online (Midtrans) tidak dapat dihubungi. Silakan pilih opsi <strong>Bayar Tunai</strong> di bawah ini.
                                     </div>
                                 @else
+                                    <!-- Fallback Mode Simulasi Lokal (Midtrans Sandbox / Offline) -->
                                     <form action="{{ url('konsumen/order/' . $pesanan->id . '/simulate-midtrans-pay' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
                                         @csrf
                                         @if($pesanan->order_token)
@@ -138,12 +147,74 @@
                         </div>
 
                         @if(($pesanan->tipe_pesanan ?? '') === 'takeaway')
-                            <!-- Kebijakan Wajib Bayar Lunas di Depan untuk Takeaway -->
-                            <div class="alert border-0 rounded-4 text-center mb-0 p-3" style="background-color: rgba(192, 142, 92, 0.12); border: 1px solid rgba(192, 142, 92, 0.3) !important; color: #c08e5c;">
-                                <small><i class="bi bi-shield-lock-fill me-1"></i> Pesanan Bawa Pulang (Takeaway) <strong>wajib dibayar lunas di depan</strong> via QRIS / E-Wallet / Virtual Account agar dapur dapat langsung memasak & membungkus pesanan Anda.</small>
+                            <!-- Section Opsi Bayar Tunai Khusus Takeaway (GPS Geofence) -->
+                            <div id="takeaway-cash-wrapper" class="mb-3">
+                                <!-- State 1: Sedang Cek GPS -->
+                                <div id="takeaway-geo-loading" class="p-3 rounded-4 text-center" style="background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.15);">
+                                    <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
+                                    <span class="small text-white-50">Memeriksa koordinat GPS untuk opsi Bayar Tunai di Kasir...</span>
+                                </div>
+
+                                <!-- State 2: Di Luar Kafe / GPS Ditolak -->
+                                <div id="takeaway-outside-alert" class="alert border-0 rounded-4 text-center mb-0 p-3" style="background-color: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.25) !important; color: #fde047; display: none;">
+                                    <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                                        <i class="bi bi-geo-alt-fill text-warning fs-5"></i>
+                                        <strong class="text-white">Pilihan Bayar Tunai di Kasir Dikunci</strong>
+                                    </div>
+                                    <p class="small mb-2 text-white-50" style="line-height: 1.5;">
+                                        “Pilihan Bayar Tunai di Kasir hanya aktif jika Anda berada langsung di Master Cafe. Untuk pemesanan dari luar kafe, silakan gunakan QRIS/Transfer.”
+                                    </p>
+                                    <button type="button" onclick="checkTakeawayLocation(true)" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1" style="font-size: 0.78rem;">
+                                        <i class="bi bi-arrow-clockwise me-1"></i> Cek Ulang Lokasi GPS
+                                    </button>
+                                </div>
+
+                                <!-- State 3: Berada di Dalam Kafe (Terverifikasi Radius) -->
+                                <div id="takeaway-inside-cash" class="p-3 rounded-4" style="background: #12161c; border: 1px solid rgba(34, 197, 94, 0.3); display: none;">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center bg-dark border border-success" style="width: 44px; height: 44px; color: #22c55e;">
+                                                <i class="bi bi-shop" style="font-size: 1.35rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="text-white fw-bold mb-0">Bayar Tunai di Kasir</h6>
+                                                <small class="text-white-50">Tamu berada langsung di kafe</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 small py-1 px-2">
+                                            <i class="bi bi-geo-alt-fill me-1"></i> Di Kafe (<span id="takeaway-distance-text"></span>)
+                                        </span>
+                                    </div>
+
+                                    <div class="alert border-0 rounded-3 mb-3 p-2 text-center" style="background: rgba(34, 197, 94, 0.1); color: #86efac; font-size: 0.8rem;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Lokasi terverifikasi. Anda dapat langsung ke meja kasir untuk membayar tunai dan mengambil pesanan bungkus Anda.
+                                    </div>
+
+                                    <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.04); border: 1px dashed rgba(255, 255, 255, 0.15);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50 small">Total Tagihan:</span>
+                                            <span class="text-white fw-bold">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
+                                        </div>
+                                    </div>
+
+                                    <form id="takeaway-cash-form" action="{{ url('konsumen/order/' . $pesanan->id . '/choose-cash' . ($pesanan->order_token ? '?token=' . $pesanan->order_token : '')) }}" method="POST">
+                                        @csrf
+                                        @if($pesanan->order_token)
+                                            <input type="hidden" name="token" value="{{ $pesanan->order_token }}">
+                                        @endif
+                                        <input type="hidden" name="payment_scope" value="self">
+                                        <input type="hidden" name="cash_mode" value="kasir">
+                                        <input type="hidden" id="takeaway_user_lat" name="user_lat" value="">
+                                        <input type="hidden" id="takeaway_user_lng" name="user_lng" value="">
+
+                                        <button type="submit" class="btn btn-outline-success btn-lg w-100 fw-bold rounded-pill btn-touch" style="font-size: 0.95rem;">
+                                            <i class="bi bi-shop me-1"></i> Pesan & Bayar Tunai di Kasir <i class="bi bi-arrow-right ms-1"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         @else
-                            <!-- Opsi 2: Pembayaran Tunai (Cash) - Pilih Mode -->
+                            <!-- Opsi 2: Pembayaran Tunai (Cash) - Khusus Dine-In -->
                             <div class="p-3 rounded-4 mb-3" style="background: #12161c; border: 1px solid rgba(255, 255, 255, 0.12);">
                                 <div class="d-flex align-items-center gap-3 mb-3">
                                     <div class="rounded-circle p-2 d-flex align-items-center justify-content-center bg-dark border border-secondary" style="width: 44px; height: 44px; color: #22c55e;">
@@ -162,6 +233,8 @@
                                     @endif
                                     <input type="hidden" id="payment_scope" name="payment_scope" value="{{ $defaultScope }}">
                                     <input type="hidden" id="cash_mode" name="cash_mode" value="">
+                                    <input type="hidden" id="dinein_user_lat" name="user_lat" value="">
+                                    <input type="hidden" id="dinein_user_lng" name="user_lng" value="">
 
                                     <!-- Pilihan Mode Cash -->
                                     <div class="d-flex flex-column gap-2 mb-3">
@@ -388,5 +461,111 @@
             return false;
         }
     });
+
+    // Geofencing GPS Check for Takeaway & Countdown Timer
+    const IS_TAKEAWAY = {{ (($pesanan->tipe_pesanan ?? '') === 'takeaway') ? 'true' : 'false' }};
+    const CAFE_LAT = {{ !empty($cafeLat) ? (float)$cafeLat : 'null' }};
+    const CAFE_LNG = {{ !empty($cafeLng) ? (float)$cafeLng : 'null' }};
+    const GEOFENCE_RADIUS = {{ !empty($geofenceRadius) ? (float)$geofenceRadius : 100 }};
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Radius bumi dalam meter
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function checkTakeawayLocation(forceRetry = false) {
+        if (!IS_TAKEAWAY) return;
+
+        const loadingEl = document.getElementById('takeaway-geo-loading');
+        const outsideEl = document.getElementById('takeaway-outside-alert');
+        const insideEl = document.getElementById('takeaway-inside-cash');
+        const distText = document.getElementById('takeaway-distance-text');
+        const latInput = document.getElementById('takeaway_user_lat');
+        const lngInput = document.getElementById('takeaway_user_lng');
+
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (outsideEl) outsideEl.style.display = 'none';
+        if (insideEl) insideEl.style.display = 'none';
+
+        if (!CAFE_LAT || !CAFE_LNG || !navigator.geolocation) {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (outsideEl) outsideEl.style.display = 'block';
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const uLat = position.coords.latitude;
+                const uLng = position.coords.longitude;
+                const dist = calculateDistance(CAFE_LAT, CAFE_LNG, uLat, uLng);
+
+                if (latInput) latInput.value = uLat;
+                if (lngInput) lngInput.value = uLng;
+
+                if (loadingEl) loadingEl.style.display = 'none';
+
+                if (dist <= GEOFENCE_RADIUS) {
+                    if (distText) distText.innerText = Math.round(dist) + ' m';
+                    if (insideEl) insideEl.style.display = 'block';
+                    if (outsideEl) outsideEl.style.display = 'none';
+                } else {
+                    if (insideEl) insideEl.style.display = 'none';
+                    if (outsideEl) outsideEl.style.display = 'block';
+                }
+            },
+            function(err) {
+                console.warn('Takeaway GPS error:', err.message);
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (outsideEl) outsideEl.style.display = 'block';
+                if (insideEl) insideEl.style.display = 'none';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    // Auto GPS location check for Takeaway on load
+    if (IS_TAKEAWAY) {
+        checkTakeawayLocation();
+    } else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            const dineLat = document.getElementById('dinein_user_lat');
+            const dineLng = document.getElementById('dinein_user_lng');
+            if (dineLat) dineLat.value = pos.coords.latitude;
+            if (dineLng) dineLng.value = pos.coords.longitude;
+        }, function() {}, { enableHighAccuracy: false, timeout: 5000 });
+    }
+
+    // Countdown Timer (15 Menit)
+    let remainingSeconds = {{ (int)($remainingSeconds ?? 900) }};
+    function updateCheckoutCountdown() {
+        const timerEl = document.getElementById('checkout-countdown');
+        if (!timerEl) return;
+
+        if (remainingSeconds <= 0) {
+            timerEl.innerText = '00:00';
+            window.location.reload();
+            return;
+        }
+
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        timerEl.innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        remainingSeconds--;
+    }
+
+    if (document.getElementById('checkout-countdown')) {
+        updateCheckoutCountdown();
+        setInterval(updateCheckoutCountdown, 1000);
+    }
 </script>
 @endsection

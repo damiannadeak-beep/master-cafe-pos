@@ -338,6 +338,15 @@ class OrderController extends Controller
             ->where('order_token', $order_token)
             ->first();
 
+        // Cek expiry 15 menit untuk pembayaran pending online
+        if ($pesanan && $this->checkOrderExpiry($pesanan)) {
+            session()->forget(['order_token', 'active_order_id']);
+            $redirectUrl = ($pesanan->id_meja) 
+                ? \Illuminate\Support\Facades\URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
+                : url('/katalog');
+            return redirect($redirectUrl)->with('info', 'Waktu batas pembayaran pesanan (15 menit) telah habis. Pesanan dibatalkan otomatis.');
+        }
+
         if (!$pesanan || in_array($pesanan->status, ['cancelled', 'void'])) {
             session()->forget(['order_token', 'active_order_id']);
             $redirectUrl = ($pesanan && $pesanan->id_meja) 
@@ -350,6 +359,13 @@ class OrderController extends Controller
 
         $pembayaran = $pesanan->pembayaran;
         $meja = $pesanan->meja;
+
+        // Hitung sisa waktu pembayaran (15 menit = 900 detik)
+        $remainingSeconds = 0;
+        if ($pesanan->status === 'pending' && $pembayaran && $pembayaran->status === 'unpaid') {
+            $createdAt = $pesanan->created_at ?: now();
+            $remainingSeconds = max(0, 900 - $createdAt->diffInSeconds(now()));
+        }
 
         // Cari semua pesanan terkait dalam sesi yang sama (Dine-In per Meja, Takeaway per Nomor HP)
         $activeTableOrders = collect([$pesanan]);
@@ -399,7 +415,7 @@ class OrderController extends Controller
             $activeTableOrders = collect([$pesanan])->merge($otherOrders)->sortBy('id')->values();
         }
 
-        return view('konsumen.tracking', compact('pesanan', 'pembayaran', 'meja', 'activeTableOrders'));
+        return view('konsumen.tracking', compact('pesanan', 'pembayaran', 'meja', 'activeTableOrders', 'remainingSeconds'));
     }
 
     /**
@@ -423,14 +439,22 @@ class OrderController extends Controller
             ->where('order_token', $order_token)
             ->first();
 
-        if (!$pesanan) {
+        if (!$pesanan || $this->checkOrderExpiry($pesanan)) {
             return response()->json([
                 'status' => 'cancelled',
                 'payment_status' => 'cancelled',
+                'is_expired' => true,
+                'message' => 'Waktu batas pembayaran telah habis atau pesanan dibatalkan.',
             ]);
         }
 
         $this->checkAndUpdateMidtransStatus($pesanan, $request);
+
+        $remainingSeconds = 0;
+        if ($pesanan->status === 'pending' && $pesanan->pembayaran && $pesanan->pembayaran->status === 'unpaid') {
+            $createdAt = $pesanan->created_at ?: now();
+            $remainingSeconds = max(0, 900 - $createdAt->diffInSeconds(now()));
+        }
 
         return response()->json([
             'id' => $pesanan->id,
@@ -439,7 +463,29 @@ class OrderController extends Controller
             'payment_method' => $pesanan->pembayaran?->metode ?? '-',
             'total' => $pesanan->total,
             'updated_at' => $pesanan->updated_at->toIso8601String(),
+            'remaining_seconds' => $remainingSeconds,
         ]);
+    }
+
+    /**
+     * Cek apakah pesanan telah kadaluarsa (khusus pembayaran online/takeaway belum bayar > 15 menit).
+     */
+    private function checkOrderExpiry($pesanan): bool
+    {
+        if (!$pesanan || $pesanan->status !== 'pending') {
+            return false;
+        }
+
+        $pembayaran = $pesanan->pembayaran;
+        if ($pembayaran && $pembayaran->status === 'unpaid' && $pembayaran->metode !== 'cash') {
+            $createdAt = $pesanan->created_at ?: now();
+            if ($createdAt->diffInSeconds(now()) >= 900) { // 15 menit = 900 detik
+                $pesanan->cancelOrder();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

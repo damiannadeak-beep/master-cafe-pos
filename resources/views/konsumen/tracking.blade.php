@@ -66,6 +66,7 @@
         ratingUrl: "{{ url('/rating/store') }}",
         statusApiUrl: "{{ url('/api/tracking/' . $pesanan->order_token . '/status') }}",
         csrfToken: "{{ csrf_token() }}",
+        remainingSeconds: {{ (int)($remainingSeconds ?? 0) }},
         serverOrders: {!! json_encode($serverOrdersList) !!}
     };
 </script>

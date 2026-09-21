@@ -323,11 +323,38 @@
             return;
         }
 
+        if (data.remaining_seconds !== undefined) {
+            remainingSeconds = data.remaining_seconds;
+        }
+
         if (data.status !== currentStatus || data.payment_status !== currentPayStatus) {
             currentStatus = data.status;
             currentPayStatus = data.payment_status;
             window.location.reload();
         }
+    }
+
+    // --- 7. COUNTDOWN TIMER PEMBAYARAN ONLINE (15 MENIT) ---
+    let remainingSeconds = config.remainingSeconds || 0;
+    function updateTrackingCountdown() {
+        const timerEl = document.getElementById('tracking-timer-text');
+        if (!timerEl) return;
+
+        if (remainingSeconds <= 0) {
+            timerEl.innerText = '00:00';
+            pollOrderStatus();
+            return;
+        }
+
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        timerEl.innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        remainingSeconds--;
+    }
+
+    if (config.remainingSeconds > 0) {
+        updateTrackingCountdown();
+        setInterval(updateTrackingCountdown, 1000);
     }
 
     function pollOrderStatus() {

@@ -49,10 +49,23 @@
                         Lunas via {{ strtoupper($pembayaran->metode ?? 'QRIS') }}
                     @elseif($isPendingVerif)
                         Bukti transfer telah dikirim, menunggu konfirmasi kasir
+                    @elseif(($pesanan->tipe_pesanan ?? '') === 'takeaway')
+                        @if(($pembayaran->metode ?? '') === 'cash')
+                            Silakan selesaikan pembayaran tunai di kasir agar pesanan bungkus Anda segera diserahkan
+                        @else
+                            Wajib bayar lunas via QRIS agar pesanan segera diproses dan dibungkus dapur
+                        @endif
                     @else
                         Dapat dibayar di kasir saat santai atau via QRIS HP
                     @endif
                 </small>
+
+                @if(!$isPaid && !$isPendingVerif && !empty($remainingSeconds) && $remainingSeconds > 0)
+                    <div class="mt-2 py-1 px-2 rounded-3 d-inline-flex align-items-center gap-2" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5;">
+                        <i class="bi bi-clock-history text-danger"></i>
+                        <span class="small">Sisa Waktu Bayar: <strong id="tracking-timer-text" class="font-monospace">--:--</strong></span>
+                    </div>
+                @endif
             </div>
         </div>
 

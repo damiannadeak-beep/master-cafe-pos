@@ -43,6 +43,29 @@ class PaymentController extends Controller
             abort(403, 'Anda tidak berhak mengakses pesanan ini.');
         }
 
+        // Cek apakah pesanan telah dibatalkan atau kadaluarsa (15 menit untuk pending unpaid)
+        if (in_array($pesanan->status, ['cancelled', 'void'])) {
+            $redirectUrl = ($pesanan->id_meja) 
+                ? \Illuminate\Support\Facades\URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
+                : url('/katalog');
+            return redirect($redirectUrl)->with('info', 'Pesanan ini telah dibatalkan atau waktu pembayarannya telah habis.');
+        }
+
+        if ($pesanan->status === 'pending' && $pembayaran && $pembayaran->status === 'unpaid' && $pembayaran->metode !== 'cash') {
+            if ($pesanan->created_at && $pesanan->created_at->diffInSeconds(now()) >= 900) {
+                $pesanan->cancelOrder();
+                $redirectUrl = ($pesanan->id_meja) 
+                    ? \Illuminate\Support\Facades\URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
+                    : url('/katalog');
+                return redirect($redirectUrl)->with('info', 'Waktu batas pembayaran pesanan (15 menit) telah habis. Pesanan dibatalkan otomatis.');
+            }
+        }
+
+        $remainingSeconds = 900;
+        if ($pesanan->created_at) {
+            $remainingSeconds = max(0, 900 - $pesanan->created_at->diffInSeconds(now()));
+        }
+
         // Cegah generate ulang jika sudah lunas
         if ($pembayaran && $pembayaran->status === 'paid') {
             if ($pesanan->order_token) {
@@ -146,9 +169,14 @@ class PaymentController extends Controller
         }
         $cumulativeTableTotal = $priorUnpaidTotal + (float)$pembayaran->total_bayar;
 
+        $cafeLat = Setting::getVal('cafe_latitude') ?: (Setting::getVal('warung_latitude') ?: 1.4828);
+        $cafeLng = Setting::getVal('cafe_longitude') ?: (Setting::getVal('warung_longitude') ?: 102.1332);
+        $geofenceRadius = (float) Setting::getVal('geofence_radius', 150);
+
         return view('konsumen.checkout', compact(
             'pesanan', 'pembayaran', 'snapToken', 'clientKey', 'isProduction', 'isSandboxMock', 'snapError',
-            'priorUnpaidTotal', 'cumulativeTableTotal', 'priorOrders'
+            'priorUnpaidTotal', 'cumulativeTableTotal', 'priorOrders',
+            'cafeLat', 'cafeLng', 'geofenceRadius', 'remainingSeconds'
         ));
     }
 
@@ -218,7 +246,26 @@ class PaymentController extends Controller
         $pesanan = Pesanan::with(['pembayaran', 'meja', 'konsumen'])->findOrFail($id_pesanan);
 
         if (($pesanan->tipe_pesanan ?? '') === 'takeaway') {
-            return redirect()->back()->with('error', 'Pesanan Bawa Pulang (Takeaway) wajib dibayar lunas di awal via Midtrans QRIS / Virtual Account.');
+            // Cek verifikasi lokasi GPS untuk Takeaway: hanya izinkan cash jika berada di Master Cafe
+            $userLat = $request->input('user_lat');
+            $userLng = $request->input('user_lng');
+
+            $cafeLat = Setting::getVal('cafe_latitude') ?: (Setting::getVal('warung_latitude') ?: 1.4828);
+            $cafeLng = Setting::getVal('cafe_longitude') ?: (Setting::getVal('warung_longitude') ?: 102.1332);
+            $maxRadius = (float) Setting::getVal('geofence_radius', 150);
+            if ($maxRadius < 50) $maxRadius = 150; // default toleransi aman 150m
+
+            $isInsideCafe = false;
+            if (!empty($cafeLat) && !empty($cafeLng) && !empty($userLat) && !empty($userLng)) {
+                $distance = $this->calculateDistanceMeters((float)$cafeLat, (float)$cafeLng, (float)$userLat, (float)$userLng);
+                if ($distance <= $maxRadius) {
+                    $isInsideCafe = true;
+                }
+            }
+
+            if (!$isInsideCafe) {
+                return redirect()->back()->with('error', 'Pilihan Bayar Tunai di Kasir hanya aktif jika Anda berada langsung di Master Cafe. Untuk pemesanan dari luar kafe, silakan gunakan QRIS/Transfer.');
+            }
         }
 
         $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
@@ -305,7 +352,7 @@ class PaymentController extends Controller
             }
 
             $namaKonsumen = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Tamu');
-            $namaMeja = $pesanan->meja ? $pesanan->meja->nama_meja_atau_nomor : 'Meja';
+            $namaMeja = ($pesanan->tipe_pesanan === 'takeaway') ? 'Bawa Pulang (Takeaway)' : ($pesanan->meja ? $pesanan->meja->nama_meja_atau_nomor : 'Meja');
             
             $notifMsg = 'Pesanan Bayar Tunai: ' . $namaMeja . ' (' . $namaKonsumen . ') - Total Rp ' . number_format($pembayaran->total_bayar, 0, ',', '.');
             if ($cashMode === 'kasir') {
@@ -325,7 +372,10 @@ class PaymentController extends Controller
         }
 
         $targetUrl = $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?cash=1') : url('/');
-        return redirect($targetUrl)->with('success', 'Pilihan bayar Tunai berhasil dikirim. Waitress akan membawakan makanan beserta struk tagihan Anda.');
+        $successMsg = ($pesanan->tipe_pesanan === 'takeaway')
+            ? 'Pilihan bayar Tunai di Kasir berhasil dikonfirmasi. Silakan lakukan pembayaran ke kasir selagi pesanan Anda disiapkan.'
+            : 'Pilihan bayar Tunai berhasil dikirim. Waitress akan membawakan makanan beserta struk tagihan Anda.';
+        return redirect($targetUrl)->with('success', $successMsg);
     }
 
     public function uploadBukti(Request $request, $id_pesanan)
@@ -453,5 +503,26 @@ class PaymentController extends Controller
         }
 
         return response()->json(['message' => 'Webhook Berhasil Diterima']);
+    }
+
+    /**
+     * Menghitung jarak antara dua koordinat GPS dalam satuan meter (Formula Haversine).
+     */
+    private function calculateDistanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371000; // Radius bumi dalam meter
+
+        $latFrom = deg2rad($lat1);
+        $lonFrom = deg2rad($lon1);
+        $latTo = deg2rad($lat2);
+        $lonTo = deg2rad($lon2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+
+        return $angle * $earthRadius;
     }
 }
