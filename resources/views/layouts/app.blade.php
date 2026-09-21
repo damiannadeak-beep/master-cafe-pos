@@ -36,12 +36,8 @@
 
         <nav class="navbar navbar-expand-md navbar-dark shadow-sm sticky-top">
             <div class="container">
-                <a class="navbar-brand d-inline-flex align-items-center gap-2 text-decoration-none" href="{{ url('/') }}">
-                    <i class="bi bi-cup-hot-fill text-primary" style="font-size: 1.15rem;"></i>
-                    <span class="d-inline-flex align-items-baseline" style="gap: 4px;">
-                        <span style="font-family: 'Rye', serif !important; color: #c08e5c; letter-spacing: 1px; font-size: 1.1rem; line-height: 1;">MASTER</span>
-                        <span style="font-family: 'Alex Brush', cursive !important; color: #c08e5c; font-size: 1.55rem; line-height: 1;">Cafe</span>
-                    </span>
+                <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">
+                    <i class="bi bi-cup-hot-fill me-1"></i> Master Cafe
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -128,11 +124,8 @@
         </main>
         
         <footer class="text-center py-4 mt-auto w-100 border-top" style="border-color: #21262d !important; padding-bottom: env(safe-area-inset-bottom, 120px) !important;">
-            <p class="mb-1 d-inline-flex align-items-baseline" style="gap: 5px;">
-                <span style="font-family: 'Rye', serif !important; color: #c08e5c; letter-spacing: 1px; font-size: 1.35rem; line-height: 1;">MASTER</span>
-                <span style="font-family: 'Alex Brush', cursive !important; color: #c08e5c; font-size: 1.95rem; line-height: 1;">Cafe</span>
-            </p>
-            <small class="text-secondary d-block">&copy; {{ date('Y') }} Master Cafe. Hak Cipta Dilindungi.</small>
+            <p class="font-cursive text-primary fs-3 mb-0">Master Cafe</p>
+            <small class="text-secondary">&copy; {{ date('Y') }} Master Cafe. Hak Cipta Dilindungi.</small>
         </footer>
     </div>
     
