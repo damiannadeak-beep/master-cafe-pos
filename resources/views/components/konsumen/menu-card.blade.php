@@ -70,7 +70,7 @@
                     </span>
                     <small class="text-secondary opacity-75 d-flex align-items-center gap-1" style="font-size: 0.7rem;">
                         <i class="bi bi-chevron-down" id="desc-icon-{{ $menu->id }}"></i>
-                        <span id="desc-text-{{ $menu->id }}">Detail</span>
+                        <span id="desc-text-{{ $menu->id }}">See more</span>
                     </small>
                 </div>
             </div>
@@ -168,10 +168,10 @@
             const isExpanded = card.classList.toggle('is-expanded');
             if (isExpanded) {
                 if (icon) icon.className = 'bi bi-chevron-up';
-                if (text) text.innerText = 'Tutup';
+                if (text) text.innerText = 'See less';
             } else {
                 if (icon) icon.className = 'bi bi-chevron-down';
-                if (text) text.innerText = 'Detail';
+                if (text) text.innerText = 'See more';
             }
         };
     }

@@ -136,25 +136,28 @@
                 </div>
                 
                 <div class="card-body p-3 p-md-4 d-flex flex-column flex-grow-1">
-                    <h5 class="fw-bold mb-1 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
+                    <h5 class="fw-bold mb-1 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; min-height: 2.7em; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
                     <div class="mb-2">
                         <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
                             {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                         </span>
                     </div>
 
-                    <!-- Area Deskripsi: Default ringkas 2 baris, saat ditekan memanjang ke bawah -->
-                    <div class="menu-desc-container mb-3 flex-grow-1">
+                    <!-- Area Deskripsi: Default ringkas 2 baris, jika panjang ada see more -->
+                    <div class="menu-desc-container mt-auto">
                         <p class="menu-desc-text small mb-0" id="desc-{{ $loop->index }}" 
                            style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; line-height: 1.45; transition: color 0.3s ease;">
                             {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
                         </p>
-                    </div>
-                    
-                    <div class="mt-auto pt-1">
-                        <div class="detail-toggle-btn text-center py-2 rounded-pill fw-bold" id="btn-detail-{{ $loop->index }}" style="background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; font-size: 0.75rem; border: 1px solid rgba(192, 142, 92, 0.25); transition: all 0.25s ease;">
-                            <i class="bi bi-chevron-down me-1" id="icon-detail-{{ $loop->index }}"></i> 
-                            <span id="text-detail-{{ $loop->index }}">Lihat Detail</span>
+
+                        <!-- Toggle See More Ringkas (Otomatis muncul hanya jika teks panjang/terpotong) -->
+                        <div class="see-more-wrap pt-1" id="see-more-wrap-{{ $loop->index }}" style="display: none;">
+                            <span class="see-more-btn fw-semibold d-inline-flex align-items-center gap-1" id="btn-detail-{{ $loop->index }}"
+                                  onclick="event.stopPropagation(); toggleMenuDetail({{ $loop->index }})"
+                                  style="color: #c08e5c; font-size: 0.76rem; cursor: pointer; transition: all 0.2s ease;">
+                                <span id="text-detail-{{ $loop->index }}">See more</span>
+                                <i class="bi bi-chevron-down" id="icon-detail-{{ $loop->index }}" style="font-size: 0.68rem;"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -213,10 +216,11 @@
         min-height: 0 !important;
         line-height: 1.6 !important;
     }
-    .katalog-menu-card.is-expanded .detail-toggle-btn {
-        background-color: rgba(192, 142, 92, 0.28) !important;
-        color: #f7d0a1 !important;
-        border-color: rgba(192, 142, 92, 0.6) !important;
+    .see-more-btn {
+        user-select: none;
+    }
+    .see-more-btn:hover {
+        color: #e2a873 !important;
     }
     .subcat-touch-scroll {
         scrollbar-width: none;
@@ -344,31 +348,67 @@
                 emptyEl.style.setProperty('display', 'none', 'important');
             }
         }
+
+        checkAllSeeMoreTriggers();
     }
 
     function toggleMenuDetail(index) {
         const card = document.getElementById('menu-card-' + index);
+        const wrap = document.getElementById('see-more-wrap-' + index);
         const text = document.getElementById('text-detail-' + index);
         const icon = document.getElementById('icon-detail-' + index);
         if (!card) return;
 
+        // Jika teks pendek dan tidak ada overflow (see more tidak aktif), kartu tidak perlu expand
+        if (wrap && wrap.style.display === 'none' && !card.classList.contains('is-expanded')) {
+            return;
+        }
+
         const isExpanded = card.classList.toggle('is-expanded');
 
         if (isExpanded) {
-            if (text) text.innerText = 'Tutup Detail';
+            if (text) text.innerText = 'See less';
             if (icon) {
-                icon.className = 'bi bi-chevron-up me-1';
+                icon.className = 'bi bi-chevron-up';
             }
         } else {
-            if (text) text.innerText = 'Lihat Detail';
+            if (text) text.innerText = 'See more';
             if (icon) {
-                icon.className = 'bi bi-chevron-down me-1';
+                icon.className = 'bi bi-chevron-down';
             }
         }
     }
 
+    function checkAllSeeMoreTriggers() {
+        requestAnimationFrame(() => {
+            document.querySelectorAll('.menu-item').forEach((item, index) => {
+                const desc = document.getElementById('desc-' + index);
+                const wrap = document.getElementById('see-more-wrap-' + index);
+                const card = document.getElementById('menu-card-' + index);
+                if (!desc || !wrap) return;
+
+                if (card && card.classList.contains('is-expanded')) {
+                    wrap.style.display = 'block';
+                    return;
+                }
+
+                // Cek apakah teks deskripsi meluap (overflow) melebihi 2 baris
+                if (desc.scrollHeight > (desc.clientHeight + 2)) {
+                    wrap.style.display = 'block';
+                } else {
+                    wrap.style.display = 'none';
+                }
+            });
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         renderPublicSubPills();
+        checkAllSeeMoreTriggers();
+        setTimeout(checkAllSeeMoreTriggers, 150);
+        setTimeout(checkAllSeeMoreTriggers, 600);
+
+        window.addEventListener('resize', checkAllSeeMoreTriggers);
 
         const scrollContainer = document.getElementById('public-sub-category-pills');
         if (scrollContainer) {
