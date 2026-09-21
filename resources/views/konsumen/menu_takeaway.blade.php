@@ -26,7 +26,7 @@
         @include('components.konsumen.kategori-filter')
     </div>
     
-    <div class="row g-3 g-md-4 align-items-start">
+    <div class="row g-3 g-md-4 align-items-stretch">
         @include('components.konsumen.menu-card')
     </div>
     
