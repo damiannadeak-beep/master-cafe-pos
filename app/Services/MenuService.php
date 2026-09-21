@@ -24,7 +24,7 @@ class MenuService
             $query->where('kategori', $category);
         }
 
-        if ($subCategory) {
+        if ($subCategory && \Illuminate\Support\Facades\Schema::hasColumn('menu', 'sub_kategori')) {
             $query->where('sub_kategori', $subCategory);
         }
 

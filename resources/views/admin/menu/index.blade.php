@@ -30,11 +30,14 @@
                 $selectedCategory = request('category');
                 $selectedSubCategory = request('sub_category');
                 
+                $hasSubKategoriCol = \Illuminate\Support\Facades\Schema::hasColumn('menu', 'sub_kategori');
                 $subCatQuery = \App\Models\Menu::query();
                 if ($selectedCategory) {
                     $subCatQuery->where('kategori', $selectedCategory);
                 }
-                $availableSubCategories = $subCatQuery->pluck('sub_kategori')->filter()->unique()->values();
+                $availableSubCategories = $hasSubKategoriCol 
+                    ? $subCatQuery->pluck('sub_kategori')->filter()->unique()->values() 
+                    : collect();
             @endphp
 
             <!-- Filter Header (Terpisah di luar table-responsive agar scroll independen dan lancar) -->
