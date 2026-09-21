@@ -48,9 +48,11 @@
             document.querySelectorAll('.menu-item').forEach(item => {
                 const itemCat = (item.getAttribute('data-kategori') || '').toLowerCase();
                 if (category === 'semua' || itemCat === category.toLowerCase()) {
-                    item.style.display = '';
+                    item.style.removeProperty('display');
+                    item.classList.remove('d-none');
                 } else {
-                    item.style.display = 'none';
+                    item.style.setProperty('display', 'none', 'important');
+                    item.classList.add('d-none');
                 }
             });
         });

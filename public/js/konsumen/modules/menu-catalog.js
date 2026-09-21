@@ -135,9 +135,11 @@
                 const matchSub = (currentSubCat === 'semua' || itemSub === currentSubCat);
 
                 if (matchMain && matchSub) {
-                    item.style.display = '';
+                    item.style.removeProperty('display');
+                    item.classList.remove('d-none');
                 } else {
-                    item.style.display = 'none';
+                    item.style.setProperty('display', 'none', 'important');
+                    item.classList.add('d-none');
                 }
             });
         });

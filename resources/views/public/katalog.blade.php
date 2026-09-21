@@ -89,7 +89,7 @@
     <!-- Daftar Menu -->
     <div class="row g-3 g-md-4 align-items-stretch" id="menu-container">
         @forelse($menus as $menu)
-        <div class="col-6 col-md-4 col-lg-3 menu-item d-flex flex-column" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}">
+        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card h-100 d-flex flex-column" 
                  id="menu-card-{{ $loop->index }}"
                  onclick="toggleMenuDetail({{ $loop->index }})"
@@ -169,6 +169,15 @@
             <p class="text-secondary">Menu belum tersedia saat ini. Silakan kembali lagi nanti.</p>
         </div>
         @endforelse
+
+        <!-- Filter Empty State jika pencarian/filter tidak ada yang cocok -->
+        <div id="filter-empty-state" class="col-12 text-center py-5" style="display: none !important;">
+            <div class="d-inline-block p-4 rounded-circle mb-3" style="background-color: #161b22; border: 1px solid #21262d;">
+                <i class="bi bi-search text-secondary" style="font-size: 2.5rem;"></i>
+            </div>
+            <h5 class="text-white fw-bold">Menu Tidak Ditemukan</h5>
+            <p class="text-secondary small">Belum ada menu yang sesuai dengan kategori atau sub-kategori yang dipilih.</p>
+        </div>
     </div>
 </div>
 
@@ -308,6 +317,8 @@
 
     function applyPublicFilter() {
         const menuItems = document.querySelectorAll('.menu-item');
+        let visibleCount = 0;
+
         menuItems.forEach(item => {
             const cat = (item.getAttribute('data-kategori') || '').toLowerCase();
             const sub = (item.getAttribute('data-subkategori') || '').toLowerCase();
@@ -316,11 +327,23 @@
             const matchSub = (pubSubCat === 'semua' || sub === pubSubCat);
 
             if (matchMain && matchSub) {
-                item.style.display = '';
+                item.style.removeProperty('display');
+                item.classList.remove('d-none');
+                visibleCount++;
             } else {
-                item.style.display = 'none';
+                item.style.setProperty('display', 'none', 'important');
+                item.classList.add('d-none');
             }
         });
+
+        const emptyEl = document.getElementById('filter-empty-state');
+        if (emptyEl) {
+            if (visibleCount === 0 && menuItems.length > 0) {
+                emptyEl.style.setProperty('display', 'block', 'important');
+            } else {
+                emptyEl.style.setProperty('display', 'none', 'important');
+            }
+        }
     }
 
     function toggleMenuDetail(index) {
