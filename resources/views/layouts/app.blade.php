@@ -12,7 +12,7 @@
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
         .font-cursive {
-            font-family: 'Great Vibes', cursive !important;
+            font-family: 'Alex Brush', cursive !important;
         }
         .app-navbar { background: var(--gradient-surface) !important; border-bottom: 1px solid var(--border-subtle); position: relative; z-index: 1050; box-shadow: 0 4px 20px rgba(45, 26, 17, 0.25); }
         /* Hide Microsoft Edge native password reveal icon to prevent double eyes */

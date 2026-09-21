@@ -53,19 +53,33 @@
     }
 
     .hero-title-premium {
+        font-family: 'Rye', serif !important;
         font-weight: 400;
         font-size: 4.5rem;
         color: #ffffff;
         line-height: 1.1;
+        letter-spacing: 2px;
         text-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
     .hero-title-cursive {
+        font-family: 'Alex Brush', cursive !important;
         color: #c08e5c;
-        font-size: 3.5rem;
+        font-size: 4.2rem;
         display: block;
-        margin-top: -10px;
+        margin-top: -15px;
         text-shadow: 0 4px 15px rgba(178,122,77,0.3);
+    }
+
+    @media (max-width: 768px) {
+        .hero-title-premium {
+            font-size: 3rem;
+            letter-spacing: 1px;
+        }
+        .hero-title-cursive {
+            font-size: 2.8rem;
+            margin-top: -10px;
+        }
     }
 
     .hero-sub-premium {

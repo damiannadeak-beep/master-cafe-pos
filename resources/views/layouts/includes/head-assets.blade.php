@@ -218,7 +218,7 @@
         .navbar-brand-logo .text-master { font-family: 'Rye', serif !important; font-size: 10px; color: #000000; letter-spacing: 1px; margin-bottom: -4px; z-index: 2; line-height: 1; }
         .navbar-brand-logo .text-cafe { font-family: 'Alex Brush', cursive !important; font-size: 14px; color: #000000; margin-bottom: 0px; z-index: 2; line-height: 1; }
         .navbar-brand-logo .text-since { font-family: 'Caveat', cursive !important; font-size: 6px; color: #000000; letter-spacing: 0.5px; z-index: 2; line-height: 1; }
-        .font-cursive { font-family: 'Great Vibes', cursive !important; }
+        .font-cursive { font-family: 'Alex Brush', cursive !important; }
         .navbar-brand-logo .aksen-gradasi { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 2px solid transparent; background: var(--gradient-bronze) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: destination-out; mask-composite: exclude; clip-path: polygon(0 0, 100% 0, 100% 80%, 0 20%); }
         
                 /* Bootstrap Dark Override */
