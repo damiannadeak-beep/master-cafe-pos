@@ -30,14 +30,14 @@
                 <div class="card-header bg-transparent border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex align-items-center flex-wrap gap-1.5">
                         @if($cardData->is_grouped)
-                            <span class="fw-bold text-white fs-6" style="font-family: 'Outfit', sans-serif;">
+                            <span class="fw-bold text-white fs-6">
                                 <span class="text-accent" style="color: #c08e5c;">#</span>{{ $cardData->order_ids_display }}
                             </span>
                             <span class="badge bg-info bg-opacity-25 text-info border border-info px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">
                                 <i class="bi bi-layers-fill me-1"></i>Gabungan ({{ count($cardData->orders) }}x Order)
                             </span>
                         @else
-                            <span class="fw-bold text-white fs-6" style="font-family: 'Outfit', sans-serif;">
+                            <span class="fw-bold text-white fs-6">
                                 <span class="text-accent" style="color: #c08e5c;">#</span>{{ $primaryOrder->id }}
                             </span>
                         @endif
@@ -159,7 +159,7 @@
                     <div class="pt-2 border-top border-secondary border-opacity-25">
                         <div class="d-flex justify-content-between align-items-center mb-2.5">
                             <span class="text-white-50 small">Total Pesanan:</span>
-                            <span class="text-accent fw-bold fs-6" style="color: #c08e5c; font-family: 'Outfit', sans-serif;">
+                            <span class="text-accent fw-bold fs-6" style="color: #c08e5c;">
                                 Rp {{ number_format($cardData->total_bill, 0, ',', '.') }}
                             </span>
                         </div>

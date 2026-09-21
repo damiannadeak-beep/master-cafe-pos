@@ -1,7 +1,7 @@
 <!-- Ringkasan Menu Pesanan -->
 <div class="card tracking-card shadow-sm p-4 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary border-opacity-25 pb-2">
-        <h6 class="text-white fw-bold mb-0" style="font-family: 'Outfit', sans-serif;">
+        <h6 class="text-white fw-bold mb-0">
             <i class="bi bi-receipt me-1" style="color: #c08e5c;"></i> 
             {{ (isset($activeTableOrders) && $activeTableOrders->count() > 1) ? 'Semua Rincian Menu di Meja Ini' : 'Rincian Menu Pesanan' }}
         </h6>

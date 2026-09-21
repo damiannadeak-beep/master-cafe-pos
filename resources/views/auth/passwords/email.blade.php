@@ -73,7 +73,7 @@
 <div class="auth-wrapper">
     <div class="auth-card">
         <div class="text-center mb-4">
-            <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Lupa Kata Sandi?</h3>
+            <h3 class="fw-bold text-white mb-1">Lupa Kata Sandi?</h3>
             <p class="text-secondary small">Masukkan alamat email Anda yang terdaftar, kami akan mengirimkan tautan untuk mengatur ulang kata sandi.</p>
         </div>
 

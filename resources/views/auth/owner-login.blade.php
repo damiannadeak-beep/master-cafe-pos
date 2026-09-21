@@ -13,8 +13,7 @@
     
     <!-- Google Fonts as per DESIGN_SYSTEM.md -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rye&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Rye&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
@@ -37,7 +36,7 @@
         body {
             background-color: var(--bg-base);
             color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -98,7 +97,8 @@
         }
 
         .portal-title {
-            font-family: 'Rye', serif;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
             font-size: 22px;
             letter-spacing: 0.5px;
             color: var(--text-main);
@@ -149,7 +149,7 @@
             border-radius: 12px;
             padding: 0 16px 0 44px;
             color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 14px;
             transition: all 0.25s ease;
         }
@@ -229,7 +229,7 @@
             color: #ffffff;
             border: none;
             border-radius: 12px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 14px;
             font-weight: 700;
             letter-spacing: 0.5px;

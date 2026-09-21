@@ -6,7 +6,7 @@
         <div class="col-lg-8">
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-body p-4 p-md-5">
-                    <h3 class="fw-bold mb-2 text-white" style="font-family: 'Rye', serif;">Pilih Meja</h3>
+                    <h3 class="fw-bold mb-2 text-white">Pilih Meja</h3>
                     <p class="text-secondary mb-3 small">Pilih nomor meja tempat Anda duduk agar pesanan dapat diantar dengan tepat oleh pelayan.</p>
                     <div class="alert border-0 rounded-3 mb-4 py-2 px-3 small d-flex align-items-center" style="background-color: rgba(192, 142, 92, 0.12); color: #e2b488; border: 1px solid rgba(192, 142, 92, 0.25) !important;">
                         <i class="bi bi-qr-code-scan fs-5 me-2"></i>
@@ -17,21 +17,21 @@
                     <div class="card border-0 shadow-lg mb-5 hover-lift rounded-4" style="background: linear-gradient(135deg, #c08e5c 0%, #986c43 100%);">
                         <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
                             <div class="mb-3 mb-md-0 text-center text-md-start">
-                                <h5 class="mb-1 fw-bold text-white" style="font-family: 'Outfit', sans-serif;"><i class="bi bi-geo-alt me-2"></i>Belum Tiba di Lokasi?</h5>
+                                <h5 class="mb-1 fw-bold text-white"><i class="bi bi-geo-alt me-2"></i>Belum Tiba di Lokasi?</h5>
                                 <p class="mb-0 small text-white opacity-75">Pesan dulu sekarang, cari meja kosong saat tiba di Master Cafe!</p>
                             </div>
                             <a href="{{ route('menu_nanti') }}" class="btn fw-bold px-4 rounded-pill hover-scale btn-touch" style="background-color: #161b22; color: #c08e5c; border: 1px solid #161b22;">Pesan Sekarang</a>
                         </div>
                     </div>
 
-                    <h5 class="fw-bold text-white mb-3" style="font-family: 'Outfit', sans-serif;">Daftar Meja</h5>
+                    <h5 class="fw-bold text-white mb-3">Daftar Meja</h5>
                     <div class="row g-3">
                         @forelse($mejas as $meja)
                             <div class="col-12 col-md-6">
                                 <div class="card border-0 shadow-sm rounded-4 h-100 hover-lift" style="background-color: #14171c; border: 1px solid #21262d !important;">
                                     <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h5 class="mb-1 text-white fw-bold" style="font-family: 'Outfit', sans-serif;">
+                                            <h5 class="mb-1 text-white fw-bold">
                                                 <i class="bi bi-display me-2 text-secondary"></i> {{ $meja->nama_meja_atau_nomor }}
                                             </h5>
                                             <small class="text-secondary" style="font-size: 0.8rem;">{{ $meja->keterangan ?? 'Siap digunakan untuk pemesanan.' }}</small>

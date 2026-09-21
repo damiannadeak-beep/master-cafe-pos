@@ -69,7 +69,7 @@
 <div class="auth-wrapper">
     <div class="auth-card">
         <div class="text-center mb-4">
-            <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Buat Kata Sandi Baru</h3>
+            <h3 class="fw-bold text-white mb-1">Buat Kata Sandi Baru</h3>
             <p class="text-secondary small">Pastikan kata sandi baru Anda kuat dan mudah diingat.</p>
         </div>
 

@@ -89,7 +89,7 @@
         <div class="staff-brand-icon">
             <i class="bi bi-shield-lock-fill fs-2"></i>
         </div>
-        <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Portal Staf & Waitress</h3>
+        <h3 class="fw-bold text-white mb-1">Portal Staf & Waitress</h3>
         <p class="text-secondary small mb-4">Masuk ke sistem Tablet Waitress atau Dashboard Owner</p>
 
         @if (session('error'))

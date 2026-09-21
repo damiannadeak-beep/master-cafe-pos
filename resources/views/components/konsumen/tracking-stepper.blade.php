@@ -1,6 +1,6 @@
 <!-- Visual Stepper Progress -->
 <div class="card tracking-card shadow-sm p-4 mb-4">
-    <h6 class="text-white fw-bold mb-4 border-bottom border-secondary border-opacity-25 pb-2" style="font-family: 'Outfit', sans-serif;">
+    <h6 class="text-white fw-bold mb-4 border-bottom border-secondary border-opacity-25 pb-2">
         <i class="bi bi-activity me-1" style="color: #c08e5c;"></i> Progres Pesanan Real-Time
     </h6>
 

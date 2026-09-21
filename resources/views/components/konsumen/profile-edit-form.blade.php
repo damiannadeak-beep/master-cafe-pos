@@ -16,24 +16,24 @@
             </div>
         </div>
         <input type="file" id="foto-input" name="foto" class="d-none" accept="image/*" onchange="previewFoto(event)">
-        <small class="text-secondary d-block mt-2" style="font-family: 'Outfit', sans-serif !important; font-size: 0.8rem;">Klik kamera untuk mengganti foto profil (Maks. 2MB)</small>
+        <small class="text-secondary d-block mt-2" style="font-size: 0.8rem;">Klik kamera untuk mengganti foto profil (Maks. 2MB)</small>
     </div>
     <div class="mb-3">
-        <label class="form-label text-secondary small fw-semibold text-uppercase" style="font-family: 'Outfit', sans-serif !important; font-size: 0.78rem; letter-spacing: 0.04em;">Nama Lengkap</label>
-        <input type="text" name="name" class="form-control text-white" style="background-color: #161b22; border: 1px solid #21262d; font-family: 'Outfit', sans-serif !important; padding: 0.75rem 1rem;" value="{{ $user->name }}" required>
+        <label class="form-label text-secondary small fw-semibold text-uppercase" style="font-size: 0.78rem; letter-spacing: 0.04em;">Nama Lengkap</label>
+        <input type="text" name="name" class="form-control text-white" style="background-color: #161b22; border: 1px solid #21262d; padding: 0.75rem 1rem;" value="{{ $user->name }}" required>
     </div>
     <div class="mb-3">
-        <label class="form-label text-secondary small fw-semibold text-uppercase" style="font-family: 'Outfit', sans-serif !important; font-size: 0.78rem; letter-spacing: 0.04em;">Email</label>
-        <input type="email" name="email" class="form-control text-white" style="background-color: #161b22; border: 1px solid #21262d; font-family: 'Outfit', sans-serif !important; padding: 0.75rem 1rem;" value="{{ $user->email }}" required>
+        <label class="form-label text-secondary small fw-semibold text-uppercase" style="font-size: 0.78rem; letter-spacing: 0.04em;">Email</label>
+        <input type="email" name="email" class="form-control text-white" style="background-color: #161b22; border: 1px solid #21262d; padding: 0.75rem 1rem;" value="{{ $user->email }}" required>
     </div>
     <div class="mb-4">
-        <label class="form-label text-secondary small fw-semibold text-uppercase" style="font-family: 'Outfit', sans-serif !important; font-size: 0.78rem; letter-spacing: 0.04em;">Nomor WhatsApp / HP</label>
+        <label class="form-label text-secondary small fw-semibold text-uppercase" style="font-size: 0.78rem; letter-spacing: 0.04em;">Nomor WhatsApp / HP</label>
         <div class="input-group">
             <span class="input-group-text border-end-0 text-secondary" style="background-color: #161b22; border-color: #21262d;"><i class="bi bi-telephone"></i></span>
-            <input type="text" name="no_hp" class="form-control border-start-0 text-white" style="background-color: #161b22; border-color: #21262d; font-family: 'Outfit', sans-serif !important; padding: 0.75rem 1rem;" value="{{ $user->no_hp }}" placeholder="08xxxxxxxx">
+            <input type="text" name="no_hp" class="form-control border-start-0 text-white" style="background-color: #161b22; border-color: #21262d; padding: 0.75rem 1rem;" value="{{ $user->no_hp }}" placeholder="08xxxxxxxx">
         </div>
     </div>
-    <button type="submit" class="btn btn-touch w-100 fw-bold rounded-pill mb-3 shadow-sm" style="background: var(--gradient-bronze); color: white; border: none; font-family: 'Outfit', sans-serif !important; padding: 0.75rem 1.25rem;">
+    <button type="submit" class="btn btn-touch w-100 fw-bold rounded-pill mb-3 shadow-sm" style="background: var(--gradient-bronze); color: white; border: none; padding: 0.75rem 1.25rem;">
         Simpan Perubahan
     </button>
 </form>

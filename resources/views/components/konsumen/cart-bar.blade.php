@@ -35,7 +35,7 @@
                 <div class="rounded-circle p-1 d-flex align-items-center justify-content-center" style="background: rgba(192, 142, 92, 0.18); width: 28px; height: 28px;">
                     <i class="bi bi-cart3" style="color: #c08e5c; font-size: 0.95rem;"></i>
                 </div>
-                <span class="fw-bold text-white small" style="font-family: 'Outfit', sans-serif;">Rincian Pesanan</span>
+                <span class="fw-bold text-white small">Rincian Pesanan</span>
                 <span id="cart-drawer-badge" class="badge rounded-pill px-2 py-1" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.35);">0 Item</span>
             </div>
             <div class="d-flex align-items-center gap-1 text-white-50 small">
@@ -85,7 +85,7 @@
             <div class="cursor-pointer" onclick="toggleCartDrawer()" style="cursor: pointer;" title="Klik untuk lihat rincian pesanan">
                 <small class="text-muted fw-bold d-block mb-0" style="font-size: 0.75rem;">Total Tagihan</small>
                 <div class="d-flex align-items-baseline gap-2">
-                    <h4 class="fw-bold text-white mb-0" id="cart-total" style="font-family: 'Outfit', sans-serif;">Rp 0</h4>
+                    <h4 class="fw-bold text-white mb-0" id="cart-total">Rp 0</h4>
                     <span id="cart-qty" class="badge rounded-pill px-2" style="background-color: rgba(178, 122, 77, 0.2); color: #c08e5c; border: 1px solid rgba(178, 122, 77, 0.4);">0 Item</span>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                         <i class="bi bi-bag-check-fill" style="color: #c08e5c; font-size: 1.25rem;"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title text-white fw-bold mb-0" id="modalConfirmGuestOrderLabel" style="font-family: 'Outfit', sans-serif;">Konfirmasi Pesanan</h5>
+                        <h5 class="modal-title text-white fw-bold mb-0" id="modalConfirmGuestOrderLabel">Konfirmasi Pesanan</h5>
                         <small class="text-secondary">
                             @if(isset($meja))
                                 Meja {{ $meja->nama_meja_atau_nomor }} &bull; Dine-In

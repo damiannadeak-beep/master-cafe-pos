@@ -6,7 +6,7 @@
     <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(178, 122, 77, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
     <div class="position-absolute bottom-0 end-0 w-100 h-100" style="background: radial-gradient(circle at bottom left, rgba(178, 122, 77, 0.1) 0%, transparent 60%); pointer-events: none;"></div>
     <div class="container text-center position-relative z-index-1 py-3">
-        <h1 class="display-5 fw-bold mb-3 text-white" style="font-family: 'Rye', serif;">{{ \App\Models\Setting::getVal('lokasi_judul') ?? 'Titik Temu Kita' }}</h1>
+        <h1 class="display-5 fw-bold mb-3 text-white">{{ \App\Models\Setting::getVal('lokasi_judul') ?? 'Titik Temu Kita' }}</h1>
         <p class="fs-6 text-light opacity-75 mx-auto mb-0" style="max-width: 600px; font-weight: 300;">
             {{ \App\Models\Setting::getVal('lokasi_deskripsi') ?? 'Temukan lokasi Master Cafe. Suasana hangat dan hidangan istimewa telah menanti kedatangan Anda.' }}
         </p>
@@ -27,7 +27,7 @@
                             <i class="bi bi-geo-alt-fill fs-3"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold mb-2 text-white" style="font-family: 'Outfit', sans-serif;">Lokasi Utama</h5>
+                            <h5 class="fw-bold mb-2 text-white">Lokasi Utama</h5>
                             <p class="mb-0 lh-base text-secondary small">
                                 <strong class="text-light">{{ \App\Models\Setting::getVal('lokasi_utama_nama') ?? 'Master Cafe' }}</strong><br>
                                 {!! nl2br(e(\App\Models\Setting::getVal('lokasi_utama_alamat') ?? "Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711")) !!}
@@ -43,7 +43,7 @@
                             <i class="bi bi-clock-fill fs-3"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold mb-2 text-white" style="font-family: 'Outfit', sans-serif;">Jam Operasional</h5>
+                            <h5 class="fw-bold mb-2 text-white">Jam Operasional</h5>
                             <p class="mb-0 fw-bold fs-6" style="color: #c08e5c;">
                                 {{ \App\Models\Setting::getVal('lokasi_jam_operasional') ?? 'Buka Setiap Hari: 10:00 AM - 23:00 PM' }}
                             </p>
@@ -54,7 +54,7 @@
                 <!-- Card Panduan -->
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #161b22 0%, #22262d 100%); border: 1px solid rgba(178, 122, 77, 0.3) !important;">
                     <div class="card-body p-4">
-                        <h6 class="fw-bold mb-2" style="color: #c08e5c; font-family: 'Outfit', sans-serif;"><i class="bi bi-info-circle-fill me-2"></i>Panduan Menuju Lokasi</h6>
+                        <h6 class="fw-bold mb-2" style="color: #c08e5c;"><i class="bi bi-info-circle-fill me-2"></i>Panduan Menuju Lokasi</h6>
                         <p class="text-secondary small mb-0">
                             {{ \App\Models\Setting::getVal('lokasi_panduan') ?? 'Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711' }}
                         </p>

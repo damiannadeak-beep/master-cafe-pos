@@ -1,5 +1,5 @@
 // Fonts
-@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat&family=Outfit:wght@300;400;600&family=Rye&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@600&family=Great+Vibes&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rye&display=swap');
 
 // Variables
 @import 'variables';
@@ -36,11 +36,8 @@ body {
 }
 
 // Typography
-h1, h2, .navbar-brand, .brand-title, .hero-title {
-  font-family: 'Rye', serif !important;
-}
-h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif !important;
+h1, h2, h3, h4, h5, h6, .navbar-brand, .brand-title, .hero-title {
+  font-family: 'Poppins', sans-serif !important;
 }
 
 // Cards

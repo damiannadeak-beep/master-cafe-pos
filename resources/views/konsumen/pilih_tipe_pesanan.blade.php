@@ -19,7 +19,7 @@
 
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-body p-4 p-md-5">
-                    <h2 class="fw-bold text-center mb-2 text-white" style="font-family: 'Outfit', sans-serif !important;">Pilih Jenis Pesanan</h2>
+                    <h2 class="fw-bold text-center mb-2 text-white">Pilih Jenis Pesanan</h2>
                     <p class="text-center text-secondary mb-5 small">Apakah Anda ingin memesan untuk dinikmati di tempat atau dibawa pulang?</p>
                     
                     <div class="row g-4">
@@ -34,7 +34,7 @@
                                         <i class="bi bi-qr-code-scan" style="font-size: 38px; color: #c08e5c !important;"></i>
                                     </div>
                                 </div>
-                                <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Makan di Tempat</h5>
+                                <h5 class="fw-bold text-white mb-2">Makan di Tempat</h5>
                                 <p class="text-secondary small mb-0">Khusus scan stiker QR di meja kafe</p>
                             </div>
                         </div>
@@ -50,7 +50,7 @@
                                             <i class="bi bi-bag-check text-white" style="font-size: 38px; color: #48bb78 !important; line-height: 1; margin: 0;"></i>
                                         </div>
                                     </div>
-                                    <h5 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Dibawa Pulang</h5>
+                                    <h5 class="fw-bold text-white mb-2">Dibawa Pulang</h5>
                                     <p class="text-secondary small mb-0">Pesan dari mana saja untuk diambil</p>
                                 </div>
                             </a>
@@ -71,7 +71,7 @@
                      style="width: 80px; height: 80px; background-color: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3);">
                     <i class="bi bi-qr-code-scan fs-1 text-accent"></i>
                 </div>
-                <h4 class="fw-bold mb-2 text-white" id="modalDineInInfoLabel" style="font-family: 'Outfit', sans-serif;">Makan di Tempat (Dine-In)</h4>
+                <h4 class="fw-bold mb-2 text-white" id="modalDineInInfoLabel">Makan di Tempat (Dine-In)</h4>
                 <p class="text-white-50 small mb-3">
                     Silakan <strong>pindai (scan) stiker QR di atas meja</strong> atau klik nomor meja Anda di bawah ini untuk memulai pesanan:
                 </p>

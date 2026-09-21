@@ -7,7 +7,7 @@
     <div class="position-absolute bottom-0 end-0 w-100 h-100" style="background: radial-gradient(circle at bottom left, rgba(178, 122, 77, 0.1) 0%, transparent 60%); pointer-events: none;"></div>
     
     <div class="container text-center position-relative z-index-1 mt-4">
-        <h1 class="display-5 fw-bold mb-3 text-white" style="font-family: 'Rye', serif;">Katalog Menu</h1>
+        <h1 class="display-5 fw-bold mb-3 text-white">Katalog Menu</h1>
         <p class="fs-6 text-light opacity-75 mx-auto mb-4" style="max-width: 600px; font-weight: 300;">
             Jelajahi sajian lezat Master Cafe. Siap untuk memesan hidangan favorit Anda?
         </p>
@@ -27,7 +27,7 @@
     
     @if(isset($promos) && count($promos) > 0)
     <div class="alert border-0 shadow-lg rounded-4 mb-5 p-4" style="background: linear-gradient(135deg, #161b22 0%, #22262d 100%); border: 1px solid rgba(178, 122, 77, 0.3) !important;">
-        <h5 class="fw-bold mb-3" style="color: #c08e5c; font-family: 'Rye', serif;">
+        <h5 class="fw-bold mb-3" style="color: #c08e5c;">
             <i class="bi bi-stars me-2"></i> Promo Spesial Hari Ini
         </h5>
         <ul class="mb-0 ps-3">
@@ -89,12 +89,24 @@
     <!-- Daftar Menu -->
     <div class="row g-3 g-md-4 align-items-stretch" id="menu-container">
         @forelse($menus as $menu)
+        @php
+            $isNewMenu = str_contains(strtolower($menu->sub_kategori ?? ''), 'baru') 
+                || str_contains(strtolower($menu->sub_kategori ?? ''), 'spesial');
+        @endphp
         <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card h-100 d-flex flex-column" 
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card h-100 d-flex flex-column position-relative" 
                  id="menu-card-{{ $loop->index }}"
                  onclick="toggleMenuDetail({{ $loop->index }})"
                  style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; {{ !$menu->is_available ? 'opacity: 0.6;' : '' }}"
                  title="Sentuh untuk melihat / menutup detail deskripsi">
+                
+                @if($isNewMenu)
+                <!-- Diagonal Corner Ribbon New (Persis seperti tangkapan layar) -->
+                <div class="corner-ribbon-wrap">
+                    <span class="corner-ribbon-tag">New</span>
+                </div>
+                @endif
+
                 <div class="position-relative">
                     <!-- Gambar -->
                     @if($menu->image)
@@ -136,27 +148,27 @@
                 </div>
                 
                 <div class="card-body p-3 p-md-4 d-flex flex-column flex-grow-1">
-                    <h5 class="fw-bold mb-1 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; min-height: 2.7em; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
+                    <h5 class="fw-bold mb-1 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; min-height: 2.7em;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
                     <div class="mb-2">
-                        <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
+                        <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c;">
                             {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                         </span>
                     </div>
 
-                    <!-- Area Deskripsi: Default ringkas 2 baris, jika panjang ada see more -->
+                    <!-- Area Deskripsi: Default ringkas 2 baris, jika panjang ada see detail di kanan -->
                     <div class="menu-desc-container mt-auto">
                         <p class="menu-desc-text small mb-0" id="desc-{{ $loop->index }}" 
                            style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; line-height: 1.45; transition: color 0.3s ease;">
                             {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
                         </p>
 
-                        <!-- Toggle See More Ringkas (Otomatis muncul hanya jika teks panjang/terpotong) -->
-                        <div class="see-more-wrap pt-1" id="see-more-wrap-{{ $loop->index }}" style="display: none;">
-                            <span class="see-more-btn fw-semibold d-inline-flex align-items-center gap-1" id="btn-detail-{{ $loop->index }}"
+                        <!-- Toggle See Detail (Seperti pesan bawa pulang: soft text-secondary dengan chevron icon) -->
+                        <div class="see-more-wrap pt-1 text-end" id="see-more-wrap-{{ $loop->index }}" style="display: none;">
+                            <span class="see-detail-link text-secondary opacity-75 d-inline-flex align-items-center gap-1" id="btn-detail-{{ $loop->index }}"
                                   onclick="event.stopPropagation(); toggleMenuDetail({{ $loop->index }})"
-                                  style="color: #c08e5c; font-size: 0.76rem; cursor: pointer; transition: all 0.2s ease;">
-                                <span id="text-detail-{{ $loop->index }}">See more</span>
-                                <i class="bi bi-chevron-down" id="icon-detail-{{ $loop->index }}" style="font-size: 0.68rem;"></i>
+                                  style="font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
+                                <i class="bi bi-chevron-down" id="icon-detail-{{ $loop->index }}"></i>
+                                <span id="text-detail-{{ $loop->index }}">See detail</span>
                             </span>
                         </div>
                     </div>
@@ -168,7 +180,7 @@
             <div class="d-inline-block p-4 rounded-circle mb-3" style="background-color: #161b22; border: 1px solid #21262d;">
                 <i class="bi bi-basket text-secondary" style="font-size: 3rem;"></i>
             </div>
-            <h5 class="text-white fw-bold" style="font-family: 'Rye', serif;">Katalog Kosong</h5>
+            <h5 class="text-white fw-bold">Katalog Kosong</h5>
             <p class="text-secondary">Menu belum tersedia saat ini. Silakan kembali lagi nanti.</p>
         </div>
         @endforelse
@@ -216,11 +228,44 @@
         min-height: 0 !important;
         line-height: 1.6 !important;
     }
-    .see-more-btn {
+    .see-detail-link:hover {
+        color: #c08e5c !important;
+        opacity: 1 !important;
+    }
+    /* Diagonal Corner Ribbon "New" (Persis seperti tangkapan layar) */
+    .corner-ribbon-wrap {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+    }
+    .corner-ribbon-tag {
+        position: absolute;
+        top: 11px;
+        right: -24px;
+        width: 82px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        text-align: center;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        line-height: 18px;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        text-transform: uppercase;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .see-detail-link {
         user-select: none;
     }
-    .see-more-btn:hover {
-        color: #e2a873 !important;
+    .see-detail-link:hover {
+        color: #c08e5c !important;
+        opacity: 1 !important;
     }
     .subcat-touch-scroll {
         scrollbar-width: none;
@@ -372,7 +417,7 @@
                 icon.className = 'bi bi-chevron-up';
             }
         } else {
-            if (text) text.innerText = 'See more';
+            if (text) text.innerText = 'See detail';
             if (icon) {
                 icon.className = 'bi bi-chevron-down';
             }

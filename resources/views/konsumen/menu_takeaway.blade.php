@@ -7,7 +7,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-                    <h5 class="text-white fw-bold mb-0 text-nowrap" style="font-family: 'Outfit', sans-serif !important;">
+                    <h5 class="text-white fw-bold mb-0 text-nowrap">
                         <i class="bi bi-bag-check-fill me-1" style="color: #c08e5c;"></i> Pesanan Dibawa Pulang
                     </h5>
                     <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(192, 142, 92, 0.15); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.3); font-size: 0.7rem;">
@@ -22,7 +22,7 @@
     @include('components.konsumen.promo-banner')
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-4 mb-3 gap-2">
-        <h5 class="fw-bold mb-0 text-white" style="font-family: 'Outfit', sans-serif;">Menu Tersedia</h5>
+        <h5 class="fw-bold mb-0 text-white">Menu Tersedia</h5>
         @include('components.konsumen.kategori-filter')
     </div>
     

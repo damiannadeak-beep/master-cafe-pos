@@ -60,8 +60,7 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Caveat:wght@600&family=Great+Vibes&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rye&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="manifest" href="/manifest.json">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -115,7 +114,7 @@
             transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
         body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
         
         /* Core Shared Utilities */
@@ -216,9 +215,10 @@
         .toast-bronze { background-color: #161b22; border: 1px solid #986c43; color: #ffffff; }
         
         .navbar-brand-logo { display: flex; align-items: center; justify-content: center; position: relative; text-align: center; width: 56px; height: 56px; background-color: #ffffff; border-radius: 50%; text-decoration: none; margin-right: 16px; }
-        .navbar-brand-logo .text-master { font-family: 'Rye', serif; font-size: 10px; color: #000000; letter-spacing: 1px; margin-bottom: -4px; z-index: 2; line-height: 1; }
-        .navbar-brand-logo .text-cafe { font-family: 'Alex Brush', cursive; font-size: 14px; color: #000000; margin-bottom: 0px; z-index: 2; line-height: 1; }
-        .navbar-brand-logo .text-since { font-family: 'Caveat', cursive; font-size: 6px; color: #000000; letter-spacing: 0.5px; z-index: 2; line-height: 1; }
+        .navbar-brand-logo .text-master { font-family: 'Rye', serif !important; font-size: 10px; color: #000000; letter-spacing: 1px; margin-bottom: -4px; z-index: 2; line-height: 1; }
+        .navbar-brand-logo .text-cafe { font-family: 'Alex Brush', cursive !important; font-size: 14px; color: #000000; margin-bottom: 0px; z-index: 2; line-height: 1; }
+        .navbar-brand-logo .text-since { font-family: 'Caveat', cursive !important; font-size: 6px; color: #000000; letter-spacing: 0.5px; z-index: 2; line-height: 1; }
+        .font-cursive { font-family: 'Great Vibes', cursive !important; }
         .navbar-brand-logo .aksen-gradasi { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 2px solid transparent; background: var(--gradient-bronze) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: destination-out; mask-composite: exclude; clip-path: polygon(0 0, 100% 0, 100% 80%, 0 20%); }
         
                 /* Bootstrap Dark Override */

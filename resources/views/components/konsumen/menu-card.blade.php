@@ -1,10 +1,21 @@
 @foreach($menus as $menu)
+@php
+    $isNewMenu = str_contains(strtolower($menu->sub_kategori ?? ''), 'baru') 
+        || str_contains(strtolower($menu->sub_kategori ?? ''), 'spesial');
+@endphp
 <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-3 mb-md-4 menu-item" 
      data-kategori="{{ strtolower($menu->kategori) }}" 
      data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}">
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column consumer-menu-card h-100 {{ $menu->is_available ? 'hover-lift' : '' }}" 
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column consumer-menu-card h-100 position-relative {{ $menu->is_available ? 'hover-lift' : '' }}" 
          id="consumer-menu-card-{{ $menu->id }}"
          style="background-color: #161b22; border: 1px solid #21262d !important; transition: all 0.25s ease; width: 100%; {{ !$menu->is_available ? 'opacity: 0.65; filter: grayscale(40%);' : '' }}">
+        
+        @if($isNewMenu)
+        <!-- Diagonal Corner Ribbon New (Persis seperti tangkapan layar) -->
+        <div class="corner-ribbon-wrap">
+            <span class="corner-ribbon-tag">New</span>
+        </div>
+        @endif
         
         <!-- Area Gambar dengan Overlay Badge -->
         <div class="position-relative cursor-pointer" 
@@ -65,7 +76,7 @@
 
                 <!-- Harga & Toggle Indikator -->
                 <div class="d-flex align-items-center justify-content-between mt-auto">
-                    <span class="fw-bold fs-6 text-nowrap" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
+                    <span class="fw-bold fs-6 text-nowrap" style="color: #c08e5c;">
                         {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                     </span>
                     <small class="text-secondary opacity-75 d-flex align-items-center gap-1" style="font-size: 0.7rem;">
@@ -105,7 +116,7 @@
                                 <i class="bi bi-dash fs-5"></i>
                             </button>
                             <span id="qty-{{ $menu->id }}" class="fw-bold mb-0 text-white" 
-                                  style="font-size: 0.95rem; min-width: 20px; text-align: center; font-family: 'Outfit', sans-serif;">
+                                  style="font-size: 0.95rem; min-width: 20px; text-align: center;">
                                 0
                             </span>
                             <button type="button" class="btn btn-primary rounded-circle p-0 d-flex justify-content-center align-items-center shadow-sm" 
@@ -154,6 +165,34 @@
         color: #e2e8f0 !important;
         min-height: 0 !important;
         line-height: 1.5 !important;
+    }
+    /* Diagonal Corner Ribbon "New" (Persis seperti tangkapan layar) */
+    .corner-ribbon-wrap {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        z-index: 10;
+        pointer-events: none;
+    }
+    .corner-ribbon-tag {
+        position: absolute;
+        top: 11px;
+        right: -24px;
+        width: 82px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        text-align: center;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        line-height: 18px;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        text-transform: uppercase;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 </style>
 

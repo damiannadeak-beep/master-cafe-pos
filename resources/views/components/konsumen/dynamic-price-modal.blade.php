@@ -17,7 +17,7 @@
                     <i class="bi bi-shop text-warning fs-1"></i>
                 </div>
                 
-                <h5 class="fw-bold text-white mb-2" id="dynamicModalMenuTitle" style="font-family: 'Outfit', sans-serif !important;">Menu Timbangan</h5>
+                <h5 class="fw-bold text-white mb-2" id="dynamicModalMenuTitle">Menu Timbangan</h5>
                 
                 <div class="p-3 rounded-4 mb-3 text-start" style="background: rgba(255,255,255,0.03); border: 1px solid #21262d;">
                     <p class="text-white-50 mb-0" style="font-size: 0.88rem; line-height: 1.55;">

@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mt-4 mb-5 pb-5">
     <div class="text-center mb-5 mt-4">
-        <h2 class="fw-bold text-white" style="font-family: 'Rye', serif;">Hubungi Kami</h2>
+        <h2 class="fw-bold text-white">Hubungi Kami</h2>
         <p class="fs-6 text-light opacity-75 mx-auto" style="max-width: 500px; font-weight: 300;">Punya pertanyaan, kritik, atau saran? Kami dengan senang hati akan mendengarkan Anda.</p>
     </div>
 

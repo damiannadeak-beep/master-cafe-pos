@@ -102,7 +102,7 @@
     <div class="auth-card">
         <div class="text-center mb-4">
             <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow" style="height: 80px; width: 80px; object-fit: cover; margin-bottom: 1rem;">
-            <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Daftar Akun Konsumen</h3>
+            <h3 class="fw-bold text-white mb-1">Daftar Akun Konsumen</h3>
             <p class="text-secondary small">Nikmati kemudahan pesan langsung dari meja Anda</p>
         </div>
 

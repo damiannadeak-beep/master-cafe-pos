@@ -30,8 +30,8 @@
 
                 <!-- Info Nama & Harga -->
                 <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
-                    <h5 class="fw-bold text-white mb-0" id="variantModalMenuTitle" style="font-family: 'Outfit', sans-serif !important; font-size: 1.15rem;"></h5>
-                    <span class="fw-bold fs-5 text-nowrap" id="variantModalMenuPrice" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;"></span>
+                    <h5 class="fw-bold text-white mb-0" id="variantModalMenuTitle" style="font-size: 1.15rem;"></h5>
+                    <span class="fw-bold fs-5 text-nowrap" id="variantModalMenuPrice" style="color: #c08e5c;"></span>
                 </div>
 
                 <!-- Deskripsi Produk -->
@@ -61,7 +61,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
                             <small class="text-muted d-block mb-0" style="font-size: 0.75rem;">Total Harga</small>
-                            <h5 class="fw-bold mb-0 text-white" id="variantModalPrice" style="color: #c08e5c !important; font-family: 'Outfit', sans-serif !important;">Rp 0</h5>
+                            <h5 class="fw-bold mb-0 text-white" id="variantModalPrice" style="color: #c08e5c !important;">Rp 0</h5>
                         </div>
                         <div class="d-flex align-items-center rounded-pill px-2 py-1" style="background-color: #14171c; border: 1px solid #21262d;">
                             <button type="button" class="btn btn-sm btn-link text-white text-decoration-none px-2" onclick="changeModalQty(-1)"><i class="bi bi-dash fs-5"></i></button>

@@ -15,7 +15,7 @@
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-header border-0 py-4 text-center" style="background: var(--gradient-bronze); border-radius: 1rem 1rem 0 0;">
                     <i class="bi bi-qr-code-scan text-white mb-2 d-block" style="font-size: 2.5rem;"></i>
-                    <h4 class="mb-0 text-white fw-bold" style="font-family: 'Rye', serif;">Pembayaran Pesanan</h4>
+                    <h4 class="mb-0 text-white fw-bold">Pembayaran Pesanan</h4>
                     <p class="text-white-50 mb-0 small">ID Pesanan: #{{ $pesanan->id }}</p>
                 </div>
                 <div class="card-body p-4">

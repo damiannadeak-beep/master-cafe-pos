@@ -7,13 +7,9 @@
     <title>Master Cafe</title>
     
     @include("layouts.includes.head-assets")
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Rye&family=Outfit:wght@300;400;600&display=swap');
-        body, button, input, select, textarea, .nav-link {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        }
-        h1, h2, h3, h4, h5, h6, .navbar-brand {
-            font-family: 'Rye', serif !important;
+    <style>
+        body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
         .font-cursive {
             font-family: 'Great Vibes', cursive !important;

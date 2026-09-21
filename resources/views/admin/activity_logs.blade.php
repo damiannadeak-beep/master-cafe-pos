@@ -8,7 +8,7 @@
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1 text-white" style="font-family: 'Outfit', sans-serif !important;">
+            <h2 class="fw-bold mb-1 text-white">
                 <i class="bi bi-shield-check me-2" style="color: #c08e5c;"></i> Log Aktivitas Operasional
             </h2>
             <p class="text-secondary small mb-0">Pantau seluruh riwayat transaksi, perubahan stok, dan aktivitas staf kafe secara transparan</p>

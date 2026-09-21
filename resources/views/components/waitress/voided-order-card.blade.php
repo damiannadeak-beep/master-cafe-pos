@@ -26,7 +26,7 @@
                 <!-- Card Header -->
                 <div class="card-header bg-transparent border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div class="d-flex align-items-center flex-wrap gap-1.5">
-                        <span class="fw-bold text-white fs-6" style="font-family: 'Outfit', sans-serif;">
+                        <span class="fw-bold text-white fs-6">
                             <span class="text-danger">#</span>{{ $order->id }}
                         </span>
                         <span class="badge rounded-pill px-2 py-1 small fw-bold" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
@@ -128,7 +128,7 @@
                     <div class="pt-2 border-top border-secondary border-opacity-25">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-white-50 small">Total Nilai Void:</span>
-                            <span class="text-danger fw-bold fs-6" style="font-family: 'Outfit', sans-serif;">
+                            <span class="text-danger fw-bold fs-6">
                                 Rp {{ number_format($order->total, 0, ',', '.') }}
                             </span>
                         </div>

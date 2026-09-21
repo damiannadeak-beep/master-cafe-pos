@@ -1,7 +1,7 @@
 <!-- Card Rating & Feedback Tamu (Hanya Tampil Saat Pesanan Selesai / Completed) -->
 @if($pesanan->status === 'completed')
 <div class="card tracking-card shadow-sm p-4 mb-4 text-center" id="rating-container">
-    <h6 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">
+    <h6 class="text-white fw-bold mb-1">
         Bagaimana Pengalaman Anda?
     </h6>
     <p class="text-secondary small mb-3">Beri ulasan untuk membantu Master Cafe selalu melayani lebih baik.</p>

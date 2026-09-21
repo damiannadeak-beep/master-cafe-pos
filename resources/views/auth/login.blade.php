@@ -102,7 +102,7 @@
     <div class="auth-card">
         <div class="text-center mb-4">
             <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow" style="height: 76px; width: 76px; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid #c08e5c;">
-            <h3 class="fw-bold text-white mb-1" style="font-family: 'Rye', serif;">Portal Staf & Waitress</h3>
+            <h3 class="fw-bold text-white mb-1">Portal Staf & Waitress</h3>
             <p class="text-secondary small mb-0">Master Cafe Smart POS & Station System</p>
         </div>
 

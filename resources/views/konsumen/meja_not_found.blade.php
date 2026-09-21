@@ -12,7 +12,7 @@
                     </div>
                 </div>
 
-                <h3 class="fw-bold text-white mb-2" style="font-family: 'Outfit', sans-serif !important;">Meja Tidak Ditemukan</h3>
+                <h3 class="fw-bold text-white mb-2">Meja Tidak Ditemukan</h3>
                 <p class="text-white-50 mb-4" style="font-size: 0.95rem; line-height: 1.6;">
                     Stiker QR meja yang Anda pindai tidak terdaftar di sistem Master Cafe atau sudah dinonaktifkan.
                 </p>

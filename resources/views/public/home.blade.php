@@ -180,7 +180,7 @@
     <div class="container">
         <div class="text-center mb-5">
             <span class="font-cursive text-bronze fs-2 d-block mb-2">Layanan Spesial</span>
-            <h2 class="fw-bold mb-0 text-white" style="font-family: 'Rye', serif; font-size: 2.5rem;">Cita Rasa & Kenyamanan</h2>
+            <h2 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">Cita Rasa & Kenyamanan</h2>
         </div>
 
         <div class="row g-4 justify-content-center">
@@ -191,7 +191,7 @@
                     <div class="pillar-icon-box mx-auto">
                         <i class="bi bi-fire fs-2"></i>
                     </div>
-                    <h4 class="text-white mb-3" style="font-family: 'Rye', serif;">Sajian Premium</h4>
+                    <h4 class="text-white mb-3 fw-bold">Sajian Premium</h4>
                     <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
                         Kopi dan hidangan racikan khusus yang dibuat dengan bahan berkualitas tinggi untuk memanjakan lidah Anda.
                     </p>
@@ -204,7 +204,7 @@
                     <div class="pillar-icon-box mx-auto">
                         <i class="bi bi-qr-code-scan fs-2"></i>
                     </div>
-                    <h4 class="text-white mb-3" style="font-family: 'Rye', serif;">Pesan Dari Meja</h4>
+                    <h4 class="text-white mb-3 fw-bold">Pesan Dari Meja</h4>
                     <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
                         Pindai kode QR di meja Anda dan nikmati kemudahan memesan menu secara digital tanpa perlu beranjak.
                     </p>
@@ -217,7 +217,7 @@
                     <div class="pillar-icon-box mx-auto">
                         <i class="bi bi-moon-stars fs-2"></i>
                     </div>
-                    <h4 class="text-white mb-3" style="font-family: 'Rye', serif;">Suasana Klasik</h4>
+                    <h4 class="text-white mb-3 fw-bold">Suasana Klasik</h4>
                     <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
                         Ruangan bernuansa hangat dan temaram yang dirancang untuk memberikan kenyamanan maksimal saat berkumpul.
                     </p>
@@ -231,7 +231,7 @@
 <!-- Tentang Kami Singkat -->
 <section class="py-5 border-top" style="background-color: #161b22; border-color: #21262d !important;">
     <div class="container text-center py-4">
-        <h3 class="text-bronze mb-4" style="font-family: 'Rye', serif;">Tinggalkan Keramaian, Temukan Ketenangan.</h3>
+        <h3 class="text-bronze mb-4 fw-bold">Tinggalkan Keramaian, Temukan Ketenangan.</h3>
         <p class="text-secondary mx-auto" style="max-width: 700px; line-height: 1.8;">
             Berdiri sejak 2024, Master Cafe lahir dari visi untuk menciptakan ruang di mana tradisi rasa bertemu dengan kepraktisan teknologi modern. Kami percaya setiap cangkir kopi memiliki cerita, dan kami ingin menjadi bagian dari cerita Anda.
         </p>

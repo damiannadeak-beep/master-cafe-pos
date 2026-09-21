@@ -6,21 +6,12 @@
     "isEntry": true
   },
   "resources/sass/app.scss": {
-    "file": "assets/app-NUJU54S-.css",
+    "file": "assets/app-C1Sz9j-6.css",
     "src": "resources/sass/app.scss",
     "isEntry": true,
-    "name": "app"
-  },
-  "../master-cafe-pos/resources/js/app.js": {
-    "file": "assets/app-DBPtnX5x.js",
     "name": "app",
-    "src": "resources/js/app.js",
-    "isEntry": true
-  },
-  "../master-cafe-pos/resources/sass/app.scss": {
-    "file": "assets/app-NUJU54S-.css",
-    "src": "resources/sass/app.scss",
-    "isEntry": true,
-    "name": "app"
+    "names": [
+      "app.css"
+    ]
   }
 }

@@ -12,7 +12,7 @@
                 </div>
                 <div class="overflow-hidden">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="text-white small fw-bold" style="font-family: 'Outfit', sans-serif;">Daftar Pesanan Anda</span>
+                        <span class="text-white small fw-bold">Daftar Pesanan Anda</span>
                         <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(192, 142, 92, 0.25); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.4);">
                             {{ $activeTableOrders->count() }} Pesanan
                         </span>
@@ -144,7 +144,7 @@
     <!-- Banner Pesanan Selesai & Tombol Selesai Utama -->
     <div class="alert border-0 rounded-4 p-4 mb-4 text-center shadow-lg" style="background: rgba(35, 134, 54, 0.15); border: 1px solid rgba(46, 160, 67, 0.35) !important;">
         <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
-        <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Selesai & Pembayaran Lunas</h5>
+        <h5 class="text-white fw-bold mb-1">Pesanan Selesai & Pembayaran Lunas</h5>
         <p class="text-secondary small mb-3">Terima kasih telah berkunjung ke Master Cafe. Klik tombol di bawah untuk menyelesaikan sesi pesanan Anda.</p>
         <button onclick="finishCustomerSession()" class="btn btn-md rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--gradient-bronze); color: white; border: none;">
             <i class="bi bi-check2-circle me-1"></i> Selesai
@@ -157,7 +157,7 @@
     <!-- Banner Pesanan Dibatalkan / Dihapus oleh Kasir -->
     <div class="alert border-0 rounded-4 p-4 mb-4 text-center shadow-lg" style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.35) !important;">
         <i class="bi bi-x-circle-fill text-danger fs-1 mb-2 d-block"></i>
-        <h5 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">Pesanan Telah Dibatalkan / Dihapus</h5>
+        <h5 class="text-white fw-bold mb-1">Pesanan Telah Dibatalkan / Dihapus</h5>
         <p class="text-secondary small mb-3">Pesanan Anda telah dibatalkan oleh Kasir. Silakan klik tombol di bawah untuk kembali ke menu dan membuat pesanan baru.</p>
         <button onclick="finishCustomerSession()" class="btn btn-md btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm">
             <i class="bi bi-arrow-left-circle me-1"></i> Kembali ke Menu / Pesan Baru
@@ -172,7 +172,7 @@
             <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold" style="background: rgba(192, 142, 92, 0.15); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.3); font-size: 0.8rem;">
                 <i class="bi bi-geo-alt-fill me-1"></i> {{ ($pesanan->tipe_pesanan ?? '') === 'takeaway' ? 'Bawa Pulang (Takeaway)' : ($meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Pesanan Cafe') }}
             </span>
-            <h4 class="text-white fw-bold mb-1" style="font-family: 'Outfit', sans-serif;">
+            <h4 class="text-white fw-bold mb-1">
                 Order #{{ $pesanan->id }}
             </h4>
             <p class="text-secondary small mb-0">

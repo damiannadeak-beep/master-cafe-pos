@@ -65,7 +65,7 @@
                         <!-- Header Meja -->
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h5 class="fw-bold text-white mb-0" style="font-family: 'Outfit', sans-serif;">
+                                <h5 class="fw-bold text-white mb-0">
                                     <i class="bi bi-geo-alt-fill text-accent me-1"></i> {{ $meja->nama_meja_atau_nomor }}
                                 </h5>
                                 <small class="text-white-50">{{ $meja->keterangan ?? 'Meja Pelanggan' }}</small>
