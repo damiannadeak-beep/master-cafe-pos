@@ -87,13 +87,13 @@
     </div>
 
     <!-- Daftar Menu -->
-    <div class="row g-3 g-md-4 align-items-start" id="menu-container">
+    <div class="row g-3 g-md-4 align-items-stretch" id="menu-container">
         @forelse($menus as $menu)
-        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}" style="align-self: flex-start;">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card" 
+        <div class="col-6 col-md-4 col-lg-3 menu-item d-flex flex-column" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card h-100 d-flex flex-column" 
                  id="menu-card-{{ $loop->index }}"
                  onclick="toggleMenuDetail({{ $loop->index }})"
-                 style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; align-self: flex-start; {{ !$menu->is_available ? 'opacity: 0.6;' : '' }}"
+                 style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; {{ !$menu->is_available ? 'opacity: 0.6;' : '' }}"
                  title="Sentuh untuk melihat / menutup detail deskripsi">
                 <div class="position-relative">
                     <!-- Gambar -->
@@ -135,8 +135,8 @@
                     @endif
                 </div>
                 
-                <div class="card-body p-3 p-md-4 d-flex flex-column">
-                    <h5 class="fw-bold mb-1 mb-md-2 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
+                <div class="card-body p-3 p-md-4 d-flex flex-column flex-grow-1">
+                    <h5 class="fw-bold mb-1 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; font-family: 'Outfit', sans-serif !important;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
                     <div class="mb-2">
                         <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c; font-family: 'Outfit', sans-serif !important;">
                             {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
@@ -144,14 +144,14 @@
                     </div>
 
                     <!-- Area Deskripsi: Default ringkas 2 baris, saat ditekan memanjang ke bawah -->
-                    <div class="menu-desc-container mb-3">
+                    <div class="menu-desc-container mb-3 flex-grow-1">
                         <p class="menu-desc-text small mb-0" id="desc-{{ $loop->index }}" 
-                           style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; line-height: 1.5; min-height: 2.4em; transition: color 0.3s ease;">
+                           style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; line-height: 1.45; transition: color 0.3s ease;">
                             {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
                         </p>
                     </div>
                     
-                    <div class="mt-auto">
+                    <div class="mt-auto pt-1">
                         <div class="detail-toggle-btn text-center py-2 rounded-pill fw-bold" id="btn-detail-{{ $loop->index }}" style="background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; font-size: 0.75rem; border: 1px solid rgba(192, 142, 92, 0.25); transition: all 0.25s ease;">
                             <i class="bi bi-chevron-down me-1" id="icon-detail-{{ $loop->index }}"></i> 
                             <span id="text-detail-{{ $loop->index }}">Lihat Detail</span>

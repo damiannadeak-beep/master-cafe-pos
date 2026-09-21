@@ -53,13 +53,13 @@
                  style="cursor: pointer;">
                 <!-- Nama Menu -->
                 <h6 class="fw-bold text-white mb-1" 
-                    style="font-size: 0.95rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em;">
+                    style="font-size: 0.95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                     {{ $menu->nama_menu }}
                 </h6>
 
                 <!-- Deskripsi Pendek: Memanjang ke bawah saat diklik -->
                 <p class="small text-secondary mb-2 consumer-desc-text" id="consumer-desc-{{ $menu->id }}"
-                   style="font-size: 0.75rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2em; transition: color 0.3s ease;">
+                   style="font-size: 0.75rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: color 0.3s ease;">
                     {{ $menu->deskripsi ?? 'Racikan istimewa Master Cafe.' }}
                 </p>
 
