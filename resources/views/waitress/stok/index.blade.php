@@ -45,6 +45,13 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Sub-Kategori Filter Bar (Level 2) - Hanya muncul jika Makanan atau Minuman dipilih -->
+            <div id="stok-sub-category-wrapper" class="w-100 mt-2" style="display: none !important;">
+                <div id="stok-sub-category-pills" class="d-flex gap-2 pb-1 overflow-auto align-items-center subcat-scroll-container" style="white-space: nowrap; flex-wrap: nowrap; -webkit-overflow-scrolling: touch;">
+                    <!-- Rendered dynamically by JS -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -64,7 +71,7 @@
                     </thead>
                     <tbody>
                         @forelse($menus as $menu)
-                            <tr class="menu-row" data-name="{{ strtolower($menu->nama_menu) }}" data-category="{{ strtolower($menu->kategori) }}" data-available="{{ $menu->is_available ? '1' : '0' }}" id="row-{{ $menu->id }}">
+                            <tr class="menu-row" data-name="{{ strtolower($menu->nama_menu) }}" data-category="{{ strtolower($menu->kategori) }}" data-subcategory="{{ strtolower($menu->sub_kategori ?? '') }}" data-available="{{ $menu->is_available ? '1' : '0' }}" id="row-{{ $menu->id }}">
                                 <td class="ps-4">
                                     <div class="rounded d-flex align-items-center justify-content-center overflow-hidden" style="width: 50px; height: 50px; background-color: #161b22; border: 1px solid #21262d;">
                                         <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; padding: 2px;">
@@ -77,9 +84,16 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge {{ strtolower($menu->kategori) == 'makanan' ? 'bg-warning text-dark' : 'bg-primary' }}">
-                                        {{ ucfirst($menu->kategori) }}
-                                    </span>
+                                    <div class="d-flex flex-column gap-1 align-items-center">
+                                        <span class="badge {{ strtolower($menu->kategori) == 'makanan' ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                            {{ ucfirst($menu->kategori) }}
+                                        </span>
+                                        @if($menu->sub_kategori)
+                                            <span class="badge bg-secondary text-white" style="font-size: 0.7rem;">
+                                                {{ $menu->sub_kategori }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="text-nowrap fw-bold" style="color: #c08e5c;">
                                     {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
@@ -127,19 +141,100 @@
 </div>
 
 <script>
+    @php
+        $stokMakananSubs = $menus->filter(fn($m) => strtolower($m->kategori) === 'makanan')->pluck('sub_kategori')->filter()->unique()->values();
+        $stokMinumanSubs = $menus->filter(fn($m) => strtolower($m->kategori) === 'minuman')->pluck('sub_kategori')->filter()->unique()->values();
+        $stokAllSubs = $menus->pluck('sub_kategori')->filter()->unique()->values();
+    @endphp
+
+    window.stokSubCategoryData = {
+        makanan: @json($stokMakananSubs),
+        minuman: @json($stokMinumanSubs),
+        all: @json($stokAllSubs)
+    };
+
     let currentCategory = 'all';
+    let currentSubCategory = 'all';
     let onlyHabis = false;
+
+    function renderStokSubPills() {
+        const wrapper = document.getElementById('stok-sub-category-wrapper');
+        const container = document.getElementById('stok-sub-category-pills');
+        if (!container) return;
+
+        const data = window.stokSubCategoryData || {};
+        let subs = [];
+        if (currentCategory === 'makanan') {
+            subs = data.makanan || [];
+            if (wrapper) wrapper.style.setProperty('display', 'block', 'important');
+        } else if (currentCategory === 'minuman') {
+            subs = data.minuman || [];
+            if (wrapper) wrapper.style.setProperty('display', 'block', 'important');
+        } else {
+            if (wrapper) wrapper.style.setProperty('display', 'none', 'important');
+            container.innerHTML = '';
+            return;
+        }
+
+        let html = `
+            <button type="button" class="btn btn-sm btn-stok-sub active rounded-pill px-3 py-1 flex-shrink-0" 
+                    onclick="setSubCategoryFilter('all', this)"
+                    style="background-color: rgba(192, 142, 92, 0.25); color: #e2a873; border: 1px solid rgba(192, 142, 92, 0.7); font-size: 0.78rem; font-weight: 600;">
+                Semua ${currentCategory === 'makanan' ? 'Makanan' : 'Minuman'}
+            </button>
+        `;
+
+        subs.forEach(sub => {
+            const safeSub = sub.replace(/'/g, "\\'");
+            html += `
+                <button type="button" class="btn btn-sm btn-stok-sub rounded-pill px-3 py-1 flex-shrink-0" 
+                        onclick="setSubCategoryFilter('${safeSub}', this)"
+                        style="background-color: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); font-size: 0.78rem;">
+                    ${sub}
+                </button>
+            `;
+        });
+
+        container.innerHTML = html;
+        container.scrollLeft = 0;
+    }
 
     function setCategoryFilter(category, btn) {
         currentCategory = category;
+        currentSubCategory = 'all';
+
         document.querySelectorAll('.btn-group button').forEach(b => {
-            if(b.id.startsWith('btn-filter-')) {
+            if(b.id && b.id.startsWith('btn-filter-')) {
                 b.classList.remove('btn-primary', 'active');
                 b.classList.add('btn-outline-primary');
             }
         });
-        btn.classList.remove('btn-outline-primary');
-        btn.classList.add('btn-primary', 'active');
+        if (btn) {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary', 'active');
+        }
+
+        renderStokSubPills();
+        filterMenus();
+    }
+
+    function setSubCategoryFilter(subCat, btn) {
+        currentSubCategory = (subCat || 'all').toLowerCase();
+
+        document.querySelectorAll('.btn-stok-sub').forEach(b => {
+            b.classList.remove('active');
+            b.style.backgroundColor = 'rgba(255,255,255,0.05)';
+            b.style.color = '#e2e8f0';
+            b.style.borderColor = 'rgba(255,255,255,0.15)';
+        });
+
+        if (btn) {
+            btn.classList.add('active');
+            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.2)';
+            btn.style.color = '#c08e5c';
+            btn.style.borderColor = 'rgba(192, 142, 92, 0.6)';
+        }
+
         filterMenus();
     }
 
@@ -162,19 +257,23 @@
         rows.forEach(row => {
             const name = row.dataset.name;
             const category = row.dataset.category;
+            const subcategory = (row.dataset.subcategory || '').toLowerCase();
             const isAvail = row.dataset.available === '1';
 
             const matchQuery = name.includes(query);
             const matchCategory = (currentCategory === 'all' || category === currentCategory);
+            const matchSubCategory = (currentSubCategory === 'all' || subcategory === currentSubCategory);
             const matchHabis = (!onlyHabis || !isAvail);
 
-            if(matchQuery && matchCategory && matchHabis) {
+            if(matchQuery && matchCategory && matchSubCategory && matchHabis) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
             }
         });
     }
+
+    document.addEventListener('DOMContentLoaded', renderStokSubPills);
 
     function setMenuAvailability(menuId, isAvailable) {
         const btnTersedia = document.getElementById('btn-tersedia-' + menuId);

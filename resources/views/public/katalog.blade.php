@@ -57,23 +57,42 @@
     </div>
     @endif
 
-    <!-- Filter Kategori -->
-    <div class="d-flex justify-content-center mb-5">
-        <div class="rounded-pill p-1 shadow-sm d-inline-flex" role="group" style="background-color: #161b22; border: 1px solid #21262d;">
-            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold filter-btn active-filter" data-filter="semua" style="transition: all 0.3s;">Semua</button>
-            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary filter-btn" data-filter="makanan" style="transition: all 0.3s;">Makanan</button>
-            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary filter-btn" data-filter="minuman" style="transition: all 0.3s;">Minuman</button>
+    @php
+        $makananSubs = $menus->filter(fn($m) => strtolower($m->kategori) === 'makanan')->pluck('sub_kategori')->filter()->unique()->values();
+        $minumanSubs = $menus->filter(fn($m) => strtolower($m->kategori) === 'minuman')->pluck('sub_kategori')->filter()->unique()->values();
+        $allSubs = $menus->pluck('sub_kategori')->filter()->unique()->values();
+    @endphp
+
+    <!-- Filter Kategori Utama (Level 1) -->
+    <div class="d-flex justify-content-center mb-3">
+        <div class="rounded-pill p-1 shadow-sm d-inline-flex gap-1 overflow-auto" role="group" style="background-color: #161b22; border: 1px solid #21262d; max-width: 100%;">
+            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold filter-main-btn active-filter text-white" onclick="filterPublicMain('semua', this)">
+                Semua
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary filter-main-btn" onclick="filterPublicMain('makanan', this)">
+                Makanan
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary filter-main-btn" onclick="filterPublicMain('minuman', this)">
+                Minuman
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Sub-Kategori (Level 2) - Rapi 1 baris swipeable, hanya muncul saat Makanan atau Minuman dipilih -->
+    <div id="public-sub-category-wrapper" class="w-100 mb-3" style="display: none !important;">
+        <div id="public-sub-category-pills" class="d-flex gap-2 pb-2 px-2 overflow-auto subcat-touch-scroll align-items-center" style="white-space: nowrap; flex-wrap: nowrap; width: 100%; -webkit-overflow-scrolling: touch;">
+            <!-- Rendered dynamically by JS -->
         </div>
     </div>
 
     <!-- Daftar Menu -->
     <div class="row g-3 g-md-4 align-items-start" id="menu-container">
         @forelse($menus as $menu)
-        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" style="align-self: flex-start;">
+        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}" style="align-self: flex-start;">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card" 
                  id="menu-card-{{ $loop->index }}"
                  onclick="toggleMenuDetail({{ $loop->index }})"
-                 style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; align-self: flex-start;"
+                 style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; align-self: flex-start; {{ !$menu->is_available ? 'opacity: 0.6;' : '' }}"
                  title="Sentuh untuk melihat / menutup detail deskripsi">
                 <div class="position-relative">
                     <!-- Gambar -->
@@ -82,38 +101,30 @@
                             <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='/images/logo.png';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
                         </div>
                     @else
-                        <div class="d-flex align-items-center justify-content-center text-secondary w-100" style="background-color: #14171c; border-bottom: 1px solid #21262d; aspect-ratio: 4/3;">
-                            <div class="text-center w-100">
-                                <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow-sm" style="height: 64px; width: 64px; object-fit: cover; margin-bottom: 1rem;">
+                        <div class="d-flex align-items-center justify-content-center w-100" style="background: radial-gradient(circle, #1c222b 0%, #12151a 100%); border-bottom: 1px solid #21262d; aspect-ratio: 4/3;">
+                            <div class="p-2 rounded-circle" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(192, 142, 92, 0.25);">
+                                <img src="{{ asset('images/logo.png') }}" alt="Master Cafe" class="rounded-circle shadow-sm" style="height: 44px; width: 44px; object-fit: cover;">
                             </div>
                         </div>
                     @endif
                     
-                    <!-- Overlay Kategori Floating di Kiri Atas -->
+                    <!-- Overlay Sub-Kategori Floating di Kiri Atas -->
+                    @if($menu->sub_kategori)
                     <div class="position-absolute top-0 start-0 m-2">
-                        @if(strtolower($menu->kategori) === 'minuman')
-                            <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(178, 122, 77, 0.4); color: #c08e5c; font-size: 0.65rem;">
-                                <i class="bi bi-cup-straw"></i> Minuman
-                            </span>
-                        @else
-                            <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(226, 232, 240, 0.2); color: #e2e8f0; font-size: 0.65rem;">
-                                <i class="bi bi-egg-fried"></i> Makanan
-                            </span>
-                        @endif
+                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(6px); border: 1px solid rgba(192, 142, 92, 0.35); color: #c08e5c; font-size: 0.68rem; font-weight: 500;">
+                            {{ $menu->sub_kategori }}
+                        </span>
                     </div>
+                    @endif
 
-                    <!-- Overlay Stok Floating di Kanan Atas -->
+                    <!-- Overlay Habis (Hanya tampil jika menu HABIS, tidak membengkakkan tampilan jika tersedia) -->
+                    @if(!$menu->is_available)
                     <div class="position-absolute top-0 end-0 m-2">
-                        @if($menu->is_available)
-                            <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(72, 187, 120, 0.4); color: #48bb78; font-size: 0.65rem;">
-                                Tersedia
-                            </span>
-                        @else
-                            <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(245, 101, 101, 0.4); color: #f56565; font-size: 0.65rem;">
-                                Habis
-                            </span>
-                        @endif
+                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(220, 38, 38, 0.92); backdrop-filter: blur(4px); color: #ffffff; font-size: 0.65rem; font-weight: 600;">
+                            Habis
+                        </span>
                     </div>
+                    @endif
 
                     <!-- Promo Badge -->
                     @if(isset($promoMenuIds) && in_array($menu->id, $promoMenuIds))
@@ -197,9 +208,120 @@
         color: #f7d0a1 !important;
         border-color: rgba(192, 142, 92, 0.6) !important;
     }
+    .subcat-touch-scroll {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .subcat-touch-scroll::-webkit-scrollbar {
+        display: none;
+    }
 </style>
 
 <script>
+    window.publicSubCategoryData = {
+        makanan: @json($makananSubs),
+        minuman: @json($minumanSubs),
+        semua: @json($allSubs)
+    };
+
+    let pubMainCat = 'semua';
+    let pubSubCat = 'semua';
+
+    function renderPublicSubPills() {
+        const wrapper = document.getElementById('public-sub-category-wrapper');
+        const container = document.getElementById('public-sub-category-pills');
+        if (!container || !wrapper) return;
+
+        const data = window.publicSubCategoryData || {};
+        let subs = [];
+        if (pubMainCat === 'makanan') {
+            subs = data.makanan || [];
+            wrapper.style.setProperty('display', 'block', 'important');
+        } else if (pubMainCat === 'minuman') {
+            subs = data.minuman || [];
+            wrapper.style.setProperty('display', 'block', 'important');
+        } else {
+            wrapper.style.setProperty('display', 'none', 'important');
+            container.innerHTML = '';
+            return;
+        }
+
+        let html = `
+            <button type="button" class="btn btn-sm filter-sub-btn active-sub rounded-pill px-3 py-1 flex-shrink-0" onclick="filterPublicSub('semua', this)" style="background-color: rgba(192, 142, 92, 0.25); color: #e2a873; border: 1px solid rgba(192, 142, 92, 0.7); font-size: 0.8rem; font-weight: 600;">
+                Semua ${pubMainCat === 'makanan' ? 'Makanan' : 'Minuman'}
+            </button>
+        `;
+
+        subs.forEach(sub => {
+            const safeSub = sub.replace(/'/g, "\\'");
+            html += `
+                <button type="button" class="btn btn-sm filter-sub-btn rounded-pill px-3 py-1 flex-shrink-0" onclick="filterPublicSub('${safeSub}', this)" style="background-color: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); font-size: 0.8rem;">
+                    ${sub}
+                </button>
+            `;
+        });
+
+        container.innerHTML = html;
+        container.scrollLeft = 0;
+    }
+
+    window.filterPublicMain = function(mainCat, btn) {
+        pubMainCat = (mainCat || 'semua').toLowerCase();
+        pubSubCat = 'semua';
+
+        document.querySelectorAll('.filter-main-btn').forEach(b => {
+            b.classList.remove('active-filter', 'text-white');
+            b.classList.add('text-secondary');
+            b.style.backgroundColor = 'transparent';
+        });
+
+        if (btn) {
+            btn.classList.remove('text-secondary');
+            btn.classList.add('active-filter', 'text-white');
+        }
+
+        renderPublicSubPills();
+        applyPublicFilter();
+    };
+
+    window.filterPublicSub = function(subCat, btn) {
+        pubSubCat = (subCat || 'semua').toLowerCase();
+
+        document.querySelectorAll('.filter-sub-btn').forEach(b => {
+            b.classList.remove('active-sub');
+            b.style.backgroundColor = 'rgba(255,255,255,0.05)';
+            b.style.color = '#e2e8f0';
+            b.style.borderColor = 'rgba(255,255,255,0.15)';
+        });
+
+        if (btn) {
+            btn.classList.add('active-sub');
+            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.2)';
+            btn.style.color = '#c08e5c';
+            btn.style.borderColor = 'rgba(192, 142, 92, 0.6)';
+        }
+
+        applyPublicFilter();
+    };
+
+    function applyPublicFilter() {
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            const cat = (item.getAttribute('data-kategori') || '').toLowerCase();
+            const sub = (item.getAttribute('data-subkategori') || '').toLowerCase();
+
+            const matchMain = (pubMainCat === 'semua' || cat === pubMainCat);
+            const matchSub = (pubSubCat === 'semua' || sub === pubSubCat);
+
+            if (matchMain && matchSub) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
     function toggleMenuDetail(index) {
         const card = document.getElementById('menu-card-' + index);
         const text = document.getElementById('text-detail-' + index);
@@ -222,40 +344,17 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const menuItems = document.querySelectorAll('.menu-item');
+        renderPublicSubPills();
 
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Update active state of buttons
-                filterBtns.forEach(b => {
-                    b.classList.remove('active-filter');
-                    b.classList.add('text-secondary');
-                    b.style.backgroundColor = 'transparent';
-                });
-                
-                this.classList.remove('text-secondary');
-                this.classList.add('active-filter');
-
-                // Filter items
-                const target = this.getAttribute('data-filter');
-                
-                menuItems.forEach(item => {
-                    if (target === 'semua' || item.getAttribute('data-kategori') === target) {
-                        item.style.display = '';
-                        item.animate([
-                            { opacity: 0, transform: 'scale(0.96)' },
-                            { opacity: 1, transform: 'scale(1)' }
-                        ], {
-                            duration: 250,
-                            easing: 'ease-out'
-                        });
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-        });
+        const scrollContainer = document.getElementById('public-sub-category-pills');
+        if (scrollContainer) {
+            scrollContainer.addEventListener('wheel', function(e) {
+                if (e.deltaY !== 0) {
+                    e.preventDefault();
+                    scrollContainer.scrollLeft += e.deltaY;
+                }
+            }, { passive: false });
+        }
     });
 </script>
 @endsection

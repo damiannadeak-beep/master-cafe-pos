@@ -12,7 +12,7 @@ class MenuService
     /**
      * Ambil list menu terpaginasi dengan filter stok dan kategori.
      */
-    public function getPaginatedMenus(?string $filter = null, ?string $category = null, int $perPage = 10)
+    public function getPaginatedMenus(?string $filter = null, ?string $category = null, ?string $subCategory = null, int $perPage = 10)
     {
         $query = Menu::query();
 
@@ -22,6 +22,10 @@ class MenuService
 
         if ($category) {
             $query->where('kategori', $category);
+        }
+
+        if ($subCategory) {
+            $query->where('sub_kategori', $subCategory);
         }
 
         return $query->orderBy('nama_menu')->paginate($perPage)->withQueryString();

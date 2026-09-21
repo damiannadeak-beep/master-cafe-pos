@@ -32,40 +32,29 @@
                 @endif
 
                 <div class="row g-3 mb-3">
-                    <div class="col-md-7">
+                    <div class="col-md-5">
                         <label class="form-label fw-bold">Nama Produk <span class="text-danger">*</span></label>
                         <input type="text" name="nama_menu" class="form-control" value="{{ old('nama_menu', $menu->nama_menu) }}" placeholder="Cth: Ayam Bakar Madu" required>
                     </div>
-                    <div class="col-md-5">
-                        <label class="form-label fw-bold">Kategori Produk <span class="text-danger">*</span></label>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Kategori Utama <span class="text-danger">*</span></label>
                         @php
-                            $currentCategory = old('kategori', $menu->kategori ?? '');
-                            $presets = [
-                                'Menu Baru' => '⭐ Menu Baru / Spesial',
-                                'Olahan Ayam' => '🍗 Olahan Ayam',
-                                'Seafood & Ikan' => '🦐 Seafood & Ikan',
-                                'Nasi Goreng' => '🍳 Nasi Goreng',
-                                'Mie & Pasta' => '🍜 Mie & Pasta',
-                                'Sayur & Lauk' => '🥗 Sayur & Lauk Pendamping',
-                                'Cemilan' => '🍟 Cemilan / Snack',
-                                'Kopi' => '☕ Coffee (Kopi)',
-                                'Varian Tea' => '🍵 Varian Teh (Tea)',
-                                'Mojito' => '🍹 Mojito & Mocktail',
-                                'Jus Buah' => '🧃 Jus Buah Segar',
-                                'Non-Coffee' => '🥤 Non-Coffee & Milkshake',
-                                'Makanan' => '🍛 Makanan Umum',
-                                'Minuman' => '🥤 Minuman Umum'
-                            ];
-                            $isPreset = array_key_exists($currentCategory, $presets) || in_array(strtolower($currentCategory), ['makanan', 'minuman']);
+                            $currentCategory = strtolower(old('kategori', $menu->kategori ?? 'makanan'));
                         @endphp
-                        <select id="kategori-select" class="form-select" onchange="handleCategorySelectChange(this)">
-                            <option value="">-- Pilih Kategori Utama --</option>
-                            @foreach($presets as $val => $label)
-                                <option value="{{ $val }}" {{ (strtolower($currentCategory) == strtolower($val)) ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                            <option value="custom" {{ (!$isPreset && !empty($currentCategory)) ? 'selected' : '' }}>✏️ + Tambah Kategori Baru (Ketik Manual)...</option>
+                        <select name="kategori" id="kategori-select" class="form-select" onchange="handleMainCategoryChange(this.value)" required>
+                            <option value="makanan" {{ $currentCategory == 'makanan' ? 'selected' : '' }}>Makanan</option>
+                            <option value="minuman" {{ $currentCategory == 'minuman' ? 'selected' : '' }}>Minuman</option>
                         </select>
-                        <input type="text" name="kategori" id="kategori-final-input" class="form-control mt-2" value="{{ $currentCategory }}" placeholder="Ketik nama kategori baru..." style="{{ (!$isPreset && !empty($currentCategory)) ? 'display: block;' : 'display: none;' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Sub-Kategori Spesifik</label>
+                        @php
+                            $currentSubCategory = old('sub_kategori', $menu->sub_kategori ?? '');
+                        @endphp
+                        <select id="sub-kategori-select" class="form-select" onchange="handleSubCategorySelectChange(this)">
+                            <!-- Populated dynamically by JS based on main category -->
+                        </select>
+                        <input type="text" name="sub_kategori" id="sub-kategori-final-input" class="form-control mt-2" value="{{ $currentSubCategory }}" placeholder="Ketik nama sub-kategori baru..." style="display: none;">
                     </div>
                 </div>
 
@@ -551,8 +540,59 @@
         updateState();
     }
 
-    window.handleCategorySelectChange = function(selectEl) {
-        const customInput = document.getElementById('kategori-final-input');
+    const subCategoryPresets = {
+        'makanan': [
+            { value: 'Seafood & Ikan', label: 'Seafood & Ikan' },
+            { value: 'Olahan Ayam', label: 'Olahan Ayam' },
+            { value: 'Nasi Goreng', label: 'Nasi Goreng' },
+            { value: 'Mie & Pasta', label: 'Mie & Pasta' },
+            { value: 'Sayur & Lauk', label: 'Sayur & Lauk Pendamping' },
+            { value: 'Cemilan', label: 'Cemilan / Snack' },
+            { value: 'Spesial & Menu Baru', label: 'Spesial & Menu Baru' }
+        ],
+        'minuman': [
+            { value: 'Coffee', label: 'Coffee (Kopi)' },
+            { value: 'Varian Teh', label: 'Varian Teh' },
+            { value: 'Varian Mojito', label: 'Varian Mojito' },
+            { value: 'Varian Jus', label: 'Varian Jus Buah' },
+            { value: 'Non-Coffee & Blend', label: 'Non-Coffee & Blend' }
+        ]
+    };
+
+    window.handleMainCategoryChange = function(mainCategory, initialSubValue = null) {
+        const subSelect = document.getElementById('sub-kategori-select');
+        const customInput = document.getElementById('sub-kategori-final-input');
+        if (!subSelect || !customInput) return;
+
+        const currentVal = initialSubValue !== null ? initialSubValue : customInput.value;
+        const presets = subCategoryPresets[mainCategory] || [];
+
+        let html = '<option value="">-- Pilih Sub-Kategori --</option>';
+        let isMatched = false;
+
+        presets.forEach(p => {
+            const selected = (currentVal && currentVal.toLowerCase() === p.value.toLowerCase()) ? 'selected' : '';
+            if (selected) isMatched = true;
+            html += `<option value="${p.value}" ${selected}>${p.label}</option>`;
+        });
+
+        const isCustomSelected = (!isMatched && currentVal && currentVal.trim() !== '');
+        html += `<option value="custom" ${isCustomSelected ? 'selected' : ''}>+ Tambah Sub-Kategori Baru...</option>`;
+        subSelect.innerHTML = html;
+
+        if (isCustomSelected) {
+            customInput.style.display = 'block';
+        } else {
+            customInput.style.display = 'none';
+            if (isMatched) {
+                const selectedOpt = presets.find(p => p.value.toLowerCase() === currentVal.toLowerCase());
+                if (selectedOpt) customInput.value = selectedOpt.value;
+            }
+        }
+    };
+
+    window.handleSubCategorySelectChange = function(selectEl) {
+        const customInput = document.getElementById('sub-kategori-final-input');
         if (!customInput) return;
         if (selectEl.value === 'custom') {
             customInput.style.display = 'block';
@@ -564,21 +604,32 @@
         }
     };
 
+    function initSubCategoryForm() {
+        const mainCatSelect = document.getElementById('kategori-select');
+        const customInput = document.getElementById('sub-kategori-final-input');
+        if (mainCatSelect && customInput) {
+            handleMainCategoryChange(mainCatSelect.value, customInput.value);
+        }
+    }
+
     // Execute immediately or on DOM ready / SPA load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             initMenuVariantBuilder();
             initDynamicPriceToggle();
+            initSubCategoryForm();
         });
     } else {
         initMenuVariantBuilder();
         initDynamicPriceToggle();
+        initSubCategoryForm();
     }
 
     // Also listen to SPA page-loaded event
     window.addEventListener('admin:page-loaded', function() {
         initMenuVariantBuilder();
         initDynamicPriceToggle();
+        initSubCategoryForm();
     });
 })();
 </script>

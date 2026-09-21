@@ -18,6 +18,7 @@ class StoreMenuRequest extends FormRequest
             'harga' => 'nullable|numeric|min:0',
             'stok' => 'nullable|integer',
             'kategori' => 'required|string|max:100',
+            'sub_kategori' => 'nullable|string|max:100',
             'is_available' => 'nullable|boolean',
             'is_dynamic_price' => 'nullable|boolean',
             'deskripsi' => 'nullable|string',

@@ -14,15 +14,37 @@
                 </div>
             </div>
             
-            <!-- Kategori Pills -->
-            <div class="d-flex gap-2 mt-4 overflow-auto pb-2" style="white-space: nowrap;">
-                <button type="button" class="btn btn-sm btn-outline-secondary text-white rounded-pill px-3 py-1 active" onclick="filterCategory('semua', this)">Semua</button>
-                @php
-                    $categories = $menus->pluck('kategori')->unique()->filter()->values();
-                @endphp
-                @foreach($categories as $cat)
-                    <button type="button" class="btn btn-sm btn-outline-secondary text-white rounded-pill px-3 py-1" onclick="filterCategory('{{ $cat }}', this)">{{ $cat }}</button>
-                @endforeach
+            @php
+                $makananSubs = $menus->filter(fn($m) => strtolower($m->kategori) === 'makanan')->pluck('sub_kategori')->filter()->unique()->values();
+                $minumanSubs = $menus->filter(fn($m) => strtolower($m->kategori) === 'minuman')->pluck('sub_kategori')->filter()->unique()->values();
+                $allSubs = $menus->pluck('sub_kategori')->filter()->unique()->values();
+            @endphp
+            <script>
+                window.posSubCategoryData = {
+                    makanan: @json($makananSubs),
+                    minuman: @json($minumanSubs),
+                    semua: @json($allSubs)
+                };
+            </script>
+
+            <!-- Kategori Utama Pills (Level 1) -->
+            <div class="d-flex gap-2 mt-3 overflow-auto pb-2" style="white-space: nowrap; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white rounded-pill px-3 py-1 btn-pos-main-cat active" onclick="filterPosMainCategory('semua', this)">
+                    Semua
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white rounded-pill px-3 py-1 btn-pos-main-cat" onclick="filterPosMainCategory('makanan', this)">
+                    Makanan
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white rounded-pill px-3 py-1 btn-pos-main-cat" onclick="filterPosMainCategory('minuman', this)">
+                    Minuman
+                </button>
+            </div>
+
+            <!-- Sub-Kategori Pills (Level 2) - Hanya tampil jika Makanan atau Minuman dipilih -->
+            <div id="pos-sub-category-wrapper" class="w-100 mt-2" style="display: none !important;">
+                <div id="pos-sub-category-pills" class="d-flex gap-2 pb-2 overflow-auto subcat-scroll-container align-items-center" style="white-space: nowrap; flex-wrap: nowrap; -webkit-overflow-scrolling: touch;">
+                    <!-- Rendered dynamically by JS -->
+                </div>
             </div>
         </div>
         

@@ -21,31 +21,138 @@
         window.calculateVariantPrice();
     };
 
-    window.filterMenu = function (category, btn) {
-        document.querySelectorAll('.btn-filter').forEach(b => {
+    // --- 1. MODAL KUANTITAS & KATALOG FILTER (2-TIER HIERARCHICAL) ---
+    let currentMainCat = 'semua';
+    let currentSubCat = 'semua';
+
+    function getIconForSubCategory(sub) {
+        const subLower = (sub || '').toLowerCase();
+        if (subLower.includes('kopi') || subLower.includes('coffee')) return 'bi-cup-hot-fill';
+        if (subLower.includes('teh') || subLower.includes('tea')) return 'bi-cup-straw';
+        if (subLower.includes('mojito')) return 'bi-tsunami';
+        if (subLower.includes('jus')) return 'bi-droplet-fill';
+        if (subLower.includes('non-coffee') || subLower.includes('blend')) return 'bi-cup';
+        if (subLower.includes('ayam')) return 'bi-egg-fried';
+        if (subLower.includes('seafood') || subLower.includes('ikan') || subLower.includes('udang')) return 'bi-water';
+        if (subLower.includes('nasi')) return 'bi-fire';
+        if (subLower.includes('mie') || subLower.includes('pasta')) return 'bi-cup-hot';
+        if (subLower.includes('sayur') || subLower.includes('lauk')) return 'bi-flower1';
+        if (subLower.includes('cemilan') || subLower.includes('snack')) return 'bi-cookie';
+        if (subLower.includes('spesial') || subLower.includes('baru')) return 'bi-star-fill';
+        return 'bi-tag';
+    }
+
+    window.selectMainCategory = function(mainCat, btn) {
+        currentMainCat = (mainCat || 'semua').toLowerCase();
+        currentSubCat = 'semua';
+
+        document.querySelectorAll('.btn-main-filter').forEach(b => {
             b.classList.remove('active');
             b.style.backgroundColor = '';
             b.style.color = '';
-            b.style.border = '';
+            b.style.borderColor = 'rgba(255,255,255,0.2)';
         });
+
         if (btn) {
             btn.classList.add('active');
             btn.style.backgroundColor = '#c08e5c';
             btn.style.color = 'white';
-            btn.style.border = 'none';
+            btn.style.borderColor = '#c08e5c';
         }
 
+        renderSubCategoryPills();
+        applyHierarchicalMenuFilter();
+    };
+
+    window.selectSubCategory = function(subCat, btn) {
+        currentSubCat = (subCat || 'semua').toLowerCase();
+
+        document.querySelectorAll('.btn-sub-filter').forEach(b => {
+            b.classList.remove('active');
+            b.style.backgroundColor = 'rgba(255,255,255,0.05)';
+            b.style.color = '#e2e8f0';
+            b.style.borderColor = 'rgba(255,255,255,0.15)';
+        });
+
+        if (btn) {
+            btn.classList.add('active');
+            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.2)';
+            btn.style.color = '#c08e5c';
+            btn.style.borderColor = 'rgba(192, 142, 92, 0.6)';
+        }
+
+        applyHierarchicalMenuFilter();
+    };
+
+    function renderSubCategoryPills() {
+        const container = document.getElementById('sub-category-pills-container');
+        if (!container) return;
+
+        const data = window.subCategoryData || {};
+        let subs = [];
+
+        if (currentMainCat === 'makanan') {
+            subs = data.makanan || [];
+            container.style.display = 'flex';
+        } else if (currentMainCat === 'minuman') {
+            subs = data.minuman || [];
+            container.style.display = 'flex';
+        } else {
+            container.style.display = 'none';
+            return;
+        }
+
+        let html = `
+            <button type="button" class="btn btn-sm btn-sub-filter active rounded-pill px-3 py-1 text-white flex-shrink-0" 
+                    onclick="selectSubCategory('semua', this)"
+                    style="background-color: rgba(192, 142, 92, 0.2); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.6); font-size: 0.78rem;">
+                Semua ${currentMainCat === 'makanan' ? 'Makanan' : 'Minuman'}
+            </button>
+        `;
+
+        subs.forEach(sub => {
+            const safeSub = sub.replace(/'/g, "\\'");
+            html += `
+                <button type="button" class="btn btn-sm btn-sub-filter rounded-pill px-3 py-1 flex-shrink-0" 
+                        onclick="selectSubCategory('${safeSub}', this)"
+                        style="background-color: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); font-size: 0.78rem;">
+                    ${sub}
+                </button>
+            `;
+        });
+
+        container.innerHTML = html;
+        container.scrollLeft = 0;
+    }
+
+    function applyHierarchicalMenuFilter() {
         requestAnimationFrame(() => {
             document.querySelectorAll('.menu-item').forEach(item => {
                 const itemCat = (item.getAttribute('data-kategori') || '').toLowerCase();
-                if (category === 'semua' || itemCat === category.toLowerCase()) {
+                const itemSub = (item.getAttribute('data-subkategori') || '').toLowerCase();
+
+                const matchMain = (currentMainCat === 'semua' || itemCat === currentMainCat);
+                const matchSub = (currentSubCat === 'semua' || itemSub === currentSubCat);
+
+                if (matchMain && matchSub) {
                     item.style.display = '';
                 } else {
                     item.style.display = 'none';
                 }
             });
         });
+    }
+
+    // Backwards compatibility for single filter calls
+    window.filterMenu = function(category, btn) {
+        window.selectMainCategory(category, btn);
     };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderSubCategoryPills);
+    } else {
+        renderSubCategoryPills();
+    }
 
     // --- 2. EXPANDABLE CARD & CATATAN ---
     window.toggleConsumerMenuDesc = function (id) {
@@ -355,4 +462,22 @@
             setTimeout(() => { alertContainer.innerHTML = ''; }, 3000);
         }
     };
+
+    function initConsumerSubPillsWheel() {
+        const subContainer = document.getElementById('sub-category-pills-container');
+        if (subContainer) {
+            subContainer.addEventListener('wheel', function(e) {
+                if (e.deltaY !== 0) {
+                    e.preventDefault();
+                    subContainer.scrollLeft += e.deltaY;
+                }
+            }, { passive: false });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initConsumerSubPillsWheel);
+    } else {
+        initConsumerSubPillsWheel();
+    }
 })();

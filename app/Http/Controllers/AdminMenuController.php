@@ -16,7 +16,8 @@ class AdminMenuController extends Controller
     {
         $menus = $menuService->getPaginatedMenus(
             $request->query('filter'),
-            $request->query('category')
+            $request->query('category'),
+            $request->query('sub_category')
         );
         $pageTitle = 'Manajemen Menu';
         $showStockPage = false;
@@ -28,7 +29,8 @@ class AdminMenuController extends Controller
     {
         $menus = $menuService->getPaginatedMenus(
             $request->query('filter'),
-            $request->query('category')
+            $request->query('category'),
+            $request->query('sub_category')
         );
         $pageTitle = 'Manajemen Stok';
         $showStockPage = true;

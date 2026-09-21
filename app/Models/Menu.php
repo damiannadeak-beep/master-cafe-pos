@@ -12,7 +12,7 @@ class Menu extends Model
     use SoftDeletes, LogsActivity;
 
     protected $table = 'menu';
-    protected $fillable = ['nama_menu', 'harga', 'stok', 'image', 'kategori', 'is_available', 'is_dynamic_price', 'variants_json', 'deskripsi'];
+    protected $fillable = ['nama_menu', 'harga', 'stok', 'image', 'kategori', 'sub_kategori', 'is_available', 'is_dynamic_price', 'variants_json', 'deskripsi'];
 
     protected $casts = [
         'is_available' => 'boolean',

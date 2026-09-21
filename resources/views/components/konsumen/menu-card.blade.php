@@ -1,5 +1,8 @@
 @foreach($menus as $menu)
-<div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-3 mb-md-4 menu-item" data-kategori="{{ strtolower($menu->kategori) }}" style="align-self: flex-start;">
+<div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-3 mb-md-4 menu-item" 
+     data-kategori="{{ strtolower($menu->kategori) }}" 
+     data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}" 
+     style="align-self: flex-start;">
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column consumer-menu-card {{ $menu->is_available ? 'hover-lift' : '' }}" 
          id="consumer-menu-card-{{ $menu->id }}"
          style="background-color: #161b22; border: 1px solid #21262d !important; transition: all 0.25s ease; width: 100%; align-self: flex-start; {{ !$menu->is_available ? 'opacity: 0.65; filter: grayscale(40%);' : '' }}">
@@ -28,21 +31,8 @@
 
             <!-- Badge Kategori Floating di Kiri Atas Gambar -->
             <div class="position-absolute top-0 start-0 m-2">
-                @php
-                    $catLower = strtolower($menu->kategori);
-                    $badgeStyle = "background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(4px); border: 1px solid rgba(192, 142, 92, 0.4); color: #c08e5c; font-size: 0.65rem;";
-                    $icon = 'bi-tag';
-                    if (str_contains($catLower, 'kopi') || str_contains($catLower, 'coffee')) { $icon = 'bi-cup-hot'; }
-                    elseif (str_contains($catLower, 'tea') || str_contains($catLower, 'teh')) { $icon = 'bi-cup-straw'; }
-                    elseif (str_contains($catLower, 'mojito') || str_contains($catLower, 'jus') || str_contains($catLower, 'minuman')) { $icon = 'bi-cup'; }
-                    elseif (str_contains($catLower, 'ayam')) { $icon = 'bi-egg-fried'; }
-                    elseif (str_contains($catLower, 'seafood') || str_contains($catLower, 'ikan') || str_contains($catLower, 'udang')) { $icon = 'bi-water'; }
-                    elseif (str_contains($catLower, 'cemilan') || str_contains($catLower, 'snack')) { $icon = 'bi-cookie'; }
-                    elseif (str_contains($catLower, 'baru') || str_contains($catLower, 'spesial')) { $icon = 'bi-star-fill'; }
-                    else { $icon = 'bi-egg-fried'; }
-                @endphp
-                <span class="badge rounded-pill px-2 py-1" style="{{ $badgeStyle }}">
-                    <i class="bi {{ $icon }} me-1"></i>{{ ucfirst($menu->kategori) }}
+                <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(4px); border: 1px solid rgba(192, 142, 92, 0.4); color: #c08e5c; font-size: 0.65rem;">
+                    {{ ucfirst($menu->sub_kategori ?: $menu->kategori) }}
                 </span>
             </div>
 

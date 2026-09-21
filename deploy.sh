@@ -10,6 +10,10 @@ cd /home/nadp3189/repositories/master-cafe-pos
 git checkout master
 git pull origin master
 
+# 2.5. Jalankan migrasi database (jika ada struktur tabel baru)
+echo "Menjalankan migrasi database..."
+php artisan migrate --force
+
 # 3. Kopi isi folder public (termasuk CSS/JS build terbaru) ke Document Root
 echo "Menyinkronkan aset public..."
 cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/ 2>/dev/null || true

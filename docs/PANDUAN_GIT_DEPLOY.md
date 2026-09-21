@@ -1,4 +1,4 @@
-﻿# Panduan Workflow Git & Deployment cPanel (Master Cafe)
+# Panduan Workflow Git & Deployment cPanel (Master Cafe)
 
 Dokumen ini berisi langkah-langkah standar untuk pengembangan fitur baru, perbaikan bug (trial-error di local), hingga deployment ke server cPanel live dengan **Keamanan Standar Industri**.
 
@@ -61,6 +61,9 @@ cd /home/nadp3189/repositories/master-cafe-pos && \
 # 2. Tarik kode terbaru dari GitHub
 git checkout master && \
 git pull origin master && \
+
+# 2.5. Jalankan migrasi jika ada skema database baru
+php artisan migrate --force && \
 
 # 3. Kopi HANYA isi folder public ke Document Root domain
 cp -Rf public/* /home/nadp3189/public_html/mastercafe.nadeak.net/ 2>/dev/null || true && \
