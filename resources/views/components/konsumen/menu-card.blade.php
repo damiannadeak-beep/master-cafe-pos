@@ -28,15 +28,22 @@
 
             <!-- Badge Kategori Floating di Kiri Atas Gambar -->
             <div class="position-absolute top-0 start-0 m-2">
-                @if(strtolower($menu->kategori) === 'minuman')
-                    <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(178, 122, 77, 0.4); color: #c08e5c; font-size: 0.65rem;">
-                        <i class="bi bi-cup-straw"></i> Minuman
-                    </span>
-                @else
-                    <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.85); backdrop-filter: blur(4px); border: 1px solid rgba(226, 232, 240, 0.2); color: #e2e8f0; font-size: 0.65rem;">
-                        <i class="bi bi-egg-fried"></i> Makanan
-                    </span>
-                @endif
+                @php
+                    $catLower = strtolower($menu->kategori);
+                    $badgeStyle = "background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(4px); border: 1px solid rgba(192, 142, 92, 0.4); color: #c08e5c; font-size: 0.65rem;";
+                    $icon = 'bi-tag';
+                    if (str_contains($catLower, 'kopi') || str_contains($catLower, 'coffee')) { $icon = 'bi-cup-hot'; }
+                    elseif (str_contains($catLower, 'tea') || str_contains($catLower, 'teh')) { $icon = 'bi-cup-straw'; }
+                    elseif (str_contains($catLower, 'mojito') || str_contains($catLower, 'jus') || str_contains($catLower, 'minuman')) { $icon = 'bi-cup'; }
+                    elseif (str_contains($catLower, 'ayam')) { $icon = 'bi-egg-fried'; }
+                    elseif (str_contains($catLower, 'seafood') || str_contains($catLower, 'ikan') || str_contains($catLower, 'udang')) { $icon = 'bi-water'; }
+                    elseif (str_contains($catLower, 'cemilan') || str_contains($catLower, 'snack')) { $icon = 'bi-cookie'; }
+                    elseif (str_contains($catLower, 'baru') || str_contains($catLower, 'spesial')) { $icon = 'bi-star-fill'; }
+                    else { $icon = 'bi-egg-fried'; }
+                @endphp
+                <span class="badge rounded-pill px-2 py-1" style="{{ $badgeStyle }}">
+                    <i class="bi {{ $icon }} me-1"></i>{{ ucfirst($menu->kategori) }}
+                </span>
             </div>
 
             <!-- Badge Status Ketersediaan di Kanan Atas -->
