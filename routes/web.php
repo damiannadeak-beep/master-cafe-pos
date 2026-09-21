@@ -187,6 +187,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pesanan-aktif', [PosController::class, 'pesananAktif'])->name('kasir.pesanan_aktif');
         Route::post('/manual-order', [PosController::class, 'storeManualOrder']);
         Route::put('/order/{id_pesanan}/status', [PosController::class, 'updateOrderStatus']);
+        Route::put('/order/item/{id_detail}/toggle-served', [PosController::class, 'toggleItemServed'])->name('kasir.order.item.toggle_served');
         Route::put('/order/{id_pesanan}/pay', [PosController::class, 'payOrder']);
         Route::post('/order/{id_pesanan}/snap-token', [PosController::class, 'getKasirSnapToken'])->name('kasir.order.snap_token');
         Route::post('/order/{id_pesanan}/qris-success', [PosController::class, 'markQrisPaid'])->name('kasir.order.qris_success');

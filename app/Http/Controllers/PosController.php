@@ -326,6 +326,10 @@ class PosController extends Controller
                     'id_kasir' => auth()->id() // Kasir yang memproses pesanan
                 ]);
 
+                if ($targetStatus === 'completed') {
+                    $pesanan->detail_pesanan()->update(['is_served' => true]);
+                }
+
                 // Jika pesanan selesai dan meja tidak lagi memiliki pesanan aktif / belum lunas,
                 // set meja menjadi tersedia kembali (is_available = true)
                 if ($targetStatus === 'completed' && $pesanan->id_meja) {
@@ -390,6 +394,46 @@ class PosController extends Controller
                 'message' => 'Status pesanan berhasil diupdate',
                 'status' => $targetStatus,
                 'order_ids' => $ids
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Toggle status centang per-item menu (is_served) oleh waitress
+     */
+    public function toggleItemServed(Request $request, $id_detail)
+    {
+        try {
+            $item = DetailPesanan::with('pesanan.detail_pesanan')->findOrFail($id_detail);
+            $item->is_served = !$item->is_served;
+            $item->save();
+
+            $pesanan = $item->pesanan;
+            $allServed = false;
+            $servedCount = 0;
+            $totalCount = 0;
+
+            if ($pesanan) {
+                $totalCount = $pesanan->detail_pesanan->count();
+                $servedCount = $pesanan->detail_pesanan->where('is_served', true)->count();
+                $allServed = ($servedCount === $totalCount);
+
+                try {
+                    broadcast(new \App\Events\PesananBaru($pesanan));
+                } catch (\Throwable $e) {}
+            }
+
+            return response()->json([
+                'success' => true,
+                'id' => $item->id,
+                'is_served' => (bool)$item->is_served,
+                'served_count' => $servedCount,
+                'total_count' => $totalCount,
+                'all_served' => $allServed,
+                'order_id' => $pesanan ? $pesanan->id : null,
+                'message' => $item->is_served ? 'Menu ditandai siap / disajikan.' : 'Menu ditandai belum siap.'
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);

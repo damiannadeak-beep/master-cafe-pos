@@ -271,12 +271,157 @@
         }
     });
 
+    // --- FITUR CHECKLIST (CENTANG) PER-ITEM MENU ---
+    window.toggleItemServed = function (itemId, btnElement) {
+        if (!itemId || !btnElement) return;
+
+        const row = document.getElementById('order-item-row-' + itemId);
+        const cardId = btnElement.getAttribute('data-card-id');
+        const card = cardId ? document.getElementById('order-card-' + cardId) : btnElement.closest('.order-card-item');
+
+        // Optimistic toggle
+        const isCurrentlyServed = btnElement.querySelector('.bi-check-lg') !== null;
+        const newServedState = !isCurrentlyServed;
+
+        updateItemRowUI(itemId, newServedState);
+        updateCardProgressUI(card);
+
+        fetch(`/kasir/order/item/${itemId}/toggle-served`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                // Rollback if failed
+                updateItemRowUI(itemId, isCurrentlyServed);
+                updateCardProgressUI(card);
+                if (window.showToast) window.showToast('Gagal mengubah status menu item.', 'danger');
+            } else {
+                if (window.showToast) window.showToast(data.message, 'success');
+            }
+        })
+        .catch(err => {
+            console.error('Toggle served error:', err);
+            updateItemRowUI(itemId, isCurrentlyServed);
+            updateCardProgressUI(card);
+        });
+    };
+
+    function updateItemRowUI(itemId, isServed) {
+        const row = document.getElementById('order-item-row-' + itemId);
+        const btn = document.getElementById('item-check-btn-' + itemId);
+        if (!row || !btn) return;
+
+        const nameSpan = row.querySelector('.item-name');
+        const qtySpan = row.querySelector('.item-qty-badge');
+        let statusBadge = row.querySelector('.item-status-badge');
+
+        if (isServed) {
+            btn.style.background = 'rgba(46, 160, 67, 0.25)';
+            btn.style.borderColor = '#2ea043';
+            btn.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 1.1rem;"></i>';
+            btn.title = 'Klik untuk batal centang';
+            row.classList.add('item-served');
+            row.style.opacity = '0.9';
+
+            if (nameSpan) {
+                nameSpan.classList.add('text-white-50', 'text-decoration-line-through');
+                nameSpan.classList.remove('text-white');
+            }
+            if (qtySpan) qtySpan.classList.add('text-success', 'fw-bold');
+            if (!statusBadge) {
+                const nameContainer = row.querySelector('.fw-medium > div');
+                if (nameContainer) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-success bg-opacity-25 text-success py-0 px-1 rounded-pill item-status-badge';
+                    badge.style.fontSize = '0.62rem';
+                    badge.innerHTML = '<i class="bi bi-check2"></i> Siap';
+                    nameContainer.appendChild(badge);
+                }
+            }
+        } else {
+            btn.style.background = 'rgba(255, 255, 255, 0.08)';
+            btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            btn.innerHTML = '<i class="bi bi-circle text-white-50" style="font-size: 0.65rem;"></i>';
+            btn.title = 'Klik untuk centang (Siap/Diantar)';
+            row.classList.remove('item-served');
+            row.style.opacity = '1';
+
+            if (nameSpan) {
+                nameSpan.classList.remove('text-white-50', 'text-decoration-line-through');
+                nameSpan.classList.add('text-white');
+            }
+            if (qtySpan) qtySpan.classList.remove('text-success', 'fw-bold');
+            if (statusBadge) statusBadge.remove();
+        }
+    }
+
+    function updateCardProgressUI(card) {
+        if (!card) return;
+
+        const allRows = card.querySelectorAll('.order-item-row');
+        const totalItems = allRows.length;
+        const servedItems = card.querySelectorAll('.item-check-btn .bi-check-lg').length;
+        const allServed = (totalItems > 0 && servedItems === totalItems);
+
+        card.setAttribute('data-total-items', totalItems);
+        card.setAttribute('data-served-items', servedItems);
+
+        const completeBtn = card.querySelector('button[id^="btn-complete-order-"]');
+        if (completeBtn) {
+            completeBtn.setAttribute('data-total-items', totalItems);
+            completeBtn.setAttribute('data-served-items', servedItems);
+            completeBtn.setAttribute('data-all-served', allServed ? '1' : '0');
+
+            const counterBadge = completeBtn.querySelector('.counter-badge');
+            if (counterBadge) {
+                counterBadge.innerText = `${servedItems}/${totalItems} Siap`;
+                if (allServed) {
+                    counterBadge.className = 'badge bg-white text-success rounded-pill py-0 px-1.5 ms-1 counter-badge';
+                    completeBtn.classList.remove('btn-outline-success');
+                    completeBtn.classList.add('btn-success');
+                } else {
+                    counterBadge.className = 'badge bg-secondary bg-opacity-50 text-white rounded-pill py-0 px-1.5 ms-1 counter-badge';
+                    completeBtn.classList.remove('btn-success');
+                    completeBtn.classList.add('btn-outline-success');
+                }
+            }
+        }
+    }
+
+    window.confirmCompleteOrder = function (idParam, btnElement) {
+        if (!btnElement) return;
+
+        const total = parseInt(btnElement.getAttribute('data-total-items') || '0');
+        const served = parseInt(btnElement.getAttribute('data-served-items') || '0');
+        const allServed = (btnElement.getAttribute('data-all-served') === '1');
+
+        if (!allServed && total > served) {
+            const unserved = total - served;
+            const confirmMsg = `Perhatian: Masih ada ${unserved} menu yang belum dicentang siap.\n\nApakah Anda yakin ingin menandai seluruh pesanan telah selesai dimasak sekarang?`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+        }
+
+        // Jalankan update status selesai
+        window.updateOrderStatus(idParam, 'completed', btnElement);
+    };
+
     if (window.WaitressApp) {
         window.WaitressApp.modules.status = {
             update: window.updateOrderStatus,
             updateSingle: window.updateSingleOrderStatus,
-            showCompletedModal: window.showOrderCompletedModal
+            showCompletedModal: window.showOrderCompletedModal,
+            toggleItemServed: window.toggleItemServed,
+            confirmCompleteOrder: window.confirmCompleteOrder
         };
     }
 
 })();
+

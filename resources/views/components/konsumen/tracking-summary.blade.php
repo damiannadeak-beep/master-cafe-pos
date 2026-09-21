@@ -60,7 +60,18 @@
                     @foreach($subOrder->detail_pesanan as $detail)
                         <div class="d-flex justify-content-between align-items-start py-1.5 border-bottom border-secondary border-opacity-10">
                             <div>
-                                <span class="text-white small fw-medium">{{ $detail->jumlah }}x {{ $detail->menu->nama_menu ?? 'Item' }}</span>
+                                <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                    <span class="text-white small fw-medium">{{ $detail->jumlah }}x {{ $detail->menu->nama_menu ?? 'Item' }}</span>
+                                    @if($detail->is_served)
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0 px-1.5 rounded-pill" style="font-size: 0.65rem;">
+                                            <i class="bi bi-check2"></i> Siap / Disajikan
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary bg-opacity-25 text-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.65rem;">
+                                            <i class="bi bi-hourglass-split"></i> Disiapkan
+                                        </span>
+                                    @endif
+                                </div>
                                 @if(!empty($detail->catatan))
                                     <small class="text-warning d-block" style="font-size: 0.74rem;">
                                         <i class="bi bi-pencil-square me-1"></i>{{ $detail->catatan }}
@@ -155,7 +166,18 @@
             @foreach($pesanan->detail_pesanan as $detail)
                 <div class="d-flex justify-content-between align-items-start py-2 border-bottom border-secondary border-opacity-10">
                     <div>
-                        <h6 class="text-white mb-0 fs-6">{{ $detail->jumlah }}x {{ $detail->menu->nama_menu ?? 'Item' }}</h6>
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <h6 class="text-white mb-0 fs-6">{{ $detail->jumlah }}x {{ $detail->menu->nama_menu ?? 'Item' }}</h6>
+                            @if($detail->is_served)
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0 px-1.5 rounded-pill ms-1" style="font-size: 0.68rem;">
+                                    <i class="bi bi-check2"></i> Siap / Disajikan
+                                </span>
+                            @else
+                                <span class="badge bg-secondary bg-opacity-25 text-secondary py-0 px-1.5 rounded-pill ms-1" style="font-size: 0.68rem;">
+                                    <i class="bi bi-hourglass-split"></i> Disiapkan
+                                </span>
+                            @endif
+                        </div>
                         @if(!empty($detail->catatan))
                             <small class="text-warning d-block" style="font-size: 0.76rem;">
                                 <i class="bi bi-pencil-square me-1"></i>{{ $detail->catatan }}

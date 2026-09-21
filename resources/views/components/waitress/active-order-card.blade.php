@@ -9,8 +9,13 @@
         $cardTotalPay = (int) ($cardData->all_paid ? $cardData->total_bill : $cardData->unpaid_amount);
         $cardUangDiterima = (int) $cardData->total_uang_diterima;
         $cardUangKembalian = (int) $cardData->total_uang_kembalian;
+
+        $allCardDetails = $cardData->orders->flatMap(fn($o) => $o->detail_pesanan);
+        $totalItemCount = $allCardDetails->count();
+        $servedItemCount = $allCardDetails->where('is_served', true)->count();
+        $allCardItemsServed = ($totalItemCount > 0 && $servedItemCount === $totalItemCount);
     @endphp
-    <div class="col-md-6 col-lg-4 order-card-item" id="order-card-{{ $primaryOrder->id }}" data-order-ids="{{ $orderIdsStr }}" data-total="{{ $cardTotalPay }}" data-uang-diterima="{{ $cardUangDiterima }}" data-uang-kembalian="{{ $cardUangKembalian }}">
+    <div class="col-md-6 col-lg-4 order-card-item" id="order-card-{{ $primaryOrder->id }}" data-order-ids="{{ $orderIdsStr }}" data-total="{{ $cardTotalPay }}" data-uang-diterima="{{ $cardUangDiterima }}" data-uang-kembalian="{{ $cardUangKembalian }}" data-total-items="{{ $totalItemCount }}" data-served-items="{{ $servedItemCount }}">
         <div class="card shadow-sm border-0 h-100 rounded-4">
             <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center rounded-top-4">
                 <div>
@@ -114,7 +119,7 @@
                                 @endphp
                                 @if($cardData->is_grouped)
                                     <tr class="table-active">
-                                        <td colspan="3" class="py-1 px-2 rounded-2" 
+                                        <td colspan="4" class="py-1 px-2 rounded-2" 
                                             style="background: rgba(255, 255, 255, 0.07); font-size: 0.72rem; cursor: pointer; user-select: none; transition: background 0.15s ease;"
                                             onclick="window.toggleSubOrderCollapse({{ $subOrder->id }})"
                                             title="Klik untuk melipat / membuka rincian pesanan #{{ $subOrder->id }}"
@@ -186,11 +191,41 @@
                                     </tr>
                                 @endif
                                 @foreach($subOrder->detail_pesanan as $item)
-                                    <tr class="{{ $cardData->is_grouped ? 'suborder-items-' . $subOrder->id : '' }}" style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.04); border-left: 3px solid rgba(220, 53, 69, 0.6);' : '' }}">
-                                        <td class="text-white-50 ps-2" style="width: 28px; vertical-align: top; font-size: 0.78rem;">{{ $item->jumlah }}x</td>
-                                        <td class="fw-medium py-1">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="text-white" style="font-size: 0.8125rem;">{{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}</span>
+                                    @php
+                                        $itemServed = (bool)($item->is_served ?? false);
+                                    @endphp
+                                    <tr id="order-item-row-{{ $item->id }}" 
+                                        class="{{ $cardData->is_grouped ? 'suborder-items-' . $subOrder->id : '' }} order-item-row {{ $itemServed ? 'item-served' : '' }}" 
+                                        style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.04); border-left: 3px solid rgba(220, 53, 69, 0.6);' : '' }} {{ $itemServed ? 'opacity: 0.9;' : '' }}; transition: all 0.2s ease;">
+                                        <!-- Kolom Centang Menu -->
+                                        <td class="ps-2 py-1 text-center" style="width: 32px; vertical-align: middle;">
+                                            <button type="button" 
+                                                    class="btn btn-sm p-0 border-0 d-flex align-items-center justify-content-center item-check-btn" 
+                                                    id="item-check-btn-{{ $item->id }}"
+                                                    data-item-id="{{ $item->id }}"
+                                                    data-order-id="{{ $subOrder->id }}"
+                                                    data-card-id="{{ $primaryOrder->id }}"
+                                                    onclick="event.stopPropagation(); window.toggleItemServed({{ $item->id }}, this)"
+                                                    title="{{ $itemServed ? 'Klik untuk batal centang' : 'Klik untuk centang (Siap/Diantar)' }}"
+                                                    style="width: 24px; height: 24px; border-radius: 6px; background: {{ $itemServed ? 'rgba(46, 160, 67, 0.25)' : 'rgba(255, 255, 255, 0.08)' }}; border: 1px solid {{ $itemServed ? '#2ea043' : 'rgba(255, 255, 255, 0.2)' }} !important; cursor: pointer; transition: all 0.2s ease;">
+                                                <i class="bi {{ $itemServed ? 'bi-check-lg text-success' : 'bi-circle text-white-50' }}" style="font-size: {{ $itemServed ? '1.1rem' : '0.65rem' }};"></i>
+                                            </button>
+                                        </td>
+                                        <!-- Kolom Qty -->
+                                        <td class="text-white-50 px-1" style="width: 28px; vertical-align: middle; font-size: 0.78rem;">
+                                            <span class="item-qty-badge {{ $itemServed ? 'text-success fw-bold' : '' }}">{{ $item->jumlah }}x</span>
+                                        </td>
+                                        <!-- Kolom Nama Menu & Detail -->
+                                        <td class="fw-medium py-1" style="vertical-align: middle;">
+                                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                                <span class="item-name {{ $itemServed ? 'text-white-50 text-decoration-line-through' : 'text-white' }}" style="font-size: 0.8125rem;">
+                                                    {{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}
+                                                </span>
+                                                @if($itemServed)
+                                                    <span class="badge bg-success bg-opacity-25 text-success py-0 px-1 rounded-pill item-status-badge" style="font-size: 0.62rem;">
+                                                        <i class="bi bi-check2"></i> Siap
+                                                    </span>
+                                                @endif
                                             </div>
                                             @if($item->selected_variants)
                                                 @php 
@@ -208,7 +243,8 @@
                                                 <div class="text-danger fst-italic" style="font-size: 0.7rem;"><i class="bi bi-chat-text me-1"></i>Catatan: {{ $item->catatan }}</div>
                                             @endif
                                         </td>
-                                        <td class="text-end text-white-50 pe-2 text-nowrap py-1" style="vertical-align: top; font-size: 0.78rem;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                        <!-- Kolom Subtotal -->
+                                        <td class="text-end text-white-50 pe-2 text-nowrap py-1" style="vertical-align: middle; font-size: 0.78rem;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
                             @endforeach
@@ -314,8 +350,20 @@
                             $processingOrders = $cardData->orders->filter(fn($o) => $o->status === 'processing');
                             $processingIdsStr = implode(',', $processingOrders->pluck('id')->toArray());
                         @endphp
-                        <button type="button" class="btn btn-sm btn-success flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus('{{ $processingIdsStr ?: $orderIdsStr }}', 'completed', this)">
-                            <i class="bi bi-check2-all me-1"></i> {{ $cardData->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan Pesanan' : ($cardData->is_grouped ? 'Selesai Dimasak (Semua)' : 'Selesai Dimasak') }}
+                        <button type="button" 
+                                id="btn-complete-order-{{ $primaryOrder->id }}"
+                                class="btn btn-sm {{ $allCardItemsServed ? 'btn-success' : 'btn-outline-success' }} flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center gap-1.5" 
+                                data-total-items="{{ $totalItemCount }}"
+                                data-served-items="{{ $servedItemCount }}"
+                                data-all-served="{{ $allCardItemsServed ? '1' : '0' }}"
+                                onclick="window.confirmCompleteOrder('{{ $processingIdsStr ?: $orderIdsStr }}', this)">
+                            <i class="bi bi-check2-all"></i>
+                            <span class="btn-text">
+                                {{ $cardData->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan' : ($cardData->is_grouped ? 'Selesai Dimasak (Semua)' : 'Selesai Dimasak') }}
+                            </span>
+                            <span class="badge {{ $allCardItemsServed ? 'bg-white text-success' : 'bg-secondary bg-opacity-50 text-white' }} rounded-pill py-0 px-1.5 ms-1 counter-badge" style="font-size: 0.65rem;">
+                                {{ $servedItemCount }}/{{ $totalItemCount }} Siap
+                            </span>
                         </button>
                     @endif
 
