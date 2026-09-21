@@ -29,10 +29,14 @@
             <div class="table-responsive">
                 <div class="p-3 d-flex gap-2 align-items-center flex-wrap">
                     <span class="fw-bold me-2">Kategori:</span>
-                    <div class="btn-group shadow-sm">
-                        <a href="{{ request()->fullUrlWithQuery(['category' => null, 'page' => null]) }}" class="btn btn-sm {{ !request('category') ? 'btn-primary' : 'btn-outline-primary' }}">Semua</a>
-                        <a href="{{ request()->fullUrlWithQuery(['category' => 'makanan', 'page' => null]) }}" class="btn btn-sm {{ request('category') == 'makanan' ? 'btn-primary' : 'btn-outline-primary' }}">Makanan</a>
-                        <a href="{{ request()->fullUrlWithQuery(['category' => 'minuman', 'page' => null]) }}" class="btn btn-sm {{ request('category') == 'minuman' ? 'btn-primary' : 'btn-outline-primary' }}">Minuman</a>
+                    @php
+                        $allCategories = \App\Models\Menu::pluck('kategori')->unique()->filter()->values();
+                    @endphp
+                    <div class="d-flex gap-1 overflow-auto pb-1" style="white-space: nowrap; max-width: calc(100% - 140px);">
+                        <a href="{{ request()->fullUrlWithQuery(['category' => null, 'page' => null]) }}" class="btn btn-sm {{ !request('category') ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill px-3">Semua</a>
+                        @foreach($allCategories as $cat)
+                            <a href="{{ request()->fullUrlWithQuery(['category' => $cat, 'page' => null]) }}" class="btn btn-sm {{ request('category') == $cat ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill px-3 text-capitalize">{{ $cat }}</a>
+                        @endforeach
                     </div>
                     
                     <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary ms-auto">Reset Filter</a>

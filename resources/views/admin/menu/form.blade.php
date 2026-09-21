@@ -37,12 +37,35 @@
                         <input type="text" name="nama_menu" class="form-control" value="{{ old('nama_menu', $menu->nama_menu) }}" placeholder="Cth: Ayam Bakar Madu" required>
                     </div>
                     <div class="col-md-5">
-                        <label class="form-label fw-bold">Kategori <span class="text-danger">*</span></label>
-                        <select name="kategori" class="form-select" required>
+                        <label class="form-label fw-bold">Kategori Produk <span class="text-danger">*</span></label>
+                        @php
+                            $currentCategory = old('kategori', $menu->kategori ?? '');
+                            $presets = [
+                                'Menu Baru' => '⭐ Menu Baru / Spesial',
+                                'Olahan Ayam' => '🍗 Olahan Ayam',
+                                'Seafood & Ikan' => '🦐 Seafood & Ikan',
+                                'Nasi Goreng' => '🍳 Nasi Goreng',
+                                'Mie & Pasta' => '🍜 Mie & Pasta',
+                                'Sayur & Lauk' => '🥗 Sayur & Lauk Pendamping',
+                                'Cemilan' => '🍟 Cemilan / Snack',
+                                'Kopi' => '☕ Coffee (Kopi)',
+                                'Varian Tea' => '🍵 Varian Teh (Tea)',
+                                'Mojito' => '🍹 Mojito & Mocktail',
+                                'Jus Buah' => '🧃 Jus Buah Segar',
+                                'Non-Coffee' => '🥤 Non-Coffee & Milkshake',
+                                'Makanan' => '🍛 Makanan Umum',
+                                'Minuman' => '🥤 Minuman Umum'
+                            ];
+                            $isPreset = array_key_exists($currentCategory, $presets) || in_array(strtolower($currentCategory), ['makanan', 'minuman']);
+                        @endphp
+                        <select id="kategori-select" class="form-select" onchange="handleCategorySelectChange(this)">
                             <option value="">-- Pilih Kategori Utama --</option>
-                            <option value="makanan" {{ strtolower((string) old('kategori', $menu->kategori)) == 'makanan' ? 'selected' : '' }}>Makanan</option>
-                            <option value="minuman" {{ strtolower((string) old('kategori', $menu->kategori)) == 'minuman' ? 'selected' : '' }}>Minuman</option>
+                            @foreach($presets as $val => $label)
+                                <option value="{{ $val }}" {{ (strtolower($currentCategory) == strtolower($val)) ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                            <option value="custom" {{ (!$isPreset && !empty($currentCategory)) ? 'selected' : '' }}>✏️ + Tambah Kategori Baru (Ketik Manual)...</option>
                         </select>
+                        <input type="text" name="kategori" id="kategori-final-input" class="form-control mt-2" value="{{ $currentCategory }}" placeholder="Ketik nama kategori baru..." style="{{ (!$isPreset && !empty($currentCategory)) ? 'display: block;' : 'display: none;' }}" required>
                     </div>
                 </div>
 
@@ -527,6 +550,19 @@
         isDynamicSwitch.addEventListener('change', updateState);
         updateState();
     }
+
+    window.handleCategorySelectChange = function(selectEl) {
+        const customInput = document.getElementById('kategori-final-input');
+        if (!customInput) return;
+        if (selectEl.value === 'custom') {
+            customInput.style.display = 'block';
+            customInput.value = '';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.value = selectEl.value;
+        }
+    };
 
     // Execute immediately or on DOM ready / SPA load
     if (document.readyState === 'loading') {
