@@ -1,34 +1,39 @@
 <!-- Modal Pilih Pembayaran -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg text-white" style="background-color: #161b22; border: 1px solid #21262d !important; border-radius: 16px;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 540px;">
+        <div class="modal-content border-0 shadow-lg text-white" style="background-color: #161b22; border: 1px solid #30363d !important; border-radius: 18px; overflow: hidden;">
             <div class="modal-header border-0 pb-0 justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0 text-white" id="paymentModalLabel">
-                    <i class="bi bi-wallet2 text-warning me-2"></i>Terima Pembayaran #<span id="payment-order-id-display"></span>
+                <h5 class="fw-bold mb-0 text-white d-flex align-items-center" id="paymentModalLabel">
+                    <span class="badge rounded-circle p-2 me-2 d-inline-flex align-items-center justify-content-center" style="background: rgba(234, 179, 8, 0.15); color: #eab308; width: 34px; height: 34px;">
+                        <i class="bi bi-wallet2" style="font-size: 1.1rem;"></i>
+                    </span>
+                    <span>Terima Pembayaran #<span id="payment-order-id-display"></span></span>
                 </h5>
                 <button type="button" class="btn-close btn-close-white btn-touch" data-bs-dismiss="modal" onclick="window.closeModalById('paymentModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 pt-3">
                 <!-- Checklist Pilihan Pesanan Gabungan (Split Bill) -->
-                <div id="payment-selective-orders-container" class="mb-3 p-3 rounded-3" style="display: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
-                    <div class="d-flex justify-content-between align-items-center mb-2.5">
-                        <label class="form-label small text-warning fw-bold mb-0">
-                            <i class="bi bi-ui-checks me-1"></i> Pilih Pesanan yang Ingin Dibayar:
-                        </label>
-                        <div class="d-flex gap-1.5">
-                            <button type="button" class="btn btn-sm py-0 px-2 btn-outline-info rounded-pill" style="font-size: 0.68rem;" onclick="window.toggleAllPaymentCheckboxes(true)">
-                                Pilih Semua
+                <div id="payment-selective-orders-container" class="mb-3.5 p-3 rounded-3" style="display: none; background: #1c2128; border: 1px solid #30363d;">
+                    <div class="d-flex justify-content-between align-items-center mb-2.5 pb-2 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center gap-1.5 text-truncate me-2">
+                            <i class="bi bi-ui-checks text-warning" style="font-size: 0.9rem;"></i>
+                            <span class="fw-bold text-white text-truncate" style="font-size: 0.82rem;">Pilih Tagihan yang Dibayar:</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
+                            <button type="button" class="btn btn-sm py-0.5 px-2.5 rounded-pill fw-semibold text-info border border-info border-opacity-50" style="font-size: 0.68rem; background: rgba(13, 202, 240, 0.12);" onclick="window.toggleAllPaymentCheckboxes(true)">
+                                <i class="bi bi-check-all me-0.5"></i> Semua
                             </button>
-                            <button type="button" class="btn btn-sm py-0 px-2 btn-outline-secondary rounded-pill" style="font-size: 0.68rem;" onclick="window.toggleAllPaymentCheckboxes(false)">
-                                Lepas Semua
+                            <button type="button" class="btn btn-sm py-0.5 px-2.5 rounded-pill fw-semibold text-white-50 border border-secondary border-opacity-50" style="font-size: 0.68rem; background: rgba(255, 255, 255, 0.05);" onclick="window.toggleAllPaymentCheckboxes(false)">
+                                Lepas
                             </button>
                         </div>
                     </div>
                     <div class="d-flex flex-column gap-2" id="payment-selective-orders-list">
                         <!-- Item checklist di-inject dinamis oleh JS -->
                     </div>
-                    <div id="payment-selective-orders-alert" class="text-danger small mt-2" style="display: none; font-size: 0.78rem;">
-                        <i class="bi bi-exclamation-circle me-1"></i> Pilih minimal satu pesanan untuk melanjutkan pembayaran.
+                    <div id="payment-selective-orders-alert" class="alert alert-danger py-1.5 px-2.5 rounded-3 mt-2 mb-0 d-flex align-items-center gap-2 small" style="display: none; font-size: 0.78rem;">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                        <span>Pilih minimal satu pesanan untuk melanjutkan pembayaran.</span>
                     </div>
                 </div>
 

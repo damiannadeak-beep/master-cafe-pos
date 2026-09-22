@@ -112,29 +112,35 @@
         let html = '';
         subOrdersData.forEach(order => {
             html += `
-                <div class="p-2.5 rounded-3 d-flex align-items-center justify-content-between selective-order-row" 
+                <div class="p-3 rounded-3 d-flex align-items-start justify-content-between selective-order-row" 
                      id="selective-order-row-${order.id}" 
-                     style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12); cursor: pointer; transition: all 0.15s ease;"
+                     style="background: rgba(46, 160, 67, 0.1); border: 1px solid rgba(46, 160, 67, 0.4); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
                      onclick="window.toggleOrderPaymentCheckbox(${order.id}, event)">
-                    <div class="d-flex align-items-center gap-2.5">
-                        <input class="form-check-input mt-0 payment-order-checkbox" 
+                    <div class="d-flex align-items-start gap-2.5 flex-grow-1" style="min-width: 0;">
+                        <input class="form-check-input payment-order-checkbox flex-shrink-0" 
                                type="checkbox" 
                                value="${order.id}" 
                                id="chk-pay-order-${order.id}" 
                                data-total="${order.total}" 
                                checked 
-                               style="width: 1.25rem; height: 1.25rem; cursor: pointer; accent-color: #2ea043;"
+                               style="width: 1.25rem; height: 1.25rem; margin-top: 3px; cursor: pointer; accent-color: #2ea043;"
                                onclick="event.stopPropagation(); window.onPaymentOrderCheckboxChange();">
-                        <div>
-                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                <span class="fw-bold text-white" style="font-size: 0.85rem;">${order.label}</span>
-                                <span class="badge bg-dark border border-secondary text-info px-1.5 py-0.5" style="font-size: 0.68rem;">${order.customer}</span>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="d-flex align-items-center gap-1.5 flex-wrap mb-1">
+                                <span class="fw-bold text-white fs-6">${order.label}</span>
+                                <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.68rem; font-weight: 500;">
+                                    <i class="bi bi-person me-0.5"></i>${order.customer}
+                                </span>
                             </div>
-                            <small class="text-white-50 d-block" style="font-size: 0.74rem;">${order.summary || ''}</small>
+                            <div class="text-white-50 small" style="font-size: 0.76rem; line-height: 1.4; word-break: break-word;">
+                                <i class="bi bi-basket text-secondary me-1"></i>${order.summary || ''}
+                            </div>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <span class="fw-bold text-accent" style="font-size: 0.88rem;">Rp ${Number(order.total).toLocaleString('id-ID')}</span>
+                    <div class="text-end flex-shrink-0 ms-3 text-nowrap align-self-center">
+                        <span class="fw-bold text-white d-block" style="font-size: 0.98rem; letter-spacing: -0.2px;">
+                            Rp ${Number(order.total).toLocaleString('id-ID')}
+                        </span>
                     </div>
                 </div>
             `;
@@ -161,13 +167,15 @@
                 selectedIds.push(parseInt(chk.value));
                 newTotal += (parseInt(chk.getAttribute('data-total')) || 0);
                 if (row) {
-                    row.style.background = 'rgba(46, 160, 67, 0.12)';
-                    row.style.borderColor = 'rgba(46, 160, 67, 0.45)';
+                    row.style.background = 'rgba(46, 160, 67, 0.1)';
+                    row.style.borderColor = 'rgba(46, 160, 67, 0.4)';
+                    row.style.opacity = '1';
                 }
             } else {
                 if (row) {
                     row.style.background = 'rgba(255, 255, 255, 0.02)';
-                    row.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    row.style.borderColor = 'rgba(255, 255, 255, 0.07)';
+                    row.style.opacity = '0.45';
                 }
             }
         });
