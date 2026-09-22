@@ -102,43 +102,43 @@
         if (!Array.isArray(subOrdersData) || subOrdersData.length <= 1) {
             container.style.display = 'none';
             listEl.innerHTML = '';
-            if (alertEl) alertEl.style.display = 'none';
+            if (alertEl) alertEl.style.setProperty('display', 'none', 'important');
             return;
         }
 
         container.style.display = 'block';
-        if (alertEl) alertEl.style.display = 'none';
+        if (alertEl) alertEl.style.setProperty('display', 'none', 'important');
 
         let html = '';
         subOrdersData.forEach(order => {
             html += `
-                <div class="p-3 rounded-3 d-flex align-items-start justify-content-between selective-order-row" 
+                <div class="rounded-3 d-flex align-items-start justify-content-between selective-order-row" 
                      id="selective-order-row-${order.id}" 
-                     style="background: rgba(46, 160, 67, 0.1); border: 1px solid rgba(46, 160, 67, 0.4); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);"
+                     style="padding: 13px 15px; margin-bottom: 4px; background: rgba(46, 160, 67, 0.1); border: 1px solid rgba(46, 160, 67, 0.4); cursor: pointer; transition: all 0.2s ease;"
                      onclick="window.toggleOrderPaymentCheckbox(${order.id}, event)">
-                    <div class="d-flex align-items-start gap-2.5 flex-grow-1" style="min-width: 0;">
+                    <div class="d-flex align-items-start flex-grow-1" style="min-width: 0;">
                         <input class="form-check-input payment-order-checkbox flex-shrink-0" 
                                type="checkbox" 
                                value="${order.id}" 
                                id="chk-pay-order-${order.id}" 
                                data-total="${order.total}" 
                                checked 
-                               style="width: 1.25rem; height: 1.25rem; margin-top: 3px; cursor: pointer; accent-color: #2ea043;"
+                               style="width: 20px; height: 20px; min-width: 20px; margin-top: 2px; margin-right: 14px; cursor: pointer; accent-color: #2ea043;"
                                onclick="event.stopPropagation(); window.onPaymentOrderCheckboxChange();">
                         <div class="flex-grow-1" style="min-width: 0;">
-                            <div class="d-flex align-items-center gap-1.5 flex-wrap mb-1">
-                                <span class="fw-bold text-white fs-6">${order.label}</span>
-                                <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.68rem; font-weight: 500;">
-                                    <i class="bi bi-person me-0.5"></i>${order.customer}
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 8px; margin-bottom: 3px;">
+                                <span class="fw-bold text-white fs-6" style="margin-right: 4px;">${order.label}</span>
+                                <span class="badge rounded-pill" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.7rem; padding: 3px 9px; font-weight: 500;">
+                                    <i class="bi bi-person" style="margin-right: 5px;"></i>${order.customer}
                                 </span>
                             </div>
-                            <div class="text-white-50 small" style="font-size: 0.76rem; line-height: 1.4; word-break: break-word;">
-                                <i class="bi bi-basket text-secondary me-1"></i>${order.summary || ''}
+                            <div class="text-white-50" style="font-size: 0.77rem; line-height: 1.45; margin-top: 5px; word-break: break-word;">
+                                <i class="bi bi-basket text-secondary" style="margin-right: 7px; font-size: 0.8rem;"></i>${order.summary || ''}
                             </div>
                         </div>
                     </div>
-                    <div class="text-end flex-shrink-0 ms-3 text-nowrap align-self-center">
-                        <span class="fw-bold text-white d-block" style="font-size: 0.98rem; letter-spacing: -0.2px;">
+                    <div class="text-end flex-shrink-0" style="min-width: 95px; margin-left: 14px; align-self: center; white-space: nowrap;">
+                        <span class="fw-bold text-white d-block" style="font-size: 1rem; letter-spacing: -0.2px;">
                             Rp ${Number(order.total).toLocaleString('id-ID')}
                         </span>
                     </div>
@@ -181,7 +181,7 @@
         });
 
         if (selectedIds.length === 0) {
-            if (alertEl) alertEl.style.display = 'block';
+            if (alertEl) alertEl.style.setProperty('display', 'flex', 'important');
             if (submitBtn) submitBtn.disabled = true;
             activeOrderPayState.total = 0;
             activeOrderPayState.orderIds = [];
@@ -191,7 +191,7 @@
             return;
         }
 
-        if (alertEl) alertEl.style.display = 'none';
+        if (alertEl) alertEl.style.setProperty('display', 'none', 'important');
         if (submitBtn) submitBtn.disabled = false;
 
         activeOrderPayState.orderIds = selectedIds;

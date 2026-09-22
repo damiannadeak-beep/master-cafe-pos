@@ -13,26 +13,26 @@
             </div>
             <div class="modal-body p-4 pt-3">
                 <!-- Checklist Pilihan Pesanan Gabungan (Split Bill) -->
-                <div id="payment-selective-orders-container" class="mb-3.5 p-3 rounded-3" style="display: none; background: #1c2128; border: 1px solid #30363d;">
-                    <div class="d-flex justify-content-between align-items-center mb-2.5 pb-2 border-bottom border-secondary border-opacity-25">
-                        <div class="d-flex align-items-center gap-1.5 text-truncate me-2">
-                            <i class="bi bi-ui-checks text-warning" style="font-size: 0.9rem;"></i>
-                            <span class="fw-bold text-white text-truncate" style="font-size: 0.82rem;">Pilih Tagihan yang Dibayar:</span>
+                <div id="payment-selective-orders-container" class="mb-3 p-3 rounded-3" style="display: none; background: #1c2128; border: 1px solid #30363d; margin-bottom: 18px !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center text-truncate me-2" style="gap: 8px;">
+                            <i class="bi bi-ui-checks text-warning" style="font-size: 1rem; margin-right: 6px;"></i>
+                            <span class="fw-bold text-white text-truncate" style="font-size: 0.84rem;">Pilih Tagihan yang Dibayar:</span>
                         </div>
-                        <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
-                            <button type="button" class="btn btn-sm py-0.5 px-2.5 rounded-pill fw-semibold text-info border border-info border-opacity-50" style="font-size: 0.68rem; background: rgba(13, 202, 240, 0.12);" onclick="window.toggleAllPaymentCheckboxes(true)">
-                                <i class="bi bi-check-all me-0.5"></i> Semua
+                        <div class="d-flex align-items-center flex-shrink-0" style="gap: 8px;">
+                            <button type="button" class="btn btn-sm py-1 px-3 rounded-pill fw-semibold text-info border border-info border-opacity-50" style="font-size: 0.7rem; background: rgba(13, 202, 240, 0.12);" onclick="window.toggleAllPaymentCheckboxes(true)">
+                                <i class="bi bi-check-all" style="margin-right: 4px;"></i> Semua
                             </button>
-                            <button type="button" class="btn btn-sm py-0.5 px-2.5 rounded-pill fw-semibold text-white-50 border border-secondary border-opacity-50" style="font-size: 0.68rem; background: rgba(255, 255, 255, 0.05);" onclick="window.toggleAllPaymentCheckboxes(false)">
+                            <button type="button" class="btn btn-sm py-1 px-3 rounded-pill fw-semibold text-white-50 border border-secondary border-opacity-50" style="font-size: 0.7rem; background: rgba(255, 255, 255, 0.05);" onclick="window.toggleAllPaymentCheckboxes(false)">
                                 Lepas
                             </button>
                         </div>
                     </div>
-                    <div class="d-flex flex-column gap-2" id="payment-selective-orders-list">
+                    <div class="d-flex flex-column" id="payment-selective-orders-list" style="gap: 12px;">
                         <!-- Item checklist di-inject dinamis oleh JS -->
                     </div>
-                    <div id="payment-selective-orders-alert" class="alert alert-danger py-1.5 px-2.5 rounded-3 mt-2 mb-0 d-flex align-items-center gap-2 small" style="display: none; font-size: 0.78rem;">
-                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                    <div id="payment-selective-orders-alert" class="alert alert-danger py-2 px-3 rounded-3 mt-3 mb-0 align-items-center small" style="display: none !important; font-size: 0.8rem; gap: 8px;">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0" style="margin-right: 6px;"></i>
                         <span>Pilih minimal satu pesanan untuk melanjutkan pembayaran.</span>
                     </div>
                 </div>
