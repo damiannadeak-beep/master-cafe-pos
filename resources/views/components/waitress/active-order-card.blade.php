@@ -368,7 +368,28 @@
                     @endif
 
                     @if(!$cardData->all_paid)
-                        <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.payGroupOrders('{{ $orderIdsStr }}', {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }})">
+                        @php
+                            $unpaidSubOrdersData = $cardData->orders
+                                ->filter(fn($o) => !($o->pembayaran && $o->pembayaran->status === 'paid'))
+                                ->values()
+                                ->map(function($o, $idx) use ($cardData) {
+                                    $oBill = (float) (($o->pembayaran && (float)$o->pembayaran->total_bayar > 0)
+                                        ? $o->pembayaran->total_bayar
+                                        : ($o->total - ($o->discount_amount ?? 0)));
+                                    $itemsSummary = $o->detail_pesanan->map(fn($d) => $d->jumlah . 'x ' . ($d->menu?->nama_menu ?? 'Item'))->take(3)->implode(', ');
+                                    if ($o->detail_pesanan->count() > 3) {
+                                        $itemsSummary .= ' +' . ($o->detail_pesanan->count() - 3) . ' lainnya';
+                                    }
+                                    return [
+                                        'id' => $o->id,
+                                        'label' => ($idx === 0 ? 'Pesanan Awal' : 'Tambahan') . ' (#' . $o->id . ')',
+                                        'customer' => $o->customer_name ?: ($cardData->customer_name ?: 'Tamu'),
+                                        'total' => (int) $oBill,
+                                        'summary' => $itemsSummary
+                                    ];
+                                })->values()->toArray();
+                        @endphp
+                        <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick='window.payGroupOrders("{{ $orderIdsStr }}", {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }}, @json($unpaidSubOrdersData))'>
                             <i class="bi bi-cash-stack me-1"></i> Terima Bayar
                         </button>
                         @if($cardData->can_void)

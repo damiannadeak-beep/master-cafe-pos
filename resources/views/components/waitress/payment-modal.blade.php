@@ -9,6 +9,29 @@
                 <button type="button" class="btn-close btn-close-white btn-touch" data-bs-dismiss="modal" onclick="window.closeModalById('paymentModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 pt-3">
+                <!-- Checklist Pilihan Pesanan Gabungan (Split Bill) -->
+                <div id="payment-selective-orders-container" class="mb-3 p-3 rounded-3" style="display: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="d-flex justify-content-between align-items-center mb-2.5">
+                        <label class="form-label small text-warning fw-bold mb-0">
+                            <i class="bi bi-ui-checks me-1"></i> Pilih Pesanan yang Ingin Dibayar:
+                        </label>
+                        <div class="d-flex gap-1.5">
+                            <button type="button" class="btn btn-sm py-0 px-2 btn-outline-info rounded-pill" style="font-size: 0.68rem;" onclick="window.toggleAllPaymentCheckboxes(true)">
+                                Pilih Semua
+                            </button>
+                            <button type="button" class="btn btn-sm py-0 px-2 btn-outline-secondary rounded-pill" style="font-size: 0.68rem;" onclick="window.toggleAllPaymentCheckboxes(false)">
+                                Lepas Semua
+                            </button>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column gap-2" id="payment-selective-orders-list">
+                        <!-- Item checklist di-inject dinamis oleh JS -->
+                    </div>
+                    <div id="payment-selective-orders-alert" class="text-danger small mt-2" style="display: none; font-size: 0.78rem;">
+                        <i class="bi bi-exclamation-circle me-1"></i> Pilih minimal satu pesanan untuk melanjutkan pembayaran.
+                    </div>
+                </div>
+
                 <!-- Tagihan -->
                 <div class="p-3 rounded-3 mb-3 text-center" style="background: rgba(192, 142, 92, 0.1); border: 1px solid rgba(192, 142, 92, 0.3);">
                     <small class="text-secondary d-block mb-1">TOTAL TAGIHAN</small>
