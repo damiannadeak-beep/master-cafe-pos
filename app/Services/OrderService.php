@@ -20,8 +20,9 @@ class OrderService
         // 1. Kumpulkan semua menu IDs, sort ascending untuk konsistensi lock order
         $menuIds = collect($items)->pluck('id_menu')->unique()->sort()->values()->all();
 
-        // 2. Lock & load semua menu sekaligus (1 query, bukan N query)
-        $menus = Menu::whereIn('id', $menuIds)
+        // 2. Lock & load semua menu sekaligus beserta resep bahannya (1 query, bukan N query)
+        $menus = Menu::with('bahans')
+            ->whereIn('id', $menuIds)
             ->where('is_available', true)
             ->lockForUpdate()
             ->get()
@@ -48,7 +49,7 @@ class OrderService
             // 3b. Hitung harga varian
             [$hargaVarian, $selectedVariants] = $this->resolveVariants($menu, $item['variants'] ?? []);
 
-            // 3f. Hitung base price (dukung menu timbangan / dynamic price)
+            // 3c. Hitung base price (dukung menu timbangan / dynamic price)
             $basePrice = ($menu->is_dynamic_price && isset($item['harga']) && $item['harga'] > 0)
                 ? (float) $item['harga']
                 : (float) $menu->harga;
@@ -57,7 +58,29 @@ class OrderService
             $subtotal = $hargaTotalPerItem * $item['jumlah'];
             $totalHarga += $subtotal;
 
-            // 3g. Buat detail pesanan
+            // 3d. Hitung HPP (Harga Pokok Penjualan) berdasarkan bahan baku resep
+            $hppPerItem = 0;
+            if ($menu->bahans && $menu->bahans->isNotEmpty()) {
+                foreach ($menu->bahans as $bahan) {
+                    $jumlahDibutuhkan = (float) ($bahan->pivot->jumlah_dibutuhkan ?? 0);
+                    $hargaBeli = (float) ($bahan->harga_beli ?? 0);
+                    $hppPerItem += ($jumlahDibutuhkan * $hargaBeli);
+                }
+            }
+            $totalHpp += ($hppPerItem * $item['jumlah']);
+
+            // 3e. Kurangi stok menu & bahan baku
+            $menu->decrement('stok', $item['jumlah']);
+            if ($menu->bahans && $menu->bahans->isNotEmpty()) {
+                foreach ($menu->bahans as $bahan) {
+                    $jumlahDibutuhkan = (float) ($bahan->pivot->jumlah_dibutuhkan ?? 0);
+                    if ($jumlahDibutuhkan > 0) {
+                        $bahan->decrement('stok', $jumlahDibutuhkan * $item['jumlah']);
+                    }
+                }
+            }
+
+            // 3f. Buat detail pesanan
             DetailPesanan::create([
                 'id_pesanan' => $pesanan->id,
                 'id_menu' => $menu->id,

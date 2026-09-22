@@ -82,11 +82,28 @@ class Pesanan extends Model
     }
 
     /**
-     * Mengembalikan stok/status menu saat dibatalkan (ketersediaan menu dikelola via toggle Tersedia/Habis).
+     * Mengembalikan stok menu dan bahan baku saat pesanan dibatalkan.
      */
     public function restoreStock()
     {
-        // Ketersediaan menu diatur secara manual oleh waitress/barista melalui tablet POS (is_available).
+        $this->loadMissing(['detail_pesanan.menu.bahans']);
+
+        foreach ($this->detail_pesanan as $detail) {
+            if ($detail->menu) {
+                // Kembalikan stok menu
+                $detail->menu->increment('stok', $detail->jumlah);
+
+                // Kembalikan stok bahan baku jika menu memiliki resep
+                if ($detail->menu->bahans && $detail->menu->bahans->isNotEmpty()) {
+                    foreach ($detail->menu->bahans as $bahan) {
+                        $jumlahDibutuhkan = (float) ($bahan->pivot->jumlah_dibutuhkan ?? 0);
+                        if ($jumlahDibutuhkan > 0) {
+                            $bahan->increment('stok', $jumlahDibutuhkan * $detail->jumlah);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -111,9 +128,9 @@ class Pesanan extends Model
                 }
             }
 
-            // Opsional: hapus record pembayaran jika ada
+            // Update status pembayaran menjadi cancelled agar riwayat/jejak audit transaksi tidak hilang
             if ($this->pembayaran) {
-                $this->pembayaran->delete();
+                $this->pembayaran->update(['status' => 'cancelled']);
             }
 
             // Soft delete agar pesanan tidak muncul di list aktif

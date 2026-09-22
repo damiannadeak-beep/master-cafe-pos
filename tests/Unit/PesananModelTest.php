@@ -150,9 +150,9 @@ class PesananModelTest extends TestCase
     }
 
     /**
-     * TEST 4: cancelOrder() menghapus record pembayaran
+     * TEST 4: cancelOrder() mengubah status pembayaran menjadi cancelled
      */
-    public function test_cancel_order_menghapus_pembayaran()
+    public function test_cancel_order_membatalkan_pembayaran()
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
@@ -189,8 +189,9 @@ class PesananModelTest extends TestCase
 
         $pesanan->cancelOrder();
 
-        $this->assertDatabaseMissing('pembayaran', [
+        $this->assertDatabaseHas('pembayaran', [
             'id_pesanan' => $pesanan->id,
+            'status' => 'cancelled',
         ]);
     }
 

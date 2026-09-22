@@ -245,11 +245,9 @@ class ManagementAndSettingsTest extends TestCase
             'total_bayar' => 25000,
         ]);
 
-        // Konsumen cancel pesanan
+        // Konsumen mencoba cancel pesanan secara online -> ditolak sesuai kebijakan kafe (harus ke kasir)
         $response = $this->actingAs($konsumen)->postJson("/konsumen/order/{$pesanan->id}/cancel");
-        $response->assertStatus(200);
-        $response->assertJson(['message' => 'Pesanan berhasil dibatalkan.']);
-
-        $this->assertSoftDeleted('pesanan', ['id' => $pesanan->id]);
+        $response->assertStatus(422);
+        $response->assertJson(['error' => 'Pesanan tidak dapat dibatalkan secara online. Jika ingin membatalkan pesanan, silakan datang langsung ke kasir.']);
     }
 }

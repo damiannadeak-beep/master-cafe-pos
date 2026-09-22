@@ -8,9 +8,12 @@ use App\Models\{Pesanan, Pembayaran, Setting};
 use App\Mail\ReceiptMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
+use App\Helpers\GeoHelper;
+use App\Traits\AuthorizesOrders;
 
 class PaymentController extends Controller
 {
+    use AuthorizesOrders;
     public function __construct()
     {
         // Ambil pengaturan Midtrans dari database (atau fallback ke config jika belum diatur)
@@ -25,23 +28,8 @@ class PaymentController extends Controller
         $pesanan = Pesanan::with(['detail_pesanan.menu', 'pembayaran', 'konsumen'])->findOrFail($id_pesanan);
         $pembayaran = $pesanan->pembayaran;
 
-        // Validasi kepemilikan pesanan (User login atau Guest dengan Token yang Cocok)
-        $token = $request->query('token') ?? session('order_token');
-        $isAuthorized = false;
-
-        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
-            $isAuthorized = true;
-        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
-            $isAuthorized = true;
-        } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
-            $isAuthorized = true;
-        } elseif ($pesanan->id_meja && (session('id_meja') == $pesanan->id_meja || (auth()->check() && in_array(auth()->user()->role, ['admin', 'kasir', 'pemilik', 'waitress'])))) {
-            $isAuthorized = true;
-        }
-
-        if (!$isAuthorized) {
-            abort(403, 'Anda tidak berhak mengakses pesanan ini.');
-        }
+        // Validasi kepemilikan pesanan via Trait
+        $this->authorizeOrderAccess($pesanan, $request);
 
         // Cek apakah pesanan telah dibatalkan atau kadaluarsa (15 menit untuk pending unpaid)
         if (in_array($pesanan->status, ['cancelled', 'void'])) {
@@ -257,7 +245,7 @@ class PaymentController extends Controller
 
             $isInsideCafe = false;
             if (!empty($cafeLat) && !empty($cafeLng) && !empty($userLat) && !empty($userLng)) {
-                $distance = $this->calculateDistanceMeters((float)$cafeLat, (float)$cafeLng, (float)$userLat, (float)$userLng);
+                $distance = GeoHelper::calculateDistanceMeters((float)$cafeLat, (float)$cafeLng, (float)$userLat, (float)$userLng);
                 if ($distance <= $maxRadius) {
                     $isInsideCafe = true;
                 }
@@ -268,20 +256,8 @@ class PaymentController extends Controller
             }
         }
 
-        $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
-        $isAuthorized = false;
-
-        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
-            $isAuthorized = true;
-        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
-            $isAuthorized = true;
-        } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
-            $isAuthorized = true;
-        }
-
-        if (!$isAuthorized) {
-            abort(403, 'Anda tidak berhak mengakses pesanan ini.');
-        }
+        // Validasi kepemilikan pesanan via Trait
+        $this->authorizeOrderAccess($pesanan, $request);
 
         $pembayaran = $pesanan->pembayaran;
         if ($pembayaran && $pembayaran->status !== 'paid') {
@@ -386,20 +362,8 @@ class PaymentController extends Controller
 
         $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
 
-        $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
-        $isAuthorized = false;
-
-        if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
-            $isAuthorized = true;
-        } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
-            $isAuthorized = true;
-        } elseif (!$pesanan->id_konsumen && empty($pesanan->order_token) && session('active_order_id') == $pesanan->id) {
-            $isAuthorized = true;
-        }
-
-        if (!$isAuthorized) {
-            abort(403, 'Anda tidak berhak mengakses pesanan ini.');
-        }
+        // Validasi kepemilikan pesanan via Trait
+        $this->authorizeOrderAccess($pesanan, $request);
 
         $pembayaran = $pesanan->pembayaran;
 
@@ -442,6 +406,11 @@ class PaymentController extends Controller
             ->orWhere('id_pesanan', $id_pesanan)
             ->first();
         if (!$pembayaran) return response()->json(['message' => 'Not Found'], 404);
+
+        // Idempotency Guard: Jika pembayaran sudah lunas, abaikan webhook duplikat
+        if ($pembayaran->status === 'paid') {
+            return response()->json(['message' => 'Already processed'], 200);
+        }
 
         $pesanan = Pesanan::with(['meja', 'konsumen'])->find($id_pesanan);
 
@@ -503,26 +472,5 @@ class PaymentController extends Controller
         }
 
         return response()->json(['message' => 'Webhook Berhasil Diterima']);
-    }
-
-    /**
-     * Menghitung jarak antara dua koordinat GPS dalam satuan meter (Formula Haversine).
-     */
-    private function calculateDistanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float
-    {
-        $earthRadius = 6371000; // Radius bumi dalam meter
-
-        $latFrom = deg2rad($lat1);
-        $lonFrom = deg2rad($lon1);
-        $latTo = deg2rad($lat2);
-        $lonTo = deg2rad($lon2);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-
-        return $angle * $earthRadius;
     }
 }

@@ -22,5 +22,8 @@ class SettingsService
         foreach ($keyValues as $key => $value) {
             Setting::updateOrCreate(['key' => $key], ['value' => $value]);
         }
+
+        // Flush cache agar Setting::getVal() mengembalikan data terbaru
+        Setting::flushCache();
     }
 }

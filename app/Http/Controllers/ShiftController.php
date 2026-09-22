@@ -28,6 +28,7 @@ class ShiftController extends Controller
         KasirShift::create([
             'user_id' => auth()->id(),
             'modal_awal' => $request->modal_awal,
+            'waktu_buka' => now(),
             'status' => 'open'
         ]);
 

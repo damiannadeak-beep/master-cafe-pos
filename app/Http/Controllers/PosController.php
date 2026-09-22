@@ -47,16 +47,22 @@ class PosController extends Controller
      */
     public function pesananAktif(Request $request)
     {
-        // 1. Proaktif cek status Midtrans untuk semua pesanan pending/unpaid sebelum memfilter
+        // 1. Proaktif cek status Midtrans — hanya untuk pesanan yang benar-benar menggunakan Midtrans
+        //    Dibatasi 5 pesanan terbaru dalam 30 menit terakhir agar tidak memblokir halaman
         $pendingCheckOrders = Pesanan::with(['pembayaran'])
             ->whereIn('status', ['pending', 'processing'])
-            ->whereNotIn('status', ['cancelled', 'void'])
+            ->where('created_at', '>=', now()->subMinutes(30))
+            ->whereHas('pembayaran', function ($p) {
+                $p->where('status', '!=', 'paid')
+                  ->where('metode', '!=', 'cash')
+                  ->whereNotNull('midtrans_order_id');
+            })
+            ->latest()
+            ->take(5)
             ->get();
 
         foreach ($pendingCheckOrders as $order) {
-            if ($order->pembayaran && $order->pembayaran->status !== 'paid') {
-                $this->posService->checkAndUpdateMidtransStatus($order);
-            }
+            $this->posService->checkAndUpdateMidtransStatus($order);
         }
 
         // 2. Ambil pesanan aktif via PosService:
@@ -138,6 +144,9 @@ class PosController extends Controller
         try {
             DB::beginTransaction();
 
+            // 2. Tentukan ID Meja terlebih dahulu
+            $idMeja = ($validated['tipe_pesanan'] === 'takeaway') ? null : ($validated['id_meja'] ?? null);
+
             // 1b. Jika meja ini masih memiliki pesanan lama yang SUDAH LUNAS (paid),
             // otomatis selesaikan pesanan lama tersebut agar sesi lama tertutup rapi dan tidak tercampur dengan tamu baru ini.
             if (!empty($idMeja) && $validated['tipe_pesanan'] === 'dine_in') {
@@ -156,8 +165,7 @@ class PosController extends Controller
                 }
             }
 
-            // 2. Buat Data Pesanan Baru
-            $idMeja = ($validated['tipe_pesanan'] === 'takeaway') ? null : ($validated['id_meja'] ?? null);
+            // 3. Buat Data Pesanan Baru
             $pesanan = Pesanan::create([
                 'id_konsumen' => null,
                 'id_meja' => $idMeja,

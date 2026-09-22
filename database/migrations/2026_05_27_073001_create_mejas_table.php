@@ -1,4 +1,4 @@
-php artisan make:model Menu -m<?php
+<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

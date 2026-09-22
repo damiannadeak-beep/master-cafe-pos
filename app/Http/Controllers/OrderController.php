@@ -8,9 +8,12 @@ use Illuminate\Support\Facades\Log;
 use App\Models\{Pesanan, DetailPesanan, Pembayaran, Menu, Meja, Promo, Setting};
 use App\Http\Requests\Konsumen\{TambahPesananRequest, CallBellRequest};
 use App\Services\OrderService;
+use App\Helpers\GeoHelper;
+use App\Traits\AuthorizesOrders;
 
 class OrderController extends Controller
 {
+    use AuthorizesOrders;
     /**
      * Menampilkan Menu berdasarkan scan QR Meja
      */
@@ -111,7 +114,7 @@ class OrderController extends Controller
                     ], 422);
                 }
 
-                $distance = $this->calculateDistanceMeters((float)$cafeLat, (float)$cafeLng, (float)$userLat, (float)$userLng);
+                $distance = GeoHelper::calculateDistanceMeters((float)$cafeLat, (float)$cafeLng, (float)$userLat, (float)$userLng);
 
                 if ($distance > $maxRadius) {
                     return response()->json([
@@ -124,8 +127,8 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Tentukan Nama Tamu / Konsumen
-            $mejaModel = $id_meja ? Meja::find($id_meja) : null;
+            // Tentukan Nama Tamu / Konsumen (dengan lock untuk mencegah race condition di meja yang sama)
+            $mejaModel = $id_meja ? Meja::lockForUpdate()->find($id_meja) : null;
             $guestName = !empty($validated['guest_name']) ? trim($validated['guest_name']) : null;
             if (empty($guestName)) {
                 $guestName = auth()->check() ? auth()->user()->name : ($mejaModel ? ('Tamu ' . $mejaModel->nama_meja_atau_nomor) : 'Tamu');
@@ -215,44 +218,17 @@ class OrderController extends Controller
     public function cancelOrder(Request $request, $id_pesanan)
     {
         try {
-            DB::beginTransaction();
-
             $pesanan = Pesanan::with(['pembayaran'])->findOrFail($id_pesanan);
 
-            $token = $request->input('token') ?? $request->query('token') ?? $request->header('X-Order-Token') ?? session('order_token');
-            $isOwner = false;
-            if (auth()->check() && $pesanan->id_konsumen && $pesanan->id_konsumen == auth()->id()) {
-                $isOwner = true;
-            } elseif ($pesanan->order_token && $token && hash_equals((string)$pesanan->order_token, (string)$token)) {
-                $isOwner = true;
-            } elseif (!$pesanan->id_konsumen && session('active_order_id') == $pesanan->id) {
-                $isOwner = true;
-            }
-
-            if (!$isOwner) {
+            // Gunakan trait AuthorizesOrders untuk validasi kepemilikan
+            if (!$this->isOrderOwner($pesanan, $request)) {
                 throw new \Exception('Anda tidak berhak membatalkan pesanan ini.');
             }
 
-            // Kebijakan kafe: Pesanan yang diinput oleh konsumen tidak dapat dibatalkan karena merupakan tanggung jawab pemesan
-            throw new \Exception('Pesanan yang telah dibuat oleh konsumen tidak dapat dibatalkan karena merupakan tanggung jawab pemesan.');
-
-            $pesanan->cancelOrder();
-
-            session()->forget(['order_token', 'active_order_id']);
-
-            DB::commit();
-
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'Pesanan berhasil dibatalkan.']);
-            }
-
-            $redirectUrl = $pesanan->id_meja 
-                ? URL::signedRoute('konsumen.menu.meja', ['id_meja' => $pesanan->id_meja]) 
-                : url('/katalog');
-            return redirect($redirectUrl)->with('success', 'Pesanan berhasil dibatalkan.');
+            // Kebijakan kafe: Pesanan yang telah dibuat tidak dapat dibatalkan secara online. Pembatalan harus datang langsung ke kasir.
+            throw new \Exception('Pesanan tidak dapat dibatalkan secara online. Jika ingin membatalkan pesanan, silakan datang langsung ke kasir.');
 
         } catch (\Exception $e) {
-            DB::rollBack();
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['error' => $e->getMessage()], 422);
             }
@@ -606,24 +582,4 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Menghitung jarak antara dua koordinat GPS dalam satuan meter (Formula Haversine).
-     */
-    private function calculateDistanceMeters(float $lat1, float $lon1, float $lat2, float $lon2): float
-    {
-        $earthRadius = 6371000; // Radius bumi dalam meter
-
-        $latFrom = deg2rad($lat1);
-        $lonFrom = deg2rad($lon1);
-        $latTo = deg2rad($lat2);
-        $lonTo = deg2rad($lon2);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-
-        return $angle * $earthRadius;
-    }
 }
