@@ -70,7 +70,11 @@
                                     @elseif($cardData->tipe_pesanan == 'dine_in' && !$cardData->id_meja)
                                         <span class="text-danger fw-bold"><i class="bi bi-geo-alt"></i> Belum Pilih Meja</span>
                                     @else
-                                        <span class="badge rounded-pill text-bg-secondary px-2">Meja {{ $cardData->meja->nama_meja_atau_nomor ?? '?' }}</span>
+                                        @php
+                                            $rawMejaName = trim((string)($cardData->meja->nama_meja_atau_nomor ?? '?'));
+                                            $labelMeja = preg_match('/^meja\b/i', $rawMejaName) ? $rawMejaName : 'Meja ' . $rawMejaName;
+                                        @endphp
+                                        <span class="badge rounded-pill text-bg-secondary px-2">{{ $labelMeja }}</span>
                                     @endif
                                 </small>
                             </div>
@@ -99,15 +103,21 @@
                                 $orderRefText = $cardData->is_grouped ? $cardData->order_ids_string : $primaryOrder->id;
                                 $waMessage = rawurlencode("Halo Kak {$cardData->customer_name}, pesanan Master Cafe #{$orderRefText} Anda sudah siap! Silakan diambil di kasir/counter. Terima kasih!");
                             @endphp
-                            <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waMessage }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-2 py-1 fw-bold" style="font-size: 0.75rem;">
+                            <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waMessage }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
                                 <i class="bi bi-whatsapp me-1"></i> Chat WA
                             </a>
                         @endif
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-dark text-white border-secondary table-sm table-borderless mb-0" style="font-size: 0.8125rem;">
+                <div class="table-responsive" style="overflow-x: hidden;">
+                    <table class="table table-dark text-white border-secondary table-sm table-borderless mb-0" style="table-layout: fixed; width: 100%; font-size: 0.8125rem;">
+                        <colgroup>
+                            <col style="width: 34px;">
+                            <col style="width: 36px;">
+                            <col style="width: auto;">
+                            <col style="width: 82px;">
+                        </colgroup>
                         <tbody>
                             @foreach($cardData->orders as $subIdx => $subOrder)
                                 @php
@@ -118,73 +128,73 @@
                                         : ($subOrder->total - ($subOrder->discount_amount ?? 0)));
                                 @endphp
                                 @if($cardData->is_grouped)
-                                    <tr class="table-active">
-                                        <td colspan="4" class="py-1 px-2 rounded-2" 
-                                            style="background: rgba(255, 255, 255, 0.07); font-size: 0.72rem; cursor: pointer; user-select: none; transition: background 0.15s ease;"
+                                    <tr class="table-active" style="{{ $subIdx > 0 ? 'border-top: 8px solid transparent;' : '' }}">
+                                        <td colspan="4" class="p-2 rounded-3" 
+                                            style="background: rgba(255, 255, 255, 0.08); font-size: 0.75rem; cursor: pointer; user-select: none; transition: background 0.15s ease;"
                                             onclick="window.toggleSubOrderCollapse({{ $subOrder->id }})"
                                             title="Klik untuk melipat / membuka rincian pesanan #{{ $subOrder->id }}"
                                             onmouseover="this.style.background='rgba(255, 255, 255, 0.13)'"
-                                            onmouseout="this.style.background='rgba(255, 255, 255, 0.07)'">
-                                            <div class="d-flex justify-content-between align-items-center flex-nowrap gap-1">
-                                                <div class="d-flex align-items-center gap-1.5 text-truncate me-1">
-                                                    <i id="suborder-chevron-{{ $subOrder->id }}" class="bi bi-chevron-down text-white-50 flex-shrink-0" style="font-size: 0.65rem !important; transition: transform 0.2s ease;"></i>
-                                                    <span class="fw-bold {{ $subIdx === 0 ? 'text-white' : 'text-warning' }} text-truncate" style="font-size: 0.72rem;">
+                                            onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i id="suborder-chevron-{{ $subOrder->id }}" class="bi bi-chevron-down text-white-50" style="font-size: 0.7rem !important; transition: transform 0.2s ease;"></i>
+                                                    <span class="fw-bold {{ $subIdx === 0 ? 'text-white' : 'text-warning' }}" style="font-size: 0.75rem;">
                                                         <i class="bi {{ $subIdx === 0 ? 'bi-receipt text-secondary' : 'bi-plus-circle-fill text-warning' }} me-1"></i>
-                                                        {{ $subIdx === 0 ? 'Pesanan Awal (#' . $subOrder->id . ')' : 'Tambahan (#' . $subOrder->id . ')' }}
+                                                        {{ $subIdx === 0 ? 'Pesanan Awal' : 'Tambahan' }} <span class="text-white-50 fw-normal">(#{{ $subOrder->id }})</span>
                                                     </span>
-                                                    <span class="badge bg-secondary bg-opacity-25 text-white-50 py-0 px-1 rounded" style="font-size: 0.62rem;">
+                                                    <span class="badge bg-secondary bg-opacity-50 text-white-50 py-0.5 px-1.5 rounded" style="font-size: 0.65rem;">
                                                         {{ count($subOrder->detail_pesanan) }} item
                                                     </span>
                                                     @if(!empty($subOrder->customer_name) && strtolower(trim($subOrder->customer_name)) !== strtolower(trim($cardData->customer_name)))
-                                                        <span class="badge bg-dark border border-secondary text-info py-0 px-1.5" style="font-size: 0.62rem; font-weight: normal;">{{ $subOrder->customer_name }}</span>
-                                                    @endif
-                                                    @php
-                                                        $canVoidSubOrder = !$subOrderPaid && $subOrder->status !== 'completed' && !in_array($subOrder->status, ['cancelled', 'void']);
-                                                    @endphp
-                                                    @if($canVoidSubOrder)
-                                                        <button type="button" 
-                                                                class="btn btn-sm py-0 px-1.5 rounded-pill border-0 d-inline-flex align-items-center gap-1 ms-1 text-decoration-none" 
-                                                                style="background: rgba(239, 68, 68, 0.18); color: #ff8b8b; font-size: 0.62rem; height: 19px; line-height: 1;" 
-                                                                onclick="event.stopPropagation(); window.voidOrder({{ $subOrder->id }})" 
-                                                                title="Batalkan Pesanan Tambahan #{{ $subOrder->id }}">
-                                                            <i class="bi bi-trash3" style="font-size: 0.68rem !important; line-height: 1;"></i>
-                                                            <span>Batal</span>
-                                                        </button>
+                                                        <span class="badge bg-dark border border-secondary text-info py-0.5 px-1.5 rounded" style="font-size: 0.65rem;">{{ $subOrder->customer_name }}</span>
                                                     @endif
                                                 </div>
-                                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                <div class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
                                                     @if($subOrderPaid)
-                                                        <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: rgba(46, 160, 67, 0.2); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.64rem;">
+                                                        <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(46, 160, 67, 0.2); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.65rem;">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Lunas{{ $subOrderMetode ? " ($subOrderMetode)" : '' }}
                                                         </span>
                                                     @else
-                                                        <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="background: rgba(220, 53, 69, 0.2); color: #ff7b72; border: 1px solid rgba(220, 53, 69, 0.35); font-size: 0.64rem;">
+                                                        <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(220, 53, 69, 0.2); color: #ff7b72; border: 1px solid rgba(220, 53, 69, 0.35); font-size: 0.65rem;">
                                                             <i class="bi bi-exclamation-circle-fill me-1"></i>Belum Bayar
                                                         </span>
                                                     @endif
 
                                                     @if($subOrder->status === 'pending')
                                                         <button type="button" 
-                                                                class="badge bg-warning text-dark py-0.5 px-2 rounded-pill border-0 d-inline-flex align-items-center gap-1 text-decoration-none shadow-none" 
-                                                                style="font-size: 0.62rem; cursor: pointer;"
+                                                                class="badge bg-warning text-dark py-1 px-2 rounded-pill border-0 d-inline-flex align-items-center gap-1 text-decoration-none shadow-none fw-bold" 
+                                                                style="font-size: 0.65rem; cursor: pointer;"
                                                                 onclick="event.stopPropagation(); window.updateSingleOrderStatus({{ $subOrder->id }}, 'processing', this)"
                                                                 title="Mulai masak pesanan #{{ $subOrder->id }}">
                                                             <i class="bi bi-fire"></i> Masak
                                                         </button>
                                                     @elseif($subOrder->status === 'processing')
                                                         <button type="button" 
-                                                                class="badge bg-primary text-white py-0.5 px-2 rounded-pill border-0 d-inline-flex align-items-center gap-1 text-decoration-none shadow-none" 
-                                                                style="font-size: 0.62rem; cursor: pointer;"
+                                                                class="badge bg-primary text-white py-1 px-2 rounded-pill border-0 d-inline-flex align-items-center gap-1 text-decoration-none shadow-none fw-bold" 
+                                                                style="font-size: 0.65rem; cursor: pointer;"
                                                                 onclick="event.stopPropagation(); window.updateSingleOrderStatus({{ $subOrder->id }}, 'completed', this)"
                                                                 title="Tandai pesanan #{{ $subOrder->id }} selesai dimasak">
                                                             <i class="bi bi-check2"></i> Selesai
                                                         </button>
                                                     @elseif($subOrder->status === 'completed')
-                                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0.5 px-1.5 rounded-pill d-inline-flex align-items-center gap-1" style="font-size: 0.62rem;">
+                                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-1 px-2 rounded-pill d-inline-flex align-items-center gap-1" style="font-size: 0.65rem;">
                                                             <i class="bi bi-check2-circle"></i> Selesai
                                                         </span>
                                                     @endif
-                                                    <span class="text-white-50 ms-0.5" style="font-size: 0.65rem;">{{ $subOrder->created_at->format('H:i') }}</span>
+
+                                                    @php
+                                                        $canVoidSubOrder = !$subOrderPaid && $subOrder->status !== 'completed' && !in_array($subOrder->status, ['cancelled', 'void']);
+                                                    @endphp
+                                                    @if($canVoidSubOrder)
+                                                        <button type="button" 
+                                                                class="btn btn-sm py-0.5 px-1.5 rounded border border-danger border-opacity-25 d-inline-flex align-items-center gap-1 text-danger" 
+                                                                style="background: rgba(239, 68, 68, 0.15); font-size: 0.65rem; height: 21px;" 
+                                                                onclick="event.stopPropagation(); window.voidOrder({{ $subOrder->id }})" 
+                                                                title="Batalkan Pesanan #{{ $subOrder->id }}">
+                                                            <i class="bi bi-trash3"></i>
+                                                            <span class="d-none d-sm-inline">Batal</span>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </td>
@@ -196,9 +206,9 @@
                                     @endphp
                                     <tr id="order-item-row-{{ $item->id }}" 
                                         class="{{ $cardData->is_grouped ? 'suborder-items-' . $subOrder->id : '' }} order-item-row {{ $itemServed ? 'item-served' : '' }}" 
-                                        style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.04); border-left: 3px solid rgba(220, 53, 69, 0.6);' : '' }} {{ $itemServed ? 'opacity: 0.9;' : '' }}; transition: all 0.2s ease;">
+                                        style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.04); border-left: 3px solid rgba(220, 53, 69, 0.6);' : '' }} {{ $itemServed ? 'opacity: 0.9;' : '' }}; border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: all 0.2s ease;">
                                         <!-- Kolom Centang Menu -->
-                                        <td class="ps-2 py-1 text-center" style="width: 32px; vertical-align: middle;">
+                                        <td class="ps-2 pe-1 py-2 text-center" style="vertical-align: middle;">
                                             <button type="button" 
                                                     class="btn btn-sm p-0 border-0 d-flex align-items-center justify-content-center item-check-btn" 
                                                     id="item-check-btn-{{ $item->id }}"
@@ -212,13 +222,13 @@
                                             </button>
                                         </td>
                                         <!-- Kolom Qty -->
-                                        <td class="text-white-50 px-1" style="width: 28px; vertical-align: middle; font-size: 0.78rem;">
-                                            <span class="item-qty-badge {{ $itemServed ? 'text-success fw-bold' : '' }}">{{ $item->jumlah }}x</span>
+                                        <td class="text-white-50 ps-1 pe-2 text-center" style="vertical-align: middle; font-size: 0.8rem;">
+                                            <span class="item-qty-badge {{ $itemServed ? 'text-success fw-bold' : 'fw-semibold text-white' }}">{{ $item->jumlah }}x</span>
                                         </td>
                                         <!-- Kolom Nama Menu & Detail -->
-                                        <td class="fw-medium py-1" style="vertical-align: middle;">
+                                        <td class="fw-medium py-2 pe-2" style="vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">
                                             <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                                <span class="item-name {{ $itemServed ? 'text-white-50 text-decoration-line-through' : 'text-white' }}" style="font-size: 0.8125rem;">
+                                                <span class="item-name {{ $itemServed ? 'text-white-50 text-decoration-line-through' : 'text-white' }}" style="font-size: 0.8125rem; line-height: 1.35;">
                                                     {{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}
                                                 </span>
                                                 @if($itemServed)
@@ -232,7 +242,7 @@
                                                     $variants = json_decode($item->selected_variants, true); 
                                                 @endphp
                                                 @if(is_array($variants) && count($variants) > 0)
-                                                    <div class="text-success" style="font-size: 0.7rem;"><i class="bi bi-tags me-1"></i>
+                                                    <div class="text-success mt-0.5" style="font-size: 0.7rem;"><i class="bi bi-tags me-1"></i>
                                                         @foreach($variants as $idx => $v)
                                                             {{ isset($v['qty']) && $v['qty'] > 1 ? $v['qty'].'x ' : '' }}{{ $v['name'] }}{{ $idx < count($variants) - 1 ? ', ' : '' }}
                                                         @endforeach
@@ -240,11 +250,11 @@
                                                 @endif
                                             @endif
                                             @if($item->catatan)
-                                                <div class="text-danger fst-italic" style="font-size: 0.7rem;"><i class="bi bi-chat-text me-1"></i>Catatan: {{ $item->catatan }}</div>
+                                                <div class="text-danger fst-italic mt-0.5" style="font-size: 0.7rem;"><i class="bi bi-chat-text me-1"></i>Catatan: {{ $item->catatan }}</div>
                                             @endif
                                         </td>
                                         <!-- Kolom Subtotal -->
-                                        <td class="text-end text-white-50 pe-2 text-nowrap py-1" style="vertical-align: middle; font-size: 0.78rem;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                        <td class="text-end text-white-50 pe-2 text-nowrap py-2" style="vertical-align: middle; font-size: 0.8rem; font-weight: 500;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
                             @endforeach
@@ -284,11 +294,11 @@
                         $unpaidOrderList = $cardData->orders->filter(fn($o) => !($o->pembayaran && $o->pembayaran->status === 'paid'));
                     @endphp
                     @if($unpaidOrderList->isNotEmpty())
-                        <div class="px-2 py-1.5 mb-2 rounded-2 d-flex align-items-center justify-content-between" style="background: rgba(220, 53, 69, 0.08); border: 1px dashed rgba(220, 53, 69, 0.35); font-size: 0.75rem;">
+                        <div class="px-2.5 py-2 mb-2.5 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-1.5" style="background: rgba(220, 53, 69, 0.08); border: 1px dashed rgba(220, 53, 69, 0.35); font-size: 0.75rem;">
                             <span class="text-white-50">
                                 <i class="bi bi-info-circle text-danger me-1"></i>Tagihan pending:
                             </span>
-                            <span class="badge bg-danger bg-opacity-75 text-white fw-semibold" style="font-size: 0.7rem;">
+                            <span class="badge bg-danger bg-opacity-75 text-white fw-semibold px-2 py-1" style="font-size: 0.72rem;">
                                 @foreach($unpaidOrderList as $uOrd)
                                     Pesanan #{{ $uOrd->id }}{{ !$loop->last ? ', ' : '' }}
                                 @endforeach
