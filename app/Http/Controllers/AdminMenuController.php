@@ -48,7 +48,7 @@ class AdminMenuController extends Controller
         if ($request->hasFile('image') && !$request->file('image')->isValid()) {
             return redirect()->back()->withInput()->with('error', 'Gagal mengunggah foto. Ukuran file foto terlalu besar (maksimal 2MB). Silakan kompres atau pilih foto lain.');
         }
-        $menuService->createMenu($request->validated(), $request->all());
+        $menuService->createMenu($request->validated(), ['image' => $request->file('image')]);
         return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil ditambahkan.');
     }
 
@@ -60,21 +60,12 @@ class AdminMenuController extends Controller
 
     public function update(UpdateMenuRequest $request, $id, MenuService $menuService)
     {
-        if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_OK && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
-            $errCode = $_FILES['image']['error'];
-            $errMsg = "Gagal upload (Kode Error PHP {$errCode}): ";
-            if ($errCode == UPLOAD_ERR_INI_SIZE || $errCode == UPLOAD_ERR_FORM_SIZE) {
-                $errMsg .= "Ukuran file foto terlalu besar melampaui batas PHP server (" . ini_get('upload_max_filesize') . "). Silakan kompres foto menjadi di bawah 1 MB.";
-            } else {
-                $errMsg .= "Server menolak file foto ini.";
-            }
-            return redirect()->back()->withInput()->with('error', $errMsg);
+        if ($request->hasFile('image') && !$request->file('image')->isValid()) {
+            return redirect()->back()->withInput()->with('error', 'Gagal mengunggah foto. Ukuran file foto terlalu besar (maksimal 2MB) atau file korup. Silakan kompres atau pilih foto lain.');
         }
 
-
-
         $menu = Menu::findOrFail($id);
-        $menuService->updateMenu($menu, $request->validated(), $request->all());
+        $menuService->updateMenu($menu, $request->validated(), ['image' => $request->file('image')]);
         return redirect()->route('admin.menu.index')->with('success', 'Menu berhasil diperbarui.');
     }
 

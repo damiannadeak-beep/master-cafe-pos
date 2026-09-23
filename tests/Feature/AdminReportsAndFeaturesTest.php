@@ -90,26 +90,32 @@ class AdminReportsAndFeaturesTest extends TestCase
         $this->assertTrue(str_contains($response->headers->get('content-type'), 'vnd.ms-excel'));
     }
 
-    /** Test 4: Admin membuat voucher promo diskon baru */
+    /** Test 4: Admin membuat voucher promo bundling baru */
     public function test_admin_dapat_membuat_promo()
     {
         $admin = User::factory()->create();
         $admin->assignRole('pemilik');
 
+        $menu = \App\Models\Menu::create([
+            'nama_menu' => 'Kopi Latte',
+            'harga' => 20000,
+            'is_available' => true,
+        ]);
+
         $response = $this->actingAs($admin)->post('/admin/promo', [
-            'title' => 'Diskon Awal Bulan 10%',
-            'type' => 'discount',
-            'discount_type' => 'percentage',
-            'value' => 10,
+            'title' => 'Paket Hemat Kopi',
+            'value' => 15000,
+            'package_menus' => [$menu->id],
+            'package_qty' => [1],
             'starts_at' => now()->toDateString(),
             'ends_at' => now()->addDays(7)->toDateString(),
-            'is_active' => 'on',
+            'is_active' => '1',
         ]);
 
         $response->assertRedirect('/admin/promo');
         $this->assertDatabaseHas('promos', [
-            'title' => 'Diskon Awal Bulan 10%',
-            'value' => 10,
+            'title' => 'Paket Hemat Kopi',
+            'value' => 15000,
         ]);
     }
 }

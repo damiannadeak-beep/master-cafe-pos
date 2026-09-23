@@ -17,6 +17,7 @@ use App\Services\PosService;
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 use Mike42\Escpos\Printer;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\Requests\Pos\{StoreManualOrderRequest, VoidOrderRequest, SplitOrderRequest, UpdateOrderStatusRequest, PayOrderRequest};
 
@@ -730,11 +731,7 @@ class PosController extends Controller
      */
     public function splitOrder(SplitOrderRequest $request, $id_pesanan)
     {
-        $validated = $request->validate([
-            'split_items' => 'required|array',
-            'split_items.*.id_detail' => 'required|exists:detail_pesanan,id',
-            'split_items.*.jumlah' => 'required|integer|min:1',
-        ]);
+        $validated = $request->validated();
 
         try {
             $pesananAsli = Pesanan::with('detail_pesanan')->findOrFail($id_pesanan);

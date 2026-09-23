@@ -170,6 +170,10 @@ class PaymentController extends Controller
 
     public function simulateMidtransPay(Request $request, $id_pesanan)
     {
+        if (!app()->environment('local', 'testing')) {
+            abort(403, 'Simulasi pembayaran Midtrans dinonaktifkan di server produksi.');
+        }
+
         $pesanan = Pesanan::with(['pembayaran', 'konsumen'])->findOrFail($id_pesanan);
 
         $token = $request->input('token') ?? $request->query('token') ?? session('order_token');
@@ -410,6 +414,12 @@ class PaymentController extends Controller
         // Idempotency Guard: Jika pembayaran sudah lunas, abaikan webhook duplikat
         if ($pembayaran->status === 'paid') {
             return response()->json(['message' => 'Already processed'], 200);
+        }
+
+        // Verifikasi Gross Amount untuk mencegah manipulasi nominal transaksi
+        if ((float) $request->gross_amount < (float) $pembayaran->total_bayar) {
+            Log::warning("[Midtrans Webhook] Gross amount mismatch: bayar={$request->gross_amount}, tagihan={$pembayaran->total_bayar} (Order #{$id_pesanan})");
+            return response()->json(['message' => 'Gross amount mismatch'], 400);
         }
 
         $pesanan = Pesanan::with(['meja', 'konsumen'])->find($id_pesanan);

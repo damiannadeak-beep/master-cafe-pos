@@ -61,58 +61,29 @@ class ManagementAndSettingsTest extends TestCase
         $this->assertDatabaseMissing('meja', ['id' => $meja->id]);
     }
 
-    public function test_admin_dapat_mengelola_bahan_baku(): void
+    public function test_admin_dapat_update_stok_menu(): void
     {
         $admin = User::factory()->create();
         $admin->assignRole('pemilik');
 
-        // 1. Store Bahan
-        $resStore = $this->actingAs($admin)->post('/admin/stok', [
-            'nama_bahan' => 'Biji Kopi Arabika Gayo',
-            'stok' => 5000,
-            'satuan' => 'gram',
-            'harga_beli' => 150000,
-        ]);
-        $resStore->assertStatus(302);
-        $this->assertDatabaseHas('bahans', [
-            'nama_bahan' => 'Biji Kopi Arabika Gayo',
-            'stok' => 5000,
-            'satuan' => 'gram',
+        $menu = Menu::create([
+            'nama_menu' => 'Kopi Latte',
+            'harga' => 20000,
+            'stok' => 10,
+            'is_available' => true,
         ]);
 
-        $bahan = Bahan::where('nama_bahan', 'Biji Kopi Arabika Gayo')->first();
-
-        // 2. Update Bahan
-        $resUpdate = $this->actingAs($admin)->put("/admin/stok/{$bahan->id}", [
-            'nama_bahan' => 'Biji Kopi Arabika Gayo Premium',
-            'stok' => 4500,
-            'satuan' => 'gram',
-            'harga_beli' => 160000,
+        $resUpdate = $this->actingAs($admin)->post("/admin/menu/{$menu->id}/stock", [
+            'stok' => 50,
         ]);
         $resUpdate->assertStatus(302);
-        $this->assertDatabaseHas('bahans', [
-            'id' => $bahan->id,
-            'nama_bahan' => 'Biji Kopi Arabika Gayo Premium',
-            'stok' => 4500,
-        ]);
-
-        // 3. Delete Bahan
-        $resDelete = $this->actingAs($admin)->delete("/admin/stok/{$bahan->id}");
-        $resDelete->assertStatus(302);
-        $this->assertDatabaseMissing('bahans', ['id' => $bahan->id]);
+        $this->assertEquals(50, $menu->fresh()->stok);
     }
 
-    public function test_kasir_dapat_update_stok_opname(): void
+    public function test_kasir_dapat_update_ketersediaan_menu(): void
     {
         $kasir = User::factory()->create();
         $kasir->assignRole('kasir');
-
-        $bahan = Bahan::create([
-            'nama_bahan' => 'Susu Full Cream',
-            'stok' => 10,
-            'satuan' => 'liter',
-            'harga_beli' => 20000,
-        ]);
 
         $menu = Menu::create([
             'nama_menu' => 'Kopi Susu Gula Aren',
@@ -122,27 +93,16 @@ class ManagementAndSettingsTest extends TestCase
             'is_available' => true,
         ]);
 
-        // Kasir update stok opname
+        // Kasir update ketersediaan menu
         $response = $this->actingAs($kasir)->post('/kasir/stok', [
-            'bahan' => [
-                $bahan->id => 15,
-            ],
-            'menu' => [
-                $menu->id => 0,
-            ],
             'menu_available' => [
                 $menu->id => '0',
             ],
         ]);
 
         $response->assertStatus(302);
-        $this->assertDatabaseHas('bahans', [
-            'id' => $bahan->id,
-            'stok' => 15,
-        ]);
         $this->assertDatabaseHas('menu', [
             'id' => $menu->id,
-            'stok' => 0,
             'is_available' => false,
         ]);
     }
@@ -195,6 +155,7 @@ class ManagementAndSettingsTest extends TestCase
         Pembayaran::create([
             'id_pesanan' => $pesanan->id,
             'status' => 'unpaid',
+            'metode' => 'cash',
             'total_bayar' => 50000,
         ]);
 

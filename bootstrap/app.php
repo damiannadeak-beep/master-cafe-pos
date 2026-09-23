@@ -23,6 +23,19 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_shift_open' => \App\Http\Middleware\EnsureShiftOpen::class,
         ]);
 
+        $middleware->redirectGuestsTo(function ($request) {
+            $ownerSlug = config('auth.owner_path', 'ruang-owner-x92k');
+            $kasirSlug = config('auth.kasir_path', 'pos-kasir-gate-88');
+
+            if ($request->is('admin*') || $request->is($ownerSlug . '*')) {
+                return route('owner.login');
+            }
+            if ($request->is('kasir*') || $request->is($kasirSlug . '*')) {
+                return route('kasir.login');
+            }
+            return '/';
+        });
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

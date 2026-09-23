@@ -135,7 +135,7 @@ class AdminController extends Controller
             @mkdir(dirname($publicStorageFile), 0755, true);
             @file_put_contents($publicStorageFile, $content);
 
-            $homeDir = env('HOME') ?: getenv('HOME');
+            $homeDir = getenv('HOME') ?: ($_SERVER['HOME'] ?? null);
             if ($homeDir && file_exists($homeDir . '/public_html')) {
                 $cpanelStorageFile = $homeDir . '/public_html/storage/' . $path;
                 @mkdir(dirname($cpanelStorageFile), 0755, true);

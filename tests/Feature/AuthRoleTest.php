@@ -47,7 +47,7 @@ class AuthRoleTest extends TestCase
     public function test_guest_diarahkan_ke_login()
     {
         $response = $this->get('/kasir/pos');
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('kasir.login'));
     }
 
     /** TEST 4: Kasir bisa mengakses halaman pesanan aktif */
@@ -86,7 +86,7 @@ class AuthRoleTest extends TestCase
             'password' => bcrypt('password123'),
         ]);
         $user->assignRole('kasir');
-        $response = $this->post('/login', [
+        $response = $this->post(route('kasir.login.submit'), [
             'email' => 'kasir@test.com',
             'password' => 'password123',
         ]);
@@ -100,7 +100,7 @@ class AuthRoleTest extends TestCase
             'email' => 'kasir@test.com',
             'password' => bcrypt('password123'),
         ]);
-        $response = $this->post('/login', [
+        $response = $this->post(route('kasir.login.submit'), [
             'email' => 'kasir@test.com',
             'password' => 'salah_banget',
         ]);
