@@ -5,10 +5,11 @@
     <div class="card border-0 rounded-4 shadow-sm p-3 p-md-4 mb-4 mt-2 mt-md-3" 
          style="background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1px solid #21262d !important; border-left: 4px solid #3b82f6 !important;">
         <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-                    <h5 class="text-white fw-bold mb-0 text-nowrap">
-                        <i class="bi bi-clock-history me-1" style="color: #60a5fa;"></i> Pesan Untuk Nanti <span class="text-secondary small fw-normal ms-1 fs-6">(Pre-Order)</span>
+            <div style="min-width: 0;">
+                <div class="d-flex align-items-center flex-wrap gap-1 gap-sm-2 mb-1">
+                    <h5 class="text-white fw-bold mb-0 d-flex align-items-center flex-wrap gap-1">
+                        <span><i class="bi bi-clock-history me-1" style="color: #60a5fa;"></i> Pesan Untuk Nanti</span>
+                        <span class="text-secondary small fw-normal fs-6 text-nowrap">(Pre-Order)</span>
                     </h5>
                 </div>
                 <small class="text-secondary d-block" style="font-size: 0.82rem;">Pesanan Anda akan disiapkan sesuai waktu yang dipilih</small>
