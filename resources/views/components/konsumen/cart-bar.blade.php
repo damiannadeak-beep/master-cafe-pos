@@ -36,7 +36,7 @@
                     <i class="bi bi-cart3" style="color: #c08e5c; font-size: 0.95rem;"></i>
                 </div>
                 <span class="fw-bold text-white small">Rincian Pesanan</span>
-                <span id="cart-drawer-badge" class="badge rounded-pill px-2 py-1" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.35);">0 Item</span>
+                <span id="cart-drawer-badge" class="badge rounded-2 px-2 py-1" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.35);">0 Item</span>
             </div>
             <div class="d-flex align-items-center gap-1 text-white-50 small">
                 <span id="cart-toggle-text" style="font-size: 0.8rem;">Lihat Rincian</span>
@@ -70,7 +70,7 @@
     <div class="container px-3 py-2 py-md-3">
         <div class="mb-2">
             <select name="promo_id" id="promo_id" class="form-select form-select-sm border-primary bg-primary bg-opacity-10 fw-bold rounded-pill px-3 py-2" style="color: #c08e5c;" onchange="updateCartUI()">
-                <option value="">🎟️ Tambah Promo (Opsional)</option>
+                <option value="">ðŸŽŸï¸ Tambah Promo (Opsional)</option>
                 @foreach($promos as $promo)
                     <option value="{{ $promo->id }}" data-type="{{ $promo->type }}" data-value="{{ $promo->value }}" data-menus="{{ $promo->type == 'package' ? json_encode($promo->menus->map(function($m) { return ['id' => $m->id, 'jumlah' => $m->pivot->jumlah, 'harga' => $m->harga]; })) : '[]' }}">
                         {{ $promo->title }} 
@@ -86,7 +86,7 @@
                 <small class="text-muted fw-bold d-block mb-0" style="font-size: 0.75rem;">Total Tagihan</small>
                 <div class="d-flex align-items-baseline gap-2">
                     <h4 class="fw-bold text-white mb-0" id="cart-total">Rp 0</h4>
-                    <span id="cart-qty" class="badge rounded-pill px-2" style="background-color: rgba(178, 122, 77, 0.2); color: #c08e5c; border: 1px solid rgba(178, 122, 77, 0.4);">0 Item</span>
+                    <span id="cart-qty" class="badge rounded-2 px-2" style="background-color: rgba(178, 122, 77, 0.2); color: #c08e5c; border: 1px solid rgba(178, 122, 77, 0.4);">0 Item</span>
                 </div>
             </div>
             <button onclick="openConfirmOrderModal()" class="btn px-4 py-2 btn-touch rounded-pill shadow-sm d-flex align-items-center gap-2" style="background: var(--gradient-bronze); color: white; border: none; font-weight: 600;">
@@ -136,7 +136,7 @@
                         <label for="inputGuestPhone" class="form-label text-white small fw-bold mb-0">
                             No. WhatsApp / HP <span class="text-danger">* (Wajib)</span>
                         </label>
-                        <span id="phoneDigitCounter" class="badge rounded-pill bg-dark border border-secondary text-secondary" style="font-size: 0.7rem; font-weight: 500;">0 digit</span>
+                        <span id="phoneDigitCounter" class="badge rounded-2 bg-dark border border-secondary text-secondary" style="font-size: 0.7rem; font-weight: 500;">0 digit</span>
                     </div>
                     
                     <div class="input-group">
@@ -157,7 +157,7 @@
                     <div id="phoneValidationFeedback" class="mt-1" style="font-size: 0.78rem; display: none;"></div>
 
                     <small class="text-secondary d-block mt-1" style="font-size: 0.76rem; line-height: 1.35;">
-                        <i class="bi bi-info-circle me-1 text-warning"></i> Digunakan kasir & dapur untuk konfirmasi via WhatsApp saat pesanan selesai dibungkus (diawali <strong>08</strong> atau <strong>628</strong>, 10–14 angka).
+                        <i class="bi bi-info-circle me-1 text-warning"></i> Digunakan kasir & dapur untuk konfirmasi via WhatsApp saat pesanan selesai dibungkus (diawali <strong>08</strong> atau <strong>628</strong>, 10-14 angka).
                     </small>
                 </div>
                 @endif

@@ -15,7 +15,7 @@
         <div class="collapse navbar-collapse justify-content-center mt-3 mt-lg-0" id="kasirNav">
             <div class="kasir-nav-wrapper d-flex flex-column flex-lg-row align-items-center gap-2">
                 <!-- Layanan Utama (Akses Langsung 1-Klik) -->
-                <div class="d-flex align-items-center gap-1 p-1 bg-surface-dark rounded-pill border border-subtle">
+                <div class="kasir-nav-group d-flex align-items-center gap-1 p-1 bg-surface-dark rounded-pill border border-subtle">
                     <a class="nav-pill-btn {{ request()->routeIs('kasir.pos') ? 'active' : '' }}" href="{{ route('kasir.pos') }}">
                         <i class="bi bi-cart-plus me-1"></i> Pesanan Manual
                     </a>
@@ -29,17 +29,24 @@
                             <i class="bi bi-bell-fill me-1"></i> Panggilan
                             <span class="badge bg-danger rounded-pill ms-1 shadow-sm" id="badge-call-bells" style="display: none;">0</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-dark kasir-dropdown shadow-lg border-0 p-2" id="dropdown-call-bells-list" aria-labelledby="dropdownCallBell" style="min-width: 270px;">
-                            <li class="dropdown-header text-white-50 fw-bold small border-bottom border-secondary border-opacity-25 pb-2 mb-1">
-                                <i class="bi bi-bell-fill me-1 text-warning"></i> Panggilan Meja Aktif
+                        <ul class="dropdown-menu dropdown-menu-dark kasir-dropdown shadow-lg border-0 p-2.5" id="dropdown-call-bells-list" aria-labelledby="dropdownCallBell" style="width: 350px; max-width: 92vw;">
+                            <li class="d-flex align-items-center justify-content-between px-2 pb-2 mb-2 border-bottom" style="border-color: rgba(255, 255, 255, 0.08) !important;">
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <i class="bi bi-bell-fill text-warning" style="font-size: 0.85rem;"></i>
+                                    <span class="text-white fw-bold" style="font-size: 0.82rem;">Panggilan Meja Aktif</span>
+                                </div>
+                                <span class="badge rounded-2 px-2 py-0.5 text-white-50 border border-secondary border-opacity-25" style="font-size: 0.7rem;" id="call-bell-header-count">0 Panggilan</span>
                             </li>
-                            <li id="call-bell-empty-msg"><span class="dropdown-item small text-muted py-2">Tidak ada panggilan aktif</span></li>
+                            <li id="call-bell-empty-msg" class="text-center py-3 px-2">
+                                <div class="text-white-50 mb-1" style="font-size: 1.4rem; opacity: 0.35;"><i class="bi bi-bell-slash"></i></div>
+                                <span class="d-block small text-white-50">Tidak ada panggilan aktif</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- Dropdown Kelompok Operasional Kas & Alat -->
-                <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+                <div class="kasir-nav-group d-flex align-items-center gap-2 mt-2 mt-lg-0">
                     <!-- Dropdown Kas & Shift -->
                     <div class="dropdown">
                         <button class="nav-pill-btn dropdown-toggle {{ request()->routeIs('kasir.shift_report', 'kasir.pengeluaran.*') ? 'active' : '' }}" type="button" id="dropdownKasShift" data-bs-toggle="dropdown" aria-expanded="false">

@@ -41,17 +41,28 @@ class WaitressStokController extends Controller
     /**
      * Toggle cepat ketersediaan 1 menu via AJAX atau tombol
      */
-    public function toggle($id)
+    public function toggle(Request $request, $id)
     {
         $menu = Menu::findOrFail($id);
-        $menu->is_available = !$menu->is_available;
+        
+        if ($request->has('is_available')) {
+            $targetAvailable = filter_var($request->input('is_available'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($targetAvailable !== null) {
+                $menu->is_available = $targetAvailable;
+            } else {
+                $menu->is_available = (bool)$request->input('is_available');
+            }
+        } else {
+            $menu->is_available = !$menu->is_available;
+        }
+        
         $menu->save();
 
-        if (request()->wantsJson() || request()->ajax()) {
+        if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'is_available' => $menu->is_available,
-                'message' => 'Status menu ' . $menu->nama_menu . ' diubah menjadi ' . ($menu->is_available ? 'Tersedia' : 'Habis')
+                'is_available' => (bool)$menu->is_available,
+                'message' => 'Status menu ' . $menu->nama_menu . ' diubah menjadi ' . ($menu->is_available ? 'Tersedia' : 'Habis') . '.'
             ]);
         }
 

@@ -2,53 +2,60 @@
 
 @section('content')
 <div class="container-fluid px-0 py-0">
+    <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-            <h4 class="fw-bold text-accent mb-1"><i class="bi bi-check2-circle me-2"></i>Status Ketersediaan Menu</h4>
-            <p class="text-white-50 mb-0">Atur ketersediaan menu secara langsung (Tersedia atau Habis). Menu yang habis otomatis tidak dapat dipesan oleh tamu.</p>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h4 class="fw-bold text-white mb-0"><i class="bi bi-check2-circle me-2" style="color: #c08e5c;"></i>Status Ketersediaan Menu</h4>
+                <span class="text-secondary small fw-normal ms-2 fs-6">(Operasional POS)</span>
+            </div>
+            <p class="text-secondary small mb-0">Atur ketersediaan menu secara langsung. Menu yang ditandai Habis otomatis tidak dapat dipesan oleh kasir maupun konsumen via QR meja.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-3 py-2 rounded-pill">
-                <i class="bi bi-check-circle-fill me-1"></i> Tersedia: <strong id="count-tersedia">{{ $menus->where('is_available', true)->count() }}</strong>
+            <span class="badge rounded-2 px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5" style="background-color: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25);">
+                <i class="bi bi-check-circle-fill"></i> Tersedia: <strong id="count-tersedia" class="ms-1">{{ $menus->where('is_available', true)->count() }}</strong>
             </span>
-            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 px-3 py-2 rounded-pill">
-                <i class="bi bi-x-circle-fill me-1"></i> Habis: <strong id="count-habis">{{ $menus->where('is_available', false)->count() }}</strong>
+            <span class="badge rounded-2 px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5" style="background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25);">
+                <i class="bi bi-x-circle-fill"></i> Habis: <strong id="count-habis" class="ms-1">{{ $menus->where('is_available', false)->count() }}</strong>
             </span>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close btn-touch" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-4" role="alert" style="background-color: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.25); color: #34d399;">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <div>{{ session('success') }}</div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     <!-- Search & Filter Bar -->
-    <div class="card kasir-card mb-4">
+    <div class="card border-0 shadow-sm mb-4" style="background-color: #161b22; border: 1px solid #21262d !important; border-radius: 12px;">
         <div class="card-body p-3">
             <div class="row g-2 align-items-center">
                 <div class="col-12 col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text bg-surface-dark border-secondary text-white-50"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchInput" class="form-control text-white border-secondary bg-surface-dark" placeholder="Cari nama menu..." onkeyup="filterMenus()">
+                    <div class="input-group pos-search-box">
+                        <span class="input-group-text border-end-0 rounded-start-pill ps-3" style="background-color: #0e1217; border-color: #21262d; color: #8b949e;">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control text-white border-start-0 rounded-end-pill pos-search-input pe-3" placeholder="Cari nama menu..." onkeyup="filterMenus()" autocomplete="off" style="background-color: #0e1217; border-color: #21262d;">
                     </div>
                 </div>
-                <div class="col-12 col-md-7 d-flex justify-content-md-end gap-2 flex-wrap">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sm btn-primary active" id="btn-filter-all" onclick="setCategoryFilter('all', this)">Semua</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-filter-makanan" onclick="setCategoryFilter('makanan', this)">Makanan</button>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-filter-minuman" onclick="setCategoryFilter('minuman', this)">Minuman</button>
+                <div class="col-12 col-md-7 d-flex justify-content-md-end gap-2 flex-wrap align-items-center">
+                    <div class="d-inline-flex p-1 rounded-3 gap-1" style="background-color: #0e1217; border: 1px solid #21262d;">
+                        <button type="button" class="btn btn-sm fw-medium px-3 py-1 rounded-2 text-nowrap btn-category-pill active" id="btn-filter-all" onclick="setCategoryFilter('all', this)">Semua</button>
+                        <button type="button" class="btn btn-sm fw-medium px-3 py-1 rounded-2 text-nowrap btn-category-pill text-secondary" id="btn-filter-makanan" onclick="setCategoryFilter('makanan', this)">Makanan</button>
+                        <button type="button" class="btn btn-sm fw-medium px-3 py-1 rounded-2 text-nowrap btn-category-pill text-secondary" id="btn-filter-minuman" onclick="setCategoryFilter('minuman', this)">Minuman</button>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-danger" id="btn-filter-habis" onclick="toggleHabisFilter(this)">
+                    <button type="button" class="btn btn-sm fw-medium d-inline-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2" id="btn-filter-habis" onclick="toggleHabisFilter(this)" style="background-color: #0e1217; border: 1px solid #21262d; color: #8b949e;">
                         <i class="bi bi-filter"></i> Hanya Menu Habis
                     </button>
                 </div>
             </div>
 
-            <!-- Sub-Kategori Filter Bar (Level 2) - Hanya muncul jika Makanan atau Minuman dipilih -->
-            <div id="stok-sub-category-wrapper" class="w-100 mt-2" style="display: none !important;">
-                <div id="stok-sub-category-pills" class="d-flex gap-2 pb-1 overflow-auto align-items-center subcat-scroll-container" style="white-space: nowrap; flex-wrap: nowrap; -webkit-overflow-scrolling: touch;">
+            <!-- Sub-Kategori Filter Bar (Level 2) -->
+            <div id="stok-sub-category-wrapper" class="w-100 mt-2.5 pt-2 border-top" style="display: none !important; border-color: #21262d !important;">
+                <div id="stok-sub-category-pills" class="d-flex gap-2 pb-1 overflow-auto align-items-center" style="white-space: nowrap; flex-wrap: nowrap; -webkit-overflow-scrolling: touch;">
                     <!-- Rendered dynamically by JS -->
                 </div>
             </div>
@@ -56,68 +63,90 @@
     </div>
 
     <!-- Table of Menus -->
-    <div class="card kasir-card">
+    <div class="card border-0 shadow-sm" style="background-color: #161b22; border: 1px solid #21262d !important; border-radius: 12px; overflow: hidden;">
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
-                <table class="table table-dark table-hover align-middle mb-0" id="menuTable">
-                    <thead class="table-dark sticky-top" style="z-index: 10;">
+            <div class="table-responsive" style="max-height: 68vh; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0" id="menuTable" style="color: #c9d1d9;">
+                    <thead class="sticky-top" style="background-color: #161b22; border-bottom: 1px solid #21262d; z-index: 10;">
                         <tr>
-                            <th class="ps-4" style="width: 80px;">Foto</th>
-                            <th>Nama Menu</th>
-                            <th class="text-center" style="width: 140px;">Kategori</th>
-                            <th class="text-nowrap" style="width: 140px;">Harga</th>
-                            <th class="pe-4 text-center" style="width: 220px;">Status Ketersediaan</th>
+                            <th class="ps-4 py-3 text-secondary text-uppercase fw-semibold" style="width: 76px; font-size: 0.72rem; letter-spacing: 0.5px;">Foto</th>
+                            <th class="py-3 text-secondary text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">Nama Menu</th>
+                            <th class="text-center py-3 text-secondary text-uppercase fw-semibold" style="width: 160px; font-size: 0.72rem; letter-spacing: 0.5px;">Kategori</th>
+                            <th class="py-3 text-secondary text-uppercase fw-semibold text-nowrap" style="width: 140px; font-size: 0.72rem; letter-spacing: 0.5px;">Harga</th>
+                            <th class="pe-4 text-center py-3 text-secondary text-uppercase fw-semibold" style="width: 220px; font-size: 0.72rem; letter-spacing: 0.5px;">Status Ketersediaan</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($menus as $menu)
-                            <tr class="menu-row" data-name="{{ strtolower($menu->nama_menu) }}" data-category="{{ strtolower($menu->kategori) }}" data-subcategory="{{ strtolower($menu->sub_kategori ?? '') }}" data-available="{{ $menu->is_available ? '1' : '0' }}" id="row-{{ $menu->id }}">
-                                <td class="ps-4">
-                                    <div class="rounded d-flex align-items-center justify-content-center overflow-hidden" style="width: 50px; height: 50px; background-color: #161b22; border: 1px solid #21262d;">
-                                        <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="{{ $menu->nama_menu }}" style="object-fit: contain; width: 100%; height: 100%; padding: 2px;">
+                            <tr class="menu-row {{ !$menu->is_available ? 'menu-row-habis' : '' }}" 
+                                data-name="{{ strtolower($menu->nama_menu) }}" 
+                                data-category="{{ strtolower($menu->kategori) }}" 
+                                data-subcategory="{{ strtolower($menu->sub_kategori ?? '') }}" 
+                                data-available="{{ $menu->is_available ? '1' : '0' }}" 
+                                id="row-{{ $menu->id }}"
+                                style="border-bottom: 1px solid #21262d; transition: background-color 0.2s ease, opacity 0.2s ease;">
+                                <td class="ps-4 py-3">
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center overflow-hidden menu-thumb" style="width: 48px; height: 48px; background-color: #0e1217; border: 1px solid #21262d;">
+                                        <img src="{{ $menu->image_url }}" onerror="this.onerror=null; this.src='{{ asset('images/logo.png') }}';" alt="{{ $menu->nama_menu }}" style="object-fit: cover; width: 100%; height: 100%;">
                                     </div>
                                 </td>
-                                <td>
-                                    <div class="fw-bold fs-6 text-light">{{ $menu->nama_menu }}</div>
+                                <td class="py-3">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="fw-semibold text-white fs-6 menu-name-text">{{ $menu->nama_menu }}</span>
+                                        <span class="badge rounded-2 fw-medium px-2 py-0.5" id="badge-habis-{{ $menu->id }}" style="background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.7rem; {{ $menu->is_available ? 'display: none !important;' : '' }}">
+                                            Habis
+                                        </span>
+                                    </div>
                                     @if($menu->is_dynamic_price)
-                                        <span class="badge bg-info text-dark" style="font-size: 0.7rem;">Harga Dinamis / Timbangan</span>
+                                        <span class="text-secondary small d-inline-block mt-1" style="font-size: 0.72rem;">
+                                            <i class="bi bi-tag me-1"></i> Harga Dinamis / Timbangan
+                                        </span>
                                     @endif
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center py-3">
                                     <div class="d-flex flex-column gap-1 align-items-center">
-                                        <span class="badge {{ strtolower($menu->kategori) == 'makanan' ? 'bg-warning text-dark' : 'bg-primary' }}">
+                                        <span class="badge rounded-2 fw-medium px-2.5 py-1" style="background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.25); font-size: 0.72rem;">
                                             {{ ucfirst($menu->kategori) }}
                                         </span>
                                         @if($menu->sub_kategori)
-                                            <span class="badge bg-secondary text-white" style="font-size: 0.7rem;">
+                                            <span class="text-secondary small" style="font-size: 0.72rem;">
                                                 {{ $menu->sub_kategori }}
                                             </span>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="text-nowrap fw-bold" style="color: #c08e5c;">
+                                <td class="text-nowrap fw-bold py-3" style="color: #c08e5c;">
                                     {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                                 </td>
-                                <td class="pe-4 text-center">
-                                    <div class="btn-group w-100 shadow-sm" role="group" id="btn-group-{{ $menu->id }}">
+                                <td class="pe-4 text-center py-3">
+                                    <!-- Tactile Segmented Control -->
+                                    <div class="avail-toggle-wrapper shadow-sm" role="group" id="btn-group-{{ $menu->id }}">
                                         <button type="button" 
-                                                class="btn btn-sm btn-touch {{ $menu->is_available ? 'btn-success fw-bold' : 'btn-outline-secondary text-white-50' }}" 
+                                                class="btn btn-sm btn-touch flex-fill rounded-pill {{ $menu->is_available ? 'btn-avail-active fw-semibold' : 'btn-avail-inactive' }}" 
                                                 onclick="setMenuAvailability({{ $menu->id }}, 1)"
                                                 id="btn-tersedia-{{ $menu->id }}">
-                                            <i class="bi bi-check-circle me-1"></i> Tersedia
+                                            <i class="bi bi-check-circle-fill"></i> Tersedia
                                         </button>
                                         <button type="button" 
-                                                class="btn btn-sm btn-touch {{ !$menu->is_available ? 'btn-danger fw-bold' : 'btn-outline-secondary text-white-50' }}" 
+                                                class="btn btn-sm btn-touch flex-fill rounded-pill {{ !$menu->is_available ? 'btn-habis-active fw-semibold' : 'btn-avail-inactive' }}" 
                                                 onclick="setMenuAvailability({{ $menu->id }}, 0)"
                                                 id="btn-habis-{{ $menu->id }}">
-                                            <i class="bi bi-x-circle me-1"></i> Habis
+                                            <i class="bi bi-x-circle-fill"></i> Habis
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-white-50">Belum ada menu produk terdaftar.</td>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background: rgba(255, 255, 255, 0.03); border: 1px solid #21262d; color: #8b949e;">
+                                            <i class="bi bi-cup-hot fs-3"></i>
+                                        </div>
+                                        <h6 class="text-white fw-bold mb-1">Belum Ada Menu Terdaftar</h6>
+                                        <p class="text-secondary small mb-0">Daftar produk menu belum tersedia pada database.</p>
+                                    </div>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -127,18 +156,72 @@
     </div>
 </div>
 
-<!-- Toast Container for Notifications -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
-    <div id="availabilityToast" class="toast align-items-center text-white bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body d-flex align-items-center gap-2" id="toastMessage">
-                <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                <span>Status berhasil diperbarui.</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
+<style>
+/* Category Pills */
+.btn-category-pill {
+    border: 1px solid transparent !important;
+    transition: all 0.18s ease;
+}
+.btn-category-pill.active {
+    background-color: rgba(192, 142, 92, 0.18) !important;
+    color: #c08e5c !important;
+    border: 1px solid rgba(192, 142, 92, 0.35) !important;
+}
+
+/* Tactile Segmented Control */
+.avail-toggle-wrapper {
+    background-color: #0e1217;
+    border: 1px solid #21262d;
+    padding: 3px;
+    border-radius: 9999px;
+    display: inline-flex;
+    width: 204px;
+    max-width: 100%;
+    user-select: none;
+}
+.avail-toggle-wrapper .btn {
+    border: none !important;
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.btn-avail-active {
+    background: rgba(52, 211, 153, 0.16) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(52, 211, 153, 0.35) !important;
+    box-shadow: 0 2px 8px rgba(52, 211, 153, 0.15) !important;
+}
+.btn-habis-active {
+    background: rgba(239, 68, 68, 0.16) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15) !important;
+}
+.btn-avail-inactive {
+    background: transparent !important;
+    color: #8b949e !important;
+    border: 1px solid transparent !important;
+}
+.btn-avail-inactive:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Habis row visual dimming */
+.menu-row-habis {
+    background-color: rgba(239, 68, 68, 0.015) !important;
+}
+.menu-row-habis .menu-thumb img {
+    filter: grayscale(80%) opacity(70%);
+}
+.menu-row-habis .menu-name-text {
+    color: #94a3b8 !important;
+}
+</style>
 
 <script>
     @php
@@ -180,7 +263,7 @@
         let html = `
             <button type="button" class="btn btn-sm btn-stok-sub active rounded-pill px-3 py-1 flex-shrink-0" 
                     onclick="setSubCategoryFilter('all', this)"
-                    style="background-color: rgba(192, 142, 92, 0.25); color: #e2a873; border: 1px solid rgba(192, 142, 92, 0.7); font-size: 0.78rem; font-weight: 600;">
+                    style="background-color: rgba(192, 142, 92, 0.18); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.35); font-size: 0.75rem; font-weight: 500;">
                 Semua ${currentCategory === 'makanan' ? 'Makanan' : 'Minuman'}
             </button>
         `;
@@ -190,7 +273,7 @@
             html += `
                 <button type="button" class="btn btn-sm btn-stok-sub rounded-pill px-3 py-1 flex-shrink-0" 
                         onclick="setSubCategoryFilter('${safeSub}', this)"
-                        style="background-color: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); font-size: 0.78rem;">
+                        style="background-color: #0e1217; color: #8b949e; border: 1px solid #21262d; font-size: 0.75rem;">
                     ${sub}
                 </button>
             `;
@@ -204,15 +287,13 @@
         currentCategory = category;
         currentSubCategory = 'all';
 
-        document.querySelectorAll('.btn-group button').forEach(b => {
-            if(b.id && b.id.startsWith('btn-filter-')) {
-                b.classList.remove('btn-primary', 'active');
-                b.classList.add('btn-outline-primary');
-            }
+        document.querySelectorAll('.btn-category-pill').forEach(b => {
+            b.classList.remove('active');
+            b.classList.add('text-secondary');
         });
         if (btn) {
-            btn.classList.remove('btn-outline-primary');
-            btn.classList.add('btn-primary', 'active');
+            btn.classList.add('active');
+            btn.classList.remove('text-secondary');
         }
 
         renderStokSubPills();
@@ -224,16 +305,16 @@
 
         document.querySelectorAll('.btn-stok-sub').forEach(b => {
             b.classList.remove('active');
-            b.style.backgroundColor = 'rgba(255,255,255,0.05)';
-            b.style.color = '#e2e8f0';
-            b.style.borderColor = 'rgba(255,255,255,0.15)';
+            b.style.backgroundColor = '#0e1217';
+            b.style.color = '#8b949e';
+            b.style.borderColor = '#21262d';
         });
 
         if (btn) {
             btn.classList.add('active');
-            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.2)';
+            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.18)';
             btn.style.color = '#c08e5c';
-            btn.style.borderColor = 'rgba(192, 142, 92, 0.6)';
+            btn.style.borderColor = 'rgba(192, 142, 92, 0.35)';
         }
 
         filterMenus();
@@ -242,11 +323,15 @@
     function toggleHabisFilter(btn) {
         onlyHabis = !onlyHabis;
         if(onlyHabis) {
-            btn.classList.remove('btn-outline-danger');
-            btn.classList.add('btn-danger', 'active');
+            btn.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            btn.style.borderColor = 'rgba(239, 68, 68, 0.35)';
+            btn.style.color = '#f87171';
+            btn.classList.add('active');
         } else {
-            btn.classList.remove('btn-danger', 'active');
-            btn.classList.add('btn-outline-danger');
+            btn.style.backgroundColor = '#0e1217';
+            btn.style.borderColor = '#21262d';
+            btn.style.color = '#8b949e';
+            btn.classList.remove('active');
         }
         filterMenus();
     }
@@ -274,43 +359,74 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', renderStokSubPills);
-
-    function setMenuAvailability(menuId, isAvailable) {
+    function applyAvailabilityUI(menuId, isAvail) {
         const btnTersedia = document.getElementById('btn-tersedia-' + menuId);
         const btnHabis = document.getElementById('btn-habis-' + menuId);
         const row = document.getElementById('row-' + menuId);
+        const badgeHabis = document.getElementById('badge-habis-' + menuId);
+
+        if (!row || !btnTersedia || !btnHabis) return;
+
+        row.dataset.available = isAvail ? '1' : '0';
+        if (isAvail) {
+            row.classList.remove('menu-row-habis');
+            if (badgeHabis) badgeHabis.style.setProperty('display', 'none', 'important');
+            btnTersedia.className = 'btn btn-sm btn-touch flex-fill rounded-pill btn-avail-active fw-semibold';
+            btnHabis.className = 'btn btn-sm btn-touch flex-fill rounded-pill btn-avail-inactive';
+        } else {
+            row.classList.add('menu-row-habis');
+            if (badgeHabis) badgeHabis.style.setProperty('display', 'inline-block', 'important');
+            btnTersedia.className = 'btn btn-sm btn-touch flex-fill rounded-pill btn-avail-inactive';
+            btnHabis.className = 'btn btn-sm btn-touch flex-fill rounded-pill btn-habis-active fw-semibold';
+        }
+        updateCounters();
+    }
+
+    function setMenuAvailability(menuId, targetAvailable) {
+        const row = document.getElementById('row-' + menuId);
+        const currentAvail = row ? (row.dataset.available === '1') : null;
+        const wantAvailable = (targetAvailable === 1 || targetAvailable === true);
 
         // Optimistic UI update
-        if(isAvailable === 1) {
-            btnTersedia.className = 'btn btn-sm btn-touch btn-success fw-bold';
-            btnHabis.className = 'btn btn-sm btn-touch btn-outline-secondary text-white-50';
-            row.dataset.available = '1';
-        } else {
-            btnTersedia.className = 'btn btn-sm btn-touch btn-outline-secondary text-white-50';
-            btnHabis.className = 'btn btn-sm btn-touch btn-danger fw-bold';
-            row.dataset.available = '0';
-        }
+        applyAvailabilityUI(menuId, wantAvailable);
 
-        updateCounters();
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-        // Send AJAX request
+        // Send explicit status to server
         fetch('/kasir/stok/' + menuId + '/toggle', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                is_available: wantAvailable
+            })
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
         .then(data => {
             if(data.success) {
-                showToast(data.message, data.is_available ? 'success' : 'danger');
+                // Ensure UI is strictly matching backend response
+                applyAvailabilityUI(menuId, data.is_available);
+                if (typeof window.showToast === 'function') {
+                    window.showToast(data.message, data.is_available ? 'success' : 'danger');
+                }
             }
         })
         .catch(err => {
-            showToast('Gagal mengubah status ketersediaan.', 'danger');
+            console.error('[Menu Availability Error]', err);
+            // Rollback if request failed
+            if (currentAvail !== null) {
+                applyAvailabilityUI(menuId, currentAvail);
+            }
+            if (typeof window.showToast === 'function') {
+                window.showToast('Gagal mengubah status ketersediaan menu. Periksa koneksi jaringan.', 'danger');
+            }
         });
     }
 
@@ -322,18 +438,14 @@
             if(r.dataset.available === '1') tersedia++;
             else habis++;
         });
-        document.getElementById('count-tersedia').innerText = tersedia;
-        document.getElementById('count-habis').innerText = habis;
+        const countTersediaEl = document.getElementById('count-tersedia');
+        const countHabisEl = document.getElementById('count-habis');
+        if (countTersediaEl) countTersediaEl.innerText = tersedia;
+        if (countHabisEl) countHabisEl.innerText = habis;
     }
 
-    function showToast(message, type = 'success') {
-        const toastEl = document.getElementById('availabilityToast');
-        const msgEl = document.getElementById('toastMessage');
-        const icon = type === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger';
-        
-        msgEl.innerHTML = `<i class="bi ${icon} fs-5"></i> <span>${message}</span>`;
-        const toast = new bootstrap.Toast(toastEl, { delay: 2500 });
-        toast.show();
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        renderStokSubPills();
+    });
 </script>
 @endsection

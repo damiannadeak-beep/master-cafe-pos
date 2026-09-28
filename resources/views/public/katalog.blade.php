@@ -13,7 +13,7 @@
         </p>
         
         <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3 align-items-center">
-            <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn rounded-pill px-4 py-2 fw-bold text-white shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.9rem;">
+            <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn rounded-3 px-4 py-2 fw-bold text-white shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.9rem;">
                 <i class="bi bi-bag-check me-2"></i> Pesan Bawa Pulang (Takeaway)
             </a>
         </div>
@@ -35,12 +35,12 @@
                 <li class="mb-3 text-white">
                     <strong class="fs-5">{{ $promo->title }}</strong> 
                     @if($promo->type == 'discount')
-                        <span class="badge rounded-pill ms-2 align-middle" style="background-color: #c08e5c;">
-                        Diskon {{ $promo->discount_type == 'percentage' ? $promo->value.'%' : 'Rp '.number_format($promo->value,0,',','.') }}
+                        <span class="text-warning small fw-semibold ms-2 align-middle">
+                            (Diskon {{ $promo->discount_type == 'percentage' ? $promo->value.'%' : 'Rp '.number_format($promo->value,0,',','.') }})
                         </span>
                     @elseif($promo->type == 'package')
-                        <span class="badge rounded-pill ms-2 align-middle" style="background-color: #c08e5c;">Paket Khusus</span>
-                        <span class="badge  text-white rounded-pill ms-1 align-middle"><i class="bi bi-tag-fill text-warning"></i> Cukup Rp {{ number_format($promo->value,0,',','.') }}</span>
+                        <span class="text-warning small fw-semibold ms-2 align-middle">(Paket Khusus)</span>
+                        <span class="text-white small ms-1 align-middle"><i class="bi bi-tag-fill text-warning me-1"></i>Cukup Rp {{ number_format($promo->value,0,',','.') }}</span>
                         <div class="mt-2 small">
                             <span class="text-secondary">Termasuk:</span> 
                             @foreach($promo->menus as $pm)
@@ -64,24 +64,41 @@
         $allSubs = $hasSubKategoriCol ? $menus->pluck('sub_kategori')->filter()->unique()->values() : collect();
     @endphp
 
-    <!-- Filter Kategori Utama (Level 1) -->
-    <div class="d-flex justify-content-center mb-3">
-        <div class="rounded-pill p-1 shadow-sm d-inline-flex gap-1 overflow-auto" role="group" style="background-color: #161b22; border: 1px solid #21262d; max-width: 100%;">
-            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold filter-main-btn active-filter text-white" onclick="filterPublicMain('semua', this)">
-                Semua
-            </button>
-            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary filter-main-btn" onclick="filterPublicMain('makanan', this)">
-                Makanan
-            </button>
-            <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-semibold text-secondary filter-main-btn" onclick="filterPublicMain('minuman', this)">
-                Minuman
-            </button>
+    <!-- Search & Filter Controls (Simetris & Terpusat di Tengah) -->
+    <!-- Search & Filter Controls (Simetris, Terpusat, & Elegan Minimalis) -->
+    <div class="mb-4">
+        <!-- Search Bar Terpusat -->
+        <div class="mx-auto mb-3" style="max-width: 440px;">
+            <div class="catalog-search-box input-group rounded-pill overflow-hidden shadow-sm" style="background-color: #14181f; border: 1px solid rgba(255, 255, 255, 0.12); transition: all 0.25s ease;">
+                <span class="input-group-text bg-transparent border-0 text-secondary ps-3 pe-2">
+                    <i class="bi bi-search search-icon" style="color: #8b949e; font-size: 0.9rem; transition: color 0.2s ease;"></i>
+                </span>
+                <input type="text" id="publicSearchInput" class="form-control bg-transparent border-0 text-white shadow-none ps-1 pe-2 py-2" placeholder="Cari hidangan atau minuman..." style="font-size: 0.875rem;" oninput="onPublicSearchInput(this.value)">
+                <button type="button" id="publicSearchClearBtn" class="btn bg-transparent border-0 text-secondary pe-3" style="display: none; font-size: 0.85rem;" onclick="clearPublicSearch()">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Kategori Utama (Level 1 - Terpusat Simetris di Bawah Search Bar) -->
+        <div class="d-flex justify-content-center">
+            <div class="rounded-pill p-1 shadow-sm d-inline-flex gap-1" role="group" style="background-color: #14181f; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <button type="button" class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold filter-main-btn active-filter" onclick="filterPublicMain('semua', this)" style="font-size: 0.85rem;">
+                    Semua
+                </button>
+                <button type="button" class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold filter-main-btn" onclick="filterPublicMain('makanan', this)" style="font-size: 0.85rem; color: #8b949e;">
+                    Makanan
+                </button>
+                <button type="button" class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold filter-main-btn" onclick="filterPublicMain('minuman', this)" style="font-size: 0.85rem; color: #8b949e;">
+                    Minuman
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Filter Sub-Kategori (Level 2) - Rapi 1 baris swipeable, hanya muncul saat Makanan atau Minuman dipilih -->
-    <div id="public-sub-category-wrapper" class="w-100 mb-3" style="display: none !important;">
-        <div id="public-sub-category-pills" class="d-flex gap-2 pb-2 px-2 overflow-auto subcat-touch-scroll align-items-center" style="white-space: nowrap; flex-wrap: nowrap; width: 100%; -webkit-overflow-scrolling: touch;">
+    <!-- Filter Sub-Kategori (Level 2 - Muncul dinamis jika Makanan / Minuman dipilih) -->
+    <div id="public-sub-category-wrapper" class="w-100 mb-4" style="display: none !important;">
+        <div id="public-sub-category-pills" class="d-flex justify-content-start justify-content-md-center gap-2 pb-2 px-2 overflow-auto subcat-touch-scroll align-items-center" style="white-space: nowrap; flex-wrap: nowrap; width: 100%; -webkit-overflow-scrolling: touch;">
             <!-- Rendered dynamically by JS -->
         </div>
     </div>
@@ -93,7 +110,12 @@
             $isNewMenu = str_contains(strtolower($menu->sub_kategori ?? ''), 'baru') 
                 || str_contains(strtolower($menu->sub_kategori ?? ''), 'spesial');
         @endphp
-        <div class="col-6 col-md-4 col-lg-3 menu-item" data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}" style="align-self: flex-start;">
+        <div class="col-6 col-md-4 col-lg-3 menu-item" 
+             data-kategori="{{ strtolower($menu->kategori ?? 'makanan') }}" 
+             data-subkategori="{{ strtolower($menu->sub_kategori ?? '') }}" 
+             data-nama="{{ strtolower($menu->nama_menu) }}" 
+             data-deskripsi="{{ strtolower($menu->deskripsi ?? '') }}"
+             style="align-self: flex-start;">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card d-flex flex-column position-relative w-100" 
                  id="menu-card-{{ $loop->index }}"
                  onclick="toggleMenuDetail({{ $loop->index }})"
@@ -124,7 +146,7 @@
                     <!-- Overlay Sub-Kategori Floating di Kiri Atas -->
                     @if($menu->sub_kategori)
                     <div class="position-absolute top-0 start-0 m-2">
-                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(6px); border: 1px solid rgba(192, 142, 92, 0.35); color: #c08e5c; font-size: 0.68rem; font-weight: 500;">
+                        <span class="badge rounded-2 px-2 py-1" style="background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(6px); border: 1px solid rgba(192, 142, 92, 0.35); color: #c08e5c; font-size: 0.68rem; font-weight: 500;">
                             {{ $menu->sub_kategori }}
                         </span>
                     </div>
@@ -133,7 +155,7 @@
                     <!-- Overlay Habis (Hanya tampil jika menu HABIS, tidak membengkakkan tampilan jika tersedia) -->
                     @if(!$menu->is_available)
                     <div class="position-absolute top-0 end-0 m-2">
-                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(220, 38, 38, 0.92); backdrop-filter: blur(4px); color: #ffffff; font-size: 0.65rem; font-weight: 600;">
+                        <span class="badge rounded-2 px-2 py-1" style="background: rgba(220, 38, 38, 0.92); backdrop-filter: blur(4px); color: #ffffff; font-size: 0.65rem; font-weight: 600;">
                             Habis
                         </span>
                     </div>
@@ -193,12 +215,26 @@
                 <i class="bi bi-search text-secondary" style="font-size: 2.5rem;"></i>
             </div>
             <h5 class="text-white fw-bold">Menu Tidak Ditemukan</h5>
-            <p class="text-secondary small">Belum ada menu yang sesuai dengan kategori atau sub-kategori yang dipilih.</p>
+            <p class="text-secondary small mb-3">Tidak ditemukan menu yang sesuai dengan kata kunci pencarian atau filter yang dipilih.</p>
+            <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 text-white shadow-sm" style="background-color: #c08e5c;" onclick="resetCatalogFilter()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Pencarian
+            </button>
         </div>
     </div>
 </div>
 
 <style>
+    .catalog-search-box:hover {
+        border-color: rgba(255, 255, 255, 0.22) !important;
+    }
+    .catalog-search-box:focus-within {
+        border-color: rgba(255, 255, 255, 0.45) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.05) !important;
+    }
+    .catalog-search-box:focus-within .search-icon {
+        color: #ffffff !important;
+    }
+
     .hover-lift {
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
     }
@@ -209,8 +245,9 @@
     }
     
     .active-filter {
-        background-color: #c08e5c !important;
-        color: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #0e1217 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
     }
 
     /* Menu Card Expand (Hanya kartu yang ditekan yang memanjang ke bawah) */
@@ -288,6 +325,36 @@
 
     let pubMainCat = 'semua';
     let pubSubCat = 'semua';
+    let pubSearchQuery = '';
+
+    window.onPublicSearchInput = function(val) {
+        pubSearchQuery = (val || '').trim().toLowerCase();
+        const clearBtn = document.getElementById('publicSearchClearBtn');
+        if (clearBtn) {
+            clearBtn.style.display = pubSearchQuery.length > 0 ? 'inline-block' : 'none';
+        }
+        applyPublicFilter();
+    };
+
+    window.clearPublicSearch = function() {
+        const input = document.getElementById('publicSearchInput');
+        if (input) {
+            input.value = '';
+            onPublicSearchInput('');
+            input.focus();
+        }
+    };
+
+    window.resetCatalogFilter = function() {
+        const input = document.getElementById('publicSearchInput');
+        if (input) input.value = '';
+        pubSearchQuery = '';
+        const clearBtn = document.getElementById('publicSearchClearBtn');
+        if (clearBtn) clearBtn.style.display = 'none';
+
+        const semuaBtn = document.querySelector('.filter-main-btn');
+        filterPublicMain('semua', semuaBtn);
+    };
 
     function renderPublicSubPills() {
         const wrapper = document.getElementById('public-sub-category-wrapper');
@@ -309,7 +376,7 @@
         }
 
         let html = `
-            <button type="button" class="btn btn-sm filter-sub-btn active-sub rounded-pill px-3 py-1 flex-shrink-0" onclick="filterPublicSub('semua', this)" style="background-color: rgba(192, 142, 92, 0.25); color: #e2a873; border: 1px solid rgba(192, 142, 92, 0.7); font-size: 0.8rem; font-weight: 600;">
+            <button type="button" class="btn btn-sm filter-sub-btn active-sub rounded-pill px-3 py-1 flex-shrink-0" onclick="filterPublicSub('semua', this)" style="background-color: #ffffff; color: #0e1217; border: 1px solid #ffffff; font-size: 0.8rem; font-weight: 600;">
                 Semua ${pubMainCat === 'makanan' ? 'Makanan' : 'Minuman'}
             </button>
         `;
@@ -317,7 +384,7 @@
         subs.forEach(sub => {
             const safeSub = sub.replace(/'/g, "\\'");
             html += `
-                <button type="button" class="btn btn-sm filter-sub-btn rounded-pill px-3 py-1 flex-shrink-0" onclick="filterPublicSub('${safeSub}', this)" style="background-color: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); font-size: 0.8rem;">
+                <button type="button" class="btn btn-sm filter-sub-btn rounded-pill px-3 py-1 flex-shrink-0" onclick="filterPublicSub('${safeSub}', this)" style="background-color: rgba(255,255,255,0.06); color: #8b949e; border: 1px solid rgba(255,255,255,0.12); font-size: 0.8rem;">
                     ${sub}
                 </button>
             `;
@@ -332,14 +399,15 @@
         pubSubCat = 'semua';
 
         document.querySelectorAll('.filter-main-btn').forEach(b => {
-            b.classList.remove('active-filter', 'text-white');
-            b.classList.add('text-secondary');
+            b.classList.remove('active-filter');
+            b.style.color = '#8b949e';
             b.style.backgroundColor = 'transparent';
         });
 
         if (btn) {
-            btn.classList.remove('text-secondary');
-            btn.classList.add('active-filter', 'text-white');
+            btn.classList.add('active-filter');
+            btn.style.color = '#0e1217';
+            btn.style.backgroundColor = '#ffffff';
         }
 
         renderPublicSubPills();
@@ -351,16 +419,16 @@
 
         document.querySelectorAll('.filter-sub-btn').forEach(b => {
             b.classList.remove('active-sub');
-            b.style.backgroundColor = 'rgba(255,255,255,0.05)';
-            b.style.color = '#e2e8f0';
-            b.style.borderColor = 'rgba(255,255,255,0.15)';
+            b.style.backgroundColor = 'rgba(255,255,255,0.06)';
+            b.style.color = '#8b949e';
+            b.style.borderColor = 'rgba(255,255,255,0.12)';
         });
 
         if (btn) {
             btn.classList.add('active-sub');
-            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.2)';
-            btn.style.color = '#c08e5c';
-            btn.style.borderColor = 'rgba(192, 142, 92, 0.6)';
+            btn.style.backgroundColor = '#ffffff';
+            btn.style.color = '#0e1217';
+            btn.style.borderColor = '#ffffff';
         }
 
         applyPublicFilter();
@@ -373,11 +441,14 @@
         menuItems.forEach(item => {
             const cat = (item.getAttribute('data-kategori') || '').toLowerCase();
             const sub = (item.getAttribute('data-subkategori') || '').toLowerCase();
+            const nama = (item.getAttribute('data-nama') || '').toLowerCase();
+            const desk = (item.getAttribute('data-deskripsi') || '').toLowerCase();
 
             const matchMain = (pubMainCat === 'semua' || cat === pubMainCat);
             const matchSub = (pubSubCat === 'semua' || sub === pubSubCat);
+            const matchSearch = (!pubSearchQuery || nama.includes(pubSearchQuery) || desk.includes(pubSearchQuery) || sub.includes(pubSearchQuery));
 
-            if (matchMain && matchSub) {
+            if (matchMain && matchSub && matchSearch) {
                 item.style.removeProperty('display');
                 item.classList.remove('d-none');
                 visibleCount++;

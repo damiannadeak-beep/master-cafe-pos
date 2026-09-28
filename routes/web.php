@@ -75,7 +75,7 @@ Route::any('/wp-admin', fn() => abort(404));
 
 // Logout dan decoy 404 untuk rute bawaan /login
 Route::get('/login', fn() => abort(404))->name('login');
-Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
 
 
@@ -199,6 +199,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/order/{id}/print-thermal', [PosController::class, 'printThermalReceipt'])->name('kasir.order.thermal');
         Route::get('/order/{id}/kitchen-receipt', [PosController::class, 'printKitchenReceipt'])->name('kasir.order.kitchen');
         Route::get('/shift-report', [\App\Http\Controllers\ShiftController::class, 'shiftReport'])->name('kasir.shift_report');
+        Route::post('/shift-report/update-cash', [\App\Http\Controllers\ShiftController::class, 'updateShiftCash'])->name('kasir.shift_report.update_cash');
         Route::get('/shift-report/pdf', [\App\Http\Controllers\ShiftController::class, 'exportShiftReportPdf'])->name('kasir.shift_report.pdf');
         Route::get('/shift-report/excel', [\App\Http\Controllers\ShiftController::class, 'exportShiftReportExcel'])->name('kasir.shift_report.excel');
         Route::get('/api/active-orders-count', [PosController::class, 'activeOrdersCount'])->name('kasir.active_orders_count');

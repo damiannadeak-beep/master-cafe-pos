@@ -8,11 +8,8 @@
             <div>
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                     <h5 class="text-white fw-bold mb-0 text-nowrap">
-                        <i class="bi bi-clock-history me-1" style="color: #60a5fa;"></i> Pesan Untuk Nanti
+                        <i class="bi bi-clock-history me-1" style="color: #60a5fa;"></i> Pesan Untuk Nanti <span class="text-secondary small fw-normal ms-1 fs-6">(Pre-Order)</span>
                     </h5>
-                    <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-size: 0.7rem;">
-                        Pre-Order
-                    </span>
                 </div>
                 <small class="text-secondary d-block" style="font-size: 0.82rem;">Pesanan Anda akan disiapkan sesuai waktu yang dipilih</small>
             </div>

@@ -112,6 +112,21 @@
         }
         const grandTotalEl = document.getElementById('grand-total');
         if (grandTotalEl) grandTotalEl.innerHTML = tagihanHtml;
+
+        // Sinkronisasi Mobile Floating Cart Indicator (< 768px)
+        const mobilePill = document.getElementById('mobile-pos-cart-pill');
+        const mobileBadge = document.getElementById('mobile-pos-cart-badge');
+        const mobileTotal = document.getElementById('mobile-pos-cart-total');
+        if (mobilePill && mobileBadge && mobileTotal) {
+            const totalQty = window.posCart.reduce((sum, item) => sum + (parseInt(item.jumlah) || 0), 0);
+            if (totalQty > 0) {
+                mobilePill.style.display = 'block';
+                mobileBadge.innerText = totalQty + ' Item';
+                mobileTotal.innerText = 'Rp ' + totalTagihan.toLocaleString('id-ID');
+            } else {
+                mobilePill.style.display = 'none';
+            }
+        }
     };
 
     window.updateQty = function (index, val) {

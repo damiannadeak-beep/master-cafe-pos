@@ -22,7 +22,7 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <span class="text-white-50 small">Layanan:</span>
-                        <span class="badge rounded-pill text-bg-secondary" id="orderCompletedType">-</span>
+                        <span class="badge rounded-2 text-bg-secondary" id="orderCompletedType">-</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-white-50 small">Status Pembayaran:</span>

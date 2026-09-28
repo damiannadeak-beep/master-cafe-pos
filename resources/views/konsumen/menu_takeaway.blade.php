@@ -8,11 +8,8 @@
             <div>
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                     <h5 class="text-white fw-bold mb-0 text-nowrap">
-                        <i class="bi bi-bag-check-fill me-1" style="color: #c08e5c;"></i> Pesanan Dibawa Pulang
+                        <i class="bi bi-bag-check-fill me-1" style="color: #c08e5c;"></i> Pesanan Dibawa Pulang <span class="text-secondary small fw-normal ms-1 fs-6">(Takeaway)</span>
                     </h5>
-                    <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(192, 142, 92, 0.15); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.3); font-size: 0.7rem;">
-                        Takeaway
-                    </span>
                 </div>
                 <small class="text-secondary d-block" style="font-size: 0.82rem;">Silakan pilih menu untuk dibungkus</small>
             </div>

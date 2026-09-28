@@ -49,7 +49,7 @@
                                 <i class="bi bi-basket me-2 fs-6"></i>
                                 <span class="text-nowrap">Pesanan Aktif</span>
                                 @if(isset($pesananAktif) && $pesananAktif->count() > 0)
-                                    <span class="badge rounded-pill bg-warning text-dark ms-2" style="font-size: 0.7rem; padding: 0.25em 0.55em;">{{ $pesananAktif->count() }}</span>
+                                    <span class="badge rounded-2 bg-warning text-dark ms-2" style="font-size: 0.7rem; padding: 0.25em 0.55em;">{{ $pesananAktif->count() }}</span>
                                 @endif
                             </button>
                         </li>
@@ -195,7 +195,7 @@
                 if(data.error) {
                     alert(data.error);
                 } else {
-                    alert('🔔 ' + (data.message || 'Pelayan segera datang ke meja Anda.'));
+                    alert('ðŸ”” ' + (data.message || 'Pelayan segera datang ke meja Anda.'));
                     try {
                         localStorage.setItem(expireKey, Date.now() + (120 * 1000));
                     } catch(e) {}

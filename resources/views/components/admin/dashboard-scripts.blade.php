@@ -23,20 +23,26 @@
                         label: 'Penjualan (Kotor)',
                         data: dataSales,
                         fill: true,
-                        backgroundColor: 'rgba(13, 110, 253, 0.05)',
-                        borderColor: 'rgba(13, 110, 253, 1)',
+                        backgroundColor: 'rgba(192, 142, 92, 0.12)',
+                        borderColor: '#c08e5c',
+                        borderWidth: 2,
                         tension: 0.35,
                         pointRadius: 3,
+                        pointBackgroundColor: '#c08e5c',
+                        pointBorderColor: '#161b22',
                         pointHoverRadius: 5,
                     },
                     {
                         label: 'Laba Bersih',
                         data: dataLaba,
                         fill: true,
-                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
-                        borderColor: 'rgba(25, 135, 84, 1)',
+                        backgroundColor: 'rgba(52, 211, 153, 0.08)',
+                        borderColor: '#34d399',
+                        borderWidth: 2,
                         tension: 0.35,
                         pointRadius: 3,
+                        pointBackgroundColor: '#34d399',
+                        pointBorderColor: '#161b22',
                         pointHoverRadius: 5,
                     }
                 ]
@@ -45,7 +51,18 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: true, position: 'top' },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            color: '#9ca3af',
+                            font: { family: 'Poppins', size: 12 },
+                            boxWidth: 10,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) { return context.dataset.label + ': Rp ' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
@@ -55,13 +72,14 @@
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#495057' }
+                        ticks: { color: '#8b949e', font: { family: 'Poppins', size: 11 } }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: '#e9ecef' },
+                        grid: { color: 'rgba(255, 255, 255, 0.06)' },
                         ticks: {
-                            color: '#495057',
+                            color: '#8b949e',
+                            font: { family: 'Poppins', size: 11 },
                             callback: function(value) { return 'Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
                         }
                     }

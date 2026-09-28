@@ -8,8 +8,9 @@
     @include("layouts.includes.head-assets")
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .admin-layout { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; margin: 0; padding: 0; }
-        .admin-topbar { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: var(--gradient-surface); z-index: 1050; flex-shrink: 0; }
+        html, body { margin: 0 !important; padding: 0 !important; height: 100% !important; overflow: hidden !important; }
+        .admin-layout { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; margin: 0 !important; padding: 0 !important; }
+        .admin-topbar { margin: 0 !important; top: 0; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); background: var(--gradient-surface); z-index: 1050; flex-shrink: 0; }
         .admin-sidebar { width: 280px; flex-shrink: 0; background: var(--gradient-surface); border-right: 1px solid var(--border-subtle); height: 100%; overflow-y: auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; }
         .admin-sidebar .nav-link { color: var(--text-muted); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-weight: 500; transition: background 0.18s ease, color 0.18s ease; display: flex; align-items: center; }
         .admin-sidebar .nav-link.active { background: var(--gradient-bronze) !important; color: #ffffff !important; box-shadow: 0 4px 16px rgba(192, 142, 92, 0.25); font-weight: 600; }
@@ -38,7 +39,7 @@
                     <button class="btn btn-link text-white text-decoration-none position-relative p-0" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-bell-fill fs-5" style="color: #c08e5c;"></i>
                         @if(isset($menuHabisCount) && $menuHabisCount > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-2 bg-danger" style="font-size: 0.65rem;">
                                 {{ $menuHabisCount }}
                             </span>
                         @endif
@@ -50,9 +51,9 @@
                                 <li>
                                     <a class="dropdown-item d-flex text-white justify-content-between align-items-center py-2" href="{{ route('admin.menu.index') }}">
                                         <div>
-                                            <i class="bi bi-x-circle text-danger me-2"></i> {{ $menu->nama_menu }}
+                                             <i class="bi bi-x-circle text-danger me-2"></i> {{ $menu->nama_menu }}
                                         </div>
-                                        <span class="badge bg-danger rounded-pill">Habis</span>
+                                        <span class="badge bg-danger rounded-2">Habis</span>
                                     </a>
                                 </li>
                             @endforeach
@@ -62,7 +63,7 @@
                     </ul>
                 </div>
 
-                <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm d-inline-flex align-items-center" onclick="document.getElementById('logout-form').submit();">
+                <button class="btn btn-outline-danger btn-sm rounded-2 px-3 shadow-sm d-inline-flex align-items-center" onclick="document.getElementById('logout-form').submit();">
                     <i class="bi bi-box-arrow-right me-md-2"></i> <span class="d-none d-md-inline">Logout</span>
                 </button>
             </div>

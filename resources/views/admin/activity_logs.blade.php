@@ -23,14 +23,16 @@
                 <a href="{{ request()->fullUrlWithQuery(['event' => 'deleted', 'page' => null]) }}" class="btn btn-sm {{ request('event') == 'deleted' ? 'btn-danger' : 'btn-outline-secondary' }}">Penghapusan</a>
             </div>
 
-            <div class="input-group input-group-sm ms-md-2" style="max-width: 260px;">
-                <input type="text" name="search" class="form-control" placeholder="Cari aktivitas / staf..." value="{{ request('search') }}" style="background-color: #0e1217; border-color: #21262d; color: white;">
+            <div class="input-group input-group-sm ms-md-2 pos-search-box" style="max-width: 280px;">
+                <span class="input-group-text border-end-0 rounded-start-pill ps-3" style="background-color: #0e1217; border-color: #21262d; color: #8b949e;">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="search" class="form-control border-start-0 rounded-end-pill pos-search-input pe-3 text-white" placeholder="Cari aktivitas / staf..." value="{{ request('search') }}" autocomplete="off" style="background-color: #0e1217; border-color: #21262d;">
                 @if(request('event'))
                     <input type="hidden" name="event" value="{{ request('event') }}">
                 @endif
-                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
                 @if(request('search') || request('event'))
-                    <a href="{{ route('admin.activity_logs.index') }}" class="btn btn-outline-danger" title="Reset Filter"><i class="bi bi-x-lg"></i></a>
+                    <a href="{{ route('admin.activity_logs.index') }}" class="btn btn-sm btn-outline-danger rounded-pill ms-1 d-inline-flex align-items-center" title="Reset Filter"><i class="bi bi-x-lg"></i></a>
                 @endif
             </div>
         </form>

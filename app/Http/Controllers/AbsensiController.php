@@ -33,9 +33,9 @@ class AbsensiController extends Controller
 
         // Mengambil Setting
         $settings = \App\Models\Setting::pluck('value', 'key')->toArray();
-        $warungLat = $settings['warung_latitude'] ?? null;
-        $warungLng = $settings['warung_longitude'] ?? null;
-        $radiusMax = $settings['absensi_radius_meter'] ?? 5;
+        $warungLat = $settings['warung_latitude'] ?? ($settings['cafe_latitude'] ?? ($settings['lokasi_utama_lat'] ?? null));
+        $warungLng = $settings['warung_longitude'] ?? ($settings['cafe_longitude'] ?? ($settings['lokasi_utama_lng'] ?? null));
+        $radiusMax = (float) ($settings['absensi_radius_meter'] ?? 25);
 
         if (!$warungLat || !$warungLng) {
             return back()->with('error', 'Koordinat warung belum diatur oleh Admin. Anda tidak bisa melakukan absensi.');

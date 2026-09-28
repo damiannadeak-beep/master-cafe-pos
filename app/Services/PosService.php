@@ -47,15 +47,50 @@ class PosService
     /**
      * Mengambil query dasar riwayat pesanan selesai
      */
-    public function getCompletedOrdersQuery(int $limit = 50)
+    public function getCompletedOrdersQuery(int $limit = 50, bool $todayOnly = false)
     {
-        return Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir'])
+        $query = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir'])
             ->where('status', 'completed')
             ->whereHas('pembayaran', function ($p) {
                 $p->where('status', 'paid');
+            });
+
+        if ($todayOnly) {
+            $query->where(function ($q) {
+                $q->whereDate('updated_at', today())
+                  ->orWhereDate('created_at', today());
+            });
+        }
+
+        return $query->orderBy('updated_at', 'desc')->take($limit);
+    }
+
+    /**
+     * Mengambil query riwayat pesanan dibatalkan / void
+     */
+    public function getVoidedOrdersQuery(int $limit = 50, bool $todayOnly = false)
+    {
+        $query = Pesanan::withTrashed()
+            ->where(function ($q) {
+                $q->whereNotNull('deleted_at')
+                  ->orWhereIn('status', ['cancelled', 'void']);
             })
-            ->orderBy('updated_at', 'desc')
-            ->take($limit);
+            ->with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir', 'voidLog.kasir']);
+
+        if ($todayOnly) {
+            $query->where(function ($q) {
+                $q->whereDate('deleted_at', today())
+                  ->orWhere(function ($q2) {
+                      $q2->whereNull('deleted_at')
+                         ->where(function ($q3) {
+                             $q3->whereDate('updated_at', today())
+                                ->orWhereDate('created_at', today());
+                         });
+                  });
+            });
+        }
+
+        return $query->orderByRaw('COALESCE(deleted_at, updated_at) DESC')->take($limit);
     }
 
     /**
@@ -528,13 +563,37 @@ class PosService
             })->join('|');
 
             $completedMax = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->max('updated_at') ?? '';
-            $completedCount = Pesanan::where('status', 'completed')->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))->whereDate('created_at', today())->count();
-            $activeHash .= "|comp:{$completedCount}-{$completedMax}";
+            $completedCount = Pesanan::where('status', 'completed')
+                ->whereHas('pembayaran', fn($p) => $p->where('status', 'paid'))
+                ->where(function ($q) {
+                    $q->whereDate('updated_at', today())
+                      ->orWhereDate('created_at', today());
+                })->count();
+
+            $voidedMax = Pesanan::withTrashed()->where(fn($q) => $q->whereNotNull('deleted_at')->orWhereIn('status', ['cancelled', 'void']))->max('updated_at') ?? '';
+            $voidedCount = Pesanan::withTrashed()
+                ->where(function ($q) {
+                    $q->whereNotNull('deleted_at')
+                      ->orWhereIn('status', ['cancelled', 'void']);
+                })
+                ->where(function ($q) {
+                    $q->whereDate('deleted_at', today())
+                      ->orWhere(function ($q2) {
+                          $q2->whereNull('deleted_at')
+                             ->where(function ($q3) {
+                                 $q3->whereDate('updated_at', today())
+                                    ->orWhereDate('created_at', today());
+                             });
+                      });
+                })->count();
+
+            $activeHash .= "|comp:{$completedCount}-{$completedMax}|void:{$voidedCount}-{$voidedMax}";
 
             return [
                 'count' => $count,
                 'latest_id' => $latestId,
                 'completed_count' => $completedCount,
+                'voided_count' => $voidedCount,
                 'hash' => md5($activeHash),
             ];
         });

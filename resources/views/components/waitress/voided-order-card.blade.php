@@ -1,142 +1,163 @@
+<style>
+    .void-card-luxury {
+        background-color: #141820 !important;
+        border: 1px solid rgba(239, 68, 68, 0.2) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.45);
+        padding: 1.25rem !important;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .void-card-luxury:hover {
+        transform: translateY(-2px);
+        border-color: rgba(239, 68, 68, 0.35) !important;
+        box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.55);
+    }
+    .void-order-items::-webkit-scrollbar {
+        width: 4px;
+    }
+    .void-order-items::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .void-order-items::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 4px;
+    }
+    .void-order-items::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+</style>
+
 @if($voidedOrders->isEmpty())
     <div class="col-12 text-center py-5">
-        <div class="card border-0 rounded-4 p-5 shadow-sm" style="background-color: rgba(22, 27, 34, 0.6); border: 1px dashed rgba(239, 68, 68, 0.25) !important;">
-            <i class="bi bi-shield-x text-danger display-3 mb-3 opacity-50"></i>
-            <h5 class="text-white fw-bold">Belum Ada Riwayat Pesanan Dibatalkan</h5>
+        <div class="card border-0 rounded-4 p-5 shadow-sm" style="background-color: rgba(20, 24, 32, 0.6); border: 1px dashed rgba(239, 68, 68, 0.25) !important;">
+            <i class="bi bi-shield-x text-danger display-4 mb-3 opacity-40"></i>
+            <h5 class="text-white fw-semibold mb-1">Belum Ada Riwayat Pesanan Dibatalkan</h5>
             <p class="text-white-50 small mb-0">Pesanan yang dibatalkan oleh kasir (Void) atau pelanggan akan otomatis tercatat di sini secara transparan.</p>
         </div>
     </div>
 @else
     @foreach($voidedOrders as $order)
         @php
-            $mejaLabel = $order->meja ? 'Meja ' . $order->meja->nama_meja_atau_nomor : 'Takeaway';
+            $rawMejaName = trim((string)($order->meja->nama_meja_atau_nomor ?? ''));
+            $labelMeja = $order->meja ? (preg_match('/^meja\b/i', $rawMejaName) ? $rawMejaName : 'Meja ' . $rawMejaName) : 'Takeaway';
             $custName = $order->customer_name;
             $alasan = $order->voidLog->alasan ?? 'Dibatalkan oleh Pelanggan / Sistem';
             $pelaku = $order->voidLog?->kasir?->name ?? ($order->kasir?->name ?? 'Pelanggan / Kasir');
             $voidTime = $order->deleted_at ?? $order->updated_at;
-            $searchKey = strtolower($order->id . ' ' . $mejaLabel . ' ' . $custName . ' ' . ($order->guest_phone ?? '') . ' ' . $alasan . ' ' . $pelaku);
+            $searchKey = strtolower($order->id . ' ' . $labelMeja . ' ' . $custName . ' ' . ($order->guest_phone ?? '') . ' ' . $alasan . ' ' . $pelaku);
         @endphp
         <div class="col-12 col-md-6 col-xl-4 voided-order-item" data-search="{{ $searchKey }}">
-            <div class="card h-100 rounded-4 shadow-sm border-0 position-relative overflow-hidden" 
-                 style="background-color: #161b22; border: 1px solid rgba(239, 68, 68, 0.15) !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+            <div class="card h-100 border-0 position-relative void-card-luxury d-flex flex-column">
                 
-                <!-- Top Indicator Line: Merah Void -->
-                <div class="position-absolute top-0 start-0 end-0" style="height: 3px; background: linear-gradient(90deg, #ef4444, #dc2626);"></div>
-
-                <!-- Card Header -->
-                <div class="card-header bg-transparent border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="d-flex align-items-center flex-wrap gap-1.5">
-                        <span class="fw-bold text-white fs-6">
-                            <span class="text-danger">#</span>{{ $order->id }}
+                <!-- 1. Card Header: Bersih & Terpadu -->
+                <div class="d-flex justify-content-between align-items-center pb-2.5 mb-2.5" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold text-white fs-5" style="letter-spacing: -0.02em;">
+                            <span class="text-danger fw-normal">#</span>{{ $order->id }}
                         </span>
-                        <span class="badge rounded-pill px-2 py-1 small fw-bold" style="background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
-                            <i class="bi bi-x-circle-fill me-1"></i> DIBATALKAN / VOID
+                        <span class="badge rounded-pill px-2.5 py-1 fw-semibold" 
+                              style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.7rem; letter-spacing: 0.03em;">
+                            DIBATALKAN / VOID
                         </span>
                     </div>
+
                     <div>
                         @if($order->meja)
-                            <span class="badge rounded-pill bg-dark border border-secondary text-warning px-2.5 py-1">
-                                <i class="bi bi-geo-alt-fill me-1"></i> Meja {{ $order->meja->nama_meja_atau_nomor }}
+                            <span class="badge rounded-pill px-2.5 py-1 fw-medium" style="background: rgba(192, 142, 92, 0.12); color: #d4a373; border: 1px solid rgba(192, 142, 92, 0.25); font-size: 0.72rem;">
+                                <i class="bi bi-geo-alt me-1"></i> {{ $labelMeja }}
                             </span>
                         @else
-                            <span class="badge rounded-pill bg-dark border border-secondary text-info px-2.5 py-1">
-                                <i class="bi bi-bag-check-fill me-1"></i> Takeaway
+                            <span class="badge rounded-pill px-2.5 py-1 fw-medium" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.72rem;">
+                                <i class="bi bi-bag me-1"></i> Takeaway
                             </span>
                         @endif
                     </div>
                 </div>
 
-                <!-- Card Body -->
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <!-- Info Pemesan & Waktu Pembatalan -->
-                        <div class="d-flex justify-content-between align-items-start mb-2 pb-2 border-bottom border-secondary border-opacity-15 flex-wrap gap-1 text-white-50 small">
-                            <div>
-                                <div class="text-white fw-semibold">
-                                    <i class="bi bi-person me-1 text-secondary"></i> {{ $custName }}
-                                </div>
-                                @if(!empty($order->guest_phone))
-                                    <div style="font-size: 0.72rem;" class="text-white-50">
-                                        <i class="bi bi-telephone me-1"></i> {{ $order->guest_phone }}
-                                    </div>
-                                @endif
+                <!-- 2. Customer & Metadata Info (Aliran Alami, Tanpa Kolom Kaku) -->
+                <div class="mb-2.5">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-1.5">
+                        <div>
+                            <div class="text-white fw-semibold" style="font-size: 0.95rem; line-height: 1.3;">
+                                {{ $custName }}
                             </div>
-                            <div class="text-end">
-                                <div class="text-white-50" style="font-size: 0.75rem;">
-                                    <i class="bi bi-clock-history me-1 text-danger"></i> {{ $voidTime ? $voidTime->format('H:i') : '-' }} WIB
+                            @if(!empty($order->guest_phone))
+                                <div class="text-white-50 mt-1" style="font-size: 0.74rem;">
+                                    <i class="bi bi-telephone me-1.5 opacity-60"></i>{{ $order->guest_phone }}
                                 </div>
-                                <div style="font-size: 0.7rem;" class="text-secondary">
-                                    {{ $voidTime ? $voidTime->diffForHumans() : '' }}
-                                </div>
-                            </div>
+                            @endif
                         </div>
-
-                        <!-- Box Alasan & Pelaku Void -->
-                        <div class="rounded-3 p-3 mb-3" style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25);">
-                            <div class="d-flex align-items-start gap-2 mb-2">
-                                <i class="bi bi-exclamation-triangle-fill text-danger flex-shrink-0" style="font-size: 0.95rem; margin-top: 2px;"></i>
-                                <div class="w-100">
-                                    <div class="text-white-50 small mb-0.5" style="font-size: 0.75rem;">Alasan Void / Batal:</div>
-                                    <div class="fw-semibold" style="font-size: 0.84rem; color: #f87171; line-height: 1.4;">
-                                        {{ $alasan }}
-                                    </div>
-                                </div>
+                        <div class="text-end">
+                            <span class="badge rounded-pill px-2.5 py-0.5 fw-medium d-inline-flex align-items-center gap-1" 
+                                  style="background: rgba(239, 68, 68, 0.12); color: #f87171; font-size: 0.7rem; border: 1px solid rgba(239, 68, 68, 0.25);">
+                                <i class="bi bi-x-circle"></i> Void
+                            </span>
+                            <div class="text-white-50 mt-1" style="font-size: 0.7rem;">
+                                <i class="bi bi-clock me-1.5 opacity-75"></i> {{ $voidTime ? $voidTime->format('H:i') : '-' }} WIB &bull; {{ $voidTime ? $voidTime->diffForHumans() : '' }}
                             </div>
-                            <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top border-danger border-opacity-25" style="font-size: 0.75rem;">
-                                <span class="text-white-50 d-inline-flex align-items-center">
-                                    <i class="bi bi-person-badge me-1.5 text-danger opacity-75"></i> Petugas / Pemohon:
-                                </span>
-                                <span class="text-white fw-semibold">
-                                    {{ $pelaku }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Daftar Item Pesanan yang Dibatalkan -->
-                        <div class="rounded-3 p-3 mb-3" style="background-color: rgba(22, 27, 34, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); max-height: 180px; overflow-y: auto;">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1.5 border-bottom border-secondary border-opacity-25" style="padding-top: 2px;">
-                                <span class="text-white-50 fw-bold text-uppercase d-inline-block" style="font-size: 0.75rem; letter-spacing: 0.5px; line-height: 1.5;">
-                                    ITEM DIBATALKAN ({{ $order->detail_pesanan->sum('jumlah') }} ITEM)
-                                </span>
-                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 py-0.5 px-1.5" style="font-size: 0.65rem;">
-                                    Stok Dikembalikan
-                                </span>
-                            </div>
-
-                            <ul class="list-unstyled mb-0" style="font-size: 0.8rem;">
-                                @forelse($order->detail_pesanan as $detail)
-                                    <li class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary border-opacity-10 text-white-50">
-                                        <div class="text-truncate pe-2">
-                                            <span class="text-secondary fw-medium">{{ $detail->jumlah }}x</span> 
-                                            <span class="text-white-50 text-decoration-line-through">{{ $detail->menu->nama_menu ?? 'Item Menu' }}</span>
-                                            @if($detail->catatan)
-                                                <small class="d-block text-white-50 opacity-50 fst-italic" style="font-size: 0.7rem;">&bull; {{ $detail->catatan }}</small>
-                                            @endif
-                                        </div>
-                                        <span class="text-white-50 text-decoration-line-through text-nowrap" style="font-size: 0.78rem;">
-                                            Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
-                                        </span>
-                                    </li>
-                                @empty
-                                    <li class="text-white-50 small py-1 fst-italic">Tidak ada rincian item</li>
-                                @endforelse
-                            </ul>
                         </div>
                     </div>
 
-                    <!-- Footer: Total Nilai Void & Info -->
-                    <div class="pt-2 border-top border-secondary border-opacity-25">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-white-50 small">Total Nilai Void:</span>
-                            <span class="text-danger fw-bold fs-6">
-                                Rp {{ number_format($order->total, 0, ',', '.') }}
-                            </span>
+                    <!-- Alasan & Pemohon (Elegan tanpa kotak tebal kaku) -->
+                    <div class="pt-2 mt-2" style="border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                        <div class="d-flex align-items-baseline gap-1.5">
+                            <span class="text-white-50 small" style="font-size: 0.74rem; flex-shrink: 0;">Alasan:</span>
+                            <span class="fw-medium text-truncate" style="font-size: 0.78rem; color: #fca5a5;">{{ $alasan }}</span>
                         </div>
-                        <div class="p-2 rounded-3 text-center" style="background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
-                            <span class="text-white-50 small" style="font-size: 0.72rem;">
-                                <i class="bi bi-shield-check text-success me-1"></i> Pesanan resmi dibatalkan & transaksi dihentikan
-                            </span>
+                        <div class="text-white-50 mt-0.5" style="font-size: 0.72rem;">
+                            <i class="bi bi-person-badge me-1 opacity-60"></i>Petugas: <span class="text-light">{{ $pelaku }}</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 3. Daftar Item Pesanan yang Dibatalkan (Menyatu Mulus di Atas Kartu) -->
+                <div class="flex-grow-1 d-flex flex-column mb-3">
+                    <div class="d-flex justify-content-between align-items-center pb-1.5 mb-1.5" style="border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
+                        <span class="text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.06em; color: #8b949e;">
+                            Item Dibatalkan ({{ $order->detail_pesanan->sum('jumlah') }})
+                        </span>
+                        <span class="badge rounded-pill px-2 py-0.5 fw-medium" style="background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-size: 0.65rem; border: 1px solid rgba(255, 255, 255, 0.06);">
+                            Stok Dikembalikan
+                        </span>
+                    </div>
+
+                    <div class="void-order-items py-1 flex-grow-1" style="max-height: 180px; overflow-y: auto;">
+                        <ul class="list-unstyled mb-0">
+                            @forelse($order->detail_pesanan as $detail)
+                                <li class="d-flex justify-content-between align-items-start py-1.5" style="border-bottom: 1px dashed rgba(255, 255, 255, 0.05);">
+                                    <div class="pe-2 text-truncate" style="min-width: 0;">
+                                        <div class="d-flex align-items-baseline">
+                                            <span class="fw-semibold text-secondary me-2" style="font-size: 0.82rem; flex-shrink: 0;">{{ $detail->jumlah }}×</span>
+                                            <span class="text-white-50 text-decoration-line-through text-truncate" style="font-size: 0.84rem;">{{ $detail->menu->nama_menu ?? 'Item Menu' }}</span>
+                                        </div>
+                                        @if($detail->catatan)
+                                            <div class="fst-italic ps-3 mt-0.5 text-white-50 opacity-50" style="font-size: 0.7rem;">
+                                                &bull; {{ $detail->catatan }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <span class="text-white-50 text-decoration-line-through text-nowrap ms-2" style="font-size: 0.8rem; font-variant-numeric: tabular-nums;">
+                                        Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
+                                    </span>
+                                </li>
+                            @empty
+                                <li class="text-white-50 small py-2 fst-italic">Tidak ada rincian item</li>
+                            @endforelse
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 4. Footer: Total Nilai Void & Info Bersih -->
+                <div class="pt-2.5 mt-auto" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="d-flex justify-content-between align-items-baseline mb-2">
+                        <span class="text-white-50" style="font-size: 0.82rem;">Total Nilai Void:</span>
+                        <span class="fw-bold" style="font-size: 1.1rem; color: #f87171; letter-spacing: -0.01em;">
+                            Rp {{ number_format($order->total, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center gap-1.5 py-1 text-white-50" style="font-size: 0.73rem;">
+                        <i class="bi bi-shield-check text-success opacity-80"></i>
+                        <span>Transaksi resmi dibatalkan & ditutup</span>
                     </div>
                 </div>
             </div>

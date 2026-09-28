@@ -106,4 +106,45 @@ class AuthRoleTest extends TestCase
         ]);
         $this->assertGuest();
     }
+
+    /** TEST 8: Kasir bisa merender kartu pesanan aktif dengan status unpaid */
+    public function test_kasir_bisa_render_kartu_pesanan_unpaid()
+    {
+        $kasir = User::factory()->create();
+        $kasir->assignRole('kasir');
+
+        $meja = \App\Models\Meja::create([
+            'nama_meja_atau_nomor' => '99',
+            'status' => 'terisi',
+        ]);
+
+        $pesanan = \App\Models\Pesanan::create([
+            'id_kasir' => $kasir->id,
+            'id_meja' => $meja->id,
+            'guest_name' => 'Budi Test',
+            'tipe_pesanan' => 'dine_in',
+            'status' => 'pending',
+            'total' => 50000,
+            'tanggal' => now(),
+        ]);
+
+        $menu = \App\Models\Menu::create([
+            'nama_menu' => 'Kopi Test',
+            'harga' => 25000,
+            'kategori' => 'minuman',
+            'is_available' => true,
+        ]);
+
+        \App\Models\DetailPesanan::create([
+            'id_pesanan' => $pesanan->id,
+            'id_menu' => $menu->id,
+            'jumlah' => 2,
+            'subtotal' => 50000,
+        ]);
+
+        $response = $this->actingAs($kasir)->get('/kasir/pesanan-aktif');
+        $response->assertStatus(200);
+        $response->assertSee('Terima Bayar');
+        $response->assertSee('Budi Test');
+    }
 }

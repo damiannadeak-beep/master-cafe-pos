@@ -187,16 +187,22 @@ class AdminController extends Controller
             'toleransi_terlambat' => 'nullable|numeric',
         ]);
 
-        $settingsService->updateSettings([
-            'warung_latitude' => $request->warung_latitude,
-            'warung_longitude' => $request->warung_longitude,
-            'absensi_radius_meter' => $request->absensi_radius_meter ?? '5',
-            'shift_pagi_start' => $request->shift_pagi_start ?? '08:00',
-            'shift_pagi_end' => $request->shift_pagi_end ?? '17:00',
-            'shift_malam_start' => $request->shift_malam_start ?? '16:00',
-            'shift_malam_end' => $request->shift_malam_end ?? '00:00',
-            'toleransi_terlambat' => $request->toleransi_terlambat ?? '15',
-        ]);
+        $allowedKeys = [
+            'warung_latitude', 'warung_longitude', 'absensi_radius_meter',
+            'shift_pagi_start', 'shift_pagi_end', 'shift_malam_start', 'shift_malam_end',
+            'toleransi_terlambat'
+        ];
+
+        $dataToUpdate = [];
+        foreach ($allowedKeys as $key) {
+            if ($request->has($key)) {
+                $dataToUpdate[$key] = $request->input($key);
+            }
+        }
+
+        if (!empty($dataToUpdate)) {
+            $settingsService->updateSettings($dataToUpdate);
+        }
 
         return redirect()->route('admin.settings')->with('success', 'Pengaturan Absensi & Shift berhasil diperbarui!');
     }
@@ -237,8 +243,13 @@ class AdminController extends Controller
             'lokasi_utama_alamat' => 'nullable|string',
             'lokasi_jam_operasional' => 'nullable|string',
             'lokasi_panduan' => 'nullable|string',
-            'lokasi_gmaps_url' => 'nullable|url',
+            'lokasi_gmaps_url' => 'nullable|string',
         ]);
+
+        $gmapsUrl = $request->lokasi_gmaps_url;
+        if (!empty($gmapsUrl) && preg_match('/src="([^"]+)"/', $gmapsUrl, $match)) {
+            $gmapsUrl = $match[1];
+        }
 
         $settingsService->updateSettings([
             'lokasi_judul' => $request->lokasi_judul,
@@ -247,7 +258,7 @@ class AdminController extends Controller
             'lokasi_utama_alamat' => $request->lokasi_utama_alamat,
             'lokasi_jam_operasional' => $request->lokasi_jam_operasional,
             'lokasi_panduan' => $request->lokasi_panduan,
-            'lokasi_gmaps_url' => $request->lokasi_gmaps_url,
+            'lokasi_gmaps_url' => $gmapsUrl,
         ]);
 
         return redirect()->route('admin.settings')->with('success', 'Pengaturan halaman lokasi berhasil diperbarui!');
@@ -295,8 +306,28 @@ class AdminController extends Controller
 
     public function reviews()
     {
-        $reviews = Rating::with('konsumen', 'pesanan')->orderBy('tanggal', 'desc')->paginate(15);
-        return view('admin.reviews', compact('reviews'));
+        $reviews = Rating::with(['konsumen', 'pesanan.meja'])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('tanggal', 'desc')
+            ->paginate(15);
+
+        $totalReviews = Rating::count();
+        $averageRating = $totalReviews > 0 ? round(Rating::avg('rating'), 1) : 0;
+        $star5Count = Rating::where('rating', 5)->count();
+        $star4Count = Rating::where('rating', 4)->count();
+        $star3Count = Rating::where('rating', 3)->count();
+        $starLowCount = Rating::whereIn('rating', [1, 2])->count();
+
+        $stats = [
+            'total' => $totalReviews,
+            'average' => $averageRating,
+            'star5' => $star5Count,
+            'star4' => $star4Count,
+            'star3' => $star3Count,
+            'starLow' => $starLowCount,
+        ];
+
+        return view('admin.reviews', compact('reviews', 'stats'));
     }
 
     public function replyReview(Request $request, $id)
@@ -331,7 +362,7 @@ class AdminController extends Controller
                     'total_menit' => 0,
                 ];
             }
-            if (strtolower($absen->status) == 'hadir') {
+            if (in_array(strtolower($absen->status), ['hadir', 'terlambat'])) {
                 $rekapAbsensi[$userId]['total_hadir']++;
                 if ($absen->jam_masuk && $absen->jam_keluar) {
                     $masuk = Carbon::parse($absen->jam_masuk);

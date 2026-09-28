@@ -13,26 +13,30 @@ class ShiftController extends Controller
     public function bukaShift()
     {
         $shift = KasirShift::where('user_id', auth()->id())->where('status', 'open')->first();
-        if ($shift) {
-            return redirect()->route('kasir.pos');
+        if (!$shift) {
+            KasirShift::create([
+                'user_id' => auth()->id(),
+                'modal_awal' => 0,
+                'waktu_buka' => now(),
+                'status' => 'open'
+            ]);
         }
-        return view('waitress.shift.buka');
+        return redirect()->route('kasir.pos');
     }
 
     public function storeBukaShift(Request $request)
     {
-        $request->validate([
-            'modal_awal' => 'required|numeric|min:0'
-        ]);
+        $shift = KasirShift::where('user_id', auth()->id())->where('status', 'open')->first();
+        if (!$shift) {
+            KasirShift::create([
+                'user_id' => auth()->id(),
+                'modal_awal' => $request->modal_awal ?? 0,
+                'waktu_buka' => now(),
+                'status' => 'open'
+            ]);
+        }
 
-        KasirShift::create([
-            'user_id' => auth()->id(),
-            'modal_awal' => $request->modal_awal,
-            'waktu_buka' => now(),
-            'status' => 'open'
-        ]);
-
-        return redirect()->route('kasir.pos')->with('success', 'Shift berhasil dibuka. Selamat bekerja!');
+        return redirect()->route('kasir.pos')->with('success', 'Shift aktif. Selamat bekerja!');
     }
 
     public function tutupShift()
@@ -48,6 +52,7 @@ class ShiftController extends Controller
     public function storeTutupShift(Request $request)
     {
         $request->validate([
+            'modal_awal' => 'nullable|numeric|min:0',
             'uang_fisik_aktual' => 'required|numeric|min:0'
         ]);
 
@@ -73,11 +78,13 @@ class ShiftController extends Controller
             ->where('created_at', '>=', $shift->waktu_buka)
             ->sum('nominal');
 
-        $harapanFisik = $shift->modal_awal + $totalTunai - $totalPengeluaran;
+        $modalAwal = (float) $request->modal_awal;
+        $harapanFisik = $modalAwal + $totalTunai - $totalPengeluaran;
         $selisih = $request->uang_fisik_aktual - $harapanFisik;
 
         $shift->update([
             'waktu_tutup' => now(),
+            'modal_awal' => $modalAwal,
             'uang_fisik_aktual' => $request->uang_fisik_aktual,
             'total_pemasukan_tunai' => $totalTunai,
             'total_pengeluaran' => $totalPengeluaran,
@@ -179,6 +186,84 @@ class ShiftController extends Controller
     }
 
     /**
+     * Memperbarui uang kas (modal awal & uang fisik) langsung dari halaman Laporan Tutup Shift
+     */
+    public function updateShiftCash(Request $request)
+    {
+        $request->validate([
+            'modal_awal' => 'nullable|numeric|min:0',
+            'uang_fisik_aktual' => 'nullable|numeric|min:0',
+            'action' => 'nullable|string|in:save,close'
+        ]);
+
+        $shift = KasirShift::where('user_id', auth()->id())->latest('id')->first();
+        if (!$shift) {
+            return redirect()->route('kasir.shift_report')->with('error', 'Data shift tidak ditemukan.');
+        }
+
+        // Hitung total tunai selama shift
+        $queryTunai = Pembayaran::where('status', 'paid')
+            ->where('metode', 'cash')
+            ->where('updated_at', '>=', $shift->waktu_buka)
+            ->whereHas('pesanan', function($q) use ($shift) {
+                $q->where(function($sub) use ($shift) {
+                    $sub->where('id_kasir', $shift->user_id)
+                        ->orWhereNull('id_kasir');
+                });
+            });
+
+        if ($shift->waktu_tutup) {
+            $queryTunai->where('updated_at', '<=', $shift->waktu_tutup);
+        }
+        $sumTunai = (float) $queryTunai->sum('total_bayar');
+
+        // Hitung total pengeluaran selama shift
+        $pengeluaranQuery = Pengeluaran::where('user_id', auth()->id())
+            ->where('created_at', '>=', $shift->waktu_buka);
+
+        if ($shift->waktu_tutup) {
+            $pengeluaranQuery->where('created_at', '<=', $shift->waktu_tutup);
+        }
+        $sumPengeluaran = (float) $pengeluaranQuery->sum('nominal');
+
+        $modalAwal = $request->filled('modal_awal') ? (float) $request->modal_awal : (float) ($shift->modal_awal ?? 0);
+        $harapanFisik = $modalAwal + $sumTunai - $sumPengeluaran;
+        $uangFisik = $request->filled('uang_fisik_aktual') ? (float) $request->uang_fisik_aktual : $harapanFisik;
+        $selisih = $uangFisik - $harapanFisik;
+
+        $updateData = [
+            'modal_awal' => $modalAwal,
+            'uang_fisik_aktual' => $uangFisik,
+            'total_pemasukan_tunai' => $sumTunai,
+            'total_pengeluaran' => $sumPengeluaran,
+            'selisih' => $selisih,
+        ];
+
+        // Jika aksi adalah menutup shift
+        if ($request->input('action') === 'close') {
+            $updateData['status'] = 'closed';
+            $updateData['waktu_tutup'] = now();
+
+            // Notifikasi ke Pemilik / Admin
+            $admins = \App\Models\User::role('pemilik')->get();
+            $kasirName = auth()->user()->name;
+            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\WebPushNotification(
+                'Laporan Tutup Shift Kasir',
+                "Kasir {$kasirName} telah menutup shift. Pemasukan Tunai: Rp " . number_format($sumTunai, 0, ',', '.') . ", Selisih Kas: Rp " . number_format($selisih, 0, ',', '.'),
+                '/admin/kasir'
+            ));
+
+            $shift->update($updateData);
+
+            return redirect()->route('kasir.shift_report')->with('success', 'Shift kasir resmi DITUTUP! Rekonsiliasi uang kas berhasil disimpan.');
+        }
+
+        $shift->update($updateData);
+
+        return redirect()->route('kasir.shift_report')->with('success', 'Uang kas dan modal awal laci berhasil diperbarui.');
+    }
+
+    /**
      * Ekspor Laporan Tutup Shift Kasir ke PDF
      */
     public function exportShiftReportPdf()
@@ -204,7 +289,7 @@ class ShiftController extends Controller
         try {
             $data = $this->getShiftReportData();
             $shift = $data["shift"];
-            $hariIni = $shift->waktu_buka->format("Y-m-d");
+            $hariIni = $shift->waktu_buka ? $shift->waktu_buka->format("Y-m-d") : date("Y-m-d");
             $filename = "laporan_shift_kasir_" . $hariIni . ".xls";
 
             $html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
@@ -213,27 +298,38 @@ class ShiftController extends Controller
             
             // Header
             $html .= '<table border="0" cellpadding="3" cellspacing="0">';
-            $html .= '<tr><td colspan="4" style="font-size: 14pt; font-weight: bold; text-align: left;">MASTER CAFE POS</td></tr>';
-            $html .= '<tr><td colspan="4" style="font-size: 10pt; text-align: left;">Laporan Rekonsiliasi Tutup Shift Kasir</td></tr>';
-            $html .= '<tr><td colspan="4"></td></tr>';
-            $html .= '<tr><td colspan="2" style="text-align: left;">STAF KASIR: ' . strtoupper(auth()->user()->name) . '</td><td colspan="2" style="text-align: right;">Tanggal Shift: ' . \Carbon\Carbon::parse($hariIni)->translatedFormat("d F Y") . '</td></tr>';
-            $html .= '<tr><td colspan="2"></td><td colspan="2" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
-            $html .= '<tr><td colspan="4"></td></tr>';
+            $html .= '<tr><td colspan="6" style="font-size: 14pt; font-weight: bold; text-align: left;">MASTER CAFE POS</td></tr>';
+            $html .= '<tr><td colspan="6" style="font-size: 10pt; text-align: left;">Laporan Rekonsiliasi Tutup Shift Kasir</td></tr>';
+            $html .= '<tr><td colspan="6"></td></tr>';
+            $html .= '<tr><td colspan="3" style="text-align: left;">STAF KASIR: ' . strtoupper(auth()->user()->name) . '</td><td colspan="3" style="text-align: right;">Tanggal Shift: ' . \Carbon\Carbon::parse($hariIni)->translatedFormat("d F Y") . '</td></tr>';
+            $html .= '<tr><td colspan="3" style="text-align: left;">Status Shift: ' . strtoupper($shift->status ?? "OPEN") . '</td><td colspan="3" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
+            $html .= '<tr><td colspan="6"></td></tr>';
             $html .= '</table>';
 
-            // KPI Grid
+            // KPI Grid Rekonsiliasi Kas
             $html .= '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">';
             $html .= '<tr>';
-            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Kas Tunai (Laci Kas)</td>';
-            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Non-Tunai (QRIS)</td>';
-            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Pengeluaran</td>';
-            $html .= '<td style="font-weight: bold; text-align: center; background-color: #ffffff;">Total Omzet Shift</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #f2f2f2;">Modal Awal Kas</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #f2f2f2;">Pemasukan Tunai</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #f2f2f2;">Non-Tunai (QRIS)</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #f2f2f2;">Pengeluaran Kasir</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #f2f2f2;">Uang Fisik Aktual</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #f2f2f2;">Selisih Fisik Kas</td>';
+            $html .= '<td style="font-weight: bold; text-align: center; background-color: #e2e8f0;">Total Omzet Shift</td>';
             $html .= '</tr>';
             $html .= '<tr>';
-            $html .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format($data["totalCash"], 0, ",", ".") . '</td>';
-            $html .= '<td style="text-align: center; font-size: 12pt;">Rp ' . number_format($data["totalQris"], 0, ",", ".") . '</td>';
-            $html .= '<td style="text-align: center; font-size: 12pt; color: #dc3545;">Rp ' . number_format($data["totalPengeluaran"], 0, ",", ".") . '</td>';
-            $html .= '<td style="text-align: center; font-size: 12pt; font-weight: bold;">Rp ' . number_format($data["totalSemua"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 11pt;">Rp ' . number_format($shift->modal_awal ?? 0, 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 11pt; color: #0d6832;">Rp ' . number_format($data["totalCash"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 11pt; color: #0b5ed7;">Rp ' . number_format($data["totalQris"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 11pt; color: #dc3545;">Rp ' . number_format($data["totalPengeluaran"], 0, ",", ".") . '</td>';
+            $html .= '<td style="text-align: center; font-size: 11pt; font-weight: bold;">Rp ' . number_format($shift->uang_fisik_aktual ?? 0, 0, ",", ".") . '</td>';
+            
+            $selisih = $shift->selisih ?? 0;
+            $selisihColor = $selisih < 0 ? '#dc3545' : ($selisih > 0 ? '#0d6832' : '#000000');
+            $selisihText = $selisih == 0 ? ' (Pas)' : ($selisih < 0 ? ' (Kurang)' : ' (Lebih)');
+            $html .= '<td style="text-align: center; font-size: 11pt; font-weight: bold; color: ' . $selisihColor . ';">Rp ' . number_format($selisih, 0, ",", ".") . $selisihText . '</td>';
+            
+            $html .= '<td style="text-align: center; font-size: 11pt; font-weight: bold; background-color: #f8fafc;">Rp ' . number_format($data["totalSemua"], 0, ",", ".") . '</td>';
             $html .= '</tr>';
             $html .= '</table>';
             

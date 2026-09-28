@@ -13,9 +13,7 @@
                 <div class="overflow-hidden">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="text-white small fw-bold">Daftar Pesanan Anda</span>
-                        <span class="badge rounded-pill px-2 py-0.5" style="background: rgba(192, 142, 92, 0.25); color: #c08e5c; font-size: 0.72rem; border: 1px solid rgba(192, 142, 92, 0.4);">
-                            {{ $activeTableOrders->count() }} Pesanan
-                        </span>
+                        <span class="text-secondary small fw-medium">({{ $activeTableOrders->count() }} Pesanan)</span>
                     </div>
                     <small class="text-white-50 text-truncate d-block" style="font-size: 0.74rem;">
                         Sedang Dilihat: <strong>#{{ $pesanan->id }}</strong> ({{ $pesanan->tipe_pesanan === 'takeaway' ? 'Bawa Pulang / Bungkus' : 'Dine In Meja ' . ($meja->nama_meja_atau_nomor ?? '') }})
@@ -99,7 +97,7 @@
             <div class="d-flex align-items-center gap-2">
                 <i class="bi bi-layers-fill" style="color: #c08e5c;"></i>
                 <span class="text-white small fw-bold">Daftar Pesanan Anda</span>
-                <span class="badge rounded-pill" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c;" id="multi-order-count-badge"></span>
+                <span class="badge rounded-2" style="background: rgba(192, 142, 92, 0.2); color: #c08e5c;" id="multi-order-count-badge"></span>
             </div>
             <div class="d-flex align-items-center gap-1 text-white-50 small">
                 <span id="multi-order-client-toggle-text">Buka</span>
@@ -169,9 +167,9 @@
 <div class="card tracking-card shadow-lg p-3 p-md-4 mb-4">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
-            <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold" style="background: rgba(192, 142, 92, 0.15); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.3); font-size: 0.8rem;">
+            <div class="small fw-semibold mb-2" style="color: #c08e5c;">
                 <i class="bi bi-geo-alt-fill me-1"></i> {{ ($pesanan->tipe_pesanan ?? '') === 'takeaway' ? 'Bawa Pulang (Takeaway)' : ($meja ? 'Meja ' . $meja->nama_meja_atau_nomor : 'Pesanan Cafe') }}
-            </span>
+            </div>
             <h4 class="text-white fw-bold mb-1">
                 Order #{{ $pesanan->id }}
             </h4>

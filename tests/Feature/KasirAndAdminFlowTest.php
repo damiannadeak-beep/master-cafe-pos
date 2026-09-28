@@ -69,6 +69,62 @@ class KasirAndAdminFlowTest extends TestCase
         ]);
     }
 
+    /** Test 2b: Kasir dapat mengetik dan menyimpan uang kas di laporan tutup shift */
+    public function test_kasir_dapat_mengetik_dan_menyimpan_uang_kas_di_laporan_tutup_shift()
+    {
+        $kasir = User::factory()->create();
+        $kasir->assignRole('kasir');
+
+        $shift = KasirShift::create([
+            'user_id' => $kasir->id,
+            'modal_awal' => 0,
+            'status' => 'open',
+            'waktu_buka' => now(),
+        ]);
+
+        $response = $this->actingAs($kasir)->post('/kasir/shift-report/update-cash', [
+            'modal_awal' => 100000,
+            'uang_fisik_aktual' => 450000,
+            'action' => 'save'
+        ]);
+
+        $response->assertRedirect(route('kasir.shift_report'));
+        $this->assertDatabaseHas('kasir_shifts', [
+            'id' => $shift->id,
+            'status' => 'open',
+            'modal_awal' => 100000,
+            'uang_fisik_aktual' => 450000,
+        ]);
+    }
+
+    /** Test 2c: Kasir dapat menutup shift langsung dari laporan tutup shift */
+    public function test_kasir_dapat_menutup_shift_langsung_dari_laporan_tutup_shift()
+    {
+        $kasir = User::factory()->create();
+        $kasir->assignRole('kasir');
+
+        $shift = KasirShift::create([
+            'user_id' => $kasir->id,
+            'modal_awal' => 50000,
+            'status' => 'open',
+            'waktu_buka' => now(),
+        ]);
+
+        $response = $this->actingAs($kasir)->post('/kasir/shift-report/update-cash', [
+            'modal_awal' => 100000,
+            'uang_fisik_aktual' => 500000,
+            'action' => 'close'
+        ]);
+
+        $response->assertRedirect(route('kasir.shift_report'));
+        $this->assertDatabaseHas('kasir_shifts', [
+            'id' => $shift->id,
+            'status' => 'closed',
+            'modal_awal' => 100000,
+            'uang_fisik_aktual' => 500000,
+        ]);
+    }
+
     /** Test 3: Kasir Membayar Pesanan (Pay Order) */
     public function test_kasir_dapat_memproses_pembayaran_pesanan()
     {

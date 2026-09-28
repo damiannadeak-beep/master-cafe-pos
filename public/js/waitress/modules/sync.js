@@ -9,9 +9,26 @@
     'use strict';
 
     let currentOrderTab = 'active';
+    let currentHistoryScope = 'today';
     let isReloadingCards = false;
     let isReloadingCompleted = false;
     let isReloadingVoided = false;
+
+    window.setHistoryScope = function (scope) {
+        currentHistoryScope = scope;
+        document.querySelectorAll('.scope-btn-today').forEach(b => {
+            b.classList.toggle('active', scope === 'today');
+        });
+        document.querySelectorAll('.scope-btn-all').forEach(b => {
+            b.classList.toggle('active', scope === 'all');
+        });
+
+        if (currentOrderTab === 'completed') {
+            window.reloadCompletedOrders(false);
+        } else if (currentOrderTab === 'voided') {
+            window.reloadVoidedOrders(false);
+        }
+    };
 
     function getPesananAktifUrl() {
         return window.WaitressHelper?.getPesananAktifUrl?.() ||
@@ -72,7 +89,7 @@
             refreshBtn.disabled = true;
         }
 
-        fetch(getPesananAktifUrl() + '?history_only=1&_t=' + Date.now(), {
+        fetch(getPesananAktifUrl() + '?history_only=1&scope=' + encodeURIComponent(currentHistoryScope) + '&_t=' + Date.now(), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html,application/xhtml+xml',
@@ -91,7 +108,8 @@
                     window.filterCompletedOrders(searchInput.value);
                 } else {
                     const filterInfo = document.getElementById('completed-filter-info');
-                    if (filterInfo) filterInfo.innerText = `Menampilkan ${items.length} pesanan selesai hari ini`;
+                    const scopeLabel = currentHistoryScope === 'today' ? 'hari ini' : '(semua riwayat)';
+                    if (filterInfo) filterInfo.innerText = `Menampilkan ${items.length} sesi pesanan selesai ${scopeLabel}`;
                 }
             })
             .catch(err => {
@@ -124,10 +142,11 @@
 
         const filterInfo = document.getElementById('completed-filter-info');
         if (filterInfo) {
+            const scopeLabel = currentHistoryScope === 'today' ? 'hari ini' : '(semua)';
             if (term) {
                 filterInfo.innerText = `Ditemukan ${visibleCount} dari ${items.length} pesanan selesai`;
             } else {
-                filterInfo.innerText = `Menampilkan ${items.length} pesanan selesai hari ini`;
+                filterInfo.innerText = `Menampilkan ${items.length} sesi pesanan selesai ${scopeLabel}`;
             }
         }
     };
@@ -146,7 +165,7 @@
             refreshBtn.disabled = true;
         }
 
-        fetch(getPesananAktifUrl() + '?voided_only=1&_t=' + Date.now(), {
+        fetch(getPesananAktifUrl() + '?voided_only=1&scope=' + encodeURIComponent(currentHistoryScope) + '&_t=' + Date.now(), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html,application/xhtml+xml',
@@ -165,7 +184,8 @@
                     window.filterVoidedOrders(searchInput.value);
                 } else {
                     const filterInfo = document.getElementById('voided-filter-info');
-                    if (filterInfo) filterInfo.innerText = `Menampilkan ${items.length} pesanan dibatalkan`;
+                    const scopeLabel = currentHistoryScope === 'today' ? 'hari ini' : '(semua riwayat)';
+                    if (filterInfo) filterInfo.innerText = `Menampilkan ${items.length} pesanan dibatalkan ${scopeLabel}`;
                 }
             })
             .catch(err => {
@@ -306,8 +326,12 @@
                     badgeActive.innerText = data.count;
                 }
                 const badgeCompleted = document.getElementById('tab-count-completed');
-                if (badgeCompleted && typeof data.completed_count !== 'undefined') {
+                if (badgeCompleted && typeof data.completed_count !== 'undefined' && currentHistoryScope === 'today') {
                     badgeCompleted.innerText = data.completed_count;
+                }
+                const badgeVoided = document.getElementById('tab-count-voided');
+                if (badgeVoided && typeof data.voided_count !== 'undefined' && currentHistoryScope === 'today') {
+                    badgeVoided.innerText = data.voided_count;
                 }
 
                 // Inisialisasi hash pertama kali tanpa render ulang

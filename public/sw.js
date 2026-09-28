@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mastercafe-pos-v1';
+const CACHE_NAME = 'mastercafe-pos-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

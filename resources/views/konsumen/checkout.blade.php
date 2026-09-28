@@ -41,7 +41,7 @@
                         <div class="card border-0 rounded-4 mb-4" style="background: #0e1217; border: 1px solid #30363d !important;">
                             <div class="card-body p-3 p-md-4">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="badge rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="background: rgba(13, 202, 240, 0.12); color: #0dcaf0; border: 1px solid rgba(13, 202, 240, 0.35); font-size: 0.74rem;">
+                                    <span class="text-info small fw-semibold d-inline-flex align-items-center">
                                         <i class="bi bi-people-fill me-1"></i> Multi-Pesanan Meja
                                     </span>
                                     <small class="text-white-50" style="font-size: 0.75rem;">Meja memiliki pesanan lain</small>

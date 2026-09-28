@@ -48,22 +48,32 @@ class PosController extends Controller
      */
     public function pesananAktif(Request $request)
     {
-        // 1. Proaktif cek status Midtrans — hanya untuk pesanan yang benar-benar menggunakan Midtrans
-        //    Dibatasi 5 pesanan terbaru dalam 30 menit terakhir agar tidak memblokir halaman
-        $pendingCheckOrders = Pesanan::with(['pembayaran'])
-            ->whereIn('status', ['pending', 'processing'])
-            ->where('created_at', '>=', now()->subMinutes(30))
-            ->whereHas('pembayaran', function ($p) {
-                $p->where('status', '!=', 'paid')
-                  ->where('metode', '!=', 'cash')
-                  ->whereNotNull('midtrans_order_id');
-            })
-            ->latest()
-            ->take(5)
-            ->get();
+        // 1. Proaktif cek status Midtrans hanya jika bukan request AJAX card polling
+        //    dan dibatasi maksimal 1 kali per 15 detik agar tidak memblokir latensi kasir
+        if (!$request->ajax() && !$request->query('cards_only') && !$request->query('history_only') && !$request->query('voided_only')) {
+            $lastCheck = cache()->get('last_pos_midtrans_sync_time');
+            if (!$lastCheck || now()->diffInSeconds($lastCheck) >= 15) {
+                cache()->put('last_pos_midtrans_sync_time', now(), 60);
+                $pendingCheckOrders = Pesanan::with(['pembayaran'])
+                    ->whereIn('status', ['pending', 'processing'])
+                    ->where('created_at', '>=', now()->subMinutes(30))
+                    ->whereHas('pembayaran', function ($p) {
+                        $p->where('status', '!=', 'paid')
+                          ->where('metode', '!=', 'cash')
+                          ->whereNotNull('midtrans_order_id');
+                    })
+                    ->latest()
+                    ->take(3)
+                    ->get();
 
-        foreach ($pendingCheckOrders as $order) {
-            $this->posService->checkAndUpdateMidtransStatus($order);
+                foreach ($pendingCheckOrders as $order) {
+                    try {
+                        $this->posService->checkAndUpdateMidtransStatus($order);
+                    } catch (\Throwable $e) {
+                        Log::warning('[PosController] Gagal sync Midtrans pesananAktif: ' . $e->getMessage());
+                    }
+                }
+            }
         }
 
         // 2. Ambil pesanan aktif via PosService:
@@ -74,22 +84,16 @@ class PosController extends Controller
 
         $groupedOrders = $this->groupActiveOrders($orders);
 
+        $historyScope = $request->query('scope', 'today'); // 'today' (default) atau 'all'
+        $todayOnly = ($historyScope !== 'all');
+
         // 3. Ambil pesanan selesai terbaru (History pesanan selesai untuk Tablet Waitress / Kasir)
         // Hanya pesanan yang sudah selesai dimasak DAN lunas yang masuk ke history selesai
-        $completedOrders = $this->posService->getCompletedOrdersQuery(50)->get();
-
+        $completedOrders = $this->posService->getCompletedOrdersQuery(50, $todayOnly)->get();
         $groupedCompletedOrders = $this->groupCompletedOrders($completedOrders);
 
         // 4. Ambil riwayat pesanan yang dibatalkan / dihapus (Void / Cancelled)
-        $voidedOrders = Pesanan::withTrashed()
-            ->where(function ($q) {
-                $q->whereNotNull('deleted_at')
-                  ->orWhereIn('status', ['cancelled', 'void']);
-            })
-            ->with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir', 'voidLog.kasir'])
-            ->orderByRaw('COALESCE(deleted_at, updated_at) DESC')
-            ->take(50)
-            ->get();
+        $voidedOrders = $this->posService->getVoidedOrdersQuery(50, $todayOnly)->get();
 
         if ($request->query('history_only')) {
             return view('components.waitress.completed-order-card', compact('completedOrders', 'groupedCompletedOrders'))->render();
@@ -103,7 +107,7 @@ class PosController extends Controller
             return view('components.waitress.active-order-card', compact('groupedOrders', 'orders'))->render();
         }
 
-        return view('waitress.pesanan_aktif', compact('groupedOrders', 'orders', 'completedOrders', 'groupedCompletedOrders', 'voidedOrders'));
+        return view('waitress.pesanan_aktif', compact('groupedOrders', 'orders', 'completedOrders', 'groupedCompletedOrders', 'voidedOrders', 'historyScope'));
     }
 
     /**
@@ -128,129 +132,36 @@ class PosController extends Controller
     }
 
     /**
-     * Mengambil jumlah pesanan aktif untuk badge notifikasi
+     * Mengambil jumlah pesanan aktif untuk badge notifikasi (dengan optimasi HTTP ETag)
      */
-    public function activeOrdersCount()
+    public function activeOrdersCount(Request $request)
     {
-        return response()->json($this->posService->getActiveOrdersCountData());
+        $data = $this->posService->getActiveOrdersCountData();
+        $etag = '"' . ($data['hash'] ?? md5(json_encode($data))) . '"';
+
+        if ($request->header('If-None-Match') === $etag) {
+            return response()->noContent(304, ['ETag' => $etag]);
+        }
+
+        return response()->json($data)->header('ETag', $etag);
     }
+
 
     /**
      * Memproses pesanan manual dari Kasir
      */
     public function storeManualOrder(StoreManualOrderRequest $request)
     {
-        $validated = $request->validated();
-
         try {
-            DB::beginTransaction();
-
-            // 2. Tentukan ID Meja terlebih dahulu
-            $idMeja = ($validated['tipe_pesanan'] === 'takeaway') ? null : ($validated['id_meja'] ?? null);
-
-            // 1b. Jika meja ini masih memiliki pesanan lama yang SUDAH LUNAS (paid),
-            // otomatis selesaikan pesanan lama tersebut agar sesi lama tertutup rapi dan tidak tercampur dengan tamu baru ini.
-            if (!empty($idMeja) && $validated['tipe_pesanan'] === 'dine_in') {
-                $oldPaidOrders = Pesanan::where('id_meja', $idMeja)
-                    ->whereIn('status', ['pending', 'processing'])
-                    ->whereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid');
-                    })
-                    ->get();
-
-                foreach ($oldPaidOrders as $oldOrd) {
-                    $oldOrd->update([
-                        'status' => 'completed',
-                        'id_kasir' => auth()->id()
-                    ]);
-                }
-            }
-
-            // 3. Buat Data Pesanan Baru
-            $pesanan = Pesanan::create([
-                'id_konsumen' => null,
-                'id_meja' => $idMeja,
-                'id_kasir' => auth()->id(),
-                'tipe_pesanan' => $validated['tipe_pesanan'],
-                'tanggal' => now(),
-                'status' => 'pending',
-                'promo_id' => $validated['promo_id'] ?? null
-            ]);
-
-            // Otomatis matikan ketersediaan meja jika ini pesanan dine-in
-            if (!empty($idMeja) && $validated['tipe_pesanan'] === 'dine_in') {
-                Meja::where('id', $idMeja)->update(['is_available' => false]);
-            }
-
-            // 3. Proses item pesanan via OrderService (lock stok, kurangi bahan, buat detail)
-            $result = $this->orderService->processOrderItems($pesanan, $validated['items']);
-            $totalSemua = $result['total'];
-            $total_hpp = $result['total_hpp'];
-
-            // 4. Hitung diskon via OrderService
-            $discountAmount = $this->orderService->calculateDiscount(
-                $totalSemua,
-                $validated['promo_id'] ?? null,
-                $validated['items']
+            $result = $this->orderService->createManualOrder(
+                $request->validated(),
+                auth()->id(),
+                $this->paymentService
             );
 
-            $totalBayar = $totalSemua - $discountAmount;
+            $pesanan = $result['pesanan'];
+            $snapData = $result['snap_data'] ?? null;
 
-            // Update total harga dan diskon di tabel pesanan
-            $pesanan->update([
-                'total' => $totalSemua,
-                'discount_amount' => $discountAmount,
-                'total_hpp' => $total_hpp
-            ]);
-
-            // 5. Proses Status Pembayaran
-            $statusBayar = $validated['pembayaran_langsung'] ? 'paid' : 'unpaid';
-            $metodeBayar = !empty($validated['metode_pembayaran']) ? $validated['metode_pembayaran'] : ($validated['pembayaran_langsung'] ? 'cash' : null);
-
-            $uangDiterima = null;
-            $uangKembalian = 0;
-            $catatanKembalian = null;
-
-            if ($validated['pembayaran_langsung'] && $metodeBayar === 'cash') {
-                $isUangPas = !empty($validated['is_uang_pas']);
-                $nominalTunaiInput = $validated['nominal_tunai'] ?? null;
-
-                if ($isUangPas) {
-                    $uangDiterima = $totalBayar;
-                    $uangKembalian = 0;
-                    $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
-                } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
-                    $uangDiterima = (float) $nominalTunaiInput;
-                    $uangKembalian = max(0, $uangDiterima - $totalBayar);
-                    if ($uangKembalian > 0) {
-                        $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
-                    } else {
-                        $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
-                    }
-                }
-            }
-
-            Pembayaran::create([
-                'id_pesanan' => $pesanan->id,
-                'metode' => $metodeBayar,
-                'status' => $statusBayar,
-                'total_bayar' => $totalBayar,
-                'tanggal' => $validated['pembayaran_langsung'] ? now() : null,
-                'uang_diterima' => $uangDiterima,
-                'uang_kembalian' => $uangKembalian,
-                'catatan_kembalian' => $catatanKembalian,
-            ]);
-
-            $snapData = null;
-            if ($metodeBayar === 'qris' && !$validated['pembayaran_langsung']) {
-                try {
-                    $snapData = $this->paymentService->createSnapToken($pesanan);
-                } catch (\Throwable $snapErr) {
-                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal generate Snap token manual order: ' . $snapErr->getMessage());
-                }
-            }
-
-            DB::commit();
             return response()->json([
                 'message' => 'Pesanan manual berhasil diproses.',
                 'id_pesanan' => $pesanan->id,
@@ -260,7 +171,6 @@ class PosController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 422);
         }
     }
@@ -524,114 +434,13 @@ class PosController extends Controller
 
         try {
             DB::beginTransaction();
-            
-            $ids = $request->input('order_ids');
-            if (empty($ids)) {
-                if (is_string($id_pesanan) && str_contains($id_pesanan, ',')) {
-                    $ids = array_filter(array_map('trim', explode(',', $id_pesanan)));
-                } else {
-                    $ids = [$id_pesanan];
-                }
-            }
 
-            $unpaidList = [];
-            $lastPesanan = null;
-            foreach ($ids as $singleId) {
-                $pesanan = Pesanan::with('pembayaran')->find($singleId);
-                if (!$pesanan) continue;
-                if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
-                    $lastPesanan = $pesanan;
-                    continue;
-                }
-                $unpaidList[] = $pesanan;
-            }
-
-            if (empty($unpaidList)) {
-                DB::commit();
-                return response()->json([
-                    'message' => 'Semua pesanan yang dipilih sudah lunas.',
-                    'id_pesanan' => $lastPesanan ? $lastPesanan->id : $id_pesanan
-                ]);
-            }
-
-            $metode = $validated['metode'] ?? 'cash';
-            $isUangPas = !empty($validated['is_uang_pas']);
-            $nominalTunai = isset($validated['nominal_tunai']) && is_numeric($validated['nominal_tunai'])
-                ? (float) $validated['nominal_tunai']
-                : null;
-
-            if (count($unpaidList) === 1) {
-                $lastPesanan = $this->paymentService->processPayment(
-                    $unpaidList[0]->id,
-                    $metode,
-                    $validated['email_pelanggan'] ?? null,
-                    auth()->id(),
-                    $nominalTunai,
-                    $isUangPas
-                );
-            } else {
-                // Multi-order: Hitung total tagihan seluruh pesanan yang belum lunas
-                $totalGroupTagihan = 0;
-                $bills = [];
-                foreach ($unpaidList as $p) {
-                    $bill = (float) (($p->pembayaran && (float)$p->pembayaran->total_bayar > 0)
-                        ? $p->pembayaran->total_bayar
-                        : ($p->total - ($p->discount_amount ?? 0)));
-                    $bills[$p->id] = $bill;
-                    $totalGroupTagihan += $bill;
-                }
-
-                if ($metode === 'cash' && !$isUangPas && $nominalTunai !== null) {
-                    if ($nominalTunai < $totalGroupTagihan) {
-                        throw new \Exception('Nominal uang tunai yang diterima (Rp ' . number_format($nominalTunai, 0, ',', '.') . ') kurang dari total tagihan gabungan (Rp ' . number_format($totalGroupTagihan, 0, ',', '.') . ').');
-                    }
-                    $totalKembalian = max(0, $nominalTunai - $totalGroupTagihan);
-
-                    // Distribusi uang tunai dan kembalian secara konsisten:
-                    // Pesanan ke-2 dan seterusnya dicatat lunas dengan uang pas (uang_diterima = total_bayar, kembalian = 0)
-                    // Pesanan pertama menampung sisa uang tunai dan seluruh uang kembalian gabungan
-                    // Sehingga total uang diterima = nominalTunai dan total kembalian = totalKembalian
-                    $subordersTotal = 0;
-                    for ($i = 1; $i < count($unpaidList); $i++) {
-                        $subordersTotal += $bills[$unpaidList[$i]->id];
-                    }
-                    $firstOrderCash = $nominalTunai - $subordersTotal;
-
-                    // Bayar pesanan pertama
-                    $lastPesanan = $this->paymentService->processPayment(
-                        $unpaidList[0]->id,
-                        'cash',
-                        $validated['email_pelanggan'] ?? null,
-                        auth()->id(),
-                        $firstOrderCash,
-                        false
-                    );
-
-                    // Bayar pesanan lainnya sebagai uang pas
-                    for ($i = 1; $i < count($unpaidList); $i++) {
-                        $this->paymentService->processPayment(
-                            $unpaidList[$i]->id,
-                            $metode,
-                            $validated['email_pelanggan'] ?? null,
-                            auth()->id(),
-                            $bills[$unpaidList[$i]->id],
-                            true
-                        );
-                    }
-                } else {
-                    // Non-tunai atau Uang Pas: setiap pesanan dibayar sesuai tagihannya masing-masing
-                    foreach ($unpaidList as $p) {
-                        $lastPesanan = $this->paymentService->processPayment(
-                            $p->id,
-                            $metode,
-                            $validated['email_pelanggan'] ?? null,
-                            auth()->id(),
-                            $bills[$p->id] ?? null,
-                            true
-                        );
-                    }
-                }
-            }
+            $lastPesanan = $this->paymentService->payOrderGroup(
+                $request->input('order_ids'),
+                $id_pesanan,
+                $validated,
+                auth()->id()
+            );
 
             DB::commit();
             return response()->json([
@@ -702,29 +511,6 @@ class PosController extends Controller
         return view('waitress.kitchen_receipt', compact('order'));
     }
 
-    /**
-     * Menampilkan laporan tutup shift kasir (Delegasi ke ShiftController)
-     */
-    public function shiftReport(ShiftController $shiftController)
-    {
-        return $shiftController->shiftReport();
-    }
-
-    /**
-     * Ekspor Laporan Tutup Shift Kasir ke PDF (Delegasi ke ShiftController)
-     */
-    public function exportShiftReportPdf(ShiftController $shiftController)
-    {
-        return $shiftController->exportShiftReportPdf();
-    }
-
-    /**
-     * Ekspor Laporan Tutup Shift Kasir ke Microsoft Excel (Delegasi ke ShiftController)
-     */
-    public function exportShiftReportExcel(ShiftController $shiftController)
-    {
-        return $shiftController->exportShiftReportExcel();
-    }
 
     /**
      * Memisahkan pesanan (Split Bill)

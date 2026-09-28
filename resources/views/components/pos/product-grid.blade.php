@@ -8,9 +8,11 @@
                 <h5 class="mb-0 fw-bold text-accent"><i class="bi bi-grid-fill me-2"></i>Daftar Produk</h5>
                 
                 <!-- Search Bar -->
-                <div class="input-group" style="max-width: 250px;">
-                    <span class="input-group-text  border-end-0 rounded-start-pill"><i class="bi bi-search text-secondary"></i></span>
-                    <input type="text" id="searchInput" class="form-control  border-start-0 rounded-end-pill" placeholder="Cari menu..." onkeyup="searchMenu(this.value)">
+                <div class="input-group pos-search-box" style="max-width: 250px;">
+                    <span class="input-group-text border-end-0 rounded-start-pill ps-3" style="background-color: #0e1217; border-color: #21262d; color: #8b949e;">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-start-0 rounded-end-pill pos-search-input pe-3" placeholder="Cari menu..." onkeyup="searchMenu(this.value)" autocomplete="off" style="background-color: #0e1217; border-color: #21262d; color: #ffffff;">
                 </div>
             </div>
             

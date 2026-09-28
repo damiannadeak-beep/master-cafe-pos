@@ -296,14 +296,13 @@
                         <div class="card border-0 text-white overflow-hidden shadow"
                              style="background: linear-gradient(145deg, #1c222c, #0e1217); border: 1px solid rgba(192, 142, 92, 0.4) !important; border-radius: 12px;">
                             <div class="p-3">
-                                <!-- Badge Tag Header -->
+                                <!-- Tag Header -->
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="badge px-2 py-1"
-                                          style="background-color: rgba(192, 142, 92, 0.2); color: #e5b98a; border: 1px solid rgba(192, 142, 92, 0.4); font-size: 0.75rem;">
-                                        <i class="bi bi-boxes me-1"></i> PAKET HEMAT COMBO
-                                    </span>
-                                    <span class="badge bg-success" id="previewStatusBadge" style="font-size: 0.7rem;">
-                                        Aktif
+                                    <div class="small fw-semibold d-inline-flex align-items-center" style="color: #c08e5c; letter-spacing: 0.5px; font-size: 0.75rem;">
+                                        <i class="bi bi-boxes me-1.5"></i> PAKET HEMAT COMBO
+                                    </div>
+                                    <span class="small fw-semibold text-success" id="previewStatusBadge" style="font-size: 0.75rem;">
+                                        ● Aktif
                                     </span>
                                 </div>
 
@@ -332,9 +331,9 @@
                                         </div>
                                     </div>
                                     <div class="text-end">
-                                        <span class="badge rounded-pill text-white py-1 px-2 fw-semibold" id="previewSavingsBadge" style="background-color: #1f883d; font-size: 0.8rem;">
+                                        <div class="small fw-semibold text-success" id="previewSavingsBadge" style="font-size: 0.85rem;">
                                             Hemat Rp 0
-                                        </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -457,8 +456,8 @@
             previewDesc.textContent = inputDesc.value.trim() || 'Beli menu paket combo lebih hemat!';
 
             // Status Badge
-            previewStatusBadge.textContent = isActiveSwitch.checked ? 'Aktif' : 'Nonaktif';
-            previewStatusBadge.className = 'badge ' + (isActiveSwitch.checked ? 'bg-success' : 'bg-secondary');
+            previewStatusBadge.textContent = isActiveSwitch.checked ? '● Aktif' : '○ Nonaktif';
+            previewStatusBadge.className = 'small fw-semibold ' + (isActiveSwitch.checked ? 'text-success' : 'text-secondary');
 
             let normalTotal = 0;
             let itemsListHtml = '';
@@ -498,20 +497,19 @@
                     savingsText.className = 'fw-bold text-success';
                     savingsNote.textContent = 'Strategi bundling menarik! Pelanggan hemat Rp ' + savings.toLocaleString('id-ID') + '.';
                     previewSavingsBadge.textContent = `Hemat ${formatRupiah(savings)}`;
-                    previewSavingsBadge.className = 'badge rounded-pill text-white py-1 px-2 fw-semibold';
-                    previewSavingsBadge.style.backgroundColor = '#1f883d';
+                    previewSavingsBadge.className = 'small fw-semibold text-success';
                 } else if (savings === 0) {
                     savingsText.textContent = 'Harga paket sama dengan harga normal (Diskon Rp 0)';
                     savingsText.className = 'fw-bold text-warning';
                     savingsNote.textContent = 'Sebaiknya berikan sedikit potongan harga agar pelanggan tertarik membeli combo.';
                     previewSavingsBadge.textContent = 'Harga Normal';
-                    previewSavingsBadge.className = 'badge bg-secondary py-1 px-2';
+                    previewSavingsBadge.className = 'small fw-medium text-secondary';
                 } else {
                     savingsText.textContent = 'Perhatian: Harga paket lebih mahal dari harga asli total!';
                     savingsText.className = 'fw-bold text-danger';
                     savingsNote.textContent = 'Pastikan harga paket lebih murah dari ' + formatRupiah(normalTotal) + '.';
                     previewSavingsBadge.textContent = 'Harga Lebih Tinggi';
-                    previewSavingsBadge.className = 'badge bg-danger py-1 px-2';
+                    previewSavingsBadge.className = 'small fw-medium text-danger';
                 }
             } else {
                 savingsText.textContent = 'Konsumen Hemat: Rp 0 (0%)';

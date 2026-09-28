@@ -5,7 +5,7 @@
             
             <div class="modal-header border-0 pb-0 px-4 pt-4 d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.75rem;">
+                    <span class="badge rounded-2 px-3 py-1 fw-semibold" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.75rem;">
                         <i class="bi bi-speedometer2 me-1"></i> Informasi Timbangan
                     </span>
                 </div>

@@ -27,7 +27,7 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn btn-primary py-2 fw-semibold rounded-pill">
+                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn btn-primary py-2 fw-semibold rounded-3">
                         <i class="bi bi-bag-check me-2"></i> Pesan Bawa Pulang (Takeaway)
                     </a>
                     <a href="{{ url('/katalog') }}" class="btn btn-outline-secondary py-2 rounded-pill text-white">

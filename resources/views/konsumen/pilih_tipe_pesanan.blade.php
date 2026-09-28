@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="d-grid gap-2 mb-3">
-                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn fw-bold py-2 rounded-pill btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
+                    <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn fw-bold py-2 rounded-3 btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
                         <i class="bi bi-bag-check me-1"></i> Atau Pesan Bawa Pulang (Takeaway)
                     </a>
                 </div>

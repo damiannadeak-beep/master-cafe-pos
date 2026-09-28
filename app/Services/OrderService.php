@@ -238,4 +238,131 @@ class OrderService
 
         return $discountPerPackage * $maxPackageCount;
     }
+
+    /**
+     * Memproses pesanan manual lengkap dari Kasir (Pesanan, Detail, Pembayaran & Snap Token).
+     *
+     * @param  array  $validatedData
+     * @param  int|null  $kasirId
+     * @param  PaymentService|null  $paymentService
+     * @return array  ['pesanan' => Pesanan, 'snap_data' => ?array]
+     *
+     * @throws \Exception
+     */
+    public function createManualOrder(array $validatedData, ?int $kasirId = null, ?PaymentService $paymentService = null): array
+    {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($validatedData, $kasirId, $paymentService) {
+            $idMeja = ($validatedData['tipe_pesanan'] === 'takeaway') ? null : ($validatedData['id_meja'] ?? null);
+
+            // Selesaikan sesi meja lama yang sudah berstatus lunas
+            if (!empty($idMeja) && $validatedData['tipe_pesanan'] === 'dine_in') {
+                $oldPaidOrders = Pesanan::where('id_meja', $idMeja)
+                    ->whereIn('status', ['pending', 'processing'])
+                    ->whereHas('pembayaran', function ($p) {
+                        $p->where('status', 'paid');
+                    })
+                    ->get();
+
+                foreach ($oldPaidOrders as $oldOrd) {
+                    $oldOrd->update([
+                        'status' => 'completed',
+                        'id_kasir' => $kasirId
+                    ]);
+                }
+            }
+
+            // Buat record Pesanan baru
+            $pesanan = Pesanan::create([
+                'id_konsumen' => null,
+                'id_meja' => $idMeja,
+                'id_kasir' => $kasirId,
+                'tipe_pesanan' => $validatedData['tipe_pesanan'],
+                'tanggal' => now(),
+                'status' => 'pending',
+                'promo_id' => $validatedData['promo_id'] ?? null
+            ]);
+
+            // Kunci ketersediaan meja untuk dine-in
+            if (!empty($idMeja) && $validatedData['tipe_pesanan'] === 'dine_in') {
+                \App\Models\Meja::where('id', $idMeja)->update(['is_available' => false]);
+            }
+
+            // Proses item menu & bahan baku
+            $result = $this->processOrderItems($pesanan, $validatedData['items']);
+            $totalSemua = $result['total'];
+            $totalHpp = $result['total_hpp'];
+
+            // Kalkulasi diskon promo
+            $discountAmount = $this->calculateDiscount(
+                $totalSemua,
+                $validatedData['promo_id'] ?? null,
+                $validatedData['items']
+            );
+
+            $totalBayar = $totalSemua - $discountAmount;
+
+            $pesanan->update([
+                'total' => $totalSemua,
+                'discount_amount' => $discountAmount,
+                'total_hpp' => $totalHpp
+            ]);
+
+            // Status dan metode pembayaran
+            $isPaidDirectly = !empty($validatedData['pembayaran_langsung']);
+            $statusBayar = $isPaidDirectly ? 'paid' : 'unpaid';
+            $metodeBayar = !empty($validatedData['metode_pembayaran']) 
+                ? $validatedData['metode_pembayaran'] 
+                : ($isPaidDirectly ? 'cash' : null);
+
+            $uangDiterima = null;
+            $uangKembalian = 0;
+            $catatanKembalian = null;
+
+            if ($isPaidDirectly && $metodeBayar === 'cash') {
+                $isUangPas = !empty($validatedData['is_uang_pas']);
+                $nominalTunaiInput = $validatedData['nominal_tunai'] ?? null;
+
+                if ($isUangPas) {
+                    $uangDiterima = $totalBayar;
+                    $uangKembalian = 0;
+                    $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+                } elseif (!empty($nominalTunaiInput) && is_numeric($nominalTunaiInput)) {
+                    $uangDiterima = (float) $nominalTunaiInput;
+                    $uangKembalian = max(0, $uangDiterima - $totalBayar);
+                    if ($uangKembalian > 0) {
+                        $catatanKembalian = 'Uang Rp ' . number_format($uangDiterima, 0, ',', '.') . ' (Kembalian Rp ' . number_format($uangKembalian, 0, ',', '.') . ')';
+                    } else {
+                        $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
+                    }
+                }
+            }
+
+            \App\Models\Pembayaran::create([
+                'id_pesanan' => $pesanan->id,
+                'metode' => $metodeBayar,
+                'status' => $statusBayar,
+                'total_bayar' => $totalBayar,
+                'tanggal' => $isPaidDirectly ? now() : null,
+                'uang_diterima' => $uangDiterima,
+                'uang_kembalian' => $uangKembalian,
+                'catatan_kembalian' => $catatanKembalian,
+            ]);
+
+            // Generate Snap token jika QRIS bayar nanti
+            $snapData = null;
+            if ($metodeBayar === 'qris' && !$isPaidDirectly && $paymentService) {
+                try {
+                    $snapData = $paymentService->createSnapToken($pesanan);
+                } catch (\Throwable $snapErr) {
+                    \Illuminate\Support\Facades\Log::warning('[OrderService] Gagal generate Snap token manual order: ' . $snapErr->getMessage());
+                }
+            }
+
+            return [
+                'pesanan' => $pesanan,
+                'snap_data' => $snapData,
+            ];
+        });
+    }
 }
+

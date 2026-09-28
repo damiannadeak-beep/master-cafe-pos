@@ -16,18 +16,27 @@
         $allCardItemsServed = ($totalItemCount > 0 && $servedItemCount === $totalItemCount);
     @endphp
     <div class="col-md-6 col-lg-4 order-card-item" id="order-card-{{ $primaryOrder->id }}" data-order-ids="{{ $orderIdsStr }}" data-total="{{ $cardTotalPay }}" data-uang-diterima="{{ $cardUangDiterima }}" data-uang-kembalian="{{ $cardUangKembalian }}" data-total-items="{{ $totalItemCount }}" data-served-items="{{ $servedItemCount }}">
-        <div class="card shadow-sm border-0 h-100 rounded-4">
-            <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center rounded-top-4">
+        <div class="card shadow-sm border-0 h-100 rounded-4 position-relative overflow-hidden" style="background-color: #161b22; border: 1px solid #21262d !important; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+            <!-- Top Status Indicator Strip -->
+            @if($cardData->overall_status === 'pending')
+                <div class="position-absolute top-0 start-0 end-0" style="height: 3px; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+            @elseif($cardData->overall_status === 'processing')
+                <div class="position-absolute top-0 start-0 end-0" style="height: 3px; background: linear-gradient(90deg, #38bdf8, #0284c7);"></div>
+            @elseif($cardData->overall_status === 'completed')
+                <div class="position-absolute top-0 start-0 end-0" style="height: 3px; background: linear-gradient(90deg, #34d399, #059669);"></div>
+            @endif
+
+            <div class="card-header bg-transparent py-3 px-3.5 border-bottom d-flex justify-content-between align-items-center" style="border-color: #21262d !important;">
                 <div>
-                    <h6 class="fw-bold mb-1 d-flex align-items-center flex-wrap gap-1">
+                    <h6 class="fw-bold mb-0.5 text-white d-flex align-items-center flex-wrap gap-1.5 fs-6">
                         @if($cardData->is_grouped)
                             <span>Pesanan #{{ $cardData->order_ids_string }}</span>
-                            <span class="badge bg-info bg-opacity-25 text-info border border-info px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                            <span class="badge rounded-2 px-2 py-0.5" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-size: 0.68rem;">
                                 <i class="bi bi-layers-fill me-1"></i>Gabungan ({{ count($cardData->orders) }}x Order)
                             </span>
                             <button type="button" 
-                                    class="btn btn-sm py-0 px-2 rounded-pill fw-medium d-inline-flex align-items-center gap-1 text-decoration-none border border-info border-opacity-50 text-info" 
-                                    style="background: rgba(13, 202, 240, 0.12); font-size: 0.65rem; height: 20px; line-height: 1;" 
+                                    class="btn btn-sm py-0 px-2 rounded-pill fw-medium d-inline-flex align-items-center gap-1 text-decoration-none" 
+                                    style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.65rem; height: 20px; line-height: 1;" 
                                     onclick="window.toggleAllSubOrders('order-card-{{ $primaryOrder->id }}', {{ json_encode($cardData->order_ids) }})" 
                                     title="Buka / Lipat Semua Rincian Pesanan Meja Ini">
                                 <i class="bi bi-arrows-collapse" style="font-size: 0.7rem !important; line-height: 1;"></i>
@@ -37,55 +46,67 @@
                             <span>Pesanan #{{ $primaryOrder->id }}</span>
                         @endif
                     </h6>
-                    <small class="text-white-50"><i class="bi bi-clock me-1"></i>{{ $cardData->latest_created_at->format('H:i') }} WIB</small>
+                    <small class="text-secondary" style="font-size: 0.75rem;"><i class="bi bi-clock me-1.5 opacity-75"></i> {{ $cardData->latest_created_at->format('H:i') }} WIB</small>
                 </div>
                 <div class="text-end">
                     @if($cardData->overall_status === 'pending')
-                        <span class="badge bg-warning text-white"><i class="bi bi-hourglass-split"></i> PENDING</span>
+                        <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.72rem;">
+                            <i class="bi bi-hourglass-split me-1"></i>PENDING
+                        </span>
                         @if($cardData->is_grouped)
-                            <small class="d-block text-warning fw-semibold mt-0.5" style="font-size: 0.68rem;">+ Menu Baru Masuk</small>
+                            <small class="d-block fw-semibold mt-0.5" style="color: #fbbf24; font-size: 0.68rem;">+ Menu Baru Masuk</small>
                         @endif
                     @elseif($cardData->overall_status === 'processing')
-                        <span class="badge bg-primary"><i class="bi bi-fire"></i> DIMASAK</span>
+                        <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem;">
+                            <i class="bi bi-fire me-1"></i>DIMASAK
+                        </span>
                     @elseif($cardData->overall_status === 'completed')
-                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> SIAP DIHIDANGKAN</span>
+                        <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); font-size: 0.72rem;">
+                            <i class="bi bi-check-circle-fill me-1"></i>SIAP SAJI
+                        </span>
                     @endif
                 </div>
             </div>
             
-            <div class="card-body text-white bg-opacity-50">
-                <div class="p-3 rounded-3 mb-3" style="background-color: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="card-body p-3.5 text-white">
+                <div class="p-3 rounded-3 mb-3" style="background-color: #0e1217; border: 1px solid #21262d;">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(192, 142, 92, 0.15); width: 36px; height: 36px; color: #c08e5c;">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-3 d-flex align-items-center justify-content-center" style="background: rgba(192, 142, 92, 0.12); width: 34px; height: 34px; color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.25);">
                                 <i class="{{ $cardData->tipe_pesanan == 'takeaway' ? 'bi bi-bag-check-fill' : 'bi bi-shop' }}"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0 fw-bold text-white fs-6">
+                                <div class="fw-semibold text-white small" style="font-size: 0.85rem;">
                                     {{ $cardData->tipe_pesanan == 'takeaway' ? 'Takeaway (Bungkus)' : 'Dine-In (Makan di Tempat)' }}
-                                </h6>
-                                <small class="text-secondary" style="font-size: 0.8rem;">
-                                    @if($cardData->tipe_pesanan == 'takeaway')
-                                        <span class="badge rounded-pill text-bg-warning px-2">Bawa Pulang</span>
-                                    @elseif($cardData->tipe_pesanan == 'dine_in' && !$cardData->id_meja)
-                                        <span class="text-danger fw-bold"><i class="bi bi-geo-alt"></i> Belum Pilih Meja</span>
-                                    @else
-                                        @php
-                                            $rawMejaName = trim((string)($cardData->meja->nama_meja_atau_nomor ?? '?'));
-                                            $labelMeja = preg_match('/^meja\b/i', $rawMejaName) ? $rawMejaName : 'Meja ' . $rawMejaName;
-                                        @endphp
-                                        <span class="badge rounded-pill text-bg-secondary px-2">{{ $labelMeja }}</span>
-                                    @endif
-                                </small>
+                                </div>
                             </div>
+                        </div>
+                        <div>
+                            @if($cardData->tipe_pesanan == 'takeaway')
+                                <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); font-size: 0.72rem;">
+                                    <i class="bi bi-bag me-1"></i>Bawa Pulang
+                                </span>
+                            @elseif($cardData->tipe_pesanan == 'dine_in' && !$cardData->id_meja)
+                                <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(248, 113, 113, 0.12); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.25); font-size: 0.72rem;">
+                                    <i class="bi bi-geo-alt me-1"></i>Belum Pilih Meja
+                                </span>
+                            @else
+                                @php
+                                    $rawMejaName = trim((string)($cardData->meja->nama_meja_atau_nomor ?? '?'));
+                                    $labelMeja = preg_match('/^meja\b/i', $rawMejaName) ? $rawMejaName : 'Meja ' . $rawMejaName;
+                                @endphp
+                                <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(192, 142, 92, 0.15); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.3); font-size: 0.75rem;">
+                                    <i class="bi bi-geo-alt-fill me-1"></i>{{ $labelMeja }}
+                                </span>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Informasi Detail Pemesan & No WA -->
-                    <div class="pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-1">
+                    <div class="pt-2 border-top d-flex justify-content-between align-items-center flex-wrap gap-1" style="border-color: #21262d !important;">
                         <div>
-                            <div class="small text-white fw-bold">
-                                <i class="bi bi-person-fill text-warning me-1"></i> Pemesan: <span class="text-white">{{ $cardData->customer_name }}</span>
+                            <div class="small text-secondary">
+                                <i class="bi bi-person me-1 text-secondary opacity-75"></i> Pemesan: <span class="text-white fw-semibold">{{ $cardData->customer_name }}</span>
                             </div>
                             @if(!empty($cardData->guest_phone))
                                 <div class="small text-white-50 mt-1">
@@ -151,11 +172,11 @@
                                                 </div>
                                                 <div class="d-flex align-items-center gap-1.5 ms-auto flex-wrap">
                                                     @if($subOrderPaid)
-                                                        <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(46, 160, 67, 0.2); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.65rem;">
+                                                        <span class="badge rounded-2 px-2 py-1 fw-semibold" style="background: rgba(46, 160, 67, 0.2); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); font-size: 0.65rem;">
                                                             <i class="bi bi-check-circle-fill me-1"></i>Lunas{{ $subOrderMetode ? " ($subOrderMetode)" : '' }}
                                                         </span>
                                                     @else
-                                                        <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(220, 53, 69, 0.2); color: #ff7b72; border: 1px solid rgba(220, 53, 69, 0.35); font-size: 0.65rem;">
+                                                        <span class="badge rounded-2 px-2 py-1 fw-semibold" style="background: rgba(220, 53, 69, 0.2); color: #ff7b72; border: 1px solid rgba(220, 53, 69, 0.35); font-size: 0.65rem;">
                                                             <i class="bi bi-exclamation-circle-fill me-1"></i>Belum Bayar
                                                         </span>
                                                     @endif
@@ -206,7 +227,7 @@
                                     @endphp
                                     <tr id="order-item-row-{{ $item->id }}" 
                                         class="{{ $cardData->is_grouped ? 'suborder-items-' . $subOrder->id : '' }} order-item-row {{ $itemServed ? 'item-served' : '' }}" 
-                                        style="{{ !$subOrderPaid ? 'background: rgba(220, 53, 69, 0.04); border-left: 3px solid rgba(220, 53, 69, 0.6);' : '' }} {{ $itemServed ? 'opacity: 0.9;' : '' }}; border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: all 0.2s ease;">
+                                        style="{{ !$subOrderPaid ? 'background: rgba(248, 113, 113, 0.04); border-left: 3px solid rgba(248, 113, 113, 0.6);' : '' }} {{ $itemServed ? 'opacity: 0.85;' : '' }}; border-bottom: 1px solid #1c2128; transition: all 0.2s ease;">
                                         <!-- Kolom Centang Menu -->
                                         <td class="ps-2 pe-1 py-2 text-center" style="vertical-align: middle;">
                                             <button type="button" 
@@ -217,18 +238,18 @@
                                                     data-card-id="{{ $primaryOrder->id }}"
                                                     onclick="event.stopPropagation(); window.toggleItemServed({{ $item->id }}, this)"
                                                     title="{{ $itemServed ? 'Klik untuk batal centang' : 'Klik untuk centang (Siap/Diantar)' }}"
-                                                    style="width: 24px; height: 24px; border-radius: 6px; background: {{ $itemServed ? 'rgba(46, 160, 67, 0.25)' : 'rgba(255, 255, 255, 0.08)' }}; border: 1px solid {{ $itemServed ? '#2ea043' : 'rgba(255, 255, 255, 0.2)' }} !important; cursor: pointer; transition: all 0.2s ease;">
-                                                <i class="bi {{ $itemServed ? 'bi-check-lg text-success' : 'bi-circle text-white-50' }}" style="font-size: {{ $itemServed ? '1.1rem' : '0.65rem' }};"></i>
+                                                    style="width: 22px; height: 22px; border-radius: 6px; background: {{ $itemServed ? 'rgba(52, 211, 153, 0.2)' : 'rgba(255, 255, 255, 0.04)' }}; border: 1px solid {{ $itemServed ? '#34d399' : '#30363d' }} !important; cursor: pointer; transition: all 0.2s ease;">
+                                                <i class="bi {{ $itemServed ? 'bi-check-lg text-success' : 'bi-circle text-white-50' }}" style="font-size: {{ $itemServed ? '1rem' : '0.6rem' }};"></i>
                                             </button>
                                         </td>
                                         <!-- Kolom Qty -->
-                                        <td class="text-white-50 ps-1 pe-2 text-center" style="vertical-align: middle; font-size: 0.8rem;">
-                                            <span class="item-qty-badge {{ $itemServed ? 'text-success fw-bold' : 'fw-semibold text-white' }}">{{ $item->jumlah }}x</span>
+                                        <td class="ps-1 pe-2 text-center" style="vertical-align: middle; font-size: 0.8rem;">
+                                            <span class="badge rounded px-1.5 py-0.5 item-qty-badge {{ $itemServed ? 'text-success fw-bold' : 'text-white' }}" style="background-color: rgba(255, 255, 255, 0.05); font-size: 0.75rem;">{{ $item->jumlah }}x</span>
                                         </td>
                                         <!-- Kolom Nama Menu & Detail -->
                                         <td class="fw-medium py-2 pe-2" style="vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word;">
                                             <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                                <span class="item-name {{ $itemServed ? 'text-white-50 text-decoration-line-through' : 'text-white' }}" style="font-size: 0.8125rem; line-height: 1.35;">
+                                                <span class="item-name {{ $itemServed ? 'text-secondary text-decoration-line-through' : 'text-white' }}" style="font-size: 0.8125rem; line-height: 1.35;">
                                                     {{ $item->menu->nama_menu ?? 'Menu tidak ditemukan' }}
                                                 </span>
                                                 @if($itemServed)
@@ -244,17 +265,17 @@
                                                 @if(is_array($variants) && count($variants) > 0)
                                                     <div class="text-success mt-0.5" style="font-size: 0.7rem;"><i class="bi bi-tags me-1"></i>
                                                         @foreach($variants as $idx => $v)
-                                                            {{ isset($v['qty']) && $v['qty'] > 1 ? $v['qty'].'x ' : '' }}{{ $v['name'] }}{{ $idx < count($variants) - 1 ? ', ' : '' }}
+                                                             {{ isset($v['qty']) && $v['qty'] > 1 ? $v['qty'].'x ' : '' }}{{ $v['name'] }}{{ $idx < count($variants) - 1 ? ', ' : '' }}
                                                         @endforeach
                                                     </div>
                                                 @endif
                                             @endif
                                             @if($item->catatan)
-                                                <div class="text-danger fst-italic mt-0.5" style="font-size: 0.7rem;"><i class="bi bi-chat-text me-1"></i>Catatan: {{ $item->catatan }}</div>
+                                                <div class="text-warning fst-italic mt-0.5" style="font-size: 0.7rem;"><i class="bi bi-chat-text me-1"></i>Catatan: {{ $item->catatan }}</div>
                                             @endif
                                         </td>
                                         <!-- Kolom Subtotal -->
-                                        <td class="text-end text-white-50 pe-2 text-nowrap py-2" style="vertical-align: middle; font-size: 0.8rem; font-weight: 500;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                        <td class="text-end text-secondary pe-2 text-nowrap py-2" style="vertical-align: middle; font-size: 0.8rem; font-weight: 500;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
                             @endforeach
@@ -263,28 +284,28 @@
                 </div>
             </div>
 
-            <div class="card-footer bg-transparent pt-2.5 pb-3 rounded-bottom-4">
-                <div class="d-flex justify-content-between align-items-center mb-2.5">
-                    <span class="text-white-50" style="font-size: 0.78rem;">Total Tagihan ({{ $cardData->total_items }} Item)</span>
+            <div class="card-footer bg-transparent pt-3 pb-3 px-3.5 rounded-bottom-4" style="border-top: 1px solid #21262d;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-secondary small">Total Tagihan ({{ $cardData->total_items }} Item)</span>
                     <div class="text-end">
                         @if($cardData->total_discount > 0)
-                            <span class="text-danger small text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp {{ number_format($cardData->total_bill + $cardData->total_discount, 0, ',', '.') }}</span>
-                            <h6 class="fw-bold text-primary mb-0" style="font-size: 0.95rem;">Rp {{ number_format($cardData->total_bill, 0, ',', '.') }}</h6>
+                            <span class="text-secondary small text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp {{ number_format($cardData->total_bill + $cardData->total_discount, 0, ',', '.') }}</span>
+                            <span class="fw-bold text-white fs-6">Rp {{ number_format($cardData->total_bill, 0, ',', '.') }}</span>
                         @else
-                            <h6 class="fw-bold text-primary mb-0" style="font-size: 0.95rem;">Rp {{ number_format($cardData->total_bill, 0, ',', '.') }}</h6>
+                            <span class="fw-bold text-white fs-6">Rp {{ number_format($cardData->total_bill, 0, ',', '.') }}</span>
                         @endif
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white-50 small">Status Bayar</span>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-secondary small">Status Bayar</span>
                     @if($cardData->all_paid)
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2.5 py-1 rounded-pill">
+                        <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 0.72rem;">
                             <i class="bi bi-check-circle-fill me-1"></i> Lunas Semua
                         </span>
                     @else
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2.5 py-1 rounded-pill">
-                            <i class="bi bi-x-circle-fill me-1"></i> Belum Lunas (Rp {{ number_format($cardData->unpaid_amount, 0, ',', '.') }})
+                        <span class="badge rounded-2 px-2.5 py-1 fw-medium" style="background-color: rgba(248, 113, 113, 0.12); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.25); font-size: 0.72rem;">
+                            <i class="bi bi-x-circle me-1"></i> Belum Lunas (Rp {{ number_format($cardData->unpaid_amount, 0, ',', '.') }})
                         </span>
                     @endif
                 </div>
@@ -294,7 +315,7 @@
                         $unpaidOrderList = $cardData->orders->filter(fn($o) => !($o->pembayaran && $o->pembayaran->status === 'paid'));
                     @endphp
                     @if($unpaidOrderList->isNotEmpty())
-                        <div class="px-2.5 py-2 mb-2.5 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-1.5" style="background: rgba(220, 53, 69, 0.08); border: 1px dashed rgba(220, 53, 69, 0.35); font-size: 0.75rem;">
+                        <div class="px-2.5 py-2 mb-2.5 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-1.5" style="background: rgba(248, 113, 113, 0.08); border: 1px dashed rgba(248, 113, 113, 0.35); font-size: 0.75rem;">
                             <span class="text-white-50">
                                 <i class="bi bi-info-circle text-danger me-1"></i>Tagihan pending:
                             </span>
@@ -339,85 +360,91 @@
                     </div>
                 @endif
 
-                <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
-                    <!-- Tombol Cetak Tiket Dapur / Koki -->
-                    <a href="{{ route('kasir.order.kitchen', $orderIdsStr) }}" target="_blank" class="btn btn-sm btn-outline-info flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" title="Cetak rincian pesanan untuk Koki / Barista">
-                        <i class="bi bi-journal-text me-1"></i> Tiket Dapur / Koki
-                    </a>
-
-                    @if($cardData->overall_status === 'pending')
-                        @php
-                            $pendingOrders = $cardData->orders->filter(fn($o) => $o->status === 'pending');
-                            $pendingIdsStr = implode(',', $pendingOrders->pluck('id')->toArray());
-                        @endphp
-                        <button type="button" class="btn btn-sm btn-primary flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.updateOrderStatus('{{ $pendingIdsStr ?: $orderIdsStr }}', 'processing', this)">
-                            <i class="bi bi-fire me-1"></i> {{ $cardData->is_grouped ? 'Konfirmasi & Dimasak (Semua)' : 'Konfirmasi & Dimasak' }}
-                        </button>
-                    @endif
-                    
-                    @if($cardData->overall_status === 'processing')
-                        @php
-                            $processingOrders = $cardData->orders->filter(fn($o) => $o->status === 'processing');
-                            $processingIdsStr = implode(',', $processingOrders->pluck('id')->toArray());
-                        @endphp
-                        <button type="button" 
-                                id="btn-complete-order-{{ $primaryOrder->id }}"
-                                class="btn btn-sm {{ $allCardItemsServed ? 'btn-success' : 'btn-outline-success' }} flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center gap-1.5" 
-                                data-total-items="{{ $totalItemCount }}"
-                                data-served-items="{{ $servedItemCount }}"
-                                data-all-served="{{ $allCardItemsServed ? '1' : '0' }}"
-                                onclick="window.confirmCompleteOrder('{{ $processingIdsStr ?: $orderIdsStr }}', this)">
-                            <i class="bi bi-check2-all"></i>
-                            <span class="btn-text">
-                                {{ $cardData->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan' : ($cardData->is_grouped ? 'Selesai Dimasak (Semua)' : 'Selesai Dimasak') }}
-                            </span>
-                            <span class="badge {{ $allCardItemsServed ? 'bg-white text-success' : 'bg-secondary bg-opacity-50 text-white' }} rounded-pill py-0 px-1.5 ms-1 counter-badge" style="font-size: 0.65rem;">
-                                {{ $servedItemCount }}/{{ $totalItemCount }} Siap
-                            </span>
-                        </button>
-                    @endif
-
-                    @if(!$cardData->all_paid)
-                        @php
-                            $unpaidSubOrdersData = $cardData->orders
-                                ->filter(fn($o) => !($o->pembayaran && $o->pembayaran->status === 'paid'))
-                                ->values()
-                                ->map(function($o, $idx) use ($cardData) {
-                                    $oBill = (float) (($o->pembayaran && (float)$o->pembayaran->total_bayar > 0)
-                                        ? $o->pembayaran->total_bayar
-                                        : ($o->total - ($o->discount_amount ?? 0)));
-                                    $itemsSummary = $o->detail_pesanan->map(fn($d) => $d->jumlah . 'x ' . ($d->menu?->nama_menu ?? 'Item'))->take(3)->implode(', ');
-                                    if ($o->detail_pesanan->count() > 3) {
-                                        $itemsSummary .= ' +' . ($o->detail_pesanan->count() - 3) . ' lainnya';
-                                    }
-                                    return [
-                                        'id' => $o->id,
-                                        'label' => ($idx === 0 ? 'Pesanan Awal' : 'Tambahan') . ' (#' . $o->id . ')',
-                                        'customer' => $o->customer_name ?: ($cardData->customer_name ?: 'Tamu'),
-                                        'total' => (int) $oBill,
-                                        'summary' => $itemsSummary
-                                    ];
-                                })->values()->toArray();
-                        @endphp
-                        <button type="button" class="btn btn-sm btn-outline-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick='window.payGroupOrders("{{ $orderIdsStr }}", {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }}, @json($unpaidSubOrdersData))'>
-                            <i class="bi bi-cash-stack me-1"></i> Terima Bayar
-                        </button>
-                        @if($cardData->can_void)
-                            <button type="button" class="btn btn-sm btn-danger flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick='window.voidOrder({{ $cardData->primary_void_id }}, @json($cardData->void_order_options))' title="Void / Batalkan Pesanan Kasir">
-                                <i class="bi bi-trash me-1"></i> Void
-                            </button>
-                        @endif
-                    @else
-                        @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
-                        @if($printerActive)
-                            <button type="button" class="btn btn-sm btn-info text-white flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center" onclick="window.printThermal({{ $primaryOrder->id }})">
-                                <i class="bi bi-printer me-1"></i> Cetak Thermal
-                            </button>
-                        @endif
-                        <a href="{{ route('kasir.order.receipt', $orderIdsStr) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 fw-bold btn-touch d-flex justify-content-center align-items-center">
-                            <i class="bi bi-file-earmark-text me-1"></i> Struk Kasir
+                <!-- Action Buttons: Clean 2-row layout with clear visual hierarchy -->
+                <div class="d-flex flex-column gap-2 pt-2 border-top" style="border-color: #21262d !important;">
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Tiket Dapur / Koki -->
+                        <a href="{{ route('kasir.order.kitchen', $orderIdsStr) }}" target="_blank" class="btn btn-sm px-2.5 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 text-decoration-none shadow-sm flex-fill" style="background-color: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.78rem;" title="Cetak rincian pesanan untuk Koki / Barista">
+                            <i class="bi bi-journal-text"></i> Tiket Dapur
                         </a>
-                    @endif
+
+                        @if($cardData->overall_status === 'pending')
+                            @php
+                                $pendingOrders = $cardData->orders->filter(fn($o) => $o->status === 'pending');
+                                $pendingIdsStr = implode(',', $pendingOrders->pluck('id')->toArray());
+                            @endphp
+                            <button type="button" class="btn btn-primary btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" style="font-size: 0.78rem;" onclick="window.updateOrderStatus('{{ $pendingIdsStr ?: $orderIdsStr }}', 'processing', this)">
+                                <i class="bi bi-fire"></i> {{ $cardData->is_grouped ? 'Konfirmasi & Masak (Semua)' : 'Konfirmasi & Masak' }}
+                            </button>
+                        @endif
+
+                        @if($cardData->overall_status === 'processing')
+                            @php
+                                $processingOrders = $cardData->orders->filter(fn($o) => $o->status === 'processing');
+                                $processingIdsStr = implode(',', $processingOrders->pluck('id')->toArray());
+                            @endphp
+                            <button type="button" 
+                                    id="btn-complete-order-{{ $primaryOrder->id }}"
+                                    class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" 
+                                    style="background-color: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); color: #34d399; font-size: 0.78rem;"
+                                    data-total-items="{{ $totalItemCount }}"
+                                    data-served-items="{{ $servedItemCount }}"
+                                    data-all-served="{{ $allCardItemsServed ? '1' : '0' }}"
+                                    onclick="window.confirmCompleteOrder('{{ $processingIdsStr ?: $orderIdsStr }}', this)">
+                                <i class="bi bi-check2-all"></i>
+                                <span class="btn-text">
+                                    {{ $cardData->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan' : ($cardData->is_grouped ? 'Selesai Dimasak (Semua)' : 'Selesai Dimasak') }}
+                                </span>
+                                <span class="badge rounded-2 py-0.5 px-1.5 ms-1 counter-badge" style="background: rgba(52, 211, 153, 0.25); color: #34d399; font-size: 0.65rem;">
+                                    {{ $servedItemCount }}/{{ $totalItemCount }}
+                                </span>
+                            </button>
+                        @endif
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @if(!$cardData->all_paid)
+                            @php
+                                $unpaidSubOrdersData = $cardData->orders
+                                    ->filter(fn($o) => !($o->pembayaran && $o->pembayaran->status === 'paid'))
+                                    ->values()
+                                    ->map(function($o, $idx) use ($cardData) {
+                                        $oBill = (float) (($o->pembayaran && (float)$o->pembayaran->total_bayar > 0)
+                                            ? $o->pembayaran->total_bayar
+                                            : ($o->total - ($o->discount_amount ?? 0)));
+                                        $itemsSummary = $o->detail_pesanan->map(fn($d) => $d->jumlah . 'x ' . ($d->menu?->nama_menu ?? 'Item'))->take(3)->implode(', ');
+                                        if ($o->detail_pesanan->count() > 3) {
+                                            $itemsSummary .= ' +' . ($o->detail_pesanan->count() - 3) . ' lainnya';
+                                        }
+                                        return [
+                                            'id' => $o->id,
+                                            'label' => ($idx === 0 ? 'Pesanan Awal' : 'Tambahan') . ' (#' . $o->id . ')',
+                                            'customer' => $o->customer_name ?: ($cardData->customer_name ?: 'Tamu'),
+                                            'total' => (int) $oBill,
+                                            'summary' => $itemsSummary
+                                        ];
+                                    })->values()->toArray();
+                            @endphp
+                            <button type="button" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-grow-1" style="background-color: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.25); color: #34d399; font-size: 0.78rem;" onclick='window.payGroupOrders("{{ $orderIdsStr }}", {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }}, @json($unpaidSubOrdersData))'>
+                                <i class="bi bi-cash-stack"></i> Terima Bayar
+                            </button>
+                            @if($cardData->can_void)
+                                <button type="button" class="btn btn-sm px-2.5 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm" style="background-color: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.25); color: #f87171; font-size: 0.78rem; min-width: 72px;" onclick='window.voidOrder({{ $cardData->primary_void_id }}, @json($cardData->void_order_options))' title="Void / Batalkan Pesanan Kasir">
+                                    <i class="bi bi-trash3"></i> Void
+                                </button>
+                            @endif
+                        @else
+                            @php $printerActive = \App\Models\Setting::getVal('printer_active') == '1'; @endphp
+                            @if($printerActive)
+                                <button type="button" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" style="background-color: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.78rem;" onclick="window.printThermal({{ $primaryOrder->id }})">
+                                    <i class="bi bi-printer"></i> Cetak Thermal
+                                </button>
+                            @endif
+                            <a href="{{ route('kasir.order.receipt', $orderIdsStr) }}" target="_blank" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" style="background-color: rgba(192, 142, 92, 0.12); border: 1px solid rgba(192, 142, 92, 0.25); color: #c08e5c; font-size: 0.78rem;">
+                                <i class="bi bi-file-earmark-text"></i> Struk Kasir
+                            </a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

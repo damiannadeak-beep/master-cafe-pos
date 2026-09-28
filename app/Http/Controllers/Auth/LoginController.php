@@ -50,7 +50,31 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
+    }
+
+    /**
+     * Keluar dari sesi secara aman & anggun.
+     * Mencegah error 419 Page Expired atau loop redirect jika sesi sudah kadaluarsa.
+     */
+    public function logout(Request $request)
+    {
+        $redirectUrl = '/';
+
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            if ($user->hasRole('pemilik')) {
+                $redirectUrl = route('owner.login');
+            } elseif ($user->hasRole('kasir')) {
+                $redirectUrl = route('kasir.login');
+            }
+
+            \Illuminate\Support\Facades\Auth::logout();
+        }
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect($redirectUrl);
     }
 
     /**

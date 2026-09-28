@@ -10,10 +10,10 @@
                 </div>
                 <div class="d-flex justify-content-between align-items-center px-4 pt-3 pt-md-4 pb-2">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-pill px-3 py-1 fw-semibold" id="variantModalCategoryBadge" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.75rem;">
+                        <span class="badge rounded-2 px-3 py-1 fw-semibold" id="variantModalCategoryBadge" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.75rem;">
                             Menu
                         </span>
-                        <span id="variantModalStockBadge" class="badge rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.75rem;">
+                        <span id="variantModalStockBadge" class="badge rounded-2 px-3 py-1 fw-semibold" style="font-size: 0.75rem;">
                             Tersedia
                         </span>
                     </div>

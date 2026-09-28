@@ -41,9 +41,16 @@
 
                 <hr>
 
-                @if(!isset($settings['warung_latitude']) || !isset($settings['warung_longitude']))
+                @php 
+                    $targetLat = $settings['warung_latitude'] ?? ($settings['cafe_latitude'] ?? ($settings['lokasi_utama_lat'] ?? null));
+                    $targetLng = $settings['warung_longitude'] ?? ($settings['cafe_longitude'] ?? ($settings['lokasi_utama_lng'] ?? null));
+                    $hasCoords = !empty($targetLat) && !empty($targetLng);
+                    $radiusM = $settings['absensi_radius_meter'] ?? 25;
+                @endphp
+
+                @if(!$hasCoords)
                     <div class="alert alert-warning">
-                        Admin belum mengatur titik kordinat warung. Anda tidak dapat melakukan absensi.
+                        Admin / Owner belum mengatur titik koordinat kafe di Pengaturan GPS. Anda belum dapat melakukan absensi.
                     </div>
                 @else
                     @if(!$absensi || !$absensi->jam_keluar)
@@ -58,7 +65,7 @@
                                 </button>
                             </div>
                             <div class="mt-3 small text-white-50" id="lokasi-status">
-                                Membutuhkan akses lokasi (GPS) untuk validasi jarak 5 meter dari warung.
+                                Membutuhkan akses lokasi (GPS) untuk validasi jarak maksimal {{ $radiusM }} meter dari kafe.
                             </div>
                         </form>
                     @else

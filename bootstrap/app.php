@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_shift_open' => \App\Http\Middleware\EnsureShiftOpen::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'logout',
+        ]);
+
         $middleware->redirectGuestsTo(function ($request) {
             $ownerSlug = config('auth.owner_path', 'ruang-owner-x92k');
             $kasirSlug = config('auth.kasir_path', 'pos-kasir-gate-88');
@@ -38,5 +42,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('logout')) {
+                return redirect('/');
+            }
+            return redirect()->back()
+                ->withInput($request->except('_token', 'password', 'password_confirmation'))
+                ->with('error', 'Sesi halaman telah berakhir karena tidak aktif. Halaman telah disegarkan, silakan coba kembali.');
+        });
     })->create();

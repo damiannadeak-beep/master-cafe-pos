@@ -1,239 +1,240 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    /* Premium Dark & Bronze Hero Section */
-    .hero-mastercafe {
-        padding: 6rem 0 5rem 0;
-        background: linear-gradient(180deg, #0e1217 0%, #161b22 100%);
-        border-bottom: 1px solid #21262d;
-        position: relative;
-        overflow: hidden;
-    }
+@php
+    $namaTempat = \App\Models\Setting::getVal('lokasi_utama_nama') ?? 'Master Cafe';
+    $alamat = \App\Models\Setting::getVal('lokasi_utama_alamat') ?? "Jl. Bantan, Senggoro, Bengkalis, Riau, Indonesia 28711";
+    $jamBuka = \App\Models\Setting::getVal('lokasi_jam_operasional') ?? 'Setiap Hari: 10:00 - 23:00 WIB';
+@endphp
 
-    /* Abstract circles for background texture */
-    .hero-mastercafe::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -10%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(178,122,77,0.15) 0%, rgba(17,20,24,0) 70%);
-        border-radius: 50%;
-        z-index: 0;
-    }
+<!-- 1. Hero Section: Editorial Modern Layout -->
+<section class="py-5 position-relative overflow-hidden border-bottom" style="background-color: #0e1217; border-color: #21262d !important;">
+    <div class="position-absolute top-0 start-50 translate-middle-x w-100 h-100" style="background: radial-gradient(circle at 30% 20%, rgba(192, 142, 92, 0.08) 0%, transparent 60%); pointer-events: none;"></div>
+    
+    <div class="container py-2 py-lg-4 position-relative z-index-1">
+        <div class="row align-items-center g-4 g-lg-5">
+            
+            <!-- Kolom Teks Editorial -->
+            <div class="col-lg-6">
+                <span class="text-uppercase fw-semibold d-inline-block mb-2" style="color: #c08e5c; font-size: 0.8rem; letter-spacing: 2px;">
+                    Specialty Coffee & Space • Bengkalis
+                </span>
+                
+                <h1 class="display-4 fw-bold text-white mb-3" style="line-height: 1.15; letter-spacing: -0.5px;">
+                    Cita Rasa Otentik, Ruang Ternyaman di Bengkalis
+                </h1>
+                
+                <p class="text-secondary fs-6 mb-4" style="line-height: 1.75; font-weight: 300; max-width: 520px;">
+                    Selamat datang di {{ $namaTempat }}. Tempat di mana kopi berkualitas racikan barista, hidangan segar, dan atmosfer tenang berpadu untuk setiap momen kerja dan kebersamaan Anda.
+                </p>
 
-    .hero-mastercafe::after {
-        content: '';
-        position: absolute;
-        bottom: -20%;
-        right: -10%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(178,122,77,0.1) 0%, rgba(17,20,24,0) 70%);
-        border-radius: 50%;
-        z-index: 0;
-    }
+                <!-- Tombol Aksi Utama Tunggal -->
+                <div>
+                    <a href="/katalog" class="btn px-4 py-2.5 rounded-3 fw-semibold text-white d-inline-flex align-items-center gap-2 text-decoration-none shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.92rem;">
+                        <i class="bi bi-book"></i> Buka Katalog Menu
+                    </a>
+                </div>
+            </div>
 
-    .hero-content {
-        position: relative;
-        z-index: 1;
-    }
+            <!-- Kolom Visual Fotografi Kafe Nyata (Master Cafe Bengkalis) -->
+            <div class="col-lg-6">
+                <div class="position-relative rounded-4 overflow-hidden shadow-lg hover-lift" style="border: 1px solid rgba(255, 255, 255, 0.12); aspect-ratio: 4/3; background-color: #161b22;">
+                    <img src="{{ asset('images/cafe_exterior.jpg') }}" alt="Gedung & Suasana Master Cafe Bengkalis" class="w-100 h-100" style="object-fit: cover; object-position: center;">
+                    
+                    <!-- Overlay Gradien Lembut Bawah -->
+                    <div class="position-absolute bottom-0 start-0 w-100 p-3 p-md-4" style="background: linear-gradient(180deg, transparent 0%, rgba(14, 18, 23, 0.9) 100%);">
+                        <div class="d-flex align-items-center justify-content-between text-white">
+                            <div>
+                                <span class="d-block small text-white-50" style="font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase;">Gedung & Suasana Kafe</span>
+                                <span class="fw-semibold small">Lantai 1 Indoor & Rooftop Lantai 2</span>
+                            </div>
+                            <span class="text-white-50 small fw-medium" style="font-size: 0.75rem;">
+                                Senggoro, Bengkalis
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    .badge-premium {
-        background: rgba(178, 122, 77, 0.1);
-        color: #c08e5c;
-        border: 1px solid rgba(178, 122, 77, 0.3);
-        font-size: 0.875rem;
-        font-weight: 600;
-        padding: 0.5rem 1.5rem;
-        border-radius: 999px;
-        letter-spacing: 1px;
-    }
-
-    .hero-title-premium {
-        font-family: 'Rye', serif !important;
-        font-weight: 400;
-        font-size: 4.5rem;
-        color: #ffffff;
-        line-height: 1.1;
-        letter-spacing: 2px;
-        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .hero-title-cursive {
-        font-family: 'Alex Brush', cursive !important;
-        color: #c08e5c;
-        font-size: 4.2rem;
-        display: block;
-        margin-top: -15px;
-        text-shadow: 0 4px 15px rgba(178,122,77,0.3);
-    }
-
-    @media (max-width: 768px) {
-        .hero-title-premium {
-            font-size: 3rem;
-            letter-spacing: 1px;
-        }
-        .hero-title-cursive {
-            font-size: 2.8rem;
-            margin-top: -10px;
-        }
-    }
-
-    .hero-sub-premium {
-        color: #a0aec0;
-        font-size: 1.1rem;
-        line-height: 1.75;
-        max-width: 660px;
-    }
-
-    /* Action Buttons */
-    .btn-premium-primary {
-        background: #c08e5c;
-        color: #ffffff !important;
-        font-weight: 600;
-        padding: 1rem 2.5rem;
-        border-radius: 999px;
-        border: none;
-        box-shadow: 0 8px 20px rgba(178, 122, 77, 0.25);
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-    }
-
-    .btn-premium-primary:hover {
-        background: #986c43;
-        transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(178, 122, 77, 0.4);
-    }
-
-    .btn-premium-outline {
-        background: transparent;
-        color: #c08e5c !important;
-        font-weight: 600;
-        padding: 1rem 2.5rem;
-        border-radius: 999px;
-        border: 1.5px solid #c08e5c;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-    }
-
-    .btn-premium-outline:hover {
-        background: rgba(178, 122, 77, 0.1);
-        transform: translateY(-2px);
-    }
-
-    /* 3 Pilar Feature Cards */
-    .pillar-card {
-        background: #161b22;
-        border: 1px solid #21262d;
-        border-radius: 1.5rem;
-        padding: 2.5rem 2rem;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    .pillar-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(178, 122, 77, 0.15);
-        border-color: #c08e5c;
-    }
-
-    .pillar-icon-box {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: rgba(178, 122, 77, 0.1);
-        border: 1px solid rgba(178, 122, 77, 0.3);
-        color: #c08e5c;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 0 20px rgba(178, 122, 77, 0.2);
-    }
-
-    .text-bronze {
-        color: #c08e5c !important;
-    }
-</style>
-
-<!-- Hero Section -->
-<section class="hero-mastercafe">
-    <div class="container text-center hero-content">
-        <h1 class="hero-title-premium mb-2">
-            MASTER
-            <span class="font-cursive hero-title-cursive">Cafe</span>
-        </h1>
-
-        <p class="hero-sub-premium mx-auto mb-4 mt-4">
-            Pengalaman bersantai dengan sentuhan klasik dan modern. Nikmati hidangan spesial kami melalui layanan pemesanan digital yang mulus dan elegan.
-        </p>
-        <p class="mx-auto mb-5 text-light fw-semibold" style="letter-spacing: 1px;">
-            <i class="bi bi-clock text-bronze me-1"></i> Buka Setiap Hari: 10:00 AM - 23:00 PM
-        </p>
-
-        <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="/katalog" class="btn btn-premium-primary text-decoration-none btn-touch">
-                <i class="bi bi-book-half me-2"></i> Eksplorasi Menu
-            </a>
-            <a href="/lokasi" class="btn btn-premium-outline text-decoration-none btn-touch">
-                <i class="bi bi-geo-alt me-2"></i> Kunjungi Kami
-            </a>
         </div>
     </div>
 </section>
 
-<!-- 3 Pilar Pengalaman -->
-<section class="py-5" style="background-color: #0e1217;">
-    <div class="container">
+<!-- 2. Structured Info Bar: Rapi, Terstruktur & Terintegrasi (Bukan Floating Pill) -->
+<section class="border-bottom" style="background-color: #12161d; border-color: #21262d !important;">
+    <div class="container py-3">
+        <div class="row g-3 g-md-0 text-white">
+            
+            <!-- Info 1: Jam Operasional -->
+            <div class="col-6 col-md-3 border-end-md" style="border-color: #21262d !important;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+                        <i class="bi bi-clock fs-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Jam Buka</span>
+                        <span class="fw-semibold small text-white">{{ $jamBuka }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info 2: Lokasi Kafe -->
+            <div class="col-6 col-md-3 border-end-md" style="border-color: #21262d !important;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+                        <i class="bi bi-geo-alt fs-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Alamat Kafe</span>
+                        <span class="fw-semibold small text-white text-truncate d-block" style="max-width: 170px;">Senggoro, Bengkalis</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info 3: Fasilitas Kerja -->
+            <div class="col-6 col-md-3 border-end-md" style="border-color: #21262d !important;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+                        <i class="bi bi-wifi fs-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Konektivitas</span>
+                        <span class="fw-semibold small text-white">Free WiFi & Colokan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info 4: Layanan Pemesanan -->
+            <div class="col-6 col-md-3">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+                        <i class="bi bi-qr-code fs-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Pemesanan</span>
+                        <span class="fw-semibold small text-white">Pesan QR & Takeaway</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- 3. Tentang Kami & Tim: Editorial Story Section -->
+<section class="py-5 border-bottom" style="background-color: #0e1217; border-color: #21262d !important;">
+    <div class="container py-3">
+        <div class="row align-items-center g-4 g-lg-5">
+            
+            <!-- Foto Tim & Keluarga Master Cafe -->
+            <div class="col-lg-6 order-2 order-lg-1">
+                <div class="rounded-4 overflow-hidden shadow-lg position-relative hover-lift" style="border: 1px solid rgba(255, 255, 255, 0.12); aspect-ratio: 16/10; background-color: #161b22;">
+                    <img src="{{ asset('images/cafe_team.jpg') }}" alt="Tim & Keluarga Master Cafe Bengkalis" class="w-100 h-100" style="object-fit: cover; object-position: center 30%;">
+                    
+                    <!-- Overlay Caption -->
+                    <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(180deg, transparent 0%, rgba(14, 18, 23, 0.92) 100%);">
+                        <div class="d-flex align-items-center justify-content-between text-white">
+                            <div>
+                                <span class="d-block small text-white-50" style="font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase;">Keramahan Bengkalis</span>
+                                <span class="fw-semibold small">Keluarga Besar {{ $namaTempat }}</span>
+                            </div>
+                            <span class="text-white-50 small fw-medium" style="font-size: 0.75rem;">
+                                Warm Hospitality
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Narasi Tentang Tim & Pelayanan -->
+            <div class="col-lg-6 order-1 order-lg-2">
+                <span class="text-uppercase fw-semibold" style="color: #c08e5c; font-size: 0.78rem; letter-spacing: 1.5px;">Tentang Kami & Tim</span>
+                <h2 class="fw-bold text-white mt-1 mb-3 display-6">Ketulusan di Balik Setiap Sajian</h2>
+                <p class="text-secondary small mb-4 lh-base" style="font-size: 0.92rem; line-height: 1.75;">
+                    {{ $namaTempat }} tumbuh dari semangat kebersamaan dan dedikasi untuk menghadirkan tempat berkumpul paling nyaman di Bengkalis. Di balik setiap cangkir kopi nikmat dan hidangan lezat yang tersaji, ada tim yang bekerja dengan senyuman tulus dan komitmen untuk membuat kunjungan Anda selalu berkesan.
+                </p>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background-color: #161b22; border: 1px solid #21262d;">
+                            <h6 class="fw-semibold text-white mb-1"><i class="bi bi-people-fill text-warning me-2"></i>Pelayanan Hangat</h6>
+                            <p class="text-secondary small mb-0" style="font-size: 0.78rem;">Menyambut setiap pengunjung layaknya keluarga dengan ramah dan penuh perhatian.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background-color: #161b22; border: 1px solid #21262d;">
+                            <h6 class="fw-semibold text-white mb-1"><i class="bi bi-heart-fill text-danger me-2"></i>Dibuat Sepenuh Hati</h6>
+                            <p class="text-secondary small mb-0" style="font-size: 0.78rem;">Racikan kopi barista dan sajian dapur diolah segar dengan standar mutu terbaik.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+<!-- 5. Layanan & Panduan Memesan di Kafe -->
+<section class="py-5 border-bottom" style="background-color: #0e1217; border-color: #21262d !important;">
+    <div class="container py-2">
         <div class="text-center mb-5">
-            <span class="font-cursive text-bronze fs-2 d-block mb-2">Layanan Spesial</span>
-            <h2 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">Cita Rasa & Kenyamanan</h2>
+            <span class="text-uppercase fw-semibold" style="color: #c08e5c; font-size: 0.75rem; letter-spacing: 1.5px;">Kemudahan Layanan</span>
+            <h3 class="fw-bold text-white mt-1 mb-2">Cara Memesan Saat Berkunjung</h3>
+            <p class="text-secondary small mb-0 mx-auto" style="max-width: 500px;">
+                Nikmati kenyamanan memesan mandiri tanpa perlu antre di kasir.
+            </p>
         </div>
 
         <div class="row g-4 justify-content-center">
-            
-            <!-- Pilar 1 -->
+            <!-- Langkah 1 -->
             <div class="col-lg-4 col-md-6">
-                <div class="pillar-card h-100 text-center">
-                    <div class="pillar-icon-box mx-auto">
-                        <i class="bi bi-fire fs-2"></i>
+                <div class="card border-0 rounded-3 p-4 h-100" style="background-color: #161b22; border: 1px solid #21262d !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 44px; height: 44px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.25);">
+                            <i class="bi bi-qr-code-scan fs-5"></i>
+                        </div>
+                        <span class="fw-bold text-white-50" style="font-size: 1.1rem;">01</span>
                     </div>
-                    <h4 class="text-white mb-3 fw-bold">Sajian Premium</h4>
-                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
-                        Kopi dan hidangan racikan khusus yang dibuat dengan bahan berkualitas tinggi untuk memanjakan lidah Anda.
+                    <h6 class="fw-semibold text-white mb-1">Pilih Meja & Scan QR</h6>
+                    <span class="text-secondary d-block mb-3" style="font-size: 0.78rem;">Pesan langsung dari smartphone</span>
+                    <p class="text-secondary small mb-0 lh-base">
+                        Silakan pilih tempat duduk favorit Anda, lalu pindai stiker kode QR di atas meja dengan kamera ponsel untuk memilih menu.
                     </p>
                 </div>
             </div>
 
-            <!-- Pilar 2 -->
+            <!-- Langkah 2 -->
             <div class="col-lg-4 col-md-6">
-                <div class="pillar-card h-100 text-center">
-                    <div class="pillar-icon-box mx-auto">
-                        <i class="bi bi-qr-code-scan fs-2"></i>
+                <div class="card border-0 rounded-3 p-4 h-100" style="background-color: #161b22; border: 1px solid #21262d !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 44px; height: 44px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.25);">
+                            <i class="bi bi-cup-hot fs-5"></i>
+                        </div>
+                        <span class="fw-bold text-white-50" style="font-size: 1.1rem;">02</span>
                     </div>
-                    <h4 class="text-white mb-3 fw-bold">Pesan Dari Meja</h4>
-                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
-                        Pindai kode QR di meja Anda dan nikmati kemudahan memesan menu secara digital tanpa perlu beranjak.
+                    <h6 class="fw-semibold text-white mb-1">Pesanan Diproses & Diantar</h6>
+                    <span class="text-secondary d-block mb-3" style="font-size: 0.78rem;">Duduk santai di tempat Anda</span>
+                    <p class="text-secondary small mb-0 lh-base">
+                        Pesanan langsung masuk ke sistem dapur dan barista. Pelayan akan mengantarkan sajian lezat langsung ke meja Anda.
                     </p>
                 </div>
             </div>
 
-            <!-- Pilar 3 -->
+            <!-- Langkah 3 -->
             <div class="col-lg-4 col-md-6">
-                <div class="pillar-card h-100 text-center">
-                    <div class="pillar-icon-box mx-auto">
-                        <i class="bi bi-moon-stars fs-2"></i>
+                <div class="card border-0 rounded-3 p-4 h-100" style="background-color: #161b22; border: 1px solid #21262d !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 44px; height: 44px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.25);">
+                            <i class="bi bi-bag-check fs-5"></i>
+                        </div>
+                        <span class="fw-bold text-white-50" style="font-size: 1.1rem;">03</span>
                     </div>
-                    <h4 class="text-white mb-3 fw-bold">Suasana Klasik</h4>
-                    <p class="text-secondary mb-0" style="line-height: 1.75; font-size: 1rem;">
-                        Ruangan bernuansa hangat dan temaram yang dirancang untuk memberikan kenyamanan maksimal saat berkumpul.
+                    <h6 class="fw-semibold text-white mb-1">Tersedia Juga Bawa Pulang</h6>
+                    <span class="text-secondary d-block mb-3" style="font-size: 0.78rem;">Takeaway cepat & praktis</span>
+                    <p class="text-secondary small mb-0 lh-base">
+                        Ingin menikmati kopi dalam perjalanan? Anda dapat memesan langsung untuk dibawa pulang melalui kasir kafe kami.
                     </p>
                 </div>
             </div>
@@ -242,14 +243,27 @@
     </div>
 </section>
 
-<!-- Tentang Kami Singkat -->
-<section class="py-5 border-top" style="background-color: #161b22; border-color: #21262d !important;">
-    <div class="container text-center py-4">
-        <h3 class="text-bronze mb-4 fw-bold">Tinggalkan Keramaian, Temukan Ketenangan.</h3>
-        <p class="text-secondary mx-auto" style="max-width: 700px; line-height: 1.8;">
-            Berdiri sejak 2024, Master Cafe lahir dari visi untuk menciptakan ruang di mana tradisi rasa bertemu dengan kepraktisan teknologi modern. Kami percaya setiap cangkir kopi memiliki cerita, dan kami ingin menjadi bagian dari cerita Anda.
-        </p>
+<!-- 5. Section Kunjungan: Selaras & Menyatu dengan Desain Halaman -->
+<section class="py-5 border-top" style="background-color: #12161d; border-color: #21262d !important;">
+    <div class="container py-2">
+        <div class="row align-items-center justify-content-between g-4">
+            <div class="col-lg-8">
+                <span class="text-uppercase fw-semibold" style="color: #c08e5c; font-size: 0.75rem; letter-spacing: 1.5px;">Kunjungi Kami</span>
+                <h4 class="fw-bold text-white mt-1 mb-2">Suasana Hangat Menanti Anda</h4>
+                <p class="text-secondary small mb-2 lh-base">
+                    {{ $alamat }}
+                </p>
+                <div class="d-flex align-items-center gap-2 text-secondary small" style="font-size: 0.82rem;">
+                    <i class="bi bi-clock" style="color: #c08e5c;"></i>
+                    <span>{{ $jamBuka }}</span>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="/lokasi" class="btn px-4 py-2.5 rounded-3 fw-semibold text-white d-inline-flex align-items-center gap-2 text-decoration-none shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.9rem;">
+                    <i class="bi bi-geo-alt"></i> Petunjuk Arah & Peta
+                </a>
+            </div>
+        </div>
     </div>
 </section>
 @endsection
-

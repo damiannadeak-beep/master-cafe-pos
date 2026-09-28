@@ -7,7 +7,7 @@
                     <i class="bi bi-tags-fill"></i>
                 </span>
                 <span>Varian & Toping (Add-ons)</span>
-                <span class="badge rounded-pill text-white fw-normal" style="background: rgba(192, 142, 92, 0.25); border: 1px solid rgba(192, 142, 92, 0.4); font-size: 0.72rem;">Opsional</span>
+                <span class="text-secondary small fw-normal ms-1 fs-6">(Opsional)</span>
             </h5>
             <p class="text-white-50 small mb-0">Atur pilihan seperti "Level Pedas", "Pilihan Suhu", atau tambahan "Toping" dengan harga tersendiri.</p>
         </div>

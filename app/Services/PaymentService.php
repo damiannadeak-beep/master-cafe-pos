@@ -244,4 +244,108 @@ class PaymentService
             'total_bayar' => $totalBayar,
         ];
     }
+
+    /**
+     * Process payment for a group of orders (multi-order / split bill)
+     */
+    public function payOrderGroup(?array $orderIds, $id_pesanan, array $validated, ?int $kasirId = null): ?Pesanan
+    {
+        $ids = $orderIds;
+        if (empty($ids)) {
+            if (is_string($id_pesanan) && str_contains($id_pesanan, ',')) {
+                $ids = array_filter(array_map('trim', explode(',', $id_pesanan)));
+            } else {
+                $ids = [$id_pesanan];
+            }
+        }
+
+        $unpaidList = [];
+        $lastPesanan = null;
+        foreach ($ids as $singleId) {
+            $pesanan = Pesanan::with('pembayaran')->find($singleId);
+            if (!$pesanan) continue;
+            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
+                $lastPesanan = $pesanan;
+                continue;
+            }
+            $unpaidList[] = $pesanan;
+        }
+
+        if (empty($unpaidList)) {
+            return $lastPesanan;
+        }
+
+        $metode = $validated['metode'] ?? 'cash';
+        $isUangPas = !empty($validated['is_uang_pas']);
+        $nominalTunai = isset($validated['nominal_tunai']) && is_numeric($validated['nominal_tunai'])
+            ? (float) $validated['nominal_tunai']
+            : null;
+
+        if (count($unpaidList) === 1) {
+            return $this->processPayment(
+                $unpaidList[0]->id,
+                $metode,
+                $validated['email_pelanggan'] ?? null,
+                $kasirId,
+                $nominalTunai,
+                $isUangPas
+            );
+        }
+
+        // Multi-order: Hitung total tagihan seluruh pesanan yang belum lunas
+        $totalGroupTagihan = 0;
+        $bills = [];
+        foreach ($unpaidList as $p) {
+            $bill = (float) (($p->pembayaran && (float)$p->pembayaran->total_bayar > 0)
+                ? $p->pembayaran->total_bayar
+                : ($p->total - ($p->discount_amount ?? 0)));
+            $bills[$p->id] = $bill;
+            $totalGroupTagihan += $bill;
+        }
+
+        if ($metode === 'cash' && !$isUangPas && $nominalTunai !== null) {
+            if ($nominalTunai < $totalGroupTagihan) {
+                throw new \Exception('Nominal uang tunai yang diterima (Rp ' . number_format($nominalTunai, 0, ',', '.') . ') kurang dari total tagihan gabungan (Rp ' . number_format($totalGroupTagihan, 0, ',', '.') . ').');
+            }
+
+            $subordersTotal = 0;
+            for ($i = 1; $i < count($unpaidList); $i++) {
+                $subordersTotal += $bills[$unpaidList[$i]->id];
+            }
+            $firstOrderCash = $nominalTunai - $subordersTotal;
+
+            $lastPesanan = $this->processPayment(
+                $unpaidList[0]->id,
+                'cash',
+                $validated['email_pelanggan'] ?? null,
+                $kasirId,
+                $firstOrderCash,
+                false
+            );
+
+            for ($i = 1; $i < count($unpaidList); $i++) {
+                $this->processPayment(
+                    $unpaidList[$i]->id,
+                    $metode,
+                    $validated['email_pelanggan'] ?? null,
+                    $kasirId,
+                    $bills[$unpaidList[$i]->id],
+                    true
+                );
+            }
+        } else {
+            foreach ($unpaidList as $p) {
+                $lastPesanan = $this->processPayment(
+                    $p->id,
+                    $metode,
+                    $validated['email_pelanggan'] ?? null,
+                    $kasirId,
+                    $bills[$p->id] ?? null,
+                    true
+                );
+            }
+        }
+
+        return $lastPesanan;
+    }
 }

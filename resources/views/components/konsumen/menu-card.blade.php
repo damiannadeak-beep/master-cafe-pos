@@ -41,7 +41,7 @@
 
             <!-- Badge Kategori Floating di Kiri Atas Gambar -->
             <div class="position-absolute top-0 start-0 m-2">
-                <span class="badge rounded-pill px-2 py-1" style="background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(4px); border: 1px solid rgba(192, 142, 92, 0.4); color: #c08e5c; font-size: 0.65rem;">
+                <span class="badge rounded-2 px-2 py-1" style="background: rgba(17, 20, 24, 0.88); backdrop-filter: blur(4px); border: 1px solid rgba(192, 142, 92, 0.4); color: #c08e5c; font-size: 0.65rem;">
                     {{ ucfirst($menu->sub_kategori ?: $menu->kategori) }}
                 </span>
             </div>

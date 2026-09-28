@@ -75,11 +75,11 @@
                                     <i class="bi bi-bell-fill"></i> Panggilan
                                 </span>
                             @elseif($activeOrder)
-                                <span class="badge rounded-pill px-2 py-1 small" style="background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                <span class="badge rounded-2 px-2 py-1 small" style="background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);">
                                     <i class="bi bi-dot"></i> Ada Pesanan
                                 </span>
                             @else
-                                <span class="badge rounded-pill px-2 py-1 small" style="background-color: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25);">
+                                <span class="badge rounded-2 px-2 py-1 small" style="background-color: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25);">
                                     <i class="bi bi-check2"></i> Tersedia
                                 </span>
                             @endif

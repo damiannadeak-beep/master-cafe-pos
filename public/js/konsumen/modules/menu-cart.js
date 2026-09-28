@@ -290,4 +290,346 @@
     window.getCartState = function () {
         return cart;
     };
+
+    // --- 2. VALIDASI NOMOR WHATSAPP GUEST SECARA REALTIME ---
+    window.validateGuestPhone = function (showFeedback = false) {
+        const inputPhone = document.getElementById('inputGuestPhone');
+        const feedback = document.getElementById('guestPhoneFeedback');
+        const counter = document.getElementById('guestPhoneCounter');
+
+        if (!inputPhone) return { isValid: true, message: '', phone: '' };
+
+        // 1. Sanitasi input: hanya angka
+        let rawVal = inputPhone.value.trim();
+        let val = rawVal.replace(/[^0-9]/g, '');
+
+        if (inputPhone.value !== val) {
+            inputPhone.value = val;
+        }
+
+        // Batasi panjang maksimal 15 digit (standar E.164 ITU-T)
+        const maxLen = 15;
+        if (val.length > maxLen) {
+            val = val.substring(0, maxLen);
+            inputPhone.value = val;
+        }
+
+        // 3. Update counter karakter realtime
+        if (counter) {
+            counter.innerText = val.length + ' / ' + maxLen + ' digit';
+            if (val.length >= 10 && val.length <= 13) {
+                counter.className = 'badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-50';
+            } else if (val.length > 0) {
+                counter.className = 'badge rounded-pill bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50';
+            } else {
+                counter.className = 'badge rounded-pill bg-dark border border-secondary text-secondary';
+            }
+        }
+
+        const isTakeaway = config.orderType === 'takeaway' || !config.hasMeja;
+
+        // 4. Cek jika input kosong
+        if (!val) {
+            if (isTakeaway) {
+                if (showFeedback && feedback) {
+                    feedback.style.display = 'block';
+                    feedback.className = 'mt-1 text-danger';
+                    feedback.innerHTML = '<i class="bi bi-x-circle me-1"></i> Nomor WhatsApp wajib diisi untuk pesanan Takeaway.';
+                    inputPhone.style.borderColor = '#dc3545';
+                } else if (feedback) {
+                    feedback.style.display = 'none';
+                    inputPhone.style.borderColor = '#30363d';
+                }
+                return { isValid: false, message: 'Nomor WhatsApp wajib diisi untuk pesanan Takeaway (bawa pulang).', phone: '' };
+            } else {
+                if (feedback) feedback.style.display = 'none';
+                inputPhone.style.borderColor = '#30363d';
+                return { isValid: true, message: '', phone: '' };
+            }
+        }
+
+        // 5. Validasi awalan: harus diawali 08 atau 628
+        if (!val.startsWith('08') && !val.startsWith('628')) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-danger';
+                feedback.innerHTML = '<i class="bi bi-x-circle me-1"></i> Nomor WhatsApp harus diawali <strong>08</strong> atau <strong>628</strong>.';
+                inputPhone.style.borderColor = '#dc3545';
+            }
+            return { isValid: false, message: 'Nomor WhatsApp tidak valid. Harus diawali dengan 08 atau 628 (contoh: 081234567890).', phone: val };
+        }
+
+        // 6. Validasi batas minimum angka
+        const minLen = val.startsWith('628') ? 11 : 10;
+        if (val.length < minLen) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-warning';
+                feedback.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i> Terlalu pendek (minimal ${minLen} angka, saat ini ${val.length} angka).`;
+                inputPhone.style.borderColor = '#ffc107';
+            }
+            return { isValid: false, message: `Nomor WhatsApp terlalu pendek. Minimal ${minLen} digit angka (contoh: 081234567890).`, phone: val };
+        }
+
+        if (val.length > maxLen) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-danger';
+                feedback.innerHTML = `<i class="bi bi-x-circle me-1"></i> Terlalu panjang (maksimal ${maxLen} angka).`;
+                inputPhone.style.borderColor = '#dc3545';
+            }
+            return { isValid: false, message: `Nomor WhatsApp terlalu panjang (maksimal ${maxLen} digit angka).`, phone: val };
+        }
+
+        // 7. Format dinyatakan valid
+        if (showFeedback && feedback) {
+            feedback.style.display = 'block';
+            feedback.className = 'mt-1 text-success';
+            feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Format nomor WhatsApp valid (${val.length} digit).`;
+            inputPhone.style.borderColor = '#238636';
+        } else if (feedback) {
+            feedback.style.display = 'none';
+            inputPhone.style.borderColor = '#238636';
+        }
+
+        return { isValid: true, message: '', phone: val };
+    };
+
+    // --- 3. CHECKOUT & PENGIRIMAN ORDER KE SERVER ---
+    window.openConfirmOrderModal = function () {
+        if (cart.length === 0) {
+            alert('Keranjang belanja masih kosong. Silakan pilih menu terlebih dahulu!');
+            return;
+        }
+
+        const modalQty = document.getElementById('modal-summary-qty');
+        const modalTotal = document.getElementById('modal-summary-total');
+        if (modalQty && document.getElementById('cart-qty')) {
+            modalQty.innerText = document.getElementById('cart-qty').innerText;
+        }
+        if (modalTotal && document.getElementById('cart-total')) {
+            modalTotal.innerHTML = document.getElementById('cart-total').innerHTML;
+        }
+
+        // Auto-fill nama dan nomor HP yang tersimpan jika ini adalah pesanan tambahan
+        const savedName = localStorage.getItem('master_cafe_guest_name');
+        const savedPhone = localStorage.getItem('master_cafe_guest_phone');
+        const inputNameEl = document.getElementById('inputGuestName');
+        const phoneInputEl = document.getElementById('inputGuestPhone');
+        if (inputNameEl && !inputNameEl.value.trim() && savedName) {
+            inputNameEl.value = savedName;
+        }
+        if (phoneInputEl && !phoneInputEl.value.trim() && savedPhone) {
+            phoneInputEl.value = savedPhone;
+        }
+
+        if (phoneInputEl) {
+            window.validateGuestPhone(phoneInputEl.value.trim().length > 0);
+        }
+
+        const modalEl = document.getElementById('modalConfirmGuestOrder');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        } else {
+            window.proceedToCheckout();
+        }
+    };
+
+    window.submitCustomerOrder = function () {
+        if (cart.length === 0) return alert('Silakan pilih menu terlebih dahulu!');
+
+        const inputName = document.getElementById('inputGuestName');
+        const inputPhone = document.getElementById('inputGuestPhone');
+
+        let guestName = inputName ? inputName.value.trim() : '';
+
+        if (!guestName) {
+            alert('Mohon masukkan Nama Pemesan / Panggilan terlebih dahulu.');
+            if (inputName) inputName.focus();
+            return;
+        }
+
+        // Validasi Nomor WhatsApp secara ketat
+        const phoneCheck = window.validateGuestPhone(true);
+        if (!phoneCheck.isValid) {
+            alert(phoneCheck.message);
+            if (inputPhone) {
+                inputPhone.focus();
+                inputPhone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+        let guestPhone = phoneCheck.phone;
+
+        const isGeofenceActive = config.isGeofenceActive || false;
+        const isDineIn = (config.orderType === 'dine_in' && config.hasMeja);
+
+        if (isGeofenceActive && isDineIn) {
+            if (!navigator.geolocation) {
+                alert('Browser Anda tidak mendukung verifikasi lokasi GPS. Pemesanan meja (Dine-In) membutuhkan GPS aktif.');
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnSubmitFinalOrder');
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Verifikasi GPS...';
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    window.proceedToCheckout(guestName, guestPhone, position.coords.latitude, position.coords.longitude);
+                },
+                function (error) {
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+                    }
+                    let errorMsg = 'Izin lokasi (GPS) diperlukan untuk memastikan Anda berada di meja kafe.';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg = 'Akses lokasi (GPS) ditolak oleh browser Anda. Harap izinkan akses lokasi di pengaturan browser untuk memesan di meja kafe.';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        errorMsg = 'Lokasi GPS tidak dapat dideteksi. Pastikan fitur lokasi/GPS di HP Anda aktif.';
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMsg = 'Waktu pencarian lokasi GPS habis. Silakan coba lagi.';
+                    }
+                    alert(errorMsg);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            window.proceedToCheckout(guestName, guestPhone, null, null);
+        }
+    };
+
+    window.proceedToCheckout = function (guestName, guestPhone, userLat = null, userLng = null) {
+        const btnSubmit = document.getElementById('btnSubmitFinalOrder');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+        }
+
+        let formData = {
+            _token: getCsrfToken(),
+            tipe_pesanan: config.orderType || 'dine_in',
+            guest_name: guestName || 'Tamu',
+            guest_phone: guestPhone || null,
+            user_lat: userLat,
+            user_lng: userLng,
+            promo_id: document.getElementById('promo_id') ? document.getElementById('promo_id').value : null,
+            items: cart
+        };
+
+        if (config.hasMeja && config.mejaId) {
+            formData.id_meja = config.mejaId;
+        }
+
+        fetch(config.orderAddUrl || '/konsumen/order/add', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw err; });
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+                    }
+                } else {
+                    // Simpan identitas pemesan agar tidak perlu ketik ulang saat nambah pesanan
+                    if (guestName) localStorage.setItem('master_cafe_guest_name', guestName);
+                    if (guestPhone) localStorage.setItem('master_cafe_guest_phone', guestPhone);
+
+                    // Simpan metadata pesanan aktif ke LocalStorage (TTL 12 Jam & Multi-Order Support)
+                    if (data.order_token) {
+                        const guestOrder = {
+                            token: data.order_token,
+                            id_pesanan: data.id_pesanan,
+                            guest_name: data.guest_name,
+                            id_meja: config.mejaId || '',
+                            label: config.mejaLabel || 'Pesanan',
+                            tipe_pesanan: config.orderType || 'dine_in',
+                            created_at: Date.now(),
+                            expires_at: Date.now() + (12 * 60 * 60 * 1000)
+                        };
+                        localStorage.setItem('active_guest_order', JSON.stringify(guestOrder));
+
+                        // Tambahkan ke daftar pesanan aktif (Multi-Order Array)
+                        let orders = [];
+                        try {
+                            const rawOrders = localStorage.getItem('active_guest_orders');
+                            if (rawOrders) orders = JSON.parse(rawOrders);
+                            if (!Array.isArray(orders)) orders = [];
+                        } catch (e) { orders = []; }
+                        orders = orders.filter(o => o.token !== data.order_token);
+                        orders.unshift(guestOrder);
+                        localStorage.setItem('active_guest_orders', JSON.stringify(orders));
+                    }
+
+                    // Kosongkan keranjang setelah pesanan berhasil disubmit
+                    try {
+                        cart = [];
+                        if (typeof cartStorageKey !== 'undefined') sessionStorage.removeItem(cartStorageKey);
+                        if (typeof updateCartBar === 'function') updateCartBar();
+                        window.updateCartUI();
+                    } catch (e) { }
+
+                    // Redirect ke Checkout atau Tracking
+                    if (data.checkout_url) {
+                        window.location.href = data.checkout_url;
+                    } else if (data.tracking_url) {
+                        window.location.href = data.tracking_url;
+                    } else {
+                        window.location.href = "/konsumen/checkout/" + data.id_pesanan;
+                    }
+                }
+            })
+            .catch(err => {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = 'Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+                }
+                if (err.errors) {
+                    let msg = "";
+                    for (let key in err.errors) {
+                        msg += err.errors[key][0] + "\n";
+                    }
+                    alert("Kesalahan validasi:\n" + msg);
+                } else if (err.error) {
+                    alert(err.error);
+                } else if (err.message) {
+                    alert(err.message);
+                } else {
+                    alert("Terjadi kesalahan saat memproses pesanan.");
+                    console.error(err);
+                }
+            });
+    };
+
+    // Inisialisasi event listener nomor WhatsApp pada DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function () {
+        const phoneInputEl = document.getElementById('inputGuestPhone');
+        if (phoneInputEl) {
+            phoneInputEl.addEventListener('input', function () {
+                window.validateGuestPhone(this.value.length > 0);
+            });
+            phoneInputEl.addEventListener('blur', function () {
+                window.validateGuestPhone(true);
+            });
+            phoneInputEl.addEventListener('paste', function () {
+                setTimeout(() => window.validateGuestPhone(true), 50);
+            });
+        }
+    });
 })();

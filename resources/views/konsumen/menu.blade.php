@@ -8,11 +8,8 @@
             <div>
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                     <h5 class="text-white fw-bold mb-0 text-nowrap">
-                        <i class="bi bi-geo-alt-fill me-1" style="color: #c08e5c;"></i> {{ preg_match('/^meja\s+/i', $meja->nama_meja_atau_nomor) ? ucwords($meja->nama_meja_atau_nomor) : 'Meja ' . ucwords($meja->nama_meja_atau_nomor) }}
+                        <i class="bi bi-geo-alt-fill me-1" style="color: #c08e5c;"></i> {{ preg_match('/^meja\s+/i', $meja->nama_meja_atau_nomor) ? ucwords($meja->nama_meja_atau_nomor) : 'Meja ' . ucwords($meja->nama_meja_atau_nomor) }} <span class="text-secondary small fw-normal ms-1 fs-6">(Dine In)</span>
                     </h5>
-                    <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background: rgba(72, 187, 120, 0.15); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3); font-size: 0.7rem;">
-                        Dine In
-                    </span>
                 </div>
                 @if($pesananAktif)
                     <div class="d-flex align-items-center flex-wrap gap-2 mt-1">

@@ -5,7 +5,7 @@
             <i class="bi bi-receipt me-1" style="color: #c08e5c;"></i> 
             {{ (isset($activeTableOrders) && $activeTableOrders->count() > 1) ? 'Semua Rincian Menu di Meja Ini' : 'Rincian Menu Pesanan' }}
         </h6>
-        <span class="badge rounded-pill bg-dark border border-secondary text-secondary">
+        <span class="badge rounded-2 bg-dark border border-secondary text-secondary">
             @if(isset($activeTableOrders) && $activeTableOrders->count() > 1)
                 {{ $activeTableOrders->sum(fn($o) => $o->detail_pesanan->sum('jumlah')) }} Item ({{ $activeTableOrders->count() }} Pesanan)
             @else
@@ -98,8 +98,8 @@
                 @if(!$subPaid)
                     <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <small class="text-warning"><i class="bi bi-info-circle me-1"></i>Tagihan pesanan ini belum diselesaikan.</small>
-                        <a href="{{ url('/konsumen/checkout/' . $subOrder->id . '?token=' . $subOrder->order_token) }}" class="btn btn-sm rounded-pill px-3 py-1 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.75rem;">
-                            ⚡ Bayar Pesanan #{{ $subOrder->id }}
+                        <a href="{{ url('/konsumen/checkout/' . $subOrder->id . '?token=' . $subOrder->order_token) }}" class="btn btn-sm rounded-2 px-3 py-1 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.75rem;">
+                            <i class="bi bi-lightning-charge-fill me-1"></i>Bayar Pesanan #{{ $subOrder->id }}
                         </a>
                     </div>
                 @endif

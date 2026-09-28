@@ -7,7 +7,7 @@ use App\Models\Menu;
 class PublicController extends Controller
 {
     public function home() {
-        $featuredMenus = Menu::where('is_available', true)->take(3)->get();
+        $featuredMenus = Menu::where('is_available', true)->take(4)->get();
         return view('public.home', compact('featuredMenus'));
     }
 
