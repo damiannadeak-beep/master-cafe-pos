@@ -33,9 +33,9 @@
             </div>
 
             <!-- List Kontak Sederhana & Otentik -->
-            <div class="list-group list-group-flush rounded-3 overflow-hidden mb-4" style="background-color: #161b22; border: 1px solid #21262d;">
+            <div class="list-group list-group-flush rounded-3 overflow-hidden mb-4 contact-card-list" style="background-color: #161b22; border: 1px solid #21262d;">
                 <!-- WhatsApp Item -->
-                <div class="list-group-item bg-transparent text-white p-3 p-md-4 border-secondary border-opacity-25">
+                <div class="list-group-item bg-transparent text-white p-3 p-md-4">
                     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                         <div>
                             <span class="text-secondary small d-block mb-1">WhatsApp Reservasi</span>
@@ -55,7 +55,7 @@
                 </div>
 
                 <!-- Email Item -->
-                <div class="list-group-item bg-transparent text-white p-3 p-md-4 border-0">
+                <div class="list-group-item bg-transparent text-white p-3 p-md-4">
                     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                         <div>
                             <span class="text-secondary small d-block mb-1">Email Resmi</span>
@@ -67,26 +67,73 @@
                             </div>
                         </div>
                         <div>
-                            <a href="mailto:{{ $emailRaw }}" class="btn btn-sm btn-outline-secondary px-3 py-2 d-inline-flex align-items-center gap-2 text-white">
+                            <a href="mailto:{{ $emailRaw }}" class="btn btn-sm btn-outline-secondary px-3 py-2 d-inline-flex align-items-center gap-2 text-white" style="border-color: #30363d;">
                                 <i class="bi bi-envelope"></i> Kirim Email
                             </a>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Media Sosial -->
-            @if(!empty($sosmedDynamic))
-            <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
-                <span class="text-secondary small me-2">Sosial media:</span>
+                <!-- Media Sosial Dinamis (Instagram, TikTok, Facebook, dll) -->
                 @foreach($sosmedDynamic as $sosmed)
-                    <a href="{{ $sosmed['url'] }}" target="_blank" class="btn btn-sm btn-dark border-secondary border-opacity-25 text-white-50 px-3 py-1.5 rounded-pill small d-inline-flex align-items-center gap-1.5 hover-social">
-                        <i class="bi {{ $sosmed['icon'] ?? 'bi-link-45deg' }} text-white"></i>
-                        <span>{{ $sosmed['label'] }}</span>
-                    </a>
+                    @php
+                        $platform = $sosmed['platform'] ?? 'Sosial Media';
+                        $label = $sosmed['label'] ?? '';
+                        $rawUrl = $sosmed['url'] ?? '#';
+                        $url = (str_starts_with($rawUrl, 'http://') || str_starts_with($rawUrl, 'https://')) ? $rawUrl : 'https://' . ltrim($rawUrl, '/');
+                        $icon = $sosmed['icon'] ?? 'bi-link-45deg';
+
+                        $btnClass = 'btn-outline-secondary text-white';
+                        $btnStyle = 'border-color: #30363d; background-color: rgba(255, 255, 255, 0.03);';
+                        $actionText = 'Buka ' . $platform;
+
+                        if (stripos($platform, 'instagram') !== false) {
+                            $icon = 'bi-instagram';
+                            $btnClass = 'btn-outline-danger';
+                            $btnStyle = 'border-color: rgba(225, 48, 108, 0.4); color: #f43f5e; background-color: rgba(225, 48, 108, 0.06);';
+                            $actionText = 'Kunjungi Instagram';
+                        } elseif (stripos($platform, 'tiktok') !== false) {
+                            $icon = 'bi-tiktok';
+                            $btnClass = 'btn-outline-info';
+                            $btnStyle = 'border-color: rgba(0, 242, 254, 0.4); color: #38bdf8; background-color: rgba(0, 242, 254, 0.06);';
+                            $actionText = 'Buka TikTok';
+                        } elseif (stripos($platform, 'facebook') !== false) {
+                            $icon = 'bi-facebook';
+                            $btnClass = 'btn-outline-primary';
+                            $btnStyle = 'border-color: rgba(24, 119, 242, 0.4); color: #60a5fa; background-color: rgba(24, 119, 242, 0.06);';
+                            $actionText = 'Buka Facebook';
+                        } elseif (stripos($platform, 'youtube') !== false) {
+                            $icon = 'bi-youtube';
+                            $btnClass = 'btn-outline-danger';
+                            $btnStyle = 'border-color: rgba(255, 0, 0, 0.4); color: #f87171; background-color: rgba(255, 0, 0, 0.06);';
+                            $actionText = 'Tonton YouTube';
+                        } elseif (stripos($platform, 'twitter') !== false || stripos($platform, 'x') !== false) {
+                            $icon = 'bi-twitter-x';
+                            $btnClass = 'btn-outline-light text-white';
+                            $btnStyle = 'border-color: rgba(255, 255, 255, 0.3); background-color: rgba(255, 255, 255, 0.06);';
+                            $actionText = 'Kunjungi X';
+                        }
+                    @endphp
+                    <div class="list-group-item bg-transparent text-white p-3 p-md-4">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                            <div>
+                                <span class="text-secondary small d-block mb-1">{{ $platform }} Resmi</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-6 fw-medium text-white">{{ $label }}</span>
+                                    <button type="button" class="btn btn-sm btn-icon btn-dark text-white-50 border-0 p-1" title="Salin {{ $platform }}" onclick="copyContactText('{{ $label }}', '{{ $platform }} berhasil disalin!')" style="width: 28px; height: 28px;">
+                                        <i class="bi bi-copy" style="font-size: 0.8rem;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <a href="{{ $url }}" target="_blank" class="btn btn-sm {{ $btnClass }} px-3 py-2 d-inline-flex align-items-center gap-2" style="{{ $btnStyle }}">
+                                    <i class="bi {{ $icon }}"></i> {{ $actionText }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
             </div>
-            @endif
 
             <!-- Section FAQ & Reservasi Acara -->
             <div class="card border-0 rounded-3 p-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
@@ -128,10 +175,14 @@
 </div>
 
 <style>
-    .hover-social:hover {
-        color: #fff !important;
-        border-color: #c08e5c !important;
-        background-color: rgba(192, 142, 92, 0.15) !important;
+    .contact-card-list .list-group-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+    .contact-card-list .list-group-item:last-child {
+        border-bottom: none !important;
     }
     .accordion-button::after {
         filter: invert(1);
