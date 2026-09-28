@@ -60,59 +60,59 @@
     </div>
 </section>
 
-<!-- 2. Structured Info Bar: Rapi, Terstruktur & Terintegrasi (Bukan Floating Pill) -->
-<section class="border-bottom" style="background-color: #12161d; border-color: #21262d !important;">
-    <div class="container py-3">
-        <div class="row g-3 g-md-0 text-white">
+<!-- 2. Structured Info Bar: Rapi, Terstruktur & Responsif di Semua Perangkat -->
+<section class="border-bottom overflow-hidden" style="background-color: #12161d; border-color: #21262d !important;">
+    <div class="container py-2 py-md-3">
+        <div class="row g-2 g-md-0 text-white align-items-center">
             
             <!-- Info 1: Jam Operasional -->
-            <div class="col-6 col-md-3 border-end-md" style="border-color: #21262d !important;">
-                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+            <div class="col-6 col-md-3 border-md-end" style="border-color: #21262d !important;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-2 gap-sm-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
                         <i class="bi bi-clock fs-5"></i>
                     </div>
-                    <div>
-                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Jam Buka</span>
-                        <span class="fw-semibold small text-white">{{ $jamBuka }}</span>
+                    <div class="min-w-0 flex-grow-1" style="min-width: 0;">
+                        <span class="text-secondary small d-block" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;">Jam Buka</span>
+                        <span class="fw-semibold text-white d-block" style="font-size: 0.8rem; line-height: 1.25; word-break: break-word;">{{ $jamBuka }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Info 2: Lokasi Kafe -->
-            <div class="col-6 col-md-3 border-end-md" style="border-color: #21262d !important;">
-                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+            <div class="col-6 col-md-3 border-md-end" style="border-color: #21262d !important;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-2 gap-sm-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
                         <i class="bi bi-geo-alt fs-5"></i>
                     </div>
-                    <div>
-                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Alamat Kafe</span>
-                        <span class="fw-semibold small text-white text-truncate d-block" style="max-width: 170px;">Senggoro, Bengkalis</span>
+                    <div class="min-w-0 flex-grow-1" style="min-width: 0;">
+                        <span class="text-secondary small d-block" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;">Alamat Kafe</span>
+                        <span class="fw-semibold text-white d-block" style="font-size: 0.8rem; line-height: 1.25; word-break: break-word;">Senggoro, Bengkalis</span>
                     </div>
                 </div>
             </div>
 
             <!-- Info 3: Fasilitas Kerja -->
-            <div class="col-6 col-md-3 border-end-md" style="border-color: #21262d !important;">
-                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+            <div class="col-6 col-md-3 border-md-end" style="border-color: #21262d !important;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-2 gap-sm-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
                         <i class="bi bi-wifi fs-5"></i>
                     </div>
-                    <div>
-                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Konektivitas</span>
-                        <span class="fw-semibold small text-white">Free WiFi & Colokan</span>
+                    <div class="min-w-0 flex-grow-1" style="min-width: 0;">
+                        <span class="text-secondary small d-block" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;">Konektivitas</span>
+                        <span class="fw-semibold text-white d-block" style="font-size: 0.8rem; line-height: 1.25; word-break: break-word;">Free WiFi & Colokan</span>
                     </div>
                 </div>
             </div>
 
             <!-- Info 4: Layanan Pemesanan -->
             <div class="col-6 col-md-3">
-                <div class="p-2 p-md-3 d-flex align-items-center gap-3">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
+                <div class="p-2 p-md-3 d-flex align-items-center gap-2 gap-sm-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; background-color: rgba(192, 142, 92, 0.12); color: #c08e5c;">
                         <i class="bi bi-qr-code fs-5"></i>
                     </div>
-                    <div>
-                        <span class="text-secondary small d-block" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Pemesanan</span>
-                        <span class="fw-semibold small text-white">Pesan QR & Takeaway</span>
+                    <div class="min-w-0 flex-grow-1" style="min-width: 0;">
+                        <span class="text-secondary small d-block" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;">Pemesanan</span>
+                        <span class="fw-semibold text-white d-block" style="font-size: 0.8rem; line-height: 1.25; word-break: break-word;">Pesan QR & Takeaway</span>
                     </div>
                 </div>
             </div>
@@ -120,6 +120,14 @@
         </div>
     </div>
 </section>
+
+<style>
+    @media (min-width: 768px) {
+        .border-md-end {
+            border-right: 1px solid #21262d !important;
+        }
+    }
+</style>
 
 <!-- 3. Tentang Kami & Tim: Editorial Story Section -->
 <section class="py-5 border-bottom" style="background-color: #0e1217; border-color: #21262d !important;">
