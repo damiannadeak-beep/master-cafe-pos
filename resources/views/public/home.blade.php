@@ -24,7 +24,7 @@
                     Cita Rasa Otentik, Ruang Ternyaman di Bengkalis
                 </h1>
                 
-                <p class="text-secondary fs-6 mb-4" style="line-height: 1.75; font-weight: 300; max-width: 520px;">
+                <p class="text-secondary fs-6 mb-4 text-justify" style="line-height: 1.75; font-weight: 300; max-width: 520px; text-align: justify; text-justify: inter-word;">
                     Selamat datang di {{ $namaTempat }}. Tempat di mana kopi berkualitas racikan barista, hidangan segar, dan atmosfer tenang berpadu untuk setiap momen kerja dan kebersamaan Anda.
                 </p>
 
@@ -122,6 +122,10 @@
 </section>
 
 <style>
+    .text-justify {
+        text-align: justify !important;
+        text-justify: inter-word !important;
+    }
     @media (min-width: 768px) {
         .border-md-end {
             border-right: 1px solid #21262d !important;
@@ -158,7 +162,7 @@
             <div class="col-lg-6 order-1 order-lg-2">
                 <span class="text-uppercase fw-semibold" style="color: #c08e5c; font-size: 0.78rem; letter-spacing: 1.5px;">Tentang Kami & Tim</span>
                 <h2 class="fw-bold text-white mt-1 mb-3 display-6">Ketulusan di Balik Setiap Sajian</h2>
-                <p class="text-secondary small mb-4 lh-base" style="font-size: 0.92rem; line-height: 1.75;">
+                <p class="text-secondary small mb-4 lh-base text-justify" style="font-size: 0.92rem; line-height: 1.75; text-align: justify; text-justify: inter-word;">
                     {{ $namaTempat }} tumbuh dari semangat kebersamaan dan dedikasi untuk menghadirkan tempat berkumpul paling nyaman di Bengkalis. Di balik setiap cangkir kopi nikmat dan hidangan lezat yang tersaji, ada tim yang bekerja dengan senyuman tulus dan komitmen untuk membuat kunjungan Anda selalu berkesan.
                 </p>
 
@@ -166,13 +170,13 @@
                     <div class="col-sm-6">
                         <div class="p-3 rounded-3" style="background-color: #161b22; border: 1px solid #21262d;">
                             <h6 class="fw-semibold text-white mb-1"><i class="bi bi-people-fill text-warning me-2"></i>Pelayanan Hangat</h6>
-                            <p class="text-secondary small mb-0" style="font-size: 0.78rem;">Menyambut setiap pengunjung layaknya keluarga dengan ramah dan penuh perhatian.</p>
+                            <p class="text-secondary small mb-0 text-justify" style="font-size: 0.78rem; text-align: justify; text-justify: inter-word;">Menyambut setiap pengunjung layaknya keluarga dengan ramah dan penuh perhatian.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="p-3 rounded-3" style="background-color: #161b22; border: 1px solid #21262d;">
                             <h6 class="fw-semibold text-white mb-1"><i class="bi bi-heart-fill text-danger me-2"></i>Dibuat Sepenuh Hati</h6>
-                            <p class="text-secondary small mb-0" style="font-size: 0.78rem;">Racikan kopi barista dan sajian dapur diolah segar dengan standar mutu terbaik.</p>
+                            <p class="text-secondary small mb-0 text-justify" style="font-size: 0.78rem; text-align: justify; text-justify: inter-word;">Racikan kopi barista dan sajian dapur diolah segar dengan standar mutu terbaik.</p>
                         </div>
                     </div>
                 </div>
@@ -207,7 +211,7 @@
                     </div>
                     <h6 class="fw-semibold text-white mb-1">Pilih Meja & Scan QR</h6>
                     <span class="text-secondary d-block mb-3" style="font-size: 0.78rem;">Pesan langsung dari smartphone</span>
-                    <p class="text-secondary small mb-0 lh-base">
+                    <p class="text-secondary small mb-0 lh-base text-justify" style="text-align: justify; text-justify: inter-word;">
                         Silakan pilih tempat duduk favorit Anda, lalu pindai stiker kode QR di atas meja dengan kamera ponsel untuk memilih menu.
                     </p>
                 </div>
@@ -224,7 +228,7 @@
                     </div>
                     <h6 class="fw-semibold text-white mb-1">Pesanan Diproses & Diantar</h6>
                     <span class="text-secondary d-block mb-3" style="font-size: 0.78rem;">Duduk santai di tempat Anda</span>
-                    <p class="text-secondary small mb-0 lh-base">
+                    <p class="text-secondary small mb-0 lh-base text-justify" style="text-align: justify; text-justify: inter-word;">
                         Pesanan langsung masuk ke sistem dapur dan barista. Pelayan akan mengantarkan sajian lezat langsung ke meja Anda.
                     </p>
                 </div>
@@ -241,7 +245,7 @@
                     </div>
                     <h6 class="fw-semibold text-white mb-1">Tersedia Juga Bawa Pulang</h6>
                     <span class="text-secondary d-block mb-3" style="font-size: 0.78rem;">Takeaway cepat & praktis</span>
-                    <p class="text-secondary small mb-0 lh-base">
+                    <p class="text-secondary small mb-0 lh-base text-justify" style="text-align: justify; text-justify: inter-word;">
                         Ingin menikmati kopi dalam perjalanan? Anda dapat memesan langsung untuk dibawa pulang melalui kasir kafe kami.
                     </p>
                 </div>
@@ -258,7 +262,7 @@
             <div class="col-lg-8">
                 <span class="text-uppercase fw-semibold" style="color: #c08e5c; font-size: 0.75rem; letter-spacing: 1.5px;">Kunjungi Kami</span>
                 <h4 class="fw-bold text-white mt-1 mb-2">Suasana Hangat Menanti Anda</h4>
-                <p class="text-secondary small mb-2 lh-base">
+                <p class="text-secondary small mb-2 lh-base text-justify" style="text-align: justify; text-justify: inter-word;">
                     {{ $alamat }}
                 </p>
                 <div class="d-flex align-items-center gap-2 text-secondary small" style="font-size: 0.82rem;">
