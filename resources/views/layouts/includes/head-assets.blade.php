@@ -116,6 +116,15 @@
         body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .nav-link, .navbar-brand {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
         }
+
+        /* Utilitas Teks Rata Kanan-Kiri */
+        .text-justify, p.text-justify, .text-justify p {
+            text-align: justify !important;
+            text-justify: inter-word !important;
+            text-align-last: left !important;
+            -webkit-hyphens: auto !important;
+            hyphens: auto !important;
+        }
         
         /* Core Shared Utilities */
         .toast-container {
