@@ -36,8 +36,9 @@
 
         <nav class="navbar navbar-expand-md navbar-dark shadow-sm sticky-top">
             <div class="container">
-                <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">
-                    <i class="bi bi-cup-hot-fill me-1"></i> Master Cafe
+                <a class="navbar-brand fw-bold text-primary d-inline-flex align-items-center gap-2" href="{{ url('/') }}">
+                    <img src="{{ asset('images/logo.png') }}" alt="Master Cafe Logo" class="rounded-circle shadow-sm" style="height: 32px; width: 32px; object-fit: cover; border: 1.5px solid rgba(192, 142, 92, 0.4);">
+                    <span>Master Cafe</span>
                 </a>
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
