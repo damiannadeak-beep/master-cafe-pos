@@ -195,7 +195,7 @@
                 if(data.error) {
                     alert(data.error);
                 } else {
-                    alert('ðŸ”” ' + (data.message || 'Pelayan segera datang ke meja Anda.'));
+                    alert('\u{1F514} ' + (data.message || 'Pelayan segera datang ke meja Anda.'));
                     try {
                         localStorage.setItem(expireKey, Date.now() + (120 * 1000));
                     } catch(e) {}

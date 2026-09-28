@@ -70,7 +70,7 @@
     <div class="container px-3 py-2 py-md-3">
         <div class="mb-2">
             <select name="promo_id" id="promo_id" class="form-select form-select-sm border-primary bg-primary bg-opacity-10 fw-bold rounded-pill px-3 py-2" style="color: #c08e5c;" onchange="updateCartUI()">
-                <option value="">ðŸŽŸï¸ Tambah Promo (Opsional)</option>
+                <option value="">&#127991; Tambah Promo (Opsional)</option>
                 @foreach($promos as $promo)
                     <option value="{{ $promo->id }}" data-type="{{ $promo->type }}" data-value="{{ $promo->value }}" data-menus="{{ $promo->type == 'package' ? json_encode($promo->menus->map(function($m) { return ['id' => $m->id, 'jumlah' => $m->pivot->jumlah, 'harga' => $m->harga]; })) : '[]' }}">
                         {{ $promo->title }} 
