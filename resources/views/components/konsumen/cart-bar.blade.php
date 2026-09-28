@@ -68,17 +68,41 @@
 
     <!-- Kontrol Utama Bawah: Promo & Checkout -->
     <div class="container px-3 py-2 py-md-3">
+        <!-- Tombol Pemicu Modal Promo (Menggantikan Native Select Android/iOS yang Pop-up Bug di Layar) -->
         <div class="mb-2">
-            <select name="promo_id" id="promo_id" class="form-select form-select-sm border-primary bg-primary bg-opacity-10 fw-bold rounded-pill px-3 py-2" style="color: #c08e5c;" onchange="updateCartUI()">
-                <option value="">&#127991; Tambah Promo (Opsional)</option>
-                @foreach($promos as $promo)
-                    <option value="{{ $promo->id }}" data-type="{{ $promo->type }}" data-value="{{ $promo->value }}" data-menus="{{ $promo->type == 'package' ? json_encode($promo->menus->map(function($m) { return ['id' => $m->id, 'jumlah' => $m->pivot->jumlah, 'harga' => $m->harga]; })) : '[]' }}">
-                        {{ $promo->title }} 
-                        @if($promo->type == 'discount')
-                            ({{ $promo->value <= 100 ? $promo->value.'%' : 'Rp '.number_format($promo->value,0,',','.') }})
+            <button type="button" class="btn w-100 py-2 px-3 rounded-pill d-flex align-items-center justify-content-between border border-primary border-opacity-25" 
+                    id="btnPromoTrigger"
+                    onclick="openPromoModal()" 
+                    style="background: rgba(192, 142, 92, 0.12); color: #c08e5c; font-size: 0.88rem; font-weight: 600;">
+                <div class="d-flex align-items-center gap-2 overflow-hidden text-truncate">
+                    <i class="bi bi-tag-fill fs-6" style="color: #c08e5c;"></i>
+                    <span id="promoTriggerLabel" class="text-truncate">
+                        @if(isset($promos) && count($promos) > 0)
+                            Tambah Promo (Opsional)
+                        @else
+                            Promo Belum Tersedia
                         @endif
-                    </option>
-                @endforeach
+                    </span>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <span id="promoBadgeActive" class="badge rounded-pill bg-success text-white" style="display: none; font-size: 0.72rem;">Digunakan</span>
+                    <i class="bi bi-chevron-right text-secondary small ms-1" id="promoChevron"></i>
+                </div>
+            </button>
+            
+            <!-- Hidden Select Element untuk kompatibilitas form submit & logic updateCartUI() -->
+            <select name="promo_id" id="promo_id" class="d-none" onchange="updateCartUI()">
+                <option value="">Tambah Promo (Opsional)</option>
+                @if(isset($promos))
+                    @foreach($promos as $promo)
+                        <option value="{{ $promo->id }}" data-type="{{ $promo->type }}" data-value="{{ $promo->value }}" data-menus="{{ $promo->type == 'package' ? json_encode($promo->menus->map(function($m) { return ['id' => $m->id, 'jumlah' => $m->pivot->jumlah, 'harga' => $m->harga]; })) : '[]' }}">
+                            {{ $promo->title }} 
+                            @if($promo->type == 'discount')
+                                ({{ $promo->value <= 100 ? $promo->value.'%' : 'Rp '.number_format($promo->value,0,',','.') }})
+                            @endif
+                        </option>
+                    @endforeach
+                @endif
             </select>
         </div>
         <div class="d-flex justify-content-between align-items-center">
@@ -183,3 +207,147 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Pilih Promo (Modern Bottom-Sheet / Dialog Khusus Konsumen) -->
+<div class="modal fade" id="modalPromoSelector" tabindex="-1" aria-labelledby="modalPromoSelectorLabel" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
+            <div class="modal-header border-0 pb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(192, 142, 92, 0.15); width: 38px; height: 38px;">
+                        <i class="bi bi-tags-fill" style="color: #c08e5c; font-size: 1.1rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title text-white fw-bold mb-0" id="modalPromoSelectorLabel">Pilih Promo Spesial</h6>
+                        <small class="text-secondary" style="font-size: 0.76rem;">Gunakan voucher hemat untuk pesanan Anda</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                @if(isset($promos) && count($promos) > 0)
+                    <div class="d-flex flex-column gap-2">
+                        <!-- Opsi Tanpa Promo -->
+                        <div class="p-3 rounded-3 promo-option-card" 
+                             id="promo-card-none"
+                             onclick="selectPromoOption('', 'Tambah Promo (Opsional)')"
+                             style="background-color: #0e1217; border: 1.5px solid #21262d; cursor: pointer; transition: all 0.2s ease;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-x-circle text-secondary fs-5"></i>
+                                    <div>
+                                        <div class="text-white fw-semibold small">Tanpa Promo</div>
+                                        <small class="text-secondary" style="font-size: 0.74rem;">Bayar sesuai harga normal menu</small>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill bg-secondary bg-opacity-25 text-secondary px-2 py-1" style="font-size: 0.72rem;">Batal Gunakan</span>
+                            </div>
+                        </div>
+
+                        <!-- Daftar Promo Aktif -->
+                        @foreach($promos as $promo)
+                            @php
+                                $valText = $promo->type == 'discount' 
+                                    ? ($promo->value <= 100 ? 'Diskon '.$promo->value.'%' : 'Hemat Rp '.number_format($promo->value,0,',','.'))
+                                    : 'Paket Rp '.number_format($promo->value,0,',','.');
+                            @endphp
+                            <div class="p-3 rounded-3 promo-option-card position-relative" 
+                                 id="promo-card-{{ $promo->id }}"
+                                 onclick="selectPromoOption('{{ $promo->id }}', '{{ addslashes($promo->title) }} ({{ $valText }})')"
+                                 style="background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1.5px solid rgba(192, 142, 92, 0.3); cursor: pointer; transition: all 0.2s ease;">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="badge rounded-pill px-2.5 py-1 text-white fw-bold" style="background: var(--gradient-bronze); font-size: 0.72rem;">
+                                                <i class="bi bi-lightning-fill me-0.5"></i> {{ $valText }}
+                                            </span>
+                                            <span class="badge bg-dark border border-secondary text-secondary" style="font-size: 0.68rem; text-transform: uppercase;">
+                                                {{ $promo->type == 'package' ? 'Paket Menu' : 'Diskon' }}
+                                            </span>
+                                        </div>
+                                        <h6 class="text-white fw-bold mb-1" style="font-size: 0.92rem;">{{ $promo->title }}</h6>
+                                        <p class="text-secondary small mb-0 lh-sm" style="font-size: 0.78rem;">
+                                            @if($promo->type == 'package')
+                                                Kombinasi menu hemat khusus pilihan Master Cafe.
+                                            @else
+                                                Potongan otomatis langsung mengurangi total tagihan.
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 flex-shrink-0 fw-semibold" style="font-size: 0.76rem;">
+                                        Pilih
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <!-- Tampilan Jika Belum Ada Promo Aktif -->
+                    <div class="text-center py-4 px-2">
+                        <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                             style="width: 58px; height: 58px; background: rgba(192, 142, 92, 0.1); color: #c08e5c;">
+                            <i class="bi bi-tag-fill fs-3"></i>
+                        </div>
+                        <h6 class="text-white fw-bold mb-1">Belum Ada Promo Aktif</h6>
+                        <p class="text-secondary small mb-3" style="font-size: 0.82rem; max-width: 320px; margin: 0 auto; line-height: 1.5;">
+                            Saat ini belum ada voucher atau penawaran diskon yang tersedia. Nikmati sajian nikmat Master Cafe dengan kualitas terbaik kami!
+                        </p>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                            Tutup
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.openPromoModal = function() {
+        const modalEl = document.getElementById('modalPromoSelector');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    };
+
+    window.selectPromoOption = function(promoId, promoLabel) {
+        const select = document.getElementById('promo_id');
+        const labelEl = document.getElementById('promoTriggerLabel');
+        const badgeEl = document.getElementById('promoBadgeActive');
+        const triggerBtn = document.getElementById('btnPromoTrigger');
+
+        if (select) {
+            select.value = promoId;
+            if (typeof window.updateCartUI === 'function') {
+                window.updateCartUI();
+            } else {
+                select.dispatchEvent(new Event('change'));
+            }
+        }
+
+        if (labelEl) {
+            if (promoId) {
+                labelEl.innerText = promoLabel;
+                if (badgeEl) badgeEl.style.display = 'inline-block';
+                if (triggerBtn) {
+                    triggerBtn.style.background = 'rgba(192, 142, 92, 0.22)';
+                    triggerBtn.style.borderColor = '#c08e5c';
+                }
+            } else {
+                labelEl.innerText = 'Tambah Promo (Opsional)';
+                if (badgeEl) badgeEl.style.display = 'none';
+                if (triggerBtn) {
+                    triggerBtn.style.background = 'rgba(192, 142, 92, 0.12)';
+                    triggerBtn.style.borderColor = 'rgba(192, 142, 92, 0.25)';
+                }
+            }
+        }
+
+        const modalEl = document.getElementById('modalPromoSelector');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+    };
+</script>
