@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container my-5 py-3">
+<div class="container mt-3 mt-md-5 mb-4 mb-md-5 py-0 py-md-3">
     @php
         $judul = \App\Models\Setting::getVal('lokasi_judul') ?? 'Lokasi & Jam Buka';
         $deskripsi = \App\Models\Setting::getVal('lokasi_deskripsi') ?? 'Kunjungi Master Cafe untuk menikmati kopi dan hidangan istimewa dalam suasana yang tenang dan nyaman.';

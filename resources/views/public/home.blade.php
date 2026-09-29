@@ -8,10 +8,10 @@
 @endphp
 
 <!-- 1. Hero Section: Editorial Modern Layout -->
-<section class="py-5 position-relative overflow-hidden border-bottom" style="background-color: #0e1217; border-color: #21262d !important;">
+<section class="pt-3 pb-4 pt-md-5 pb-md-5 position-relative overflow-hidden border-bottom" style="background-color: #0e1217; border-color: #21262d !important;">
     <div class="position-absolute top-0 start-50 translate-middle-x w-100 h-100" style="background: radial-gradient(circle at 30% 20%, rgba(192, 142, 92, 0.08) 0%, transparent 60%); pointer-events: none;"></div>
     
-    <div class="container py-2 py-lg-4 position-relative z-index-1">
+    <div class="container pt-1 pb-2 py-lg-4 position-relative z-index-1">
         <div class="row align-items-center g-4 g-lg-5">
             
             <!-- Kolom Teks Editorial -->

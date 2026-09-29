@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container my-5 py-3">
+<div class="container mt-3 mt-md-5 mb-4 mb-md-5 py-0 py-md-3">
     @php
         $waRaw = \App\Models\Setting::getVal('kontak_wa') ?? '+62 812-3456-7890';
         $waClean = preg_replace('/[^0-9]/', '', $waRaw);

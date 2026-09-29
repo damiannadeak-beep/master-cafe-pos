@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5 mb-5 pb-5">
+<div class="container mt-3 mt-md-5 mb-4 mb-md-5 pb-5">
     <div class="row justify-content-center">
         <div class="col-lg-7">
             @if(session('info'))

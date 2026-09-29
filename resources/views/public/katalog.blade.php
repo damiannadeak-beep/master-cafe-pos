@@ -2,22 +2,22 @@
 
 @section('content')
 <!-- Header Banner -->
-<div class="pt-5 pb-4 mb-5 position-relative overflow-hidden rounded-bottom-4 shadow-lg" style="background-color: #0e1217; border-bottom: 1px solid #21262d;">
+<div class="pt-2 pt-md-4 pb-3 pb-md-4 mb-3 mb-md-4 position-relative overflow-hidden rounded-bottom-4 shadow-lg" style="background-color: #0e1217; border-bottom: 1px solid #21262d;">
     <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(178, 122, 77, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
     <div class="position-absolute bottom-0 end-0 w-100 h-100" style="background: radial-gradient(circle at bottom left, rgba(178, 122, 77, 0.1) 0%, transparent 60%); pointer-events: none;"></div>
     
-    <div class="container text-center position-relative z-index-1 mt-4">
-        <h1 class="display-5 fw-bold mb-3 text-white">Katalog Menu</h1>
-        <p class="fs-6 text-light opacity-75 mx-auto mb-4" style="max-width: 600px; font-weight: 300;">
+    <div class="container text-center position-relative z-index-1 mt-0 mt-md-2">
+        <h1 class="fs-2 fs-md-1 display-md-5 fw-bold mb-2 text-white">Katalog Menu</h1>
+        <p class="small text-light opacity-75 mx-auto mb-3" style="max-width: 600px; font-weight: 300;">
             Jelajahi sajian lezat Master Cafe. Siap untuk memesan hidangan favorit Anda?
         </p>
         
         <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3 align-items-center">
-            <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn rounded-3 px-4 py-2 fw-bold text-white shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.9rem;">
+            <a href="{{ url('/konsumen/menu-takeaway') }}" class="btn rounded-3 px-3 px-md-4 py-2 fw-bold text-white shadow-sm" style="background: var(--gradient-bronze); border: none; font-size: 0.88rem;">
                 <i class="bi bi-bag-check me-2"></i> Pesan Bawa Pulang (Takeaway)
             </a>
         </div>
-        <p class="text-white-50 small mt-3 mb-0">
+        <p class="text-white-50 small mt-2 mb-0" style="font-size: 0.78rem;">
             <i class="bi bi-qr-code-scan me-1 text-warning"></i> Untuk makan di tempat, silakan scan stiker QR di atas meja kafe Anda.
         </p>
     </div>
