@@ -20,7 +20,7 @@ class PaymentService
      * @return Pesanan
      * @throws \Exception
      */
-    public function processPayment($id_pesanan, $metode, $email_pelanggan = null, $kasir_id = null, $nominalTunai = null, $isUangPas = false)
+    public function processPayment($id_pesanan, $metode, $email_pelanggan = null, $kasir_id = null, $nominalTunai = null, $isUangPas = false, $nominalNonTunai = null, $catatanSplit = null)
     {
         $pesanan = Pesanan::with('konsumen')->findOrFail($id_pesanan);
         $totalBayar = $pesanan->total - ($pesanan->discount_amount ?? 0);
@@ -56,6 +56,14 @@ class PaymentService
                     $catatanKembalian = 'Uang Pas (Tanpa Kembalian)';
                 }
             }
+        } elseif ($metode === 'split') {
+            $nomTunai = (float) ($nominalTunai ?? 0);
+            $nomNonTunai = (float) ($nominalNonTunai ?? max(0, $totalBayar - $nomTunai));
+            $uangDiterima = $totalBayar;
+            $uangKembalian = 0;
+            $catatanKembalian = !empty($catatanSplit) 
+                ? $catatanSplit 
+                : ('Split: Tunai Rp ' . number_format($nomTunai, 0, ',', '.') . ' + Non-Tunai Rp ' . number_format($nomNonTunai, 0, ',', '.'));
         }
 
         $pembayaran->update([
@@ -159,7 +167,7 @@ class PaymentService
      * @return array
      * @throws \Exception
      */
-    public function createSnapToken(Pesanan $pesanan): array
+    public function createSnapToken(Pesanan $pesanan, ?float $customAmount = null): array
     {
         $serverKey = trim(\App\Models\Setting::getVal('midtrans_server_key', config('services.midtrans.serverKey')));
         $clientKey = trim(\App\Models\Setting::getVal('midtrans_client_key', config('services.midtrans.clientKey')));
@@ -176,33 +184,46 @@ class PaymentService
         \Midtrans\Config::$is3ds = true;
 
         $pesanan->loadMissing(['detail_pesanan.menu', 'pembayaran', 'konsumen']);
-        $totalBayar = (int) round(($pesanan->pembayaran && (float)$pesanan->pembayaran->total_bayar > 0)
-            ? $pesanan->pembayaran->total_bayar
-            : ($pesanan->total - ($pesanan->discount_amount ?? 0)));
+        $totalBayar = $customAmount !== null
+            ? (int) round($customAmount)
+            : (int) round(($pesanan->pembayaran && (float)$pesanan->pembayaran->total_bayar > 0)
+                ? $pesanan->pembayaran->total_bayar
+                : ($pesanan->total - ($pesanan->discount_amount ?? 0)));
 
         if ($totalBayar <= 0) {
             throw new \Exception('Total tagihan pesanan harus lebih besar dari Rp 0.');
         }
 
-        $midtransOrderId = 'POS-' . $pesanan->id . '-' . time();
+        $midtransOrderId = ($customAmount !== null ? 'SPLIT-' : 'POS-') . $pesanan->id . '-' . time();
 
-        $itemDetails = [];
-        foreach ($pesanan->detail_pesanan as $detail) {
-            $itemDetails[] = [
-                'id' => (string) $detail->id_menu,
-                'price' => (int) round($detail->subtotal / max(1, $detail->jumlah)),
-                'quantity' => (int) $detail->jumlah,
-                'name' => mb_substr($detail->menu->nama_menu ?? 'Item Menu', 0, 50),
+        if ($customAmount !== null) {
+            $itemDetails = [
+                [
+                    'id' => 'SPLIT-REMAINDER',
+                    'price' => (int) $totalBayar,
+                    'quantity' => 1,
+                    'name' => 'Sisa Non-Tunai (Order #' . $pesanan->id . ')',
+                ]
             ];
-        }
+        } else {
+            $itemDetails = [];
+            foreach ($pesanan->detail_pesanan as $detail) {
+                $itemDetails[] = [
+                    'id' => (string) $detail->id_menu,
+                    'price' => (int) round($detail->subtotal / max(1, $detail->jumlah)),
+                    'quantity' => (int) $detail->jumlah,
+                    'name' => mb_substr($detail->menu->nama_menu ?? 'Item Menu', 0, 50),
+                ];
+            }
 
-        if (($pesanan->discount_amount ?? 0) > 0) {
-            $itemDetails[] = [
-                'id' => 'DISCOUNT',
-                'price' => -(int) $pesanan->discount_amount,
-                'quantity' => 1,
-                'name' => 'Diskon Promo',
-            ];
+            if (($pesanan->discount_amount ?? 0) > 0) {
+                $itemDetails[] = [
+                    'id' => 'DISCOUNT',
+                    'price' => -(int) $pesanan->discount_amount,
+                    'quantity' => 1,
+                    'name' => 'Diskon Promo',
+                ];
+            }
         }
 
         $customerName = $pesanan->guest_name ?: ($pesanan->konsumen?->name ?? 'Pelanggan POS Kasir');
@@ -228,13 +249,16 @@ class PaymentService
         // Simpan ke record pembayaran
         $pembayaran = Pembayaran::firstOrCreate(
             ['id_pesanan' => $pesanan->id],
-            ['status' => 'unpaid', 'total_bayar' => $totalBayar]
+            ['status' => 'unpaid', 'total_bayar' => $pesanan->total - ($pesanan->discount_amount ?? 0)]
         );
-        $pembayaran->update([
+        $updateData = [
             'snap_token' => $snapToken,
             'midtrans_order_id' => $midtransOrderId,
-            'total_bayar' => $totalBayar,
-        ]);
+        ];
+        if ($customAmount === null) {
+            $updateData['total_bayar'] = $totalBayar;
+        }
+        $pembayaran->update($updateData);
 
         return [
             'snap_token' => $snapToken,
@@ -280,6 +304,10 @@ class PaymentService
         $nominalTunai = isset($validated['nominal_tunai']) && is_numeric($validated['nominal_tunai'])
             ? (float) $validated['nominal_tunai']
             : null;
+        $nominalNonTunai = isset($validated['nominal_nontunai']) && is_numeric($validated['nominal_nontunai'])
+            ? (float) $validated['nominal_nontunai']
+            : null;
+        $catatanSplit = $validated['catatan_split'] ?? null;
 
         if (count($unpaidList) === 1) {
             return $this->processPayment(
@@ -288,7 +316,9 @@ class PaymentService
                 $validated['email_pelanggan'] ?? null,
                 $kasirId,
                 $nominalTunai,
-                $isUangPas
+                $isUangPas,
+                $nominalNonTunai,
+                $catatanSplit
             );
         }
 
@@ -301,6 +331,23 @@ class PaymentService
                 : ($p->total - ($p->discount_amount ?? 0)));
             $bills[$p->id] = $bill;
             $totalGroupTagihan += $bill;
+        }
+
+        if ($metode === 'split') {
+            $lastPesanan = null;
+            foreach ($unpaidList as $p) {
+                $lastPesanan = $this->processPayment(
+                    $p->id,
+                    'split',
+                    $validated['email_pelanggan'] ?? null,
+                    $kasirId,
+                    $nominalTunai,
+                    true,
+                    $nominalNonTunai,
+                    $catatanSplit
+                );
+            }
+            return $lastPesanan;
         }
 
         if ($metode === 'cash' && !$isUangPas && $nominalTunai !== null) {

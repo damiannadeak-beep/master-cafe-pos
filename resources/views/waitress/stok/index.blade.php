@@ -12,11 +12,11 @@
             <p class="text-secondary small mb-0">Atur ketersediaan menu secara langsung. Menu yang ditandai Habis otomatis tidak dapat dipesan oleh kasir maupun konsumen via QR meja.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge rounded-2 px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5" style="background-color: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25);">
-                <i class="bi bi-check-circle-fill"></i> Tersedia: <strong id="count-tersedia" class="ms-1">{{ $menus->where('is_available', true)->count() }}</strong>
+            <span class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center" style="background-color: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25); gap: 6px;">
+                <i class="bi bi-check-circle-fill" style="margin-right: 6px !important; font-size: 0.95rem;"></i> Tersedia: <strong id="count-tersedia" class="ms-1">{{ $menus->where('is_available', true)->count() }}</strong>
             </span>
-            <span class="badge rounded-2 px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5" style="background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25);">
-                <i class="bi bi-x-circle-fill"></i> Habis: <strong id="count-habis" class="ms-1">{{ $menus->where('is_available', false)->count() }}</strong>
+            <span class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center" style="background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); gap: 6px;">
+                <i class="bi bi-x-circle-fill" style="margin-right: 6px !important; font-size: 0.95rem;"></i> Habis: <strong id="count-habis" class="ms-1">{{ $menus->where('is_available', false)->count() }}</strong>
             </span>
         </div>
     </div>
@@ -47,8 +47,8 @@
                         <button type="button" class="btn btn-sm fw-medium px-3 py-1 rounded-2 text-nowrap btn-category-pill text-secondary" id="btn-filter-makanan" onclick="setCategoryFilter('makanan', this)">Makanan</button>
                         <button type="button" class="btn btn-sm fw-medium px-3 py-1 rounded-2 text-nowrap btn-category-pill text-secondary" id="btn-filter-minuman" onclick="setCategoryFilter('minuman', this)">Minuman</button>
                     </div>
-                    <button type="button" class="btn btn-sm fw-medium d-inline-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2" id="btn-filter-habis" onclick="toggleHabisFilter(this)" style="background-color: #0e1217; border: 1px solid #21262d; color: #8b949e;">
-                        <i class="bi bi-filter"></i> Hanya Menu Habis
+                    <button type="button" class="btn btn-sm fw-medium d-inline-flex align-items-center px-3 py-1.5 rounded-2" id="btn-filter-habis" onclick="toggleHabisFilter(this)" style="background-color: #0e1217; border: 1px solid #21262d; color: #8b949e; gap: 6px !important;">
+                        <i class="bi bi-filter" style="margin-right: 5px !important;"></i> Hanya Menu Habis
                     </button>
                 </div>
             </div>
@@ -65,9 +65,9 @@
     <!-- Table of Menus -->
     <div class="card border-0 shadow-sm" style="background-color: #161b22; border: 1px solid #21262d !important; border-radius: 12px; overflow: hidden;">
         <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 68vh; overflow-y: auto;">
+            <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="menuTable" style="color: #c9d1d9;">
-                    <thead class="sticky-top" style="background-color: #161b22; border-bottom: 1px solid #21262d; z-index: 10;">
+                    <thead style="background-color: #12161c; border-bottom: 1px solid #21262d;">
                         <tr>
                             <th class="ps-4 py-3 text-secondary text-uppercase fw-semibold" style="width: 76px; font-size: 0.72rem; letter-spacing: 0.5px;">Foto</th>
                             <th class="py-3 text-secondary text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">Nama Menu</th>
@@ -124,14 +124,16 @@
                                         <button type="button" 
                                                 class="btn btn-sm btn-touch flex-fill rounded-pill {{ $menu->is_available ? 'btn-avail-active fw-semibold' : 'btn-avail-inactive' }}" 
                                                 onclick="setMenuAvailability({{ $menu->id }}, 1)"
-                                                id="btn-tersedia-{{ $menu->id }}">
-                                            <i class="bi bi-check-circle-fill"></i> Tersedia
+                                                id="btn-tersedia-{{ $menu->id }}"
+                                                style="gap: 5px !important;">
+                                            <i class="bi bi-check-circle-fill" style="margin-right: 5px !important;"></i> Tersedia
                                         </button>
                                         <button type="button" 
                                                 class="btn btn-sm btn-touch flex-fill rounded-pill {{ !$menu->is_available ? 'btn-habis-active fw-semibold' : 'btn-avail-inactive' }}" 
                                                 onclick="setMenuAvailability({{ $menu->id }}, 0)"
-                                                id="btn-habis-{{ $menu->id }}">
-                                            <i class="bi bi-x-circle-fill"></i> Habis
+                                                id="btn-habis-{{ $menu->id }}"
+                                                style="gap: 5px !important;">
+                                            <i class="bi bi-x-circle-fill" style="margin-right: 5px !important;"></i> Habis
                                         </button>
                                     </div>
                                 </td>
@@ -149,9 +151,30 @@
                                 </td>
                             </tr>
                         @endforelse
+                        <tr id="no-filter-results" style="display: none;">
+                            <td colspan="5" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 50px; height: 50px; background: rgba(255, 255, 255, 0.03); border: 1px solid #21262d; color: #8b949e;">
+                                        <i class="bi bi-search fs-4"></i>
+                                    </div>
+                                    <h6 class="text-white fw-bold mb-1">Menu Tidak Ditemukan</h6>
+                                    <p class="text-secondary small mb-0">Tidak ada menu yang sesuai dengan filter atau kata kunci pencarian Anda.</p>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Footer Stok Menu -->
+            @if($menus->count() > 0)
+            <div class="pos-pagination-footer">
+                <div class="pagination-info" id="stok-pagination-info">
+                    Menampilkan <span class="highlight">1-{{ min(15, $menus->count()) }}</span> dari <span class="highlight">{{ $menus->count() }}</span> menu
+                </div>
+                <div class="pagination-controls" id="stok-pagination-controls"></div>
+            </div>
+            @endif
         </div>
     </div>
 </div>
@@ -187,7 +210,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px !important;
+}
+.avail-toggle-wrapper .btn .bi {
+    margin-right: 5px !important;
 }
 .btn-avail-active {
     background: rgba(52, 211, 153, 0.16) !important;
@@ -220,6 +246,87 @@
 }
 .menu-row-habis .menu-name-text {
     color: #94a3b8 !important;
+}
+
+/* Styling Pagination Dark Mode untuk Stok Menu */
+.pos-pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #12161c;
+    border-top: 1px solid #21262d;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pagination-info {
+    font-size: 0.82rem;
+    color: #8b949e;
+}
+
+.pagination-info .highlight {
+    color: #e6edf3;
+    font-weight: 600;
+}
+
+.pagination-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    user-select: none;
+}
+
+.page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #c9d1d9;
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+    background-color: #21262d;
+    color: #ffffff;
+    border-color: #484f58;
+}
+
+.page-btn.active {
+    background-color: #c08e5c;
+    color: #ffffff;
+    border-color: #c08e5c;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(192, 142, 92, 0.4);
+    cursor: default;
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background-color: #12161c;
+    border-color: #21262d;
+    color: #6e7681;
+}
+
+.page-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 32px;
+    color: #6e7681;
+    font-weight: bold;
+    font-size: 0.82rem;
 }
 </style>
 
@@ -336,9 +443,152 @@
         filterMenus();
     }
 
+    class TableFilterPagination {
+        constructor({ 
+            infoId, 
+            controlsId, 
+            itemsPerPage = 15, 
+            itemName = 'menu' 
+        }) {
+            this.infoEl = document.getElementById(infoId);
+            this.controlsEl = document.getElementById(controlsId);
+            this.itemsPerPage = itemsPerPage;
+            this.itemName = itemName;
+            this.currentPage = 1;
+            this.filteredRows = [];
+        }
+
+        get totalPages() {
+            return Math.ceil(this.filteredRows.length / this.itemsPerPage) || 1;
+        }
+
+        setFilteredRows(rows, resetPage = true) {
+            this.filteredRows = rows;
+            if (resetPage) {
+                this.currentPage = 1;
+            } else if (this.currentPage > this.totalPages) {
+                this.currentPage = this.totalPages;
+            }
+            this.render();
+        }
+
+        goToPage(page) {
+            if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+            this.currentPage = page;
+            this.render();
+            const tableEl = document.getElementById('menuTable');
+            if (tableEl) {
+                const rect = tableEl.getBoundingClientRect();
+                if (rect.top < 0) {
+                    tableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        render() {
+            this.updateRows();
+            this.updateInfo();
+            this.updateControls();
+        }
+
+        updateRows() {
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+
+            this.filteredRows.forEach((row, idx) => {
+                if (idx >= start && idx < end) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        updateInfo() {
+            if (!this.infoEl) return;
+            const total = this.filteredRows.length;
+            if (total === 0) {
+                this.infoEl.innerHTML = `Tidak ada ${this.itemName} yang ditemukan`;
+                return;
+            }
+            const start = (this.currentPage - 1) * this.itemsPerPage + 1;
+            const end = Math.min(this.currentPage * this.itemsPerPage, total);
+            this.infoEl.innerHTML = `Menampilkan <span class="highlight">${start}-${end}</span> dari <span class="highlight">${total}</span> ${this.itemName}`;
+        }
+
+        updateControls() {
+            if (!this.controlsEl) return;
+            this.controlsEl.innerHTML = '';
+
+            const total = this.totalPages;
+            const current = this.currentPage;
+
+            if (total <= 1) {
+                this.controlsEl.style.display = 'none';
+                return;
+            } else {
+                this.controlsEl.style.display = 'inline-flex';
+            }
+
+            // Prev
+            const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '<i class="bi bi-chevron-left" style="font-size: 0.72rem;"></i>';
+            prevBtn.title = 'Halaman Sebelumnya';
+            prevBtn.disabled = (current === 1);
+            prevBtn.addEventListener('click', () => this.goToPage(current - 1));
+            this.controlsEl.appendChild(prevBtn);
+
+            // Pages + dots
+            const pages = this.calculatePages(current, total);
+            pages.forEach(p => {
+                if (p === '...') {
+                    const dots = document.createElement('span');
+                    dots.className = 'page-dots';
+                    dots.textContent = '...';
+                    this.controlsEl.appendChild(dots);
+                } else {
+                    const numBtn = document.createElement('button');
+                    numBtn.type = 'button';
+                    numBtn.className = `page-btn ${p === current ? 'active' : ''}`;
+                    numBtn.textContent = p;
+                    numBtn.addEventListener('click', () => this.goToPage(p));
+                    this.controlsEl.appendChild(numBtn);
+                }
+            });
+
+            // Next
+            const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '<i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>';
+            nextBtn.title = 'Halaman Berikutnya';
+            nextBtn.disabled = (current === total);
+            nextBtn.addEventListener('click', () => this.goToPage(current + 1));
+            this.controlsEl.appendChild(nextBtn);
+        }
+
+        calculatePages(current, total) {
+            if (total <= 7) {
+                return Array.from({ length: total }, (_, i) => i + 1);
+            }
+            if (current <= 4) {
+                return [1, 2, 3, 4, 5, '...', total];
+            }
+            if (current >= total - 3) {
+                return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+            }
+            return [1, '...', current - 1, current, current + 1, '...', total];
+        }
+    }
+
+    let stokPagination = null;
+
     function filterMenus() {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
         const rows = document.querySelectorAll('.menu-row');
+        const matchingRows = [];
 
         rows.forEach(row => {
             const name = row.dataset.name;
@@ -352,11 +602,20 @@
             const matchHabis = (!onlyHabis || !isAvail);
 
             if(matchQuery && matchCategory && matchSubCategory && matchHabis) {
-                row.style.display = '';
+                matchingRows.push(row);
             } else {
                 row.style.display = 'none';
             }
         });
+
+        const noResultRow = document.getElementById('no-filter-results');
+        if (noResultRow) {
+            noResultRow.style.display = (matchingRows.length === 0 && rows.length > 0) ? '' : 'none';
+        }
+
+        if (stokPagination) {
+            stokPagination.setFilteredRows(matchingRows, true);
+        }
     }
 
     function applyAvailabilityUI(menuId, isAvail) {
@@ -446,6 +705,13 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         renderStokSubPills();
+        stokPagination = new TableFilterPagination({
+            infoId: 'stok-pagination-info',
+            controlsId: 'stok-pagination-controls',
+            itemsPerPage: 15,
+            itemName: 'menu'
+        });
+        filterMenus();
     });
 </script>
 @endsection

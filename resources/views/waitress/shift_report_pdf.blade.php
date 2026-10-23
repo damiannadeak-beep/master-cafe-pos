@@ -144,13 +144,13 @@
         </tr>
         <tr>
             <td class="summary-label">Waktu Tutup Shift:</td>
-            <td>{{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') . ' WIB' : 'Shift Masih Berjalan (Open)' }}</td>
+            <td>{{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') . ' WIB' : 'Shift Masih Berjalan' }}</td>
             <td class="summary-label">Pemasukan Tunai:</td>
             <td class="summary-val" style="color: #0d6832;">Rp {{ number_format($totalCash, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td class="summary-label">Status Shift:</td>
-            <td><span class="badge-status">{{ strtoupper($shift->status) }}</span></td>
+            <td>{{ ($shift->status ?? '') === 'closed' ? 'Shift Selesai (Ditutup)' : 'Shift Masih Berjalan' }}</td>
             <td class="summary-label">Pemasukan QRIS:</td>
             <td class="summary-val" style="color: #0b5ed7;">Rp {{ number_format($totalQris, 0, ',', '.') }}</td>
         </tr>

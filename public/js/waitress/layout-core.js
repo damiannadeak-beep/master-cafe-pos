@@ -175,11 +175,11 @@
                     if (callBells.length > 0) {
                         let itemsHtml = `
                             <li class="d-flex align-items-center justify-content-between px-2 pb-2 mb-2 border-bottom" style="border-color: rgba(255, 255, 255, 0.08) !important;">
-                                <div class="d-flex align-items-center gap-1.5">
+                                <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-bell-fill text-warning" style="font-size: 0.85rem;"></i>
                                     <span class="text-white fw-bold" style="font-size: 0.82rem;">Panggilan Meja Aktif</span>
                                 </div>
-                                <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); font-size: 0.7rem;">${callBells.length} Panggilan</span>
+                                <span class="fw-semibold" style="color: #fbbf24; font-size: 0.75rem;">${callBells.length} panggilan</span>
                             </li>
                         `;
                         callBells.forEach(c => {
@@ -190,24 +190,13 @@
 
                             itemsHtml += `
                                 <li class="px-1 mb-2">
-                                    <div class="p-2.5 rounded-3" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25);">
-                                        <div class="d-flex align-items-center justify-content-between mb-2 gap-2">
-                                            <div class="d-flex align-items-center gap-2 min-w-0">
-                                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 28px; height: 28px; background: rgba(245, 158, 11, 0.2); color: #fbbf24;">
-                                                    <i class="bi bi-bell-fill" style="font-size: 0.82rem;"></i>
-                                                </span>
-                                                <span class="fw-bold text-white text-truncate" style="font-size: 0.85rem;">${displayTitle}</span>
+                                    <div class="d-flex align-items-center justify-content-between gap-3 px-2 py-2 rounded-3" style="background: rgba(255, 255, 255, 0.04);">
+                                        <div class="min-w-0">
+                                            <div class="fw-bold text-white text-truncate" style="font-size: 0.9rem;">
+                                                ${tableName ? `<i class="bi bi-geo-alt-fill text-warning me-1"></i>${tableName}` : displayTitle}
                                             </div>
-                                            ${tableName ? `
-                                                <span class="badge rounded-pill px-2.5 py-1 fw-bold text-nowrap flex-shrink-0" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 0.72rem;">
-                                                    <i class="bi bi-geo-alt-fill me-1"></i>${tableName}
-                                                </span>
-                                            ` : ''}
+                                            <div class="text-white-50 text-truncate" style="font-size: 0.73rem;">Konsumen memanggil pelayan</div>
                                         </div>
-                                        <div class="d-flex align-items-center justify-content-between pt-2 border-top gap-2" style="border-color: rgba(255, 255, 255, 0.08) !important;">
-                                            <span class="text-white-50 text-truncate" style="font-size: 0.73rem;">
-                                                <i class="bi bi-person-walking me-1 text-warning opacity-75"></i>Konsumen butuh bantuan
-                                            </span>
                                             <button type="button" onclick="dismissCallBellNotif(${c.id})" class="btn-callbell-action flex-shrink-0 shadow-sm">
                                                 <i class="bi bi-check2"></i> Tanggapi
                                             </button>
@@ -220,11 +209,11 @@
                     } else {
                         listContainer.innerHTML = `
                             <li class="d-flex align-items-center justify-content-between px-2 pb-2 mb-2 border-bottom" style="border-color: rgba(255, 255, 255, 0.08) !important;">
-                                <div class="d-flex align-items-center gap-1.5">
+                                <div class="d-flex align-items-center gap-2">
                                     <i class="bi bi-bell-fill text-warning" style="font-size: 0.85rem;"></i>
                                     <span class="text-white fw-bold" style="font-size: 0.82rem;">Panggilan Meja Aktif</span>
                                 </div>
-                                <span class="badge rounded-pill px-2 py-0.5 text-white-50 border border-secondary border-opacity-25" style="font-size: 0.7rem;">0 Panggilan</span>
+                                <span class="text-white-50" style="font-size: 0.75rem;">0 panggilan</span>
                             </li>
                             <li class="text-center py-3 px-2">
                                 <div class="text-white-50 mb-1" style="font-size: 1.4rem; opacity: 0.35;"><i class="bi bi-bell-slash"></i></div>

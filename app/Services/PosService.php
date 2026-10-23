@@ -112,10 +112,13 @@ class PosService
                 }
             } else {
                 $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
+                $custName = strtolower(trim($order->customer_name ?? ''));
                 if (!empty($cleanPhone)) {
                     $groupKey = 'takeaway_phone_' . $cleanPhone;
+                } elseif (!empty($custName) && !in_array($custName, ['tamu', 'guest', 'pelanggan'])) {
+                    $groupKey = 'takeaway_name_' . $custName;
                 } else {
-                    $groupKey = 'takeaway_name_' . strtolower(trim($order->customer_name ?: 'guest'));
+                    $groupKey = 'takeaway_order_' . $order->id;
                 }
             }
 
@@ -252,38 +255,61 @@ class PosService
     }
 
     /**
-     * Mengelompokkan riwayat pesanan selesai per Meja / Tamu dalam sesi waktu berdekatan
+     * Mengelompokkan riwayat pesanan selesai.
+     * Hanya pesanan yang dibayar bersamaan dalam satu transaksi pembayaran (batch payment)
+     * di meja yang sama (atau takeaway yang sama) yang digabungkan.
+     * Pesanan baru di sesi berikutnya akan selalu terpisah menjadi kartu mandiri.
      */
     public function groupCompletedOrders(Collection $orders): Collection
     {
         $groups = [];
 
         foreach ($orders as $order) {
-            $windowBlock = $order->created_at ? (floor($order->created_at->hour / 3)) : 0;
-            $datePrefix = $order->created_at ? $order->created_at->format('Y-m-d') : 'today';
+            $rawPay = $order->pembayaran?->tanggal;
+            $payCarbon = $rawPay ? \Carbon\Carbon::parse($rawPay) : null;
+            $matchedKey = null;
 
-            if ($order->tipe_pesanan === 'dine_in') {
-                if ($order->id_meja) {
-                    $groupKey = 'table_' . $order->id_meja . '_' . $datePrefix . '_b' . $windowBlock;
-                } else {
-                    $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
-                    $groupKey = 'dinein_nomeja_' . ($cleanPhone ?: strtolower(trim($order->customer_name ?: 'guest'))) . '_' . $datePrefix . '_b' . $windowBlock;
+            if ($order->tipe_pesanan === 'dine_in' && $order->id_meja && $payCarbon) {
+                // Cari group meja yang sama yang dibayar bersamaan dalam toleransi <= 5 detik
+                foreach ($groups as $k => $gData) {
+                    if (($gData['tipe_pesanan'] ?? null) === 'dine_in' && ($gData['id_meja'] ?? null) === $order->id_meja && !empty($gData['pay_time'])) {
+                        $diffSec = abs($gData['pay_time']->diffInSeconds($payCarbon));
+                        if ($diffSec <= 5) {
+                            $matchedKey = $k;
+                            break;
+                        }
+                    }
+                }
+                if (!$matchedKey) {
+                    $matchedKey = 'table_' . $order->id_meja . '_pay_' . $order->id;
+                }
+            } elseif ($order->tipe_pesanan === 'takeaway' && !empty($order->guest_phone) && $payCarbon) {
+                $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone);
+                foreach ($groups as $k => $gData) {
+                    if (($gData['tipe_pesanan'] ?? null) === 'takeaway' && !empty($gData['clean_phone']) && $gData['clean_phone'] === $cleanPhone && !empty($gData['pay_time'])) {
+                        $diffSec = abs($gData['pay_time']->diffInSeconds($payCarbon));
+                        if ($diffSec <= 5) {
+                            $matchedKey = $k;
+                            break;
+                        }
+                    }
+                }
+                if (!$matchedKey) {
+                    $matchedKey = 'takeaway_' . $cleanPhone . '_pay_' . $order->id;
                 }
             } else {
-                $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
-                if (!empty($cleanPhone)) {
-                    $groupKey = 'takeaway_phone_' . $cleanPhone . '_' . $datePrefix . '_b' . $windowBlock;
-                } else {
-                    $groupKey = 'takeaway_name_' . strtolower(trim($order->customer_name ?: 'guest')) . '_' . $datePrefix . '_b' . $windowBlock;
-                }
+                $matchedKey = 'order_' . $order->id;
             }
 
-            if (!isset($groups[$groupKey])) {
-                $groups[$groupKey] = [
-                    'group_key' => $groupKey,
+            if (!isset($groups[$matchedKey])) {
+                $cleanPhone = preg_replace('/[^0-9]/', '', $order->guest_phone ?? '');
+                $groups[$matchedKey] = [
+                    'group_key' => $matchedKey,
                     'tipe_pesanan' => $order->tipe_pesanan,
                     'meja' => $order->meja,
                     'id_meja' => $order->id_meja,
+                    'clean_phone' => $cleanPhone,
+                    'pay_time' => $payCarbon,
                     'customer_name' => $order->customer_name,
                     'guest_phone' => $order->guest_phone,
                     'created_at' => $order->created_at,
@@ -292,11 +318,12 @@ class PosService
                 ];
             }
 
-            $groups[$groupKey]['orders']->push($order);
-            if ($order->created_at > $groups[$groupKey]['latest_created_at']) {
-                $groups[$groupKey]['latest_created_at'] = $order->created_at;
+            $groups[$matchedKey]['orders']->push($order);
+            if ($order->created_at > $groups[$matchedKey]['latest_created_at']) {
+                $groups[$matchedKey]['latest_created_at'] = $order->created_at;
             }
         }
+
 
         $result = collect([]);
         foreach ($groups as $g) {
@@ -514,6 +541,77 @@ class PosService
             }
 
             return $pesananBaru;
+        });
+    }
+
+    /**
+     * Menggabungkan dua pesanan aktif (Merge Bill / Merge Orders)
+     * Seluruh item dari pesanan sumber ($sourcePesanan) dilebur ke pesanan tujuan ($targetPesanan)
+     */
+    public function mergeOrders(Pesanan $targetPesanan, Pesanan $sourcePesanan): Pesanan
+    {
+        return DB::transaction(function () use ($targetPesanan, $sourcePesanan) {
+            if ($targetPesanan->id === $sourcePesanan->id) {
+                throw new \Exception('Tidak bisa menggabungkan pesanan dengan dirinya sendiri.');
+            }
+
+            if (($targetPesanan->pembayaran && $targetPesanan->pembayaran->status === 'paid') ||
+                ($sourcePesanan->pembayaran && $sourcePesanan->pembayaran->status === 'paid')) {
+                throw new \Exception('Salah satu pesanan sudah berstatus lunas, tidak dapat digabungkan.');
+            }
+
+            if (in_array($targetPesanan->status, ['cancelled', 'void']) ||
+                in_array($sourcePesanan->status, ['cancelled', 'void'])) {
+                throw new \Exception('Pesanan yang sudah dibatalkan tidak dapat digabungkan.');
+            }
+
+            // 1. Pindahkan seluruh detail_pesanan dari source ke target
+            DetailPesanan::where('id_pesanan', $sourcePesanan->id)->update([
+                'id_pesanan' => $targetPesanan->id
+            ]);
+
+            // 2. Hitung ulang total penjualan dan HPP pada pesanan target
+            $newTotal = (float) DetailPesanan::where('id_pesanan', $targetPesanan->id)->sum('subtotal');
+            $newHpp = (float) ($targetPesanan->total_hpp ?? 0) + (float) ($sourcePesanan->total_hpp ?? 0);
+
+            // Sesuaikan status jika salah satu pesanan masih pending atau processing
+            $newStatus = $targetPesanan->status;
+            if ($sourcePesanan->status === 'pending' || $targetPesanan->status === 'pending') {
+                $newStatus = 'pending';
+            } elseif ($sourcePesanan->status === 'processing' || $targetPesanan->status === 'processing') {
+                $newStatus = 'processing';
+            }
+
+            $targetPesanan->update([
+                'total' => $newTotal,
+                'total_hpp' => $newHpp,
+                'promo_id' => null,
+                'discount_amount' => 0,
+                'status' => $newStatus
+            ]);
+
+            // 3. Perbarui catatan pembayaran pada pesanan target
+            if ($targetPesanan->pembayaran) {
+                $targetPesanan->pembayaran->update([
+                    'total_bayar' => $newTotal
+                ]);
+            } else {
+                Pembayaran::create([
+                    'id_pesanan' => $targetPesanan->id,
+                    'status' => 'unpaid',
+                    'total_bayar' => $newTotal
+                ]);
+            }
+
+            // 4. Hapus pembayaran pada source jika ada
+            if ($sourcePesanan->pembayaran) {
+                $sourcePesanan->pembayaran->delete();
+            }
+
+            // 5. Hapus pesanan sumber (force delete agar tidak menjadi kartu kosong di riwayat void)
+            $sourcePesanan->forceDelete();
+
+            return $targetPesanan->fresh(['detail_pesanan.menu', 'pembayaran', 'meja']);
         });
     }
 

@@ -14,9 +14,11 @@ class PayOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'metode' => 'required|in:cash,qris',
+            'metode' => 'required|in:cash,qris,split',
             'email_pelanggan' => 'nullable|email',
             'nominal_tunai' => 'nullable|numeric|min:0',
+            'nominal_nontunai' => 'nullable|numeric|min:0',
+            'catatan_split' => 'nullable|string',
             'is_uang_pas' => 'nullable|boolean',
             'order_ids' => 'nullable|array',
             'order_ids.*' => 'integer',

@@ -88,6 +88,9 @@ class PrintService
                 $printer->text("Bayar    : Rp " . number_format($order->pembayaran->uang_diterima, 0, ',', '.') . "\n");
                 $printer->text("Kembali  : Rp " . number_format($order->pembayaran->uang_kembalian, 0, ',', '.') . "\n");
             }
+            if (($order->pembayaran->metode ?? '') === 'split' && !empty($order->pembayaran->catatan_kembalian)) {
+                $printer->text("* " . $order->pembayaran->catatan_kembalian . "\n");
+            }
             $printer->text("--------------------------------\n");
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);

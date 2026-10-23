@@ -178,11 +178,12 @@ class PosController extends Controller
     /**
      * Dapatkan Snap Token Midtrans untuk pesanan aktif kasir
      */
-    public function getKasirSnapToken($id)
+    public function getKasirSnapToken(Request $request, $id)
     {
         try {
             $pesanan = Pesanan::findOrFail($id);
-            $snapData = $this->paymentService->createSnapToken($pesanan);
+            $customAmount = $request->input('amount') ? (float)$request->input('amount') : null;
+            $snapData = $this->paymentService->createSnapToken($pesanan, $customAmount);
             return response()->json($snapData);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
@@ -333,11 +334,26 @@ class PosController extends Controller
             $allServed = false;
             $servedCount = 0;
             $totalCount = 0;
+            $statusChanged = false;
 
             if ($pesanan) {
+                // Refresh list detail_pesanan setelah perubahan is_served
+                $pesanan->load('detail_pesanan');
                 $totalCount = $pesanan->detail_pesanan->count();
                 $servedCount = $pesanan->detail_pesanan->where('is_served', true)->count();
-                $allServed = ($servedCount === $totalCount);
+                $allServed = ($servedCount === $totalCount && $totalCount > 0);
+
+                // Jika seluruh menu telah siap / disajikan, otomatis selesaikan pesanan (completed)
+                if ($allServed && $pesanan->status !== 'completed') {
+                    $pesanan->status = 'completed';
+                    $pesanan->save();
+                    $statusChanged = true;
+                } elseif (!$allServed && $pesanan->status === 'completed') {
+                    // Jika ada menu yang batal centang dan sebelumnya sudah completed, kembalikan ke processing
+                    $pesanan->status = 'processing';
+                    $pesanan->save();
+                    $statusChanged = true;
+                }
 
                 try {
                     broadcast(new \App\Events\PesananBaru($pesanan));
@@ -352,6 +368,8 @@ class PosController extends Controller
                 'total_count' => $totalCount,
                 'all_served' => $allServed,
                 'order_id' => $pesanan ? $pesanan->id : null,
+                'order_status' => $pesanan ? $pesanan->status : null,
+                'status_changed' => $statusChanged,
                 'message' => $item->is_served ? 'Menu ditandai siap / disajikan.' : 'Menu ditandai belum siap.'
             ]);
         } catch (\Exception $e) {
@@ -531,6 +549,90 @@ class PosController extends Controller
             return response()->json(['message' => 'Pesanan berhasil dipisah.']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Menggabungkan pesanan aktif (Merge Bill / Merge Orders)
+     */
+    public function mergeOrder(Request $request, $id_pesanan)
+    {
+        $request->validate([
+            'merge_with_id' => 'required|integer|exists:pesanan,id'
+        ]);
+
+        try {
+            $targetPesanan = Pesanan::with(['detail_pesanan', 'pembayaran'])->findOrFail($id_pesanan);
+            $sourcePesanan = Pesanan::with(['detail_pesanan', 'pembayaran'])->findOrFail($request->merge_with_id);
+
+            $merged = $this->posService->mergeOrders($targetPesanan, $sourcePesanan);
+
+            return response()->json([
+                'message' => "Pesanan #{$sourcePesanan->id} berhasil digabungkan ke Pesanan #{$targetPesanan->id}.",
+                'target_order_id' => $merged->id
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Mengambil daftar pesanan aktif lain yang bisa digabung (Merge Candidates)
+     */
+    public function getMergeCandidates(Request $request, $id_pesanan)
+    {
+        try {
+            $candidates = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran'])
+                ->where('id', '!=', $id_pesanan)
+                ->whereNotIn('status', ['cancelled', 'void', 'completed'])
+                ->where(function ($q) {
+                    $q->whereDoesntHave('pembayaran')
+                      ->orWhereHas('pembayaran', function ($p) {
+                          $p->where('status', '!=', 'paid');
+                      });
+                })
+                ->orderBy('id', 'desc')
+                ->get()
+                ->map(function ($order) {
+                    $mejaName = $order->meja ? ($order->meja->nama_meja_atau_nomor ?? 'Meja ' . $order->meja->nomor_meja) : 'Bawa Pulang';
+                    $cust = $order->customer_name ?: 'Tamu';
+                    $total = number_format((float)$order->total, 0, ',', '.');
+                    $count = $order->detail_pesanan->count();
+                    return [
+                        'id' => $order->id,
+                        'label' => "Pesanan #{$order->id} - {$mejaName} ({$cust}) - Rp {$total} ({$count} item)"
+                    ];
+                });
+
+            return response()->json($candidates);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * Mengambil rincian item pesanan untuk keperluan Split Bill
+     */
+    public function getOrderDetails($id_pesanan)
+    {
+        try {
+            $pesanan = Pesanan::with('detail_pesanan.menu')->findOrFail($id_pesanan);
+            $items = $pesanan->detail_pesanan->map(function ($d) {
+                return [
+                    'id' => $d->id,
+                    'menu' => ['nama_menu' => $d->menu?->nama_menu ?? 'Item'],
+                    'jumlah' => (int) $d->jumlah,
+                    'subtotal' => (float) $d->subtotal,
+                ];
+            });
+
+            return response()->json([
+                'id' => $pesanan->id,
+                'customer_name' => $pesanan->customer_name ?: 'Tamu',
+                'items' => $items
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal memuat item pesanan: ' . $e->getMessage()], 404);
         }
     }
 

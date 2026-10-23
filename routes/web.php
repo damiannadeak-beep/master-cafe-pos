@@ -195,6 +195,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/order/{id_pesanan}/reject-payment', [PosController::class, 'rejectPayment']);
         Route::put('/order/{id_pesanan}/void', [PosController::class, 'voidOrder'])->name('kasir.order.void');
         Route::post('/order/{id_pesanan}/split', [PosController::class, 'splitOrder'])->name('kasir.order.split');
+        Route::post('/order/{id_pesanan}/merge', [PosController::class, 'mergeOrder'])->name('kasir.order.merge');
+        Route::get('/order/{id_pesanan}/merge-candidates', [PosController::class, 'getMergeCandidates'])->name('kasir.order.merge_candidates');
+        Route::get('/order/{id_pesanan}/details', [PosController::class, 'getOrderDetails'])->name('kasir.order.details');
         Route::get('/order/{id}/receipt', [PosController::class, 'printReceipt'])->name('kasir.order.receipt');
         Route::post('/order/{id}/print-thermal', [PosController::class, 'printThermalReceipt'])->name('kasir.order.thermal');
         Route::get('/order/{id}/kitchen-receipt', [PosController::class, 'printKitchenReceipt'])->name('kasir.order.kitchen');
@@ -269,8 +272,6 @@ Route::group([], function () {
     Route::post('/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
     Route::post('/konsumen/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
     Route::post('/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
-    Route::post('/konsumen/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti'])->name('konsumen.upload_bukti');
-    Route::post('/order/{id_pesanan}/upload-bukti', [PaymentController::class, 'uploadBukti']);
 
     // Panggil Pelayan (Call Bell) dari Meja
     Route::post('/konsumen/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');

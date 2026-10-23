@@ -277,6 +277,11 @@
                     });
                     const badgeActive = document.getElementById('tab-count-active');
                     if (badgeActive) badgeActive.innerText = totalOrdersCount;
+
+                    // Terapkan filter & pencarian aktif yang sedang dipilih kasir
+                    if (typeof window.filterActiveOrders === 'function') {
+                        window.filterActiveOrders();
+                    }
                 }
             })
             .catch(err => {

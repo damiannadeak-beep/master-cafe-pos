@@ -80,6 +80,37 @@
         background: rgba(255, 255, 255, 0.12);
         border-radius: 4px;
     }
+    .quick-filter-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 5px 12px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: #8b949e;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        white-space: nowrap;
+        user-select: none;
+    }
+    .quick-filter-btn:hover {
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.06);
+    }
+    .quick-filter-btn.active {
+        color: #ffffff !important;
+        background: #c08e5c !important;
+        border-color: rgba(192, 142, 92, 0.5) !important;
+        box-shadow: 0 2px 8px rgba(192, 142, 92, 0.35);
+    }
+    .quick-filter-btn i {
+        font-size: 0.8rem;
+    }
 </style>
 <div class="container-fluid px-0 py-3" style="padding-bottom: 5rem !important;">
     <!-- Top Header & Segmented Pill Tabs -->
@@ -117,6 +148,45 @@
 
     <!-- PANE 1: Pesanan Aktif -->
     <div id="pane-active-orders">
+        <!-- Search & Filter Bar untuk Pesanan Aktif -->
+        <div class="card border-0 rounded-4 p-3 mb-4 shadow-sm" style="background-color: rgba(22, 27, 34, 0.85); border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="input-group input-group-sm pos-search-box">
+                        <span class="input-group-text border-end-0 rounded-start-pill ps-3" style="background-color: #0e1217; border-color: #21262d; color: #8b949e;">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 rounded-end-pill pos-search-input pe-3 text-white" 
+                               id="search-active-input" placeholder="Cari Meja, Order #, Tamu..." 
+                               onkeyup="window.filterActiveOrders()" autocomplete="off"
+                               style="background-color: #0e1217; border-color: #21262d;">
+                    </div>
+                </div>
+                <div class="col-12 col-md-7 col-lg-8 d-flex justify-content-md-end align-items-center gap-2 flex-wrap">
+                    <div class="active-filter-group d-inline-flex align-items-center p-1 rounded-pill" style="background-color: #0e1217; border: 1px solid #21262d; gap: 4px;">
+                        <button type="button" class="quick-filter-btn active" data-filter="all" onclick="window.setActiveQuickFilter('all', this)">
+                            <i class="bi bi-grid-fill"></i> Semua
+                        </button>
+                        <button type="button" class="quick-filter-btn" data-filter="unpaid" onclick="window.setActiveQuickFilter('unpaid', this)">
+                            <i class="bi bi-clock-history text-danger"></i> Belum Bayar
+                        </button>
+                        <button type="button" class="quick-filter-btn" data-filter="paid" onclick="window.setActiveQuickFilter('paid', this)">
+                            <i class="bi bi-check-circle-fill text-success"></i> Sudah Bayar
+                        </button>
+                        <button type="button" class="quick-filter-btn" data-filter="cooking" onclick="window.setActiveQuickFilter('cooking', this)">
+                            <i class="bi bi-fire text-warning"></i> Dimasak
+                        </button>
+                        <button type="button" class="quick-filter-btn" data-filter="takeaway" onclick="window.setActiveQuickFilter('takeaway', this)">
+                            <i class="bi bi-bag text-info"></i> Takeaway
+                        </button>
+                    </div>
+                    <span class="text-secondary small fw-medium" id="active-filter-info">
+                        Menampilkan <span id="active-visible-count">{{ $orders->count() }}</span> pesanan
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4" id="active-orders-container">
             @include("components.waitress.active-order-card")
         </div>
@@ -204,6 +274,8 @@
 @include("components.waitress.qris-modal")
 
 @include("components.waitress.split-bill-modal")
+
+@include("components.waitress.merge-bill-modal")
 
 @include("components.waitress.verification-modal")
 

@@ -277,6 +277,7 @@
 
         const row = document.getElementById('order-item-row-' + itemId);
         const cardId = btnElement.getAttribute('data-card-id');
+        const orderId = btnElement.getAttribute('data-order-id');
         const card = cardId ? document.getElementById('order-card-' + cardId) : btnElement.closest('.order-card-item');
 
         // Optimistic toggle
@@ -285,6 +286,7 @@
 
         updateItemRowUI(itemId, newServedState);
         updateCardProgressUI(card);
+        if (orderId) updateSubOrderProgressUI(orderId, card);
 
         fetch(`/kasir/order/item/${itemId}/toggle-served`, {
             method: 'PUT',
@@ -300,15 +302,23 @@
                 // Rollback if failed
                 updateItemRowUI(itemId, isCurrentlyServed);
                 updateCardProgressUI(card);
+                if (orderId) updateSubOrderProgressUI(orderId, card);
                 if (window.showToast) window.showToast('Gagal mengubah status menu item.', 'danger');
             } else {
                 if (window.showToast) window.showToast(data.message, 'success');
+                // Jika status pesanan berubah otomatis (misal semua menu siap), refresh kartu agar badge Selesai sinkron
+                if (data.status_changed || data.all_served) {
+                    if (typeof window.reloadActiveOrdersCards === 'function') {
+                        window.reloadActiveOrdersCards(true);
+                    }
+                }
             }
         })
         .catch(err => {
             console.error('Toggle served error:', err);
             updateItemRowUI(itemId, isCurrentlyServed);
             updateCardProgressUI(card);
+            if (orderId) updateSubOrderProgressUI(orderId, card);
         });
     };
 
@@ -324,7 +334,7 @@
         if (isServed) {
             btn.style.background = 'rgba(46, 160, 67, 0.25)';
             btn.style.borderColor = '#2ea043';
-            btn.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 1.1rem;"></i>';
+            btn.innerHTML = '<i class="bi bi-check-lg text-success" style="font-size: 0.85rem;"></i>';
             btn.title = 'Klik untuk batal centang';
             row.classList.add('item-served');
             row.style.opacity = '0.9';
@@ -338,16 +348,17 @@
                 const nameContainer = row.querySelector('.fw-medium > div');
                 if (nameContainer) {
                     const badge = document.createElement('span');
-                    badge.className = 'badge bg-success bg-opacity-25 text-success py-0 px-1 rounded-pill item-status-badge';
-                    badge.style.fontSize = '0.62rem';
-                    badge.innerHTML = '<i class="bi bi-check2"></i> Siap';
+                    badge.className = 'text-success small ms-1 item-status-badge d-inline-flex align-items-center';
+                    badge.style.fontSize = '0.7rem';
+                    badge.style.gap = '3px';
+                    badge.innerHTML = '<i class="bi bi-check2" style="margin: 0 !important; margin-right: 0 !important;"></i><span>Siap</span>';
                     nameContainer.appendChild(badge);
                 }
             }
         } else {
             btn.style.background = 'rgba(255, 255, 255, 0.08)';
             btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            btn.innerHTML = '<i class="bi bi-circle text-white-50" style="font-size: 0.65rem;"></i>';
+            btn.innerHTML = '<i class="bi bi-circle text-white-50" style="font-size: 0.55rem;"></i>';
             btn.title = 'Klik untuk centang (Siap/Diantar)';
             row.classList.remove('item-served');
             row.style.opacity = '1';
@@ -358,6 +369,41 @@
             }
             if (qtySpan) qtySpan.classList.remove('text-success', 'fw-bold');
             if (statusBadge) statusBadge.remove();
+        }
+    }
+
+    function updateSubOrderProgressUI(orderId, card) {
+        if (!orderId) return;
+        const subBadgeContainer = document.getElementById('suborder-status-badge-' + orderId);
+        if (!subBadgeContainer) return;
+
+        const searchScope = card || document;
+        const itemBtns = searchScope.querySelectorAll(`.item-check-btn[data-order-id="${orderId}"]`);
+        if (itemBtns.length === 0) return;
+
+        const totalInSub = itemBtns.length;
+        const servedInSub = Array.from(itemBtns).filter(btn => btn.querySelector('.bi-check-lg') !== null).length;
+        const allInSubServed = (totalInSub > 0 && servedInSub === totalInSub);
+
+        if (allInSubServed) {
+            subBadgeContainer.innerHTML = `
+                <span class="text-success small fw-semibold d-inline-flex align-items-center" style="font-size: 0.68rem; gap: 4px !important;">
+                    <i class="bi bi-check2-circle" style="font-size: 0.72rem; line-height: 1; margin: 0 !important; margin-right: 0 !important;"></i>
+                    <span>Selesai</span>
+                </span>
+            `;
+        } else {
+            subBadgeContainer.innerHTML = `
+                <button type="button" 
+                        id="suborder-btn-${orderId}"
+                        class="btn btn-sm btn-primary py-0 px-2 rounded-2 fw-semibold d-inline-flex align-items-center justify-content-center shadow-none suborder-btn" 
+                        style="font-size: 0.68rem; height: 24px; line-height: 1; gap: 4px !important;" 
+                        onclick="event.stopPropagation(); window.updateSingleOrderStatus(${orderId}, 'completed', this)"
+                        title="Tandai pesanan #${orderId} selesai dimasak">
+                    <i class="bi bi-check2" style="font-size: 0.72rem; line-height: 1; margin: 0 !important; margin-right: 0 !important;"></i>
+                    <span>Selesai</span>
+                </button>
+            `;
         }
     }
 

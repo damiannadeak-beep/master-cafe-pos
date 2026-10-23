@@ -55,20 +55,19 @@
                         <span class="fw-bold text-white fs-5" style="letter-spacing: -0.02em;">
                             <span class="text-danger fw-normal">#</span>{{ $order->id }}
                         </span>
-                        <span class="badge rounded-pill px-2.5 py-1 fw-semibold" 
-                              style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.7rem; letter-spacing: 0.03em;">
-                            DIBATALKAN / VOID
+                        <span class="text-danger fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem; gap: 4px;">
+                            <i class="bi bi-x-circle-fill"></i> DIBATALKAN / VOID
                         </span>
                     </div>
 
                     <div>
                         @if($order->meja)
-                            <span class="badge rounded-pill px-2.5 py-1 fw-medium" style="background: rgba(192, 142, 92, 0.12); color: #d4a373; border: 1px solid rgba(192, 142, 92, 0.25); font-size: 0.72rem;">
-                                <i class="bi bi-geo-alt me-1"></i> {{ $labelMeja }}
+                            <span class="fw-medium text-warning d-inline-flex align-items-center" style="font-size: 0.78rem; gap: 4px;">
+                                <i class="bi bi-geo-alt"></i> {{ $labelMeja }}
                             </span>
                         @else
-                            <span class="badge rounded-pill px-2.5 py-1 fw-medium" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.72rem;">
-                                <i class="bi bi-bag me-1"></i> Takeaway
+                            <span class="fw-medium text-secondary d-inline-flex align-items-center" style="font-size: 0.78rem; gap: 4px;">
+                                <i class="bi bi-bag"></i> Takeaway
                             </span>
                         @endif
                     </div>
@@ -87,13 +86,12 @@
                                 </div>
                             @endif
                         </div>
-                        <div class="text-end">
-                            <span class="badge rounded-pill px-2.5 py-0.5 fw-medium d-inline-flex align-items-center gap-1" 
-                                  style="background: rgba(239, 68, 68, 0.12); color: #f87171; font-size: 0.7rem; border: 1px solid rgba(239, 68, 68, 0.25);">
-                                <i class="bi bi-x-circle"></i> Void
-                            </span>
-                            <div class="text-white-50 mt-1" style="font-size: 0.7rem;">
-                                <i class="bi bi-clock me-1.5 opacity-75"></i> {{ $voidTime ? $voidTime->format('H:i') : '-' }} WIB &bull; {{ $voidTime ? $voidTime->diffForHumans() : '' }}
+                        <div class="text-end text-white-50">
+                            <div style="font-size: 0.74rem;">
+                                <i class="bi bi-clock me-1 opacity-75"></i> {{ $voidTime ? $voidTime->format('H:i') : '-' }} WIB
+                            </div>
+                            <div class="opacity-60" style="font-size: 0.68rem;">
+                                {{ $voidTime ? $voidTime->diffForHumans() : '' }}
                             </div>
                         </div>
                     </div>
@@ -113,11 +111,11 @@
                 <!-- 3. Daftar Item Pesanan yang Dibatalkan (Menyatu Mulus di Atas Kartu) -->
                 <div class="flex-grow-1 d-flex flex-column mb-3">
                     <div class="d-flex justify-content-between align-items-center pb-1.5 mb-1.5" style="border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
-                        <span class="text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.06em; color: #8b949e;">
+                        <span class="text-uppercase fw-semibold text-secondary" style="font-size: 0.68rem; letter-spacing: 0.06em;">
                             Item Dibatalkan ({{ $order->detail_pesanan->sum('jumlah') }})
                         </span>
-                        <span class="badge rounded-pill px-2 py-0.5 fw-medium" style="background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-size: 0.65rem; border: 1px solid rgba(255, 255, 255, 0.06);">
-                            Stok Dikembalikan
+                        <span class="text-white-50 d-inline-flex align-items-center" style="font-size: 0.68rem; gap: 3px;">
+                            <i class="bi bi-arrow-return-left"></i> Stok Dikembalikan
                         </span>
                     </div>
 

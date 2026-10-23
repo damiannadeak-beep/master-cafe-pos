@@ -109,36 +109,45 @@
         container.style.display = 'block';
         if (alertEl) alertEl.style.setProperty('display', 'none', 'important');
 
+        const btnSelectAll = document.getElementById('btn-payment-select-all');
+        const btnDeselectAll = document.getElementById('btn-payment-deselect-all');
+        if (btnSelectAll && btnDeselectAll) {
+            btnSelectAll.style.color = '#38bdf8';
+            btnSelectAll.style.background = 'rgba(56, 189, 248, 0.15)';
+            btnDeselectAll.style.color = 'rgba(255, 255, 255, 0.5)';
+            btnDeselectAll.style.background = 'transparent';
+        }
+
         let html = '';
         subOrdersData.forEach(order => {
             html += `
-                <div class="rounded-3 d-flex align-items-start justify-content-between selective-order-row" 
+                <div class="rounded-2 d-flex align-items-center justify-content-between selective-order-row" 
                      id="selective-order-row-${order.id}" 
-                     style="padding: 13px 15px; margin-bottom: 4px; background: rgba(46, 160, 67, 0.1); border: 1px solid rgba(46, 160, 67, 0.4); cursor: pointer; transition: all 0.2s ease;"
+                     style="padding: 7px 11px; margin-bottom: 6px; background: rgba(46, 160, 67, 0.1); border: 1px solid rgba(46, 160, 67, 0.4); cursor: pointer; transition: all 0.15s ease;"
                      onclick="window.toggleOrderPaymentCheckbox(${order.id}, event)">
-                    <div class="d-flex align-items-start flex-grow-1" style="min-width: 0;">
+                    <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
                         <input class="form-check-input payment-order-checkbox flex-shrink-0" 
                                type="checkbox" 
                                value="${order.id}" 
                                id="chk-pay-order-${order.id}" 
                                data-total="${order.total}" 
                                checked 
-                               style="width: 20px; height: 20px; min-width: 20px; margin-top: 2px; margin-right: 14px; cursor: pointer; accent-color: #2ea043;"
+                               style="width: 16px; height: 16px; min-width: 16px; margin-top: 0; margin-right: 10px; cursor: pointer; accent-color: #2ea043;"
                                onclick="event.stopPropagation(); window.onPaymentOrderCheckboxChange();">
                         <div class="flex-grow-1" style="min-width: 0;">
-                            <div class="d-flex align-items-center flex-wrap" style="gap: 8px; margin-bottom: 3px;">
-                                <span class="fw-bold text-white fs-6" style="margin-right: 4px;">${order.label}</span>
-                                <span class="badge rounded-pill" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.7rem; padding: 3px 9px; font-weight: 500;">
-                                    <i class="bi bi-person" style="margin-right: 5px;"></i>${order.customer}
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                <span class="fw-bold text-white" style="font-size: 0.78rem;">${order.label}</span>
+                                <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.65rem; padding: 2px 5px;">
+                                    ${order.customer}
                                 </span>
                             </div>
-                            <div class="text-white-50" style="font-size: 0.77rem; line-height: 1.45; margin-top: 5px; word-break: break-word;">
-                                <i class="bi bi-basket text-secondary" style="margin-right: 7px; font-size: 0.8rem;"></i>${order.summary || ''}
+                            <div class="text-white-50 text-truncate" style="font-size: 0.7rem; line-height: 1.3; margin-top: 2px;">
+                                <i class="bi bi-basket text-secondary me-1" style="font-size: 0.68rem;"></i>${order.summary || ''}
                             </div>
                         </div>
                     </div>
-                    <div class="text-end flex-shrink-0" style="min-width: 95px; margin-left: 14px; align-self: center; white-space: nowrap;">
-                        <span class="fw-bold text-white d-block" style="font-size: 1rem; letter-spacing: -0.2px;">
+                    <div class="text-end flex-shrink-0 ps-2" style="white-space: nowrap;">
+                        <span class="fw-bold text-white d-block" style="font-size: 0.82rem;">
                             Rp ${Number(order.total).toLocaleString('id-ID')}
                         </span>
                     </div>
@@ -179,6 +188,28 @@
                 }
             }
         });
+
+        // Update segmented toggle buttons visual state
+        const btnSelectAll = document.getElementById('btn-payment-select-all');
+        const btnDeselectAll = document.getElementById('btn-payment-deselect-all');
+        if (btnSelectAll && btnDeselectAll) {
+            if (checkboxes.length > 0 && selectedIds.length === checkboxes.length) {
+                btnSelectAll.style.color = '#38bdf8';
+                btnSelectAll.style.background = 'rgba(56, 189, 248, 0.15)';
+                btnDeselectAll.style.color = 'rgba(255, 255, 255, 0.5)';
+                btnDeselectAll.style.background = 'transparent';
+            } else if (selectedIds.length === 0) {
+                btnSelectAll.style.color = 'rgba(255, 255, 255, 0.5)';
+                btnSelectAll.style.background = 'transparent';
+                btnDeselectAll.style.color = '#f87171';
+                btnDeselectAll.style.background = 'rgba(248, 113, 113, 0.15)';
+            } else {
+                btnSelectAll.style.color = 'rgba(255, 255, 255, 0.8)';
+                btnSelectAll.style.background = 'transparent';
+                btnDeselectAll.style.color = 'rgba(255, 255, 255, 0.5)';
+                btnDeselectAll.style.background = 'transparent';
+            }
+        }
 
         if (selectedIds.length === 0) {
             if (alertEl) alertEl.style.setProperty('display', 'flex', 'important');
@@ -233,23 +264,98 @@
         activeOrderPayState.method = method;
         const btnCash = document.getElementById('tab-btn-cash');
         const btnQris = document.getElementById('tab-btn-qris');
+        const btnSplit = document.getElementById('tab-btn-split');
         const cashSection = document.getElementById('active-order-cash-section');
+        const splitSection = document.getElementById('active-order-split-section');
         const submitBtn = document.getElementById('btn-submit-active-order-pay');
 
+        // Reset tab styles
+        [btnCash, btnQris, btnSplit].forEach(btn => {
+            if (btn) {
+                btn.className = 'btn flex-fill fw-medium rounded-3 pay-method-tab';
+                btn.style.cssText = 'font-size: 0.78rem; padding: 7px 8px; background: rgba(255, 255, 255, 0.03); border: 1px solid #30363d; color: #8b949e !important; transition: all 0.15s ease;';
+            }
+        });
+
+        if (cashSection) cashSection.style.display = 'none';
+        if (splitSection) splitSection.style.display = 'none';
+
         if (method === 'cash') {
-            btnCash?.classList.add('active', 'btn-outline-success');
-            btnCash?.classList.remove('btn-outline-secondary');
-            btnQris?.classList.remove('active', 'btn-outline-primary');
-            btnQris?.classList.add('btn-outline-secondary');
+            if (btnCash) {
+                btnCash.className = 'btn flex-fill fw-bold rounded-3 pay-method-tab active';
+                btnCash.style.cssText = 'font-size: 0.78rem; padding: 7px 8px; background: rgba(46, 160, 67, 0.18); border: 1.5px solid #2ea043; color: #34d399 !important; transition: all 0.15s ease;';
+            }
             if (cashSection) cashSection.style.display = 'block';
-            if (submitBtn) submitBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Selesaikan Pembayaran Tunai';
-        } else {
-            btnQris?.classList.add('active', 'btn-outline-primary');
-            btnQris?.classList.remove('btn-outline-secondary');
-            btnCash?.classList.remove('active', 'btn-outline-success');
-            btnCash?.classList.add('btn-outline-secondary');
-            if (cashSection) cashSection.style.display = 'none';
-            if (submitBtn) submitBtn.innerHTML = '<i class="bi bi-qr-code-scan me-1"></i> Lanjut ke Scan QRIS';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.className = 'btn btn-success fw-bold rounded-3 shadow btn-touch';
+                submitBtn.style.cssText = 'font-size: 0.86rem; padding: 9px 16px;';
+                submitBtn.innerHTML = '<i class="bi bi-check-circle-fill me-1.5"></i> Selesaikan Pembayaran Tunai';
+            }
+        } else if (method === 'qris') {
+            if (btnQris) {
+                btnQris.className = 'btn flex-fill fw-bold rounded-3 pay-method-tab active';
+                btnQris.style.cssText = 'font-size: 0.78rem; padding: 7px 8px; background: rgba(56, 189, 248, 0.18); border: 1.5px solid #38bdf8; color: #38bdf8 !important; transition: all 0.15s ease;';
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.className = 'btn fw-bold rounded-3 shadow btn-touch text-white';
+                submitBtn.style.cssText = 'font-size: 0.86rem; padding: 9px 16px; background: #0284c7; border: 1px solid #38bdf8;';
+                submitBtn.innerHTML = '<i class="bi bi-qr-code-scan me-1.5"></i> Lanjut ke Scan QRIS';
+            }
+        } else if (method === 'split') {
+            if (btnSplit) {
+                btnSplit.className = 'btn flex-fill fw-bold rounded-3 pay-method-tab active';
+                btnSplit.style.cssText = 'font-size: 0.78rem; padding: 7px 8px; background: rgba(245, 158, 11, 0.18); border: 1.5px solid #f59e0b; color: #fbbf24 !important; transition: all 0.15s ease;';
+            }
+            if (splitSection) splitSection.style.display = 'block';
+            
+            // Inisialisasi split kalkulasi
+            const splitInput = document.getElementById('split-cash-input');
+            const total = activeOrderPayState.total;
+            if (splitInput) {
+                splitInput.value = '';
+                splitInput.focus();
+            }
+            const sisaDisplay = document.getElementById('split-nontunai-display');
+            if (sisaDisplay) sisaDisplay.innerText = 'Rp ' + total.toLocaleString('id-ID');
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.className = 'btn fw-bold rounded-3 shadow btn-touch text-white';
+                submitBtn.style.cssText = 'font-size: 0.86rem; padding: 9px 16px; background: #64748b; border: 1px solid #475569;';
+                submitBtn.innerHTML = '<i class="bi bi-qr-code-scan me-1.5"></i> Masukkan Porsi Tunai Terlebih Dahulu';
+            }
+        }
+    };
+
+    window.onSplitPaymentInputChange = function (val) {
+        const total = activeOrderPayState.total;
+        const cashVal = parseInt(val) || 0;
+        const sisa = Math.max(0, total - cashVal);
+        const sisaDisplay = document.getElementById('split-nontunai-display');
+        const submitBtn = document.getElementById('btn-submit-active-order-pay');
+
+        if (sisaDisplay) {
+            if (cashVal > total) {
+                sisaDisplay.innerHTML = '<span class="text-danger small">Tunai melebihi total!</span>';
+            } else {
+                sisaDisplay.innerText = 'Rp ' + sisa.toLocaleString('id-ID');
+            }
+        }
+
+        if (submitBtn) {
+            if (cashVal <= 0 || cashVal >= total) {
+                submitBtn.disabled = true;
+                submitBtn.className = 'btn fw-bold rounded-3 shadow btn-touch text-white';
+                submitBtn.style.cssText = 'font-size: 0.86rem; padding: 9px 16px; background: #64748b; border: 1px solid #475569;';
+                submitBtn.innerHTML = '<i class="bi bi-qr-code-scan me-1.5"></i> Masukkan Porsi Tunai Terlebih Dahulu';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.className = 'btn fw-bold rounded-3 shadow btn-touch text-white';
+                submitBtn.style.cssText = 'font-size: 0.86rem; padding: 9px 16px; background: #0284c7; border: 1px solid #38bdf8;';
+                submitBtn.innerHTML = `<i class="bi bi-lightning-charge-fill me-1.5"></i> Tampilkan QRIS Midtrans Sisa (Rp ${sisa.toLocaleString('id-ID')})`;
+            }
         }
     };
 
@@ -259,7 +365,7 @@
         const isUangPas = (selectedNominal === total);
 
         let presetHtml = `
-            <button type="button" class="btn btn-sm ${isUangPas ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('pas', ${total}, this)">
+            <button type="button" class="btn btn-sm ${isUangPas ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-3 fw-semibold" style="font-size: 0.76rem; padding: 5px 11px;" onclick="window.selectActiveOrderCashPreset('pas', ${total}, this)">
                 <i class="bi bi-check2-circle me-1"></i> Uang Pas (Rp ${total.toLocaleString('id-ID')})
             </button>
         `;
@@ -267,7 +373,7 @@
         if (total < 50000) {
             const is50k = (selectedNominal === 50000);
             presetHtml += `
-                <button type="button" class="btn btn-sm ${is50k ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 50000, this)">
+                <button type="button" class="btn btn-sm ${is50k ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-3 fw-semibold" style="font-size: 0.76rem; padding: 5px 11px;" onclick="window.selectActiveOrderCashPreset('fixed', 50000, this)">
                     Rp 50.000
                 </button>
             `;
@@ -276,7 +382,7 @@
         if (total < 100000 && total !== 50000) {
             const is100k = (selectedNominal === 100000);
             presetHtml += `
-                <button type="button" class="btn btn-sm ${is100k ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', 100000, this)">
+                <button type="button" class="btn btn-sm ${is100k ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-3 fw-semibold" style="font-size: 0.76rem; padding: 5px 11px;" onclick="window.selectActiveOrderCashPreset('fixed', 100000, this)">
                     Rp 100.000
                 </button>
             `;
@@ -286,7 +392,7 @@
         if (total > 100000) {
             const isCeil = (selectedNominal === nextCeil);
             presetHtml += `
-                <button type="button" class="btn btn-sm ${isCeil ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('fixed', ${nextCeil}, this)">
+                <button type="button" class="btn btn-sm ${isCeil ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-3 fw-semibold" style="font-size: 0.76rem; padding: 5px 11px;" onclick="window.selectActiveOrderCashPreset('fixed', ${nextCeil}, this)">
                     Rp ${nextCeil.toLocaleString('id-ID')}
                 </button>
             `;
@@ -296,7 +402,7 @@
         const isCustom = !isStandardPreset && selectedNominal > total;
 
         presetHtml += `
-            <button type="button" class="btn btn-sm ${isCustom ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-pill px-3 py-2 fw-bold" onclick="window.selectActiveOrderCashPreset('custom', 0, this)">
+            <button type="button" class="btn btn-sm ${isCustom ? 'btn-outline-success active' : 'btn-outline-secondary'} active-cash-preset-btn rounded-3 fw-semibold" style="font-size: 0.76rem; padding: 5px 11px;" onclick="window.selectActiveOrderCashPreset('custom', 0, this)">
                 <i class="bi bi-pencil me-1"></i> Nominal Lain
             </button>
         `;
@@ -402,7 +508,7 @@
                 card.style.borderColor = 'rgba(34, 197, 94, 0.4)';
             }
         } else {
-            if (labelKembalian) labelKembalian.innerHTML = '<span class="text-warning fw-bold fs-5">Rp ' + kembalian.toLocaleString('id-ID') + '</span>';
+            if (labelKembalian) labelKembalian.innerHTML = '<span class="text-warning fw-bold" style="font-size: 0.92rem;">Rp ' + kembalian.toLocaleString('id-ID') + '</span>';
             if (alertMsg) alertMsg.innerHTML = '<i class="bi bi-bell-fill text-warning me-1"></i> <strong>Kembalikan uang ke tamu sebesar Rp ' + kembalian.toLocaleString('id-ID') + '</strong>.';
             if (card) {
                 card.style.background = 'rgba(234, 179, 8, 0.09)';
@@ -415,12 +521,22 @@
         if (activeOrderPayState.method === 'qris') {
             window.closeModalById('paymentModal');
             window.openModalById('qrisScanModal');
+        } else if (activeOrderPayState.method === 'split') {
+            const total = activeOrderPayState.total;
+            const cashVal = parseInt(document.getElementById('split-cash-input')?.value) || 0;
+            const nonTunaiVal = Math.max(0, total - cashVal);
+            if (cashVal <= 0 || nonTunaiVal <= 0) {
+                if (window.showToast) window.showToast('Masukkan porsi tunai dan non-tunai yang valid.', 'warning');
+                else alert('Masukkan porsi tunai dan non-tunai yang valid.');
+                return;
+            }
+            window.openActiveOrderMidtransSnapForSplit(cashVal, nonTunaiVal);
         } else {
             window.executePayment('cash');
         }
     };
 
-    window.executePayment = function (method) {
+    window.executePayment = function (method, splitCash = null, splitNonTunai = null) {
         if (!activeOrderPayState.orderIds || activeOrderPayState.orderIds.length === 0) {
             if (window.showToast) window.showToast('Pilih minimal satu pesanan untuk dibayar.', 'warning');
             else alert('Pilih minimal satu pesanan untuk dibayar.');
@@ -442,6 +558,10 @@
         if (method === 'cash') {
             payload.nominal_tunai = activeOrderPayState.nominal;
             payload.is_uang_pas = activeOrderPayState.isUangPas;
+        } else if (method === 'split') {
+            payload.nominal_tunai = splitCash;
+            payload.nominal_nontunai = splitNonTunai;
+            payload.catatan_split = `Split: Tunai Rp ${splitCash.toLocaleString('id-ID')} + Non-Tunai Rp ${splitNonTunai.toLocaleString('id-ID')}`;
         }
 
         fetch(`/kasir/order/${currentOrderId}/pay`, {
@@ -471,6 +591,8 @@
                     if (method === 'cash' && !activeOrderPayState.isUangPas && activeOrderPayState.nominal > activeOrderPayState.total) {
                         const kembalian = activeOrderPayState.nominal - activeOrderPayState.total;
                         toastMsg += ` (Kembalian: Rp ${kembalian.toLocaleString('id-ID')})`;
+                    } else if (method === 'split') {
+                        toastMsg += ` (Campuran: Tunai Rp ${splitCash.toLocaleString('id-ID')} + Non-Tunai Rp ${splitNonTunai.toLocaleString('id-ID')})`;
                     }
 
                     if (window.showToast) {
@@ -584,6 +706,95 @@
                 }
                 alert('Terjadi kesalahan jaringan: ' + err.message);
             });
+    };
+
+    // --- INTEGRASI QRIS DINAMIS MIDTRANS UNTUK SISA NON-TUNAI (CAMPURAN) ---
+    window.openActiveOrderMidtransSnapForSplit = function (splitCash, splitNonTunai) {
+        const orderId = currentOrderId || activeOrderPayState.id;
+        if (!orderId) return alert('Pesanan tidak ditemukan.');
+
+        const submitBtn = document.getElementById('btn-submit-active-order-pay');
+        const origHtml = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5"></span> Menghubungkan Midtrans Sandbox...';
+        }
+
+        fetch(`/kasir/order/${orderId}/snap-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ amount: splitNonTunai })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHtml;
+                }
+
+                if (data.error) {
+                    alert('Gagal mengambil kode Midtrans: ' + data.error);
+                    return;
+                }
+
+                if (!data.snap_token) {
+                    alert('Gagal mendapatkan token Midtrans QRIS.');
+                    return;
+                }
+
+                if (typeof window.snap === 'undefined') {
+                    alert('Script Midtrans Snap belum termuat. Periksa koneksi internet Anda.');
+                    return;
+                }
+
+                window.closeModalById('paymentModal');
+
+                window.snap.pay(data.snap_token, {
+                    onSuccess: function (result) {
+                        // Sisa tagihan QRIS Midtrans lunas, simpan pembayaran split
+                        window.executePayment('split', splitCash, splitNonTunai);
+                    },
+                    onPending: function (result) {
+                        if (window.showToast) window.showToast('⏳ Pembayaran QRIS Midtrans sedang diproses pelanggan.', 'info');
+                    },
+                    onError: function (result) {
+                        alert('❌ Pembayaran QRIS Midtrans gagal atau dibatalkan.');
+                        window.openModalById('paymentModal');
+                    },
+                    onClose: function () {
+                        // Jika kasir/pelanggan menutup popup tanpa bayar, buka kembali modal pembayaran
+                        window.openModalById('paymentModal');
+                    }
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origHtml;
+                }
+                alert('Terjadi kesalahan jaringan saat memanggil Midtrans.');
+            });
+    };
+
+    // Konfirmasi manual (misal jika pelanggan transfer langsung atau scan QRIS akrilik toko)
+    window.confirmSplitPaymentManual = function () {
+        const total = activeOrderPayState.total;
+        const cashVal = parseInt(document.getElementById('split-cash-input')?.value) || 0;
+        const nonTunaiVal = Math.max(0, total - cashVal);
+        if (cashVal <= 0 || nonTunaiVal <= 0) {
+            if (window.showToast) window.showToast('Masukkan porsi tunai dan non-tunai yang valid terlebih dahulu.', 'warning');
+            else alert('Masukkan porsi tunai dan non-tunai yang valid terlebih dahulu.');
+            return;
+        }
+
+        if (confirm(`Konfirmasi pembayaran campuran manual:\n• Tunai: Rp ${cashVal.toLocaleString('id-ID')}\n• Non-Tunai: Rp ${nonTunaiVal.toLocaleString('id-ID')}\n\nPastikan kedua pembayaran sudah diterima kasir?`)) {
+            window.executePayment('split', cashVal, nonTunaiVal);
+        }
     };
 
 })();

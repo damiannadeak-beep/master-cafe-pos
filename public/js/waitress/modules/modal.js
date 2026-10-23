@@ -55,21 +55,25 @@
                 const inst = bootstrap.Modal.getInstance(el);
                 if (inst) {
                     inst.hide();
-                    return;
                 }
             }
         } catch (e) {
             console.warn('[Modal] Bootstrap hide error:', e);
         }
 
-        // 2. Direct DOM Fallback
-        el.classList.remove('show');
-        el.style.display = 'none';
-        el.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('modal-open');
+        // 2. Direct DOM Cleanup Fallback
+        setTimeout(() => {
+            el.classList.remove('show');
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+            el.removeAttribute('aria-modal');
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
 
-        const backdrop = document.getElementById('modal-fallback-backdrop');
-        if (backdrop) backdrop.remove();
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(b => b.remove());
+        }, 150);
     };
 
 })();

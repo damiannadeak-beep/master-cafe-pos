@@ -282,7 +282,7 @@
                         </thead>
                         <tbody>
                             @forelse($pembayarans as $p)
-                            <tr style="border-bottom: 1px solid #1c2128; transition: background 0.15s ease;">
+                            <tr class="transaksi-row" style="border-bottom: 1px solid #1c2128; transition: background 0.15s ease;">
                                 <td class="py-3 px-4">
                                     <span class="text-white-50 small d-inline-flex align-items-center">
                                         <i class="bi bi-clock me-2 text-secondary opacity-75" style="margin-right: 7px !important;"></i> {{ $p->tanggal ? \Carbon\Carbon::parse($p->tanggal)->format('H:i') : '-' }} WIB
@@ -348,6 +348,16 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Footer Pagination Transaksi -->
+                @if($pembayarans->count() > 0)
+                <div class="pos-pagination-footer">
+                    <div class="pagination-info" id="transaksi-pagination-info">
+                        Menampilkan <span class="highlight">1-{{ min(15, $pembayarans->count()) }}</span> dari <span class="highlight">{{ $pembayarans->count() }}</span> transaksi
+                    </div>
+                    <div class="pagination-controls" id="transaksi-pagination-controls"></div>
+                </div>
+                @endif
             </div>
 
             <!-- TAB 2: Rekapitulasi Menu Terjual -->
@@ -365,7 +375,7 @@
                         <tbody>
                             @php $itemIndex = 1; @endphp
                             @forelse($rekapMenu as $nama => $data)
-                            <tr style="border-bottom: 1px solid #1c2128; transition: background 0.15s ease;">
+                            <tr class="menu-row" style="border-bottom: 1px solid #1c2128; transition: background 0.15s ease;">
                                 <td class="py-3 px-4 text-center">
                                     <span class="text-secondary small">{{ $itemIndex++ }}</span>
                                 </td>
@@ -416,6 +426,16 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Footer Pagination Rekap Menu -->
+                @if(count($rekapMenu) > 0)
+                <div class="pos-pagination-footer">
+                    <div class="pagination-info" id="menu-pagination-info">
+                        Menampilkan <span class="highlight">1-{{ min(15, count($rekapMenu)) }}</span> dari <span class="highlight">{{ count($rekapMenu) }}</span> menu
+                    </div>
+                    <div class="pagination-controls" id="menu-pagination-controls"></div>
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -474,8 +494,144 @@ function updateTotalKasLive() {
     }
 }
 
+class TablePagination {
+    constructor({ rowSelector, infoId, controlsId, itemsPerPage = 15, itemName = 'transaksi' }) {
+        this.rowSelector = rowSelector;
+        this.infoEl = document.getElementById(infoId);
+        this.controlsEl = document.getElementById(controlsId);
+        this.itemsPerPage = itemsPerPage;
+        this.itemName = itemName;
+        this.currentPage = 1;
+
+        this.rows = Array.from(document.querySelectorAll(this.rowSelector));
+        this.totalItems = this.rows.length;
+
+        if (this.totalItems > 0 && this.controlsEl) {
+            this.render();
+        }
+    }
+
+    get totalPages() {
+        return Math.ceil(this.totalItems / this.itemsPerPage) || 1;
+    }
+
+    goToPage(page) {
+        if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+        this.currentPage = page;
+        this.render();
+    }
+
+    render() {
+        this.updateRows();
+        this.updateInfo();
+        this.updateControls();
+    }
+
+    updateRows() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+
+        this.rows.forEach((row, idx) => {
+            if (idx >= start && idx < end) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    updateInfo() {
+        if (!this.infoEl) return;
+        const start = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const end = Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+        this.infoEl.innerHTML = `Menampilkan <span class="highlight">${start}-${end}</span> dari <span class="highlight">${this.totalItems}</span> ${this.itemName}`;
+    }
+
+    updateControls() {
+        if (!this.controlsEl) return;
+        this.controlsEl.innerHTML = '';
+
+        const total = this.totalPages;
+        const current = this.currentPage;
+
+        if (total <= 1) {
+            this.controlsEl.style.display = 'none';
+            return;
+        } else {
+            this.controlsEl.style.display = 'inline-flex';
+        }
+
+        // Tombol Sebelumnya (Prev)
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'page-btn';
+        prevBtn.innerHTML = '<i class="bi bi-chevron-left" style="font-size: 0.72rem;"></i>';
+        prevBtn.title = 'Halaman Sebelumnya';
+        prevBtn.disabled = (current === 1);
+        prevBtn.addEventListener('click', () => this.goToPage(current - 1));
+        this.controlsEl.appendChild(prevBtn);
+
+        // Nomor Halaman & Titik-titik (...)
+        const pages = this.calculatePages(current, total);
+        pages.forEach(p => {
+            if (p === '...') {
+                const dots = document.createElement('span');
+                dots.className = 'page-dots';
+                dots.textContent = '...';
+                this.controlsEl.appendChild(dots);
+            } else {
+                const numBtn = document.createElement('button');
+                numBtn.type = 'button';
+                numBtn.className = `page-btn ${p === current ? 'active' : ''}`;
+                numBtn.textContent = p;
+                numBtn.addEventListener('click', () => this.goToPage(p));
+                this.controlsEl.appendChild(numBtn);
+            }
+        });
+
+        // Tombol Berikutnya (Next)
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'page-btn';
+        nextBtn.innerHTML = '<i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>';
+        nextBtn.title = 'Halaman Berikutnya';
+        nextBtn.disabled = (current === total);
+        nextBtn.addEventListener('click', () => this.goToPage(current + 1));
+        this.controlsEl.appendChild(nextBtn);
+    }
+
+    calculatePages(current, total) {
+        if (total <= 7) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        if (current <= 4) {
+            return [1, 2, 3, 4, 5, '...', total];
+        }
+        if (current >= total - 3) {
+            return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+        }
+        return [1, '...', current - 1, current, current + 1, '...', total];
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     updateTotalKasLive();
+
+    new TablePagination({
+        rowSelector: '.transaksi-row',
+        infoId: 'transaksi-pagination-info',
+        controlsId: 'transaksi-pagination-controls',
+        itemsPerPage: 15,
+        itemName: 'transaksi'
+    });
+
+    new TablePagination({
+        rowSelector: '.menu-row',
+        infoId: 'menu-pagination-info',
+        controlsId: 'menu-pagination-controls',
+        itemsPerPage: 15,
+        itemName: 'menu'
+    });
 });
 </script>
 
@@ -506,13 +662,13 @@ document.addEventListener('DOMContentLoaded', function() {
             </tr>
             <tr>
                 <td style="background-color: #f8f9fa; font-weight: bold;">Waktu Tutup Shift:</td>
-                <td>{{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') . ' WIB' : 'Shift Masih Berjalan (Open)' }}</td>
+                <td>{{ $shift->waktu_tutup ? $shift->waktu_tutup->format('d/m/Y H:i') . ' WIB' : 'Shift Masih Berjalan' }}</td>
                 <td style="background-color: #f8f9fa; font-weight: bold;">Pemasukan Tunai:</td>
                 <td style="text-align: right; font-weight: bold; color: #0d6832;">Rp {{ number_format($totalCash, 0, ',', '.') }}</td>
             </tr>
             <tr>
                 <td style="background-color: #f8f9fa; font-weight: bold;">Status Shift:</td>
-                <td><span class="badge bg-secondary">{{ strtoupper($shift->status) }}</span></td>
+                <td>{{ ($shift->status ?? '') === 'closed' ? 'Shift Selesai (Ditutup)' : 'Shift Masih Berjalan' }}</td>
                 <td style="background-color: #f8f9fa; font-weight: bold;">Pemasukan QRIS:</td>
                 <td style="text-align: right; font-weight: bold; color: #0b5ed7;">Rp {{ number_format($totalQris, 0, ',', '.') }}</td>
             </tr>
@@ -544,11 +700,11 @@ document.addEventListener('DOMContentLoaded', function() {
     <h6 class="fw-bold text-dark text-uppercase border-bottom border-dark pb-1 mb-2">2. Rekapitulasi Menu Terjual</h6>
     <table class="table table-bordered border-secondary table-sm mb-3 table-print" style="font-size: 8.5pt;">
         <thead>
-            <tr style="background-color: #f2f2f2;">
-                <th style="width: 35px;" class="text-center">No</th>
-                <th>Menu / Produk</th>
-                <th style="width: 90px;" class="text-center">Qty Terjual</th>
-                <th style="width: 130px;" class="text-end">Subtotal</th>
+            <tr style="background-color: #f2f2f2 !important;">
+                <th style="width: 35px; color: #111111 !important; background-color: #f2f2f2 !important; font-weight: bold;" class="text-center">No</th>
+                <th style="color: #111111 !important; background-color: #f2f2f2 !important; font-weight: bold;">Menu / Produk</th>
+                <th style="width: 90px; color: #111111 !important; background-color: #f2f2f2 !important; font-weight: bold;" class="text-center">Qty Terjual</th>
+                <th style="width: 130px; color: #111111 !important; background-color: #f2f2f2 !important; font-weight: bold;" class="text-end">Subtotal</th>
             </tr>
         </thead>
         <tbody>
@@ -593,6 +749,87 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <style>
+/* Styling Pagination Dark Mode untuk Shift Report */
+.pos-pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #12161c;
+    border-top: 1px solid #21262d;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pagination-info {
+    font-size: 0.82rem;
+    color: #8b949e;
+}
+
+.pagination-info .highlight {
+    color: #e6edf3;
+    font-weight: 600;
+}
+
+.pagination-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    user-select: none;
+}
+
+.page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #c9d1d9;
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+    background-color: #21262d;
+    color: #ffffff;
+    border-color: #484f58;
+}
+
+.page-btn.active {
+    background-color: #c08e5c;
+    color: #ffffff;
+    border-color: #c08e5c;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(192, 142, 92, 0.4);
+    cursor: default;
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background-color: #12161c;
+    border-color: #21262d;
+    color: #6e7681;
+}
+
+.page-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 32px;
+    color: #6e7681;
+    font-weight: bold;
+    font-size: 0.82rem;
+}
+
 @media print {
     @page {
         size: A4 portrait;
@@ -620,26 +857,25 @@ document.addEventListener('DOMContentLoaded', function() {
     .kasir-navbar, .kasir-topbar, .offcanvas, .d-print-none, nav, header {
         display: none !important;
     }
-    .print-area {
-        display: block !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-        padding: 0 !important;
+    .print-area, .print-area * {
+        color: #111111 !important;
+    }
+    .print-area .text-muted {
+        color: #666666 !important;
     }
     .table-print {
         width: 100% !important;
         border-collapse: collapse !important;
-        color: #000000 !important;
         background: transparent !important;
     }
     .table-print th, .table-print td {
         border: 1px solid #333333 !important;
-        color: #000000 !important;
+        color: #111111 !important;
         padding: 4px 8px !important;
-        background: transparent !important;
     }
     .table-print th {
         background-color: #f2f2f2 !important;
+        color: #111111 !important;
         font-weight: bold !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;

@@ -18,34 +18,14 @@
             '';
     }
 
-    window.openSplitModal = function (orderId, btnElement) {
-        splitOrderId = orderId;
-        const btn = btnElement ? (btnElement.closest('button') || btnElement) : null;
-        let details = [];
-        if (btn) {
-            let rawData = btn.getAttribute('data-details') || '';
-            try {
-                details = JSON.parse(rawData);
-            } catch (e) {
-                try {
-                    // Fallback jika ada HTML entity decoding issue
-                    const txt = document.createElement('textarea');
-                    txt.innerHTML = rawData;
-                    details = JSON.parse(txt.value);
-                } catch (e2) {
-                    console.error('Error parse data-details:', e2);
-                    details = [];
-                }
-            }
-        }
-        splitDetails = details;
-
-        const splitOrderSpan = document.getElementById('split-order-id');
-        if (splitOrderSpan) splitOrderSpan.innerText = orderId;
+    function renderSplitItems(details) {
+        splitDetails = details || [];
+        const splitContainer = document.getElementById('split-items-container');
+        if (!splitContainer) return;
 
         let html = '';
-        if (details.length === 0) {
-            html = '<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-circle me-1"></i> Data item pesanan tidak ditemukan atau gagal dimuat.</div>';
+        if (!details || details.length === 0) {
+            html = '<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-circle me-1"></i> Data item pesanan tidak ditemukan atau sudah kosong.</div>';
         } else {
             details.forEach(item => {
                 const menuName = item.menu ? item.menu.nama_menu : (item.nama_menu || 'Menu');
@@ -68,18 +48,66 @@
             });
         }
 
-        const splitContainer = document.getElementById('split-items-container');
-        if (splitContainer) splitContainer.innerHTML = html;
+        splitContainer.innerHTML = html;
 
-        document.querySelectorAll('.split-cb').forEach(cb => {
+        splitContainer.querySelectorAll('.split-cb').forEach(cb => {
             cb.addEventListener('change', function () {
                 const qtyInput = document.getElementById('qty_' + this.value);
                 if (qtyInput) qtyInput.disabled = !this.checked;
             });
         });
+    }
+
+    window.openSplitModal = function (orderId, btnElement) {
+        splitOrderId = orderId;
+        const splitOrderSpan = document.getElementById('split-order-id');
+        if (splitOrderSpan) splitOrderSpan.innerText = orderId;
+
+        const splitContainer = document.getElementById('split-items-container');
+        const btn = btnElement ? (btnElement.closest('button') || btnElement) : null;
+        let details = [];
+        if (btn) {
+            let rawData = btn.getAttribute('data-details') || '';
+            try {
+                details = JSON.parse(rawData);
+            } catch (e) {
+                try {
+                    const txt = document.createElement('textarea');
+                    txt.innerHTML = rawData;
+                    details = JSON.parse(txt.value);
+                } catch (e2) {
+                    details = [];
+                }
+            }
+        }
 
         if (typeof window.openModalById === 'function') {
             window.openModalById('splitModal');
+        }
+
+        if (details && details.length > 0) {
+            renderSplitItems(details);
+        } else {
+            if (splitContainer) {
+                splitContainer.innerHTML = '<div class="text-center py-4 text-white-50"><div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>Memuat rincian item pesanan...</div>';
+            }
+            fetch(`/kasir/order/${orderId}/details`, {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.items) {
+                    renderSplitItems(data.items);
+                } else {
+                    renderSplitItems([]);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (splitContainer) {
+                    splitContainer.innerHTML = '<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-triangle me-1"></i> Gagal memuat item dari server.</div>';
+                }
+            });
         }
     };
 
@@ -147,6 +175,46 @@
                 console.error(err);
                 if (window.showToast) window.showToast('Terjadi kesalahan saat memisah bon.', 'danger');
             });
+    };
+
+    /**
+     * Handler pemicu Pisah Bon dari kartu pesanan kasir
+     */
+    window.handleCardSplit = function (primaryOrderId, btnElement) {
+        const btn = btnElement ? (btnElement.closest('button') || btnElement) : null;
+        if (!btn) return;
+
+        let subordersRaw = btn.getAttribute('data-suborders');
+        if (subordersRaw) {
+            try {
+                let suborders = JSON.parse(subordersRaw);
+                if (Array.isArray(suborders) && suborders.length > 1) {
+                    let promptMsg = `Meja ini memiliki ${suborders.length} pesanan yang belum lunas:\n`;
+                    suborders.forEach((so, idx) => {
+                        promptMsg += `${idx + 1}. Pesanan #${so.id} (${so.summary})\n`;
+                    });
+                    promptMsg += `\nKetik nomor urut pilihan (1 - ${suborders.length}) untuk memisah pesanan:`;
+                    let choice = prompt(promptMsg, '1');
+                    if (!choice) return;
+                    let selectedIdx = parseInt(choice) - 1;
+                    if (isNaN(selectedIdx) || selectedIdx < 0 || selectedIdx >= suborders.length) {
+                        if (window.showToast) window.showToast('Pilihan nomor tidak valid.', 'warning');
+                        else alert('Pilihan nomor tidak valid.');
+                        return;
+                    }
+                    let chosen = suborders[selectedIdx];
+                    window.openSplitModal(chosen.id, btn);
+                    return;
+                } else if (Array.isArray(suborders) && suborders.length === 1) {
+                    window.openSplitModal(suborders[0].id, btn);
+                    return;
+                }
+            } catch (e) {
+                console.error('Error parse data-suborders:', e);
+            }
+        }
+
+        window.openSplitModal(primaryOrderId, btnElement);
     };
 
 })();

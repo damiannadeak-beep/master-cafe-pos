@@ -38,7 +38,9 @@
                     </h6>
                     @if(!$isPaid && !$isPendingVerif)
                         <div class="d-flex gap-1 align-items-center flex-wrap">
-                            <a href="{{ url('/konsumen/checkout/' . $pesanan->id . '?token=' . $pesanan->order_token) }}" class="btn btn-sm rounded-pill px-2 py-1 fw-bold" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.75rem;">
+                            <a href="{{ url('/konsumen/checkout/' . $pesanan->id . '?token=' . $pesanan->order_token) }}" 
+                               class="btn btn-sm fw-bold d-inline-flex align-items-center" 
+                               style="background: var(--gradient-bronze); color: white; border: none; border-radius: 8px; padding: 5px 12px; font-size: 0.75rem;">
                                 ⚡ Bayar Online (QRIS)
                             </a>
                         </div>

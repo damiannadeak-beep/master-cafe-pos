@@ -178,8 +178,21 @@
             @else
             <tr>
                 <td>Metode</td>
-                <td class="text-right">{{ strtoupper($order->payment_method_label ?? ($order->pembayaran->metode ?? 'CASH')) }}</td>
+                <td class="text-right">
+                    @if(isset($order->pembayaran) && $order->pembayaran->metode === 'split')
+                        CAMPURAN
+                    @else
+                        {{ strtoupper($order->payment_method_label ?? ($order->pembayaran->metode ?? 'CASH')) }}
+                    @endif
+                </td>
             </tr>
+            @if(isset($order->pembayaran) && $order->pembayaran->metode === 'split' && !empty($order->pembayaran->catatan_kembalian))
+            <tr>
+                <td colspan="2" class="text-left" style="font-size: 10px; color: #333; padding: 2px 0;">
+                    * {{ $order->pembayaran->catatan_kembalian }}
+                </td>
+            </tr>
+            @endif
             @endif
             @if($order->pembayaran && $order->pembayaran->uang_diterima)
             <tr>

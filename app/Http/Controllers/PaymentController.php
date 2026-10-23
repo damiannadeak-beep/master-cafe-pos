@@ -358,40 +358,6 @@ class PaymentController extends Controller
         return redirect($targetUrl)->with('success', $successMsg);
     }
 
-    public function uploadBukti(Request $request, $id_pesanan)
-    {
-        $request->validate([
-            'bukti_bayar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
-
-        // Validasi kepemilikan pesanan via Trait
-        $this->authorizeOrderAccess($pesanan, $request);
-
-        $pembayaran = $pesanan->pembayaran;
-
-        if ($request->hasFile('bukti_bayar')) {
-            $file = $request->file('bukti_bayar');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('public/bukti_bayar', $filename);
-
-            $pembayaran->bukti_bayar = 'bukti_bayar/' . $filename;
-            $pembayaran->status = 'pending_verification';
-            $pembayaran->save();
-            
-            // Broadcast notification to cashier that there is a new payment to verify
-            \App\Models\Notification::create([
-                'type' => 'payment_verification',
-                'message' => 'Pesanan #' . $pesanan->id . ' menunggu verifikasi pembayaran.',
-                'id_meja' => $pesanan->id_meja,
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Bukti pembayaran berhasil diunggah. Silakan tunggu verifikasi kasir.');
-    }
-
-
     public function webhook(Request $request)
     {
         // 1. Validasi Signature Key

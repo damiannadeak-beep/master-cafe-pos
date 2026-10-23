@@ -1,134 +1,141 @@
-﻿# BAB II TINJAUAN PUSTAKA
+# BAB II TINJAUAN PUSTAKA
 
 ## 2.1 Kajian Terdahulu
 
-Kajian terdahulu merupakan penelusuran terhadap artikel jurnal ilmiah terakreditasi yang telah dipublikasikan secara resmi dengan topik relevan seputar sistem kasir (*Point of Sale*) dan sistem pemesanan mandiri (*Self-Service*). Kajian ini bertujuan untuk memetakan perkembangan teknologi yang telah dicapai, mengevaluasi kelebihan dan kelemahan dari solusi yang ada, serta mempertegas posisi kebaruan (*novelty*) dan kontribusi dari sistem yang dikembangkan pada Master Cafe.
+Kajian terdahulu merupakan penelusuran terhadap artikel jurnal ilmiah terakreditasi yang telah dipublikasikan secara resmi dengan topik yang relevan seputar sistem kasir (*Point of Sale*) dan sistem pemesanan mandiri (*Self-Service*). Kajian ini bertujuan untuk memetakan perkembangan teknologi yang telah dicapai oleh peneliti sebelumnya, mengevaluasi kelebihan dan keterbatasan dari solusi yang ada, serta mempertegas posisi kebaruan (*novelty*) dan kontribusi dari sistem yang dikembangkan pada Master Cafe Bengkalis.
 
-Seluruh rujukan kajian terdahulu dalam penelitian ini merupakan publikasi ilmiah terbitan tahun **2024** yang telah terindeks secara resmi pada **Portal SINTA Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi (Kemendikbudristek)** dengan peringkat akreditasi **SINTA 4** serta memiliki *Digital Object Identifier* (DOI) aktif yang terdaftar di Crossref:
+Dalam penyusunan proposal Tugas Akhir ini, rujukan kajian terdahulu terdiri atas tepat 6 (enam) artikel jurnal ilmiah terverifikasi yang mencakup 3 (tiga) artikel jurnal internasional bereputasi (terindeks Scopus dan IEEE) serta 3 (tiga) artikel jurnal nasional terakreditasi pada Portal SINTA Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi (SINTA 3 dan SINTA 4) terbitan tahun 2022 hingga 2025 dengan rincian sebagai berikut:
 
-1. **Penelitian oleh Pratama dan Khristianto (2024) [1]**  
+1. **Penelitian oleh Hidayat, Rubianto, Nurkhasanah, dan Prasandy (2024) [1]**  
+   * **Judul Asli:** *"Menu Ordering Application using QR Code With User Experience Analysis"*  
+   * **Nama Jurnal & Reputasi:** *2024 9th International Conference on Business and Industrial Research (ICBIR)*, Bangkok, Thailand: IEEE, hlm. 1–6, Mei 2024. Terindeks **Scopus** dan **IEEE Xplore**.  
+   * **DOI / Tautan Aktif:** [https://doi.org/10.1109/ICBIR61386.2024.10875903](https://doi.org/10.1109/ICBIR61386.2024.10875903)  
+   * **Ringkasan Metode:** Menerapkan metodologi *Kanban* dalam rekayasa aplikasi pemesanan hidangan berbasis *mobile web* menggunakan pemindaian *QR Code* meja dan integrasi teknologi RFID guna melacak posisi meja pelanggan di area kedai kopi. Hasil pengujian fungsional dan *User Acceptance Testing* (UAT) menunjukkan skor performa sebesar 91,4%, di mana 65% responden menyatakan pemesanan hidangan berlangsung jauh lebih cepat dibandingkan cara konvensional.  
+   * **Kelebihan:** Mampu memangkas antrean di meja kasir secara signifikan dan mempercepat alur data pesanan ke bagian dapur.  
+   * **Kekurangan:** Sistem hanya berfokus pada alur pemesanan meja dan belum terintegrasi dengan modul kasir keuangan yang komprehensif, seperti manajemen buka-tutup shift kerja kasir, pencatatan kas modal/darurat, serta rekonsiliasi kas fisik harian.
+
+2. **Penelitian oleh Wong, Chong, Chong, dan Law (2023) [2]**  
+   * **Judul Asli:** *"QR Food Ordering System with Data Analytics"*  
+   * **Nama Jurnal & Reputasi:** *Journal of Informatics and Web Engineering (JIWE)*, Vol. 2, No. 2, hlm. 248–261, September 2023. MMU Press. Terindeks **Scopus**.  
+   * **DOI / Tautan Aktif:** [https://doi.org/10.33093/jiwe.2023.2.2.18](https://doi.org/10.33093/jiwe.2023.2.2.18)  
+   * **Ringkasan Metode:** Merancang arsitektur sistem pemesanan makanan mandiri berbasis *QR Code* yang dihubungkan dengan modul visualisasi *data analytics* penjualan sektor *food and beverage* (F&B) untuk memantau menu terlaris, frekuensi transaksi, dan riwayat pesanan pelanggan.  
+   * **Kelebihan:** Menyediakan laporan grafis analitik penjualan terperinci untuk mendukung pengambilan keputusan pemilik usaha.  
+   * **Kekurangan:** Sistem belum menerapkan teknologi *Progressive Web App* (PWA), belum memiliki validasi radius lokasi pemesan (*geofencing GPS*) sehingga rawan pesanan palsu jika tautan meja tersebar ke luar kafe, serta belum dilengkapi modul audit pergantian shift kasir.
+
+3. **Penelitian oleh Singh, Sonje, Salkar, dan Jadhav (2022) [3]**  
+   * **Judul Asli:** *"Smart QR-based Restaurant Dine-in System with Sales Analysis"*  
+   * **Nama Jurnal & Reputasi:** *ITM Web of Conferences*, Vol. 44, Art. No. 03014, hlm. 1–6, 2022. EDP Sciences. Terindeks **Scopus** dan **Web of Science**.  
+   * **DOI / Tautan Aktif:** [https://doi.org/10.1051/itmconf/20224403014](https://doi.org/10.1051/itmconf/20224403014)  
+   * **Ringkasan Metode:** Mengembangkan sistem *dine-in* restoran menggunakan *dynamic QR Code* pada setiap meja makan yang terhubung langsung ke bagian dapur dan kasir guna meniadakan penggunaan buku menu fisik dan nota kertas pascapandemi.  
+   * **Kelebihan:** Mempercepat waktu pengiriman pesanan ke koki dan meminimalisir kontak fisik langsung antar-individu.  
+   * **Kekurangan:** Sistem tidak memiliki proteksi koordinat fisik lokasi pelanggan dan belum menyediakan rekonsiliasi selisih kas fisik di akhir shift kerja kasir.
+
+4. **Penelitian oleh Pratama dan Khristianto (2024) [4]**  
    * **Judul Asli:** *"Sistem Informasi Pemesanan Makanan Dan Minuman Berbasis Qr Code Pada Brotherhood Coffee Co Pati"*  
    * **Nama Jurnal & Akreditasi:** *INTECOMS: Journal of Information Technology and Computer Science*, Vol. 7, No. 1, hlm. 64–70, Januari 2024. Terakreditasi **SINTA 4**.  
-   * **DOI / Tautan Aktif:** [https://doi.org/10.31539/intecoms.v7i1.8181](https://doi.org/10.31539/intecoms.v7i1.8181) (Akses OJS: [https://journal.ipm2kpe.or.id/index.php/INTECOM/article/view/8181](https://journal.ipm2kpe.or.id/index.php/INTECOM/article/view/8181))  
-   * **Ringkasan Metode:** Menggunakan bahasa pemrograman PHP, basis data MySQL, dan pendekatan SDLC model sekuensial linier (Waterfall) untuk mengotomatiskan proses pemesanan menu melalui pemindaian barcode/QR Code pada meja kafe.  
-   * **Kelebihan:** Mampu memangkas waktu tunggu pelanggan dengan menghilangkan proses manual pelayan mendatangi meja untuk mencatat pesanan, serta data pesanan pelanggan langsung tersimpan secara digital ke sistem.  
-   * **Kekurangan:** Sistem belum terintegrasi dengan modul kasir keuangan yang komprehensif (seperti pembukuan uang modal awal kasir, pencatatan kas keluar darurat, dan rekonsiliasi kas fisik per shift kerja), belum menerapkan arsitektur *Progressive Web App* (PWA), serta belum memiliki pembatasan lokasi GPS meja (*geofencing*).
+   * **DOI / Tautan Aktif:** [https://doi.org/10.31539/intecoms.v7i1.8181](https://doi.org/10.31539/intecoms.v7i1.8181)  
+   * **Ringkasan Metode:** Menerapkan metode Waterfall, bahasa pemrograman PHP, dan basis data MySQL untuk mengotomatiskan proses pemesanan menu kafe melalui pemindaian stiker *QR Code* di meja.  
+   * **Kelebihan:** Mampu memangkas waktu tunggu pelanggan dan menghilangkan proses pelayan mendatangi meja untuk mencatat pesanan secara manual.  
+   * **Kekurangan:** Sistem belum terintegrasi dengan modul kasir keuangan (pembukuan kas modal kasir, pencatatan kas keluar darurat, dan rekonsiliasi kas per shift), belum berbasis PWA, serta belum memiliki proteksi lokasi meja.
 
-2. **Penelitian oleh Irwansa dan Huda (2024) [2]**  
-   * **Judul Asli:** *"Pemanfaatan QR Code Dalam Pemesanan Makanan & Minuman Pada Rumah Makan Kejora Jaya Menggunakan Metode User Centered Design (UCD)"*  
-   * **Nama Jurnal & Akreditasi:** *INTECOMS: Journal of Information Technology and Computer Science*, Vol. 7, No. 1, hlm. 196–206, Februari 2024. Terakreditasi **SINTA 4**.  
-   * **DOI / Tautan Aktif:** [https://doi.org/10.31539/intecoms.v7i1.8429](https://doi.org/10.31539/intecoms.v7i1.8429) (Akses OJS: [https://journal.ipm2kpe.or.id/index.php/INTECOM/article/view/8429](https://journal.ipm2kpe.or.id/index.php/INTECOM/article/view/8429))  
-   * **Ringkasan Metode:** Menerapkan metode *User Centered Design* (UCD) dan pemodelan *Unified Modeling Language* (UML) dalam rekayasa sistem berbasis web untuk menggantikan nota kertas pesanan manual dengan pemindaian stiker QR Code di meja makan.  
-   * **Kelebihan:** Mengurangi beban kerja pelayan secara efektif, mengeliminasi risiko kertas nota basah atau tulisan tangan yang tidak terbaca, dan mempercepat alur data pesanan ke bagian dapur.  
-   * **Kekurangan:** Belum mendukung arsitektur multi-stasiun (pemisahan dinamis antara hak akses Tablet Waitress dan Kasir Utama), belum dilengkapi fasilitas pelaporan tutup shift kasir harian, serta belum memiliki dukungan cetak struk ke printer thermal Bluetooth.
+5. **Penelitian oleh Prayudha, Irwansyah, dan Anra (2024) [5]**  
+   * **Judul Asli:** *"Rancang Bangun Aplikasi Point of Sale (POS App) Berbasis Progressive Web App untuk Usaha Mikro Kecil dan Menengah"*  
+   * **Nama Jurnal & Akreditasi:** *JustIN (Jurnal Sistem dan Teknologi Informasi)*, Vol. 12, No. 2, hlm. 248–254, April 2024. Universitas Tanjungpura. Terakreditasi **SINTA 3**.  
+   * **DOI / Tautan Aktif:** [https://doi.org/10.26418/justin.v12i2.76824](https://doi.org/10.26418/justin.v12i2.76824)  
+   * **Ringkasan Metode:** Merancang dan membangun aplikasi kasir *Point of Sale* (POS) dengan mengimplementasikan teknologi *Progressive Web App* (PWA) agar aplikasi kasir UMKM dapat diakses secara responsif di berbagai perangkat gawai pintar, dapat dipasang langsung ke layar utama ponsel (*Add to Home Screen*), dan mendukung penyimpanan aset lokal melalui *service worker*.  
+   * **Kelebihan:** Fleksibilitas operasional kasir UMKM tanpa ketergantungan toko aplikasi digital serta performa responsif di ponsel.  
+   * **Kekurangan:** Sistem dirancang murni sebagai aplikasi kasir satu arah untuk staf kasir dan belum diintegrasikan dengan portal pemesanan mandiri meja pelanggan (*customer self-service*) secara terpadu.
 
-3. **Penelitian oleh Wulandari dan Handayani (2024) [3]**  
-   * **Judul Asli:** *"Sistem Inventory dan Pemesanan Menu Berbasis Web dan Mobile pada Hana Chick"*  
-   * **Nama Jurnal & Akreditasi:** *INTECOMS: Journal of Information Technology and Computer Science*, Vol. 7, No. 6, hlm. 2291–2301, Desember 2024. Terakreditasi **SINTA 4**.  
-   * **DOI / Tautan Aktif:** [https://doi.org/10.31539/intecoms.v7i6.13257](https://doi.org/10.31539/intecoms.v7i6.13257) (Akses OJS: [https://journal.ipm2kpe.or.id/index.php/INTECOM/article/view/13257](https://journal.ipm2kpe.or.id/index.php/INTECOM/article/view/13257))  
-   * **Ringkasan Metode:** Menggunakan metode Waterfall untuk merancang sistem pemesanan menu online dan pengelolaan stok inventaris bahan secara otomatis, menyelesaikan persoalan selisih pencatatan keuangan manual berbasis spreadsheet.  
-   * **Kelebihan:** Mampu menyinkronkan pengurangan stok inventaris menu secara *real-time* saat terjadi pemesanan serta menyediakan pelaporan arus transaksi pemasukan dan pengeluaran.  
-   * **Kekurangan:** Sistem pemesanan difokuskan pada pengiriman pesanan jarak jauh dan belum dioptimasi untuk interaksi pemesanan mandiri pelanggan di meja kafe (*Dine-In Self-Service QR*), belum memiliki verifikasi lokasi radius kafe (*geofencing*), serta belum memiliki modul rekonsiliasi kas fisik per shift staf kasir.
+6. **Penelitian oleh Fadhilah, Rindri, dan Wathan (2025) [6]**  
+   * **Judul Asli:** *"Rancang Bangun Sistem Pemesanan Berbasis QR Code dan Aplikasi Kasir Mobile di Warung Kopi Rumah Seduh"*  
+   * **Nama Jurnal & Akreditasi:** *KHARISMA Tech*, Vol. 20, No. 2, hlm. 132–146, 2025. Terakreditasi **SINTA 4**.  
+   * **DOI / Tautan Aktif:** [https://doi.org/10.55645/kharismatech.v20i2.636](https://doi.org/10.55645/kharismatech.v20i2.636)  
+   * **Ringkasan Metode:** Mengembangkan sistem pemesanan menu berbasis pemindaian *QR Code* meja yang disinkronisasikan langsung dengan aplikasi kasir *mobile web* pada kedai kopi Rumah Seduh guna mempercepat sinkronisasi transaksi antara barista, kasir, dan pelanggan.  
+   * **Kelebihan:** Mempermudah pemrosesan pesanan masuk secara digital tanpa miskomunikasi.  
+   * **Kekurangan:** Sistem belum memiliki modul manajemen pergantian shift kerja kasir, belum menyediakan pencatatan kas modal kasir dan kas darurat, serta belum memiliki proteksi koordinat geografis lokasi pemesan.
 
-Perbandingan komparatif antara ketiga penelitian terdahulu di atas dengan sistem yang diusulkan pada Master Cafe disajikan pada Tabel 2.1.
+Perbandingan komparatif secara sistematis antara keenam penelitian terdahulu di atas dengan sistem yang diusulkan pada Master Cafe disajikan pada Tabel 2.1.
 
 ### Tabel 2.1 Perbandingan Penelitian Terdahulu dengan Sistem yang Diusulkan
 
-| No | Peneliti & Tahun | Judul Penelitian & Jurnal | Metode / Teknologi | Kelebihan | Kelemahan / Keterbatasan | Posisi & Kebaruan Penelitian Ini (Master Cafe) |
-|:---|:---|:---|:---|:---|:---|:---|
-| 1 | Pratama & Khristianto (2024) [1] | *Sistem Informasi Pemesanan Makanan Dan Minuman Berbasis Qr Code Pada Brotherhood Coffee Co Pati* (INTECOMS - **SINTA 4**) | PHP, MySQL, Waterfall, QR Code | Mempercepat alur pemesanan dan mengurangi antrean pelanggan di kasir. | Belum memiliki modul rekonsiliasi kas kasir per shift, belum berbasis PWA, dan belum ada proteksi lokasi meja. | Mengintegrasikan pemesanan mandiri QR Code berbasis PWA dengan sistem kasir POS lengkap yang memiliki pembukuan shift harian kasir dan proteksi lokasi GPS. |
-| 2 | Irwansa & Huda (2024) [2] | *Pemanfaatan QR Code Dalam Pemesanan Makanan & Minuman Pada Rumah Makan Kejora Jaya Menggunakan Metode User Centered Design (UCD)* (INTECOMS - **SINTA 4**) | Web-based, UCD, UML, QR Code Meja | Mengeliminasi risiko nota kertas pesanan hilang/basah dan tulisan tidak terbaca. | Belum mendukung multi-stasiun (*waitress tablet* & kasir) dan belum ada cetak struk thermal kasir. | Menyediakan arsitektur multi-stasiun (Admin, Kasir POS, Tablet Waitress, dan Konsumen) dengan integrasi printer thermal Bluetooth dan ekspor PDF. |
-| 3 | Wulandari & Handayani (2024) [3] | *Sistem Inventory dan Pemesanan Menu Berbasis Web dan Mobile pada Hana Chick* (INTECOMS - **SINTA 4**) | Web & Mobile, Waterfall, Inventory Management | Pengurangan stok menu otomatis saat transaksi dan pencatatan pemasukan/pengeluaran. | Belum dioptimasi untuk pemesanan mandiri di meja (*Dine-In QR*), belum ada geofencing, dan belum ada rekonsiliasi kas fisik shift kasir. | Menggabungkan pemesanan mandiri di meja (*Dine-In QR*) dan takeaway, verifikasi radius lokasi GPS, serta rekonsiliasi selisih kas fisik di akhir shift kasir. |
+| No | Peneliti & Tahun | Judul Penelitian & Publikasi | Kelebihan & Keterbatasan Solusi | Posisi & Kebaruan Sistem (Master Cafe) |
+|:--:|:---|:---|:---|:---|
+| 1 | Hidayat, Rubianto, Nurkhasanah, & Prasandy (2024) [1] | *Menu Ordering Application using QR Code With User Experience Analysis* (IEEE ICBIR - Scopus) | (+) Memangkas antrean kasir dan tingkat kepuasan *User Acceptance Testing* (UAT) mencapai 91,4%.<br>(-) Belum terintegrasi sistem kasir *Point of Sale* (POS), belum ada *shift* kasir harian, dan tanpa rekonsiliasi kas. | Mengintegrasikan fitur *self-service QR Code* meja dengan terminal POS kasir terpadu yang dilengkapi manajemen *shift* harian, rekonsiliasi uang fisik kasir, dan proteksi *geofencing GPS*. |
+| 2 | Wong, Chong, Chong, & Law (2023) [2] | *QR Food Ordering System with Data Analytics* (JIWE - Scopus Indexed) | (+) Visualisasi tren menu terlaris dan analisis frekuensi pesanan berbasis *data analytics*.<br>(-) Fokus analitik pasca-penjualan, belum berbasis *Progressive Web App* (PWA), tanpa *geofencing*, dan tanpa audit kasir. | Menghadirkan arsitektur PWA *real-time* dengan verifikasi koordinat lokasi meja (*geofencing* Haversine) serta rekonsiliasi kas kasir per *shift* untuk mencegah *fraud* operasional. |
+| 3 | Singh, Sonje, Salkar, & Jadhav (2022) [3] | *Smart QR-based Restaurant Dine-in System with Sales Analysis* (ITM Web of Conf. - Scopus) | (+) Meniadakan buku menu fisik dan mempercepat aliran pesanan ke dapur secara *dine-in*.<br>(-) Rawan diakses dari luar resto (tanpa validasi lokasi) dan tanpa pembukuan selisih kas. | Menyediakan sistem *Dine-In QR* terlindungi radius lokasi kafe, sinkronisasi stok porsi *real-time*, serta modul rekonsiliasi selisih kas fisik di laci kasir saat tutup *shift*. |
+| 4 | Pratama & Khristianto (2024) [4] | *Sistem Informasi Pemesanan Makanan Dan Minuman Berbasis Qr Code Pada Brotherhood Coffee Co Pati* (INTECOMS - SINTA 4) | (+) Menghilangkan proses manual pelayan mencatat pesanan kertas ke meja.<br>(-) Belum ada pembukuan modal kasir, kas darurat, tutup *shift*, dan belum berbasis PWA. | Menggabungkan pemesanan mandiri *QR Code* berbasis PWA dengan sistem kasir POS lengkap yang memiliki pembukuan *shift* harian kasir dan cetak struk *thermal Bluetooth*. |
+| 5 | Prayudha, Irwansyah, & Anra (2024) [5] | *Rancang Bangun Aplikasi Point of Sale (POS App) Berbasis Progressive Web App untuk UMKM* (JustIN - SINTA 3) | (+) POS responsif berbasis PWA, dapat diinstal ke layar utama (*Add to Home Screen*), dan *caching service worker*.<br>(-) Hanya kasir satu arah, belum terhubung portal *self-service* pelanggan di meja. | Menyediakan ekosistem *dual-channel*: kasir POS internal toko terhubung langsung dalam satu *database* dengan portal *self-service QR Code* di meja pelanggan tanpa instalasi. |
+| 6 | Fadhilah, Rindri, & Wathan (2025) [6] | *Rancang Bangun Sistem Pemesanan Berbasis QR Code dan Aplikasi Kasir Mobile di Warung Kopi Rumah Seduh* (KHARISMA Tech - SINTA 4) | (+) Sinkronisasi digital pesanan *QR Code* meja ke kasir *mobile web* warung kopi.<br>(-) Tanpa manajemen *shift* kasir, tanpa kas modal/darurat, dan tanpa validasi radius meja. | Menyajikan arsitektur *multi-role* (Admin, Kasir, Waitress, Konsumen), verifikasi radius lokasi GPS kafe, serta rekonsiliasi kas fisik harian di akhir *shift* kasir. |
 
-Berdasarkan analisis perbandingan di atas, ditemukan kesenjangan penelitian (*research gap*) di mana penelitian terdahulu umumnya mengkaji sistem pemesanan QR Code dan pencatatan kasir secara terpisah. Posisi penelitian ini adalah menghadirkan solusi terintegrasi yang menggabungkan:
-1. **Sistem Kasir Terpadu (Point of Sale):** Dilengkapi pencatatan transaksi kasir cepat (tunai & QRIS), manajemen buka dan tutup shift kerja kasir, pencatatan kas modal/kas keluar darurat, serta rekonsiliasi selisih uang fisik kasir harian.
-2. **Fitur Pemesanan Mandiri (*Self-Service* QR Code):** Dibangun dengan teknologi *Progressive Web App* (PWA) yang responsif dan cepat dibuka di ponsel pintar konsumen tanpa perlu mengunduh aplikasi di toko digital.
-3. **Keamanan Pemesanan (*Geofencing GPS*):** Dilengkapi opsi verifikasi koordinat lokasi kafe menggunakan formula Haversine untuk memastikan pesanan meja (*Dine-In*) hanya dapat dikirim jika pelanggan secara fisik terdeteksi berada di dalam radius Master Cafe.
+**Sumber:** (Data diolah dari kajian pustaka jurnal penelitian terdahulu [1] - [6], 2025).
+
+Berdasarkan analisis komparatif pada Tabel 2.1 di atas, ditemukan adanya kesenjangan penelitian (*research gap*) di mana mayoritas penelitian terdahulu mengkaji sistem pemesanan *QR Code* dan sistem kasir keuangan secara terpisah. Sebagian penelitian berfokus pada kemudahan antarmuka pemesanan meja bagi pelanggan namun mengabaikan kebutuhan modul kasir operasional dan rekonsiliasi kas. Sebaliknya, penelitian kasir POS yang ada umumnya dirancang satu arah untuk petugas kasir tanpa menyediakan portal interaksi mandiri bagi pelanggan di meja makan.
+
+Posisi dan kebaruan (*novelty*) dari penelitian Tugas Akhir pada Master Cafe Bengkalis ini adalah menghadirkan sistem terintegrasi menyeluruh (*end-to-end*) yang menggabungkan empat pilar keunggulan utama:
+1. **Ekosistem Dual-Channel Terpadu:** Menyatukan sistem kasir operasional utama (*Point of Sale*) dengan portal pemesanan mandiri pelanggan (*Customer Self-Service*) berbasis *QR Code* meja dalam satu basis data terpusat, sehingga ketersediaan stok menu langsung tersinkronisasi secara *real-time*.
+2. **Manajemen Shift Kerja dan Rekonsiliasi Kas Fisik:** Mengimplementasikan prosedur pembukuan kasir ketat yang mewajibkan pencatatan modal awal kasir (*cash float*), pencatatan kas keluar operasional darurat (*petty cash*), serta rekonsiliasi kas fisik di akhir shift kerja kasir guna mendeteksi dan mencegah kecurangan kasir (*cashier fraud*) maupun selisih uang harian.
+3. **Proteksi Keamanan Pemesanan Geofencing GPS:** Menyediakan fitur verifikasi koordinat lokasi kafe menggunakan formula Haversine untuk memastikan pesanan meja (*Dine-In*) hanya dapat dikirimkan jika perangkat ponsel pelanggan secara fisik terdeteksi berada di dalam radius Master Cafe, sehingga mencegah risiko pesanan fiktif (*prank order*).
+4. **Arsitektur Progressive Web App (PWA) dan Dukungan Perangkat Keras:** Antarmuka sistem dapat diakses secara instan oleh pelanggan tanpa perlu mengunduh aplikasi di toko digital, responsif di berbagai layar perangkat, serta terintegrasi langsung dengan pencetakan struk transaksi ke printer *thermal* Bluetooth (58mm dan 80mm).
 
 ---
 
 ## 2.2 Landasan Teori
 
-Landasan teori memuat uraian teori-teori ilmiah, konsep dasar, arsitektur perangkat lunak, dan teknologi pendukung yang dijadikan sebagai pijakan ilmiah dalam perancangan dan implementasi sistem.
+Landasan teori memuat uraian teori-teori ilmiah, konsep dasar rekayasa perangkat lunak, arsitektur sistem, dan teknologi pendukung yang dikaji secara mendalam dari keenam artikel jurnal acuan utama [1]–[6] sebagai pedoman ilmiah dalam perancangan dan pembangunan Sistem Kasir Berbasis Web dengan Fitur *Self-Service* pada Master Cafe Bengkalis.
 
-### 2.2.1 Sistem Kasir (Point of Sale / POS)
-*Point of Sale* (POS) secara harfiah merujuk pada titik atau lokasi tempat transaksi penjualan antara pedagang dan pelanggan berlangsung [4]. Dalam konteks teknologi informasi, sistem POS adalah kombinasi perangkat lunak (*software*) dan perangkat keras (*hardware*) yang digunakan untuk mencatat transaksi penjualan, menghitung kalkulasi harga, mengelola persediaan stok barang, serta mencetak bukti transaksi pembayaran (struk belanja) [5].
+### 2.2.1 Sistem kasir (point of sale / pos)
+*Point of Sale* (POS) didefinisikan sebagai sistem komputerisasi terintegrasi yang digunakan untuk mengotomatiskan pencatatan transaksi penjualan, mengelola persediaan stok barang secara langsung, serta merekam arus kas masuk dari pelanggan [5], [6]. Sebagaimana diuraikan oleh Prayudha dkk. [5] dan Fadhilah dkk. [6], penerapan sistem POS modern pada unit usaha kuliner mampu mentransformasikan pencatatan manual menjadi transaksi digital yang akurat dan terstruktur.
 
-Sistem POS modern pada industri *food and beverage* (F&B) tidak hanya berfungsi sebagai mesin kasir elektronik (*electronic cash register*), melainkan berkembang menjadi pusat kendali operasional kafe [6]. Fungsi vital POS meliputi:
-1. **Pencatatan Transaksi Cepat:** Menerima pembayaran tunai maupun non-tunai (seperti QRIS).
-2. **Manajemen Kas dan Shift Kerja:** Mencatat modal awal kasir, kas masuk penjualan, kas keluar darurat, serta rekonsiliasi uang fisik kasir pada akhir shift untuk mendeteksi adanya selisih (*surplus/shortage*).
-3. **Pengelolaan Stok Menu:** Pengurangan jumlah porsi menu otomatis secara *real-time* setiap kali transaksi diselesaikan.
-4. **Pelaporan Operasional:** Menghasilkan laporan omzet harian, mingguan, hingga bulanan yang akurat guna mempermudah audit pemilik kafe.
+Fungsi utama sistem POS pada operasional kafe meliputi [5], [6]:  
+a. Pencatatan transaksi penjualan cepat, mendukung pembayaran tunai maupun nontunai digital (QRIS).  
+b. Pengelolaan pergantian shift kerja kasir, pencatatan modal awal, kas keluar darurat, serta rekonsiliasi kas fisik di akhir hari.  
+c. Pengurangan kuantitas stok menu secara otomatis pada saat pesanan diverifikasi dan diselesaikan oleh kasir.  
+d. Rekapitulasi laporan keuangan dan omzet harian secara otomatis guna mendukung evaluasi pemilik usaha.
 
-### 2.2.2 Konsep Sistem Pemesanan Mandiri (Self-Service Ordering System)
-*Self-Service Ordering System* adalah inovasi layanan yang memungkinkan konsumen untuk melihat daftar menu, menentukan pilihan hidangan, menambahkan instruksi khusus/catatan, dan mengirimkan pesanan secara langsung melalui antarmuka digital tanpa harus menunggu pelayan datang ke meja atau mengantre di kasir [7].
+### 2.2.2 Sistem pemesanan mandiri (self-service ordering system)
+Sistem pemesanan mandiri (*self-service ordering system*) adalah model layanan digital yang memberikan wewenang penuh kepada pelanggan untuk menelusuri katalog menu, memilih varian hidangan, dan mengirimkan pesanan langsung melalui perangkat gawai pintar tanpa harus mengantre di kasir atau menunggu kedatangan staf pelayan ke meja [1], [3].
 
-Penerapan *self-service* pada industri kafe memberikan sejumlah keuntungan strategis [8]:
-1. **Mengurangi Waktu Tunggu dan Antrean:** Pelanggan yang duduk di meja dapat langsung memesan saat itu juga, sehingga kepadatan di area meja kasir berkurang drastis.
-2. **Meminimalisir Kesalahan Manusia (*Human Error*):** Mengeliminasi salah dengar atau salah catat pesanan oleh pelayan, karena rincian menu diinput langsung oleh pelanggan.
-3. **Meningkatkan Nilai Rata-rata Pesanan (*Upselling*):** Katalog visual digital yang menarik memicu minat beli pelanggan untuk memesan varian menu tambahan atau promo yang ditawarkan.
+Hasil penelitian Hidayat dkk. [1] dan Singh dkk. [3] membuktikan bahwa mekanisme *self-service* berbasis meja makan mampu memangkas waktu tunggu pemesanan hidangan hingga lebih dari 65%, menghilangkan risiko salah catat nota pesanan (*human error*), serta mempercepat efisiensi alur penyajian hidangan di dapur kafe.
 
-### 2.2.3 Quick Response Code (QR Code)
-*Quick Response Code* (QR Code) adalah bentuk evolusi dari barcode satu dimensi (*1D Barcode*) menjadi matriks dua dimensi (*2D Barcode*) yang dikembangkan oleh Denso Wave pada tahun 1994 [9]. QR Code mampu menyimpan data dengan kapasitas yang jauh lebih besar (mencapai ribuan karakter alfanumerik) dan dapat dibaca dari segala arah (360 derajat) menggunakan kamera ponsel pintar [10].
+### 2.2.3 Quick response code (qr code)
+*Quick Response Code* (QR Code) adalah jenis kode matriks dua dimensi yang mampu menyimpan data alfanumerik dalam kapasitas tinggi serta dapat dipindai secara cepat dari berbagai sudut sudut (360 derajat) menggunakan kamera ponsel pintar [1], [4].
 
-Pada sistem *self-service* kafe, QR Code ditempelkan pada masing-masing meja makan dengan memuat tautan (*Uniform Resource Locator* / URL) yang berisi parameter identifikasi meja (misalnya `https://mastercafe.nadeak.net/konsumen/menu/table/{id_meja}`). Ketika kamera ponsel memindai kode tersebut, browser pelanggan secara otomatis diarahkan ke antarmuka katalog menu dengan identitas nomor meja yang sudah terkunci di sistem [11].
+Sebagaimana diterapkan dalam studi Hidayat dkk. [1] serta Pratama dan Khristianto [4], stiker QR Code ditempelkan pada masing-masing meja makan dengan memuat tautan (*Uniform Resource Locator* / URL) unik yang membawa parameter nomor meja. Ketika pelanggan memindai kode tersebut, sistem secara otomatis mengunci identitas meja pemesan tanpa mewajibkan proses pendaftaran akun yang rumit.
 
-### 2.2.4 Progressive Web App (PWA) dan Desain Web Responsif
-*Progressive Web Application* (PWA) adalah metodologi pengembangan aplikasi web yang menggabungkan fleksibilitas web dengan keunggulan fungsional aplikasi mobile native [12]. PWA dibangun menggunakan teknologi web standar (HTML5, CSS3, dan JavaScript) dengan penambahan komponen penting berupa:
-1. **Web App Manifest (`manifest.json`):** File konfigurasi berformat JSON yang mendefinisikan identitas aplikasi (nama, ikon, warna tema, serta tampilan *standalone* tanpa bilah navigasi browser) sehingga aplikasi web dapat ditambahkan langsung ke layar utama (*Add to Home Screen*) ponsel pengguna [13].
-2. **Service Worker:** Skrip JavaScript latar belakang (*background thread*) yang berfungsi sebagai *network proxy*. *Service worker* memungkinkan penyimpanan aset ke dalam *cache* lokal, sehingga aplikasi web tetap dapat diakses dengan cepat bahkan pada kondisi jaringan internet yang tidak stabil [14].
+### 2.2.4 Progressive web app (pwa) dan responsive web design
+*Progressive Web Application* (PWA) merupakan metodologi perancangan aplikasi berbasis web yang mengombinasikan keunggulan jangkauan fleksibel peramban web dengan kapabilitas fungsional aplikasi *mobile native* [5]. PWA dibangun menggunakan teknologi web standar (HTML5, CSS3, JavaScript) dengan penambahan komponen utama:  
+a. Web App Manifest (*manifest.json*): Berkas konfigurasi yang memungkinkan aplikasi web dipasang langsung ke layar beranda (*Add to Home Screen*) dan dijalankan dalam mode layar penuh (*standalone*) layaknya aplikasi ponsel bawaan [5].  
+b. Service Worker: Skrip latar belakang yang bertindak sebagai *network proxy* untuk mengelola penyimpanan memori *cache* lokal aset aplikasi, sehingga sistem dapat dibuka dengan sangat cepat dan tetap stabil saat jaringan internet melambat [5].
 
-*Responsive Web Design* (RWD) memastikan tata letak dan elemen antarmuka sistem kasir dan menu mandiri dapat beradaptasi secara optimal pada berbagai ukuran layar perangkat, mulai dari layar ponsel pintar pelanggan, tablet staf *waitress*, hingga monitor komputer meja kasir [15].
+*Responsive Web Design* (RWD) memastikan antarmuka sistem kasir dan menu mandiri dapat menyesuaikan tata letak grafisnya secara otomatis pada berbagai ukuran layar gawai, mulai dari layar ponsel pintar pelanggan, tablet pelayan, hingga layar monitor kasir [5].
 
-### 2.2.5 Framework Laravel dan Arsitektur Model-View-Controller (MVC)
-Laravel adalah sebuah framework aplikasi web berbasis bahasa pemrograman PHP yang bersifat *open-source* dan dirancang dengan mengusung prinsip keanggunan sintaksis (*expressive and elegant syntax*) [16]. Laravel menyediakan berbagai pustaka bawaan yang mempercepat proses rekayasa perangkat lunak, antara lain *routing*, sistem keamanan enkripsi CSRF (*Cross-Site Request Forgery*), middleware otentikasi multi-role, sistem templat *Blade*, serta *Object-Relational Mapping* (ORM) yang bernama Eloquent [17].
+### 2.2.5 Framework laravel dan arsitektur model-view-controller (mvc)
+Laravel adalah kerangka kerja (*framework*) pengembangan aplikasi web berbasis bahasa pemrograman PHP yang menerapkan pola arsitektur *Model-View-Controller* (MVC) [4], [5]. Pola arsitektur MVC memisahkan logika rekayasa perangkat lunak ke dalam tiga modul independen:  
+a. **Model:** Menangani pemodelan struktur data, aturan validasi bisnis, dan komunikasi kueri data ke tabel basis data relasional.  
+b. **View:** Menangani penyajian visual dan antarmuka pengguna grafis kepada kasir maupun pelanggan.  
+c. **Controller:** Menangani penerimaan permintaan (*request*) pengguna, mengeksekusi logika pemrosesan data melalui Model, dan meneruskan hasilnya ke View yang bersangkutan.
 
-Laravel menerapkan pola arsitektur **Model-View-Controller (MVC)** untuk memisahkan logika bisnis, struktur data, dan antarmuka pengguna [18]:
-1. **Model:** Komponen yang bertanggung jawab menangani representasi data dan interaksi langsung dengan tabel-tabel pada basis data.
-2. **View:** Komponen antarmuka pengguna (*User Interface*) yang bertugas menyajikan data grafis kepada pengguna sistem.
-3. **Controller:** Komponen perantara yang bertugas menerima *request* dari pengguna melalui rute (*route*), memproses logika bisnis menggunakan Model, dan mengembalikan hasil olahan ke dalam View yang sesuai.
+### 2.2.6 Basis data relasional dan mysql
+Basis data relasional (RDBMS) adalah sistem penyimpanan data terstruktur yang mengorganisasikan rekaman data ke dalam tabel-tabel dua dimensi yang saling terhubung menggunakan relasi kunci utama (*Primary Key*) dan kunci tamu (*Foreign Key*) [2], [4].
 
-### 2.2.6 Basis Data Relasional dan MySQL
-Basis data relasional (*Relational Database Management System* / RDBMS) adalah sistem penyimpanan data terstruktur yang mengorganisasikan informasi ke dalam bentuk tabel-tabel dua dimensi yang terdiri atas baris (*records*) dan kolom (*attributes*) [19]. Antar-tabel dapat dihubungkan melalui relasi kunci primer (*Primary Key*) dan kunci asing (*Foreign Key*).
+Dalam penelitian F&B terdahulu [2], [4], MySQL dipilih sebagai basis data utama karena keunggulannya dalam kecepatan pemrosesan transaksi kueri SQL, keandalan integritas data transaksi (prinsip ACID), serta dukungannya yang optimal pada lingkungan server berbasis PHP dan Laravel.
 
-MySQL merupakan salah satu RDBMS terpopuler di dunia yang menggunakan bahasa kueri *Structured Query Language* (SQL). Keunggulan MySQL terletak pada kecepatan eksekusi data, keandalan transaksi berprinsip ACID (*Atomicity, Consistency, Isolation, Durability*), serta kompatibilitasnya yang tinggi dengan lingkungan ekosistem PHP dan framework Laravel [20].
+### 2.2.7 Unified modeling language (uml)
+*Unified Modeling Language* (UML) adalah pemodelan visual grafis standar yang digunakan untuk merancang dan mendokumentasikan spesifikasi sistem perangkat lunak berorientasi objek [4], [5]. Diagram UML yang digunakan dalam perancangan sistem ini mencakup:  
+a. **Use Case Diagram:** Mendefinisikan interaksi fungsional antara pengguna (Admin/Owner, Kasir, Waitress, dan Konsumen) dengan fungsi sistem.  
+b. **Activity Diagram:** Memetakan urutan alur kerja (*workflow*) operasional pemesanan mandiri dan transaksi kasir secara bertahap.  
+c. **Entity Relationship Diagram (ERD):** Merancang skema relasi logis antar-tabel basis data, seperti tabel transaksi, pesanan meja, detail menu, kasir shift, dan stok bahan.
 
-### 2.2.7 Unified Modeling Language (UML)
-*Unified Modeling Language* (UML) adalah bahasa visual standar industri untuk mendokumentasikan, menspesifikasikan, dan merancang artefak-artefak dari sistem perangkat lunak berorientasi objek [21]. Diagram-diagram UML yang digunakan dalam perancangan sistem ini meliputi:
-1. **Use Case Diagram:** Diagram yang mendeskripsikan fungsionalitas sistem dari sudut pandang para pengguna (aktor) yang berinteraksi dengan sistem, seperti Admin/Pemilik, Kasir, dan Konsumen [22].
-2. **Activity Diagram:** Diagram yang memodelkan alur kerja (*workflow*) fungsional sistem secara berurutan, menggambarkan transisi aksi dari suatu aktivitas ke aktivitas lainnya beserta titik percabangan keputusan (*decision point*) [23].
-3. **Entity Relationship Diagram (ERD):** Pemodelan konseptual struktur basis data yang menunjukkan entitas, atribut, dan relasi logis antar-entitas data dalam sistem kasir dan pesanan [24].
-
-### 2.2.8 Pengujian Black Box Testing
-*Black Box Testing* (pengujian kotak hitam) adalah metodologi pengujian perangkat lunak yang berfokus pada pengujian fungsionalitas sistem tanpa harus menguji struktur kode internal atau logika internal program [25]. Pengujian dilakukan dengan cara memberikan masukan (*input*) data tertentu pada antarmuka sistem dan memverifikasi apakah keluaran (*output*) dan perilaku sistem telah sesuai dengan spesifikasi kebutuhan perangkat lunak yang direncanakan (*functional requirements*) [26].
+### 2.2.8 Pengujian black box testing
+*Black Box Testing* adalah teknik pengujian perangkat lunak yang berfokus pada pengujian kesesuaian fungsi-fungsi sistem tanpa harus meninjau struktur internal baris kode program [5], [6]. Pengujian dilakukan dengan cara memberikan serangkaian masukan (*input*) pada tombol dan formulir antarmuka, kemudian memvalidasi apakah keluaran (*output*) sistem telah berjalan sesuai dengan spesifikasi kebutuhan yang direncanakan [5], [6].
 
 ---
 
-## DAFTAR PUSTAKA (Format IEEE)
+## DAFTAR PUSTAKA
 
-[1] F. P. Pratama and T. Khristianto, "Sistem Informasi Pemesanan Makanan Dan Minuman Berbasis Qr Code Pada Brotherhood Coffee Co Pati," *INTECOMS: Journal of Information Technology and Computer Science*, vol. 7, no. 1, pp. 64–70, Jan. 2024, doi: [10.31539/intecoms.v7i1.8181](https://doi.org/10.31539/intecoms.v7i1.8181).  
-[2] Irwansa and N. Huda, "Pemanfaatan QR Code Dalam Pemesanan Makanan & Minuman Pada Rumah Makan Kejora Jaya Menggunakan Metode User Centered Design (UCD)," *INTECOMS: Journal of Information Technology and Computer Science*, vol. 7, no. 1, pp. 196–206, Feb. 2024, doi: [10.31539/intecoms.v7i1.8429](https://doi.org/10.31539/intecoms.v7i1.8429).  
-[3] Y. A. Wulandari and I. Handayani, "Sistem Inventory dan Pemesanan Menu Berbasis Web dan Mobile pada Hana Chick," *INTECOMS: Journal of Information Technology and Computer Science*, vol. 7, no. 6, pp. 2291–2301, Dec. 2024, doi: [10.31539/intecoms.v7i6.13257](https://doi.org/10.31539/intecoms.v7i6.13257).  
-[4] K. E. Kendall and J. E. Kendall, *Systems Analysis and Design*, 10th ed. Boston: Pearson, 2020.  
-[5] I. Sommerville, *Software Engineering*, 10th ed. Harlow: Pearson Education, 2016.  
-[6] R. S. Pressman and B. R. Maxim, *Software Engineering: A Practitioner's Approach*, 9th ed. New York: McGraw-Hill Education, 2020.  
-[7] D. T. Susilo and M. Firmansyah, "Analisis Efektivitas Sistem Pemesanan Mandiri Berbasis Digital terhadap Kepuasan Pelanggan," *Jurnal Manajemen Bisnis dan Pelayanan*, vol. 8, no. 1, pp. 15–24, 2021.  
-[8] C. Liu and Y. Wei, "Impact of Self-Service Technology on Restaurant Customer Experience: An Empirical Analysis," *Journal of Hospitality and Tourism Technology*, vol. 12, no. 3, pp. 450–465, 2021.  
-[9] Denso Wave Incorporated, "About QR Code: History and Standardization," *Denso Wave Technical Report*, 2019. [Online]. Available: https://www.denso-wave.com/en/technology/vol1.html.  
-[10] H. P. Utomo and F. Susanto, "Pemanfaatan Quick Response Code pada Sistem Antrean Digital," *Jurnal Teknologi Informasi dan Rekayasa Komputer*, vol. 3, no. 2, pp. 78–86, 2022.  
-[11] M. A. Maulana and R. I. Wardhani, "Implementasi QR Code Dinamis pada Sistem Identifikasi Meja Restoran Berbasis Web," *Jurnal RESTI (Rekayasa Sistem dan Teknologi Informasi)*, vol. 6, no. 4, pp. 589–596, 2022.  
-[12] Google Developers, "Progressive Web Apps Overview," *Web Fundamentals Documentation*, 2023. [Online]. Available: https://web.dev/progressive-web-apps/.  
-[13] J. Musolesi, *Building Progressive Web Applications: Bringing Mobile Web to the Next Level*. Sebastopol: O'Reilly Media, 2018.  
-[14] T. Arakawa, *Service Worker Lifecycle and Caching Strategies for Offline-First Architecture*. New York: Packt Publishing, 2020.  
-[15] E. Marcotte, *Responsive Web Design*, 2nd ed. New York: A Book Apart, 2014.  
-[16] T. Otwell, *Laravel: Up & Running: A Framework for Building Modern PHP Apps*, 2nd ed. Sebastopol: O'Reilly Media, 2019.  
-[17] M. Bean, *Mastering Laravel 10: Building Robust and Scalable Web Applications*. Birmingham: Packt Publishing, 2023.  
-[18] M. Fowler, *Patterns of Enterprise Application Architecture*. Boston: Addison-Wesley Professional, 2012.  
-[19] C. J. Date, *An Introduction to Database Systems*, 8th ed. Boston: Addison-Wesley, 2014.  
-[20] R. Elmasri and S. B. Navathe, *Fundamentals of Database Systems*, 7th ed. Boston: Pearson, 2017.  
-[21] J. Rumbaugh, I. Jacobson, and G. Booch, *The Unified Modeling Language Reference Manual*, 2nd ed. Boston: Addison-Wesley, 2010.  
-[22] A. Dennis, B. H. Wixom, and D. Tegarden, *Systems Analysis and Design: An Object-Oriented Approach with UML*, 6th ed. Hoboken: John Wiley & Sons, 2021.  
-[23] H. M. Jogiyanto, *Analisis dan Desain Sistem Informasi: Pendekatan Terstruktur Teori dan Praktik Aplikasi Bisnis*, Yogyakarta: Andi Offset, 2018.  
-[24] P. Rob and C. Coronel, *Database Systems: Design, Implementation, and Management*, 13th ed. Boston: Cengage Learning, 2019.  
-[25] G. J. Myers, C. Sandler, and T. Badgett, *The Art of Software Testing*, 3rd ed. Hoboken: John Wiley & Sons, 2012.  
-[26] P. C. Jorgensen, *Software Testing: A Craftsman's Approach*, 4th ed. Boca Raton: CRC Press, 2014.
+[1] F. A. Hidayat, T. Rubianto, Nurkhasanah, and T. Prasandy, “Menu Ordering Application using QR Code With User Experience Analysis,” in *2024 9th International Conference on Business and Industrial Research (ICBIR)*, Bangkok, Thailand: IEEE, 2024, pp. 1–6, doi: 10.1109/ICBIR61386.2024.10875903.  
+[2] C.-C. Wong, L.-Y. Chong, S.-C. Chong, and C.-Y. Law, “QR Food Ordering System with Data Analytics,” *Journal of Informatics and Web Engineering*, vol. 2, no. 2, pp. 248–261, Sep. 2023, doi: 10.33093/jiwe.2023.2.2.18.  
+[3] R. Singh, R. Sonje, S. Salkar, and A. Jadhav, “Smart QR-based Restaurant Dine-in System with Sales Analysis,” *ITM Web of Conferences*, vol. 44, art. no. 03014, pp. 1–6, 2022, doi: 10.1051/itmconf/20224403014.  
+[4] F. P. Pratama and T. Khristianto, “Sistem Informasi Pemesanan Makanan Dan Minuman Berbasis Qr Code Pada Brotherhood Coffee Co Pati,” *INTECOMS: Journal of Information Technology and Computer Science*, vol. 7, no. 1, pp. 64–70, Jan. 2024, doi: 10.31539/intecoms.v7i1.8181.  
+[5] I. D. Prayudha, M. A. Irwansyah, and H. Anra, “Rancang Bangun Aplikasi Point of Sale (POS App) Berbasis Progressive Web App untuk Usaha Mikro Kecil dan Menengah,” *JustIN (Jurnal Sistem dan Teknologi Informasi)*, vol. 12, no. 2, pp. 248–254, Apr. 2024, doi: 10.26418/justin.v12i2.76824.  
+[6] I. Fadhilah, Y. A. Rindri, and M. H. Wathan, “Rancang Bangun Sistem Pemesanan Berbasis QR Code dan Aplikasi Kasir Mobile di Warung Kopi Rumah Seduh,” *KHARISMA Tech*, vol. 20, no. 2, pp. 132–146, 2025, doi: 10.55645/kharismatech.v20i2.636.  

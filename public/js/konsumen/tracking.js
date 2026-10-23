@@ -378,6 +378,63 @@
         }
     });
 
+    // --- 7. SALIN TAUTAN & TOKEN LACAK PESANAN ---
+    window.copyTrackingToClipboard = function (text, btnElement, successMsg) {
+        if (!text) return;
+
+        function onSuccess() {
+            if (typeof window.showToast === 'function') {
+                window.showToast(successMsg || 'Tersalin ke papan klip!', 'success');
+            }
+            if (btnElement) {
+                const originalHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="bi bi-check2 text-success" style="font-size: 0.95rem;"></i> <span>Tersalin!</span>';
+                btnElement.classList.add('border-success');
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.classList.remove('border-success');
+                }, 2000);
+            }
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text)
+                .then(onSuccess)
+                .catch(() => fallbackCopy(text, onSuccess));
+        } else {
+            fallbackCopy(text, onSuccess);
+        }
+
+        function fallbackCopy(val, cb) {
+            const temp = document.createElement('textarea');
+            temp.value = val;
+            temp.style.position = 'fixed';
+            temp.style.left = '-9999px';
+            temp.style.top = '0';
+            temp.setAttribute('readonly', '');
+            document.body.appendChild(temp);
+            temp.focus();
+            temp.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful && cb) {
+                    cb();
+                } else if (!successful && typeof window.showToast === 'function') {
+                    window.showToast('Gagal menyalin, silakan salin manual.', 'danger');
+                }
+            } catch (e) {
+                if (typeof window.showToast === 'function') {
+                    window.showToast('Gagal menyalin, silakan salin manual.', 'danger');
+                }
+            }
+            document.body.removeChild(temp);
+        }
+    };
+
+    window.copyTrackingLink = function (url, btn) {
+        window.copyTrackingToClipboard(url, btn, 'Tautan pelacakan berhasil disalin!');
+    };
+
     // Lifecycle On Ready
     document.addEventListener('DOMContentLoaded', () => {
         if (trackingMejaId) {

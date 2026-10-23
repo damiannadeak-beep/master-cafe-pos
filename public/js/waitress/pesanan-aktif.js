@@ -118,4 +118,101 @@
         });
     };
 
+    // Filter State & Logic untuk Pesanan Aktif (Search & Quick Filter Pills)
+    window.activeOrderFilter = {
+        search: '',
+        status: 'all' // 'all' | 'unpaid' | 'paid' | 'cooking' | 'takeaway'
+    };
+
+    window.setActiveQuickFilter = function (filterType, btnEl) {
+        window.activeOrderFilter.status = filterType;
+        
+        // Update active class on buttons
+        document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        if (btnEl) {
+            btnEl.classList.add('active');
+        } else {
+            const matchingBtn = document.querySelector(`.quick-filter-btn[data-filter="${filterType}"]`);
+            if (matchingBtn) matchingBtn.classList.add('active');
+        }
+
+        window.filterActiveOrders();
+    };
+
+    window.filterActiveOrders = function () {
+        const searchInput = document.getElementById('search-active-input');
+        const term = searchInput ? (searchInput.value || '').toLowerCase().trim() : '';
+        window.activeOrderFilter.search = term;
+
+        const currentFilter = window.activeOrderFilter.status || 'all';
+        const cards = document.querySelectorAll('#active-orders-container .order-card-item');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const searchData = (card.getAttribute('data-search') || '').toLowerCase();
+            const paidStatus = card.getAttribute('data-paid') || ''; // 'paid' or 'unpaid'
+            const cookingStatus = card.getAttribute('data-cooking') || ''; // 'served', 'cooking', 'waiting'
+            const tipe = card.getAttribute('data-tipe') || ''; // 'dine_in' or 'takeaway'
+
+            // Cek kecocokan teks pencarian
+            const matchesSearch = !term || searchData.includes(term);
+
+            // Cek kecocokan pill filter
+            let matchesFilter = true;
+            if (currentFilter === 'unpaid') {
+                matchesFilter = (paidStatus === 'unpaid');
+            } else if (currentFilter === 'paid') {
+                matchesFilter = (paidStatus === 'paid');
+            } else if (currentFilter === 'cooking') {
+                matchesFilter = (cookingStatus === 'cooking' || cookingStatus === 'waiting');
+            } else if (currentFilter === 'takeaway') {
+                matchesFilter = (tipe === 'takeaway');
+            }
+
+            if (matchesSearch && matchesFilter) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const countEl = document.getElementById('active-visible-count');
+        if (countEl) {
+            countEl.innerText = visibleCount;
+        }
+
+        // Tampilkan pesan jika tidak ada pesanan yang cocok dengan filter
+        let noMatchEl = document.getElementById('active-no-results-alert');
+        if (visibleCount === 0 && cards.length > 0) {
+            if (!noMatchEl) {
+                noMatchEl = document.createElement('div');
+                noMatchEl.id = 'active-no-results-alert';
+                noMatchEl.className = 'col-12 text-center py-5';
+                noMatchEl.innerHTML = `
+                    <div class="d-inline-block p-3 rounded-circle mb-2" style="background: rgba(255, 255, 255, 0.05);">
+                        <i class="bi bi-search text-white-50" style="font-size: 2.2rem;"></i>
+                    </div>
+                    <h6 class="fw-bold text-white-50 mb-1">Tidak Ada Pesanan yang Cocok</h6>
+                    <p class="text-secondary small mb-0">Coba ubah kata kunci pencarian atau pilih filter pill lain.</p>
+                `;
+                const container = document.getElementById('active-orders-container');
+                if (container) container.appendChild(noMatchEl);
+            } else {
+                noMatchEl.style.display = '';
+            }
+        } else if (noMatchEl) {
+            noMatchEl.style.display = 'none';
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof window.filterActiveOrders === 'function') {
+            window.filterActiveOrders();
+        }
+    });
+
 })();
+

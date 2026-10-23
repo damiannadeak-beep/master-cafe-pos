@@ -16,35 +16,44 @@
         border-color: rgba(255, 255, 255, 0.16) !important;
         box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.55);
     }
-    .btn-completed-print {
-        background-color: #c08e5c !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(192, 142, 92, 0.5) !important;
-        border-radius: 10px !important;
-        height: 40px !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.01em;
+    .btn-print-thermal {
+        background-color: rgba(56, 189, 248, 0.1) !important;
+        border: 1px solid rgba(56, 189, 248, 0.25) !important;
+        color: #38bdf8 !important;
+        border-radius: 8px !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .btn-completed-print:hover {
-        background-color: #aa7949 !important;
-        color: #ffffff !important;
-        border-color: #c08e5c !important;
-        box-shadow: 0 4px 14px rgba(192, 142, 92, 0.3);
+    .btn-print-thermal:hover {
+        background-color: rgba(56, 189, 248, 0.2) !important;
+        border-color: rgba(56, 189, 248, 0.45) !important;
+        color: #7dd3fc !important;
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
     }
-    .btn-completed-print:active {
+    .btn-print-thermal:active {
         transform: translateY(0);
     }
-    .print-receipt-link {
-        color: #8b949e !important;
+    .btn-print-receipt {
+        background-color: rgba(192, 142, 92, 0.12) !important;
+        border: 1px solid rgba(192, 142, 92, 0.28) !important;
+        color: #e2b17a !important;
+        border-radius: 8px !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
         text-decoration: none !important;
-        font-size: 0.75rem !important;
-        transition: color 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .print-receipt-link:hover {
-        color: #ffffff !important;
+    .btn-print-receipt:hover {
+        background-color: rgba(192, 142, 92, 0.22) !important;
+        border-color: rgba(192, 142, 92, 0.5) !important;
+        color: #f6d3a8 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(192, 142, 92, 0.2);
+    }
+    .btn-print-receipt:active {
+        transform: translateY(0);
     }
     .completed-order-items::-webkit-scrollbar {
         width: 4px;
@@ -90,8 +99,8 @@
                             <span class="fw-bold text-white fs-5" style="letter-spacing: -0.02em;">
                                 <span style="color: #c08e5c; font-weight: 500;">#</span>{{ $cardData->order_ids_display }}
                             </span>
-                            <span class="badge rounded-pill px-2 py-0.5 fw-medium" style="background: rgba(255, 255, 255, 0.06); color: #94a3b8; font-size: 0.68rem; border: 1px solid rgba(255, 255, 255, 0.08);">
-                                <i class="bi bi-layers me-1"></i>{{ count($cardData->orders) }}x Order
+                            <span class="text-white-50 fw-medium d-inline-flex align-items-center" style="font-size: 0.75rem; gap: 4px;">
+                                <i class="bi bi-layers"></i> {{ count($cardData->orders) }}x Order
                             </span>
                         @else
                             <span class="fw-bold text-white fs-5" style="letter-spacing: -0.02em;">
@@ -99,20 +108,19 @@
                             </span>
                         @endif
 
-                        <span class="badge rounded-pill px-2.5 py-1 fw-semibold" 
-                              style="background: rgba(16, 185, 129, 0.12); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.7rem; letter-spacing: 0.03em;">
-                            SELESAI
+                        <span class="text-success fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem; gap: 4px;">
+                            <i class="bi bi-check-circle-fill"></i> SELESAI
                         </span>
                     </div>
 
                     <div>
                         @if($cardData->meja)
-                            <span class="badge rounded-pill px-2.5 py-1 fw-medium" style="background: rgba(192, 142, 92, 0.12); color: #d4a373; border: 1px solid rgba(192, 142, 92, 0.25); font-size: 0.72rem;">
-                                <i class="bi bi-geo-alt me-1"></i> {{ $labelMeja }}
+                            <span class="fw-medium text-warning d-inline-flex align-items-center" style="font-size: 0.78rem; gap: 4px;">
+                                <i class="bi bi-geo-alt"></i> {{ $labelMeja }}
                             </span>
                         @else
-                            <span class="badge rounded-pill px-2.5 py-1 fw-medium" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.72rem;">
-                                <i class="bi bi-bag me-1"></i> Takeaway
+                            <span class="fw-medium text-secondary d-inline-flex align-items-center" style="font-size: 0.78rem; gap: 4px;">
+                                <i class="bi bi-bag"></i> Takeaway
                             </span>
                         @endif
                     </div>
@@ -133,15 +141,13 @@
                         </div>
                         <div class="text-end">
                             @if($isPaid)
-                                <span class="badge rounded-pill px-2.5 py-0.5 fw-medium d-inline-flex align-items-center gap-1" 
-                                      style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.7rem; border: 1px solid rgba(16, 185, 129, 0.25);">
-                                    <i class="bi bi-check2"></i> Lunas
-                                </span>
+                                <div class="text-success fw-medium d-inline-flex align-items-center" style="font-size: 0.75rem; gap: 4px;">
+                                    <i class="bi bi-check2-circle"></i> Lunas
+                                </div>
                             @else
-                                <span class="badge rounded-pill px-2.5 py-0.5 fw-medium d-inline-flex align-items-center gap-1" 
-                                      style="background: rgba(239, 68, 68, 0.12); color: #f87171; font-size: 0.7rem; border: 1px solid rgba(239, 68, 68, 0.25);">
+                                <div class="text-danger fw-medium d-inline-flex align-items-center" style="font-size: 0.75rem; gap: 4px;">
                                     <i class="bi bi-exclamation-circle"></i> Belum Bayar
-                                </span>
+                                </div>
                             @endif
                             <div class="text-white-50 mt-1" style="font-size: 0.7rem;">
                                 <i class="bi bi-clock me-1.5 opacity-75"></i> {{ $cardData->latest_created_at->format('H:i') }} WIB &bull; {{ $cardData->latest_created_at->diffForHumans() }}
@@ -167,8 +173,9 @@
                             @foreach($cardData->orders as $subIdx => $subOrd)
                                 <div class="mb-2 {{ !$loop->last ? 'pb-2 border-bottom border-white border-opacity-5' : '' }}">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="badge rounded-pill px-2 py-0.5 fw-semibold" style="font-size: 0.65rem; background: rgba(255, 255, 255, 0.06); color: #cbd5e1;">
-                                            {{ $subIdx === 0 ? 'Pesanan Utama' : 'Tambahan' }} (#{{ $subOrd->id }})
+                                        <span class="text-white-50 fw-semibold d-inline-flex align-items-center" style="font-size: 0.72rem; gap: 4px;">
+                                            <i class="bi {{ $subIdx === 0 ? 'bi-star-fill text-warning' : 'bi-plus-circle' }}" style="font-size: 0.65rem;"></i>
+                                            {{ $subIdx === 0 ? 'Pesanan Utama' : 'Tambahan' }} <span style="color: #c08e5c;">(#{{ $subOrd->id }})</span>
                                         </span>
                                         <span class="text-white-50" style="font-size: 0.68rem;"><i class="bi bi-clock me-1.5 opacity-75"></i> {{ $subOrd->created_at->format('H:i') }} WIB</span>
                                     </div>
@@ -219,7 +226,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Footer: Total & Tombol Cetak Struk Solid Elegan -->
+                <!-- 4. Footer: Total & Tombol Aksi Cetak Struk & Cetak Thermal -->
                 <div class="pt-2.5 mt-auto" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
                     <div class="d-flex justify-content-between align-items-baseline mb-3">
                         <span class="text-white-50" style="font-size: 0.82rem;">Total Pesanan:</span>
@@ -228,18 +235,19 @@
                         </span>
                     </div>
 
-                    <div class="d-flex flex-column gap-2">
-                        <button type="button" class="btn btn-completed-print w-100 d-inline-flex align-items-center justify-content-center btn-touch shadow-sm" 
-                                onclick="window.printThermal({{ $primaryOrder->id }})">
-                            <i class="bi bi-printer me-2"></i> {{ $cardData->is_grouped ? 'Cetak Struk Thermal' : 'Cetak Struk' }}
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm px-3 py-2 btn-print-thermal d-inline-flex align-items-center justify-content-center flex-fill shadow-sm" 
+                                onclick="window.printThermal({{ $primaryOrder->id }})" 
+                                title="Cetak struk ke printer thermal / terminal POS"
+                                style="gap: 5px !important;">
+                            <i class="bi bi-printer" style="margin: 0 !important; margin-right: 0 !important;"></i> Cetak Thermal
                         </button>
-                        <div class="text-center pt-0.5">
-                            <a href="{{ route('kasir.order.receipt', ['id' => $printIds]) }}" target="_blank" 
-                               class="d-inline-flex align-items-center gap-1.5 py-0.5 print-receipt-link" 
-                               title="Buka Pratinjau Struk Digital di Tab Baru">
-                                <i class="bi bi-arrow-up-right me-1 opacity-70"></i> {{ $cardData->is_grouped ? 'Pratinjau Struk Gabungan' : 'Pratinjau Struk Digital' }}
-                            </a>
-                        </div>
+                        <a href="{{ route('kasir.order.receipt', ['id' => $printIds]) }}" target="_blank" 
+                           class="btn btn-sm px-3 py-2 btn-print-receipt d-inline-flex align-items-center justify-content-center flex-fill shadow-sm" 
+                           title="Buka atau cetak struk kasir digital"
+                           style="gap: 5px !important;">
+                            <i class="bi bi-file-earmark-text" style="margin: 0 !important; margin-right: 0 !important;"></i> Cetak Struk
+                        </a>
                     </div>
                 </div>
             </div>

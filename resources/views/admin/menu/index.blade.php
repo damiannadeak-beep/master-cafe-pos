@@ -219,12 +219,12 @@
                                 <!-- Ketersediaan Status -->
                                 <td class="py-3 text-center">
                                     @if($m->is_available)
-                                        <span class="badge rounded-2 px-2.5 py-1" style="background-color: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 0.75rem; font-weight: 500;">
-                                            <i class="bi bi-check-circle-fill me-1" style="font-size: 0.65rem;"></i> Tersedia
+                                        <span class="badge rounded-2 px-2.5 py-1 d-inline-flex align-items-center" style="background-color: rgba(52, 211, 153, 0.12); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.25); font-size: 0.75rem; font-weight: 500; gap: 5px;">
+                                            <i class="bi bi-check-circle-fill" style="font-size: 0.72rem; margin-right: 5px !important;"></i> Tersedia
                                         </span>
                                     @else
-                                        <span class="badge rounded-2 px-2.5 py-1" style="background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.75rem; font-weight: 500;">
-                                            <i class="bi bi-x-circle-fill me-1" style="font-size: 0.65rem;"></i> Habis
+                                        <span class="badge rounded-2 px-2.5 py-1 d-inline-flex align-items-center" style="background-color: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.75rem; font-weight: 500; gap: 5px;">
+                                            <i class="bi bi-x-circle-fill" style="font-size: 0.72rem; margin-right: 5px !important;"></i> Habis
                                         </span>
                                     @endif
                                 </td>

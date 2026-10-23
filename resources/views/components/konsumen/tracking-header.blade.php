@@ -144,8 +144,8 @@
         <i class="bi bi-check-circle-fill text-success fs-1 mb-2 d-block"></i>
         <h5 class="text-white fw-bold mb-1">Pesanan Selesai & Pembayaran Lunas</h5>
         <p class="text-secondary small mb-3">Terima kasih telah berkunjung ke Master Cafe. Klik tombol di bawah untuk menyelesaikan sesi pesanan Anda.</p>
-        <button onclick="finishCustomerSession()" class="btn btn-md rounded-pill px-4 py-2 fw-bold shadow-sm" style="background: var(--gradient-bronze); color: white; border: none;">
-            <i class="bi bi-check2-circle me-1"></i> Selesai
+        <button onclick="finishCustomerSession()" class="btn btn-md fw-bold shadow-sm" style="background: var(--gradient-bronze); color: white; border: none; border-radius: 8px; padding: 8px 24px;">
+            <i class="bi bi-check2-circle me-1.5"></i> Selesai
         </button>
         <p class="text-white-50 small mt-3 mb-0">
             <i class="bi bi-info-circle me-1"></i> Butuh struk? Silakan minta ke kasir kami.
@@ -157,8 +157,8 @@
         <i class="bi bi-x-circle-fill text-danger fs-1 mb-2 d-block"></i>
         <h5 class="text-white fw-bold mb-1">Pesanan Telah Dibatalkan / Dihapus</h5>
         <p class="text-secondary small mb-3">Pesanan Anda telah dibatalkan oleh Kasir. Silakan klik tombol di bawah untuk kembali ke menu dan membuat pesanan baru.</p>
-        <button onclick="finishCustomerSession()" class="btn btn-md btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm">
-            <i class="bi bi-arrow-left-circle me-1"></i> Kembali ke Menu / Pesan Baru
+        <button onclick="finishCustomerSession()" class="btn btn-md btn-danger fw-bold shadow-sm" style="border-radius: 8px; padding: 8px 24px;">
+            <i class="bi bi-arrow-left-circle me-1.5"></i> Kembali ke Menu / Pesan Baru
         </button>
     </div>
 @endif
@@ -185,20 +185,20 @@
         <div class="text-end">
             <div id="badge-status-container">
                 @if($pesanan->status === 'completed')
-                    <button onclick="finishCustomerSession()" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-bold shadow-sm">
-                        <i class="bi bi-check-all me-1"></i> Selesai
+                    <button onclick="finishCustomerSession()" class="btn btn-sm btn-success fw-bold shadow-sm" style="border-radius: 8px; padding: 6px 16px;">
+                        <i class="bi bi-check-all me-1.5"></i> Selesai
                     </button>
                 @elseif($pesanan->status === 'processing')
-                    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 rounded-pill fs-6 pulse-animation">
-                        <i class="bi bi-cup-hot-fill me-1"></i> Sedang Disiapkan
+                    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 fs-6 pulse-animation" style="border-radius: 8px;">
+                        <i class="bi bi-cup-hot-fill me-1.5"></i> Sedang Disiapkan
                     </span>
                 @elseif($pesanan->status === 'cancelled')
-                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 rounded-pill fs-6">
-                        <i class="bi bi-x-circle me-1"></i> Dibatalkan
+                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 fs-6" style="border-radius: 8px;">
+                        <i class="bi bi-x-circle me-1.5"></i> Dibatalkan
                     </span>
                 @else
-                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-3 py-2 rounded-pill fs-6">
-                        <i class="bi bi-clock-history me-1"></i> Menunggu
+                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-3 py-2 fs-6" style="border-radius: 8px;">
+                        <i class="bi bi-clock-history me-1.5"></i> Menunggu
                     </span>
                 @endif
             </div>
@@ -210,20 +210,107 @@
         <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <small class="text-secondary">Ingin menambah pesanan atau butuh bantuan?</small>
             <div class="d-flex gap-2 flex-wrap">
-                <a href="{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}" class="btn btn-sm rounded-pill px-3 fw-bold btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
-                    <i class="bi bi-plus-circle me-1"></i> Tambah Menu di Meja Ini
+                <a href="{{ URL::signedRoute('konsumen.menu.meja', ['id_meja' => $meja->id]) }}" 
+                   class="btn btn-sm fw-bold d-inline-flex align-items-center btn-touch shadow-sm" 
+                   style="background: var(--gradient-bronze); color: white; border: none; border-radius: 8px; padding: 7px 16px; font-size: 0.82rem; gap: 8px;">
+                    <i class="bi bi-plus-circle" style="font-size: 0.95rem;"></i>
+                    <span>Tambah Menu di Meja Ini</span>
                 </a>
-                <button id="btnCallBell" onclick="callWaiter({{ $meja->id }})" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold btn-touch">
-                    <i class="bi bi-bell-fill me-1"></i> Panggil Pelayan
+                <button id="btnCallBell" onclick="callWaiter({{ $meja->id }})" 
+                        class="btn btn-sm btn-outline-warning fw-bold d-inline-flex align-items-center btn-touch" 
+                        style="border-radius: 8px; padding: 7px 16px; font-size: 0.82rem; gap: 8px;">
+                    <i class="bi bi-bell-fill" style="font-size: 0.95rem;"></i>
+                    <span>Panggil Pelayan</span>
                 </button>
             </div>
         </div>
     @elseif(($pesanan->tipe_pesanan ?? '') === 'takeaway')
         <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <small class="text-secondary">Ingin memesan menu bungkus lainnya?</small>
-            <a href="{{ route('menu_takeaway') }}" class="btn btn-sm rounded-pill px-3 fw-bold btn-touch" style="background: var(--gradient-bronze); color: white; border: none;">
-                <i class="bi bi-plus-circle me-1"></i> Pesan Menu Tambahan (Bungkus)
+            <a href="{{ route('menu_takeaway') }}" 
+               class="btn btn-sm fw-bold d-inline-flex align-items-center btn-touch shadow-sm" 
+               style="background: var(--gradient-bronze); color: white; border: none; border-radius: 8px; padding: 7px 16px; font-size: 0.82rem; gap: 8px;">
+                <i class="bi bi-plus-circle" style="font-size: 0.95rem;"></i>
+                <span>Pesan Menu Tambahan (Bungkus)</span>
             </a>
         </div>
     @endif
+
+    <!-- Box Salin Tautan Lacak Pesanan -->
+    @if(!empty($pesanan->order_token))
+        <div class="mt-3 pt-3 border-top border-secondary border-opacity-25">
+            <div class="p-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3" 
+                 style="background: rgba(192, 142, 92, 0.08); border: 1px dashed rgba(192, 142, 92, 0.35); border-radius: 10px;">
+                <div class="d-flex align-items-center" style="gap: 14px;">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" 
+                         style="background: rgba(192, 142, 92, 0.16); width: 38px; height: 38px; border-radius: 8px; border: 1px solid rgba(192, 142, 92, 0.3);">
+                        <i class="bi bi-link-45deg" style="color: #c08e5c; font-size: 1.3rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-white small fw-bold mb-0.5">Tautan Lacak Pesanan</div>
+                        <small class="text-secondary d-block" style="font-size: 0.76rem; line-height: 1.4;">
+                            Salin tautan ini jika ingin melihat kembali status pesanan Anda sewaktu-waktu.
+                        </small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center flex-shrink-0 ms-sm-auto">
+                    <button type="button" 
+                            onclick="copyTrackingLink('{{ url('/tracking/' . $pesanan->order_token) }}', this)" 
+                            class="btn btn-sm fw-bold d-inline-flex align-items-center btn-touch shadow-sm" 
+                            style="background: var(--gradient-bronze); color: white; border: none; border-radius: 8px; padding: 7px 16px; font-size: 0.82rem; gap: 8px;">
+                        <i class="bi bi-clipboard" style="font-size: 0.95rem;"></i>
+                        <span>Salin Tautan</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
+
+@if(!empty($pesanan->order_token))
+<script>
+    if (!window.copyTrackingToClipboard) {
+        window.copyTrackingToClipboard = function(text, btnElement, successMsg) {
+            if (!text) return;
+            function done() {
+                if (typeof window.showToast === 'function') {
+                    window.showToast(successMsg || 'Tersalin ke papan klip!', 'success');
+                }
+                if (btnElement) {
+                    const originalHtml = btnElement.innerHTML;
+                    btnElement.innerHTML = '<i class="bi bi-check2 text-success" style="font-size: 0.95rem;"></i> <span>Tersalin!</span>';
+                    btnElement.classList.add('border-success');
+                    setTimeout(() => {
+                        btnElement.innerHTML = originalHtml;
+                        btnElement.classList.remove('border-success');
+                    }, 2000);
+                }
+            }
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(() => fb(text, done));
+            } else {
+                fb(text, done);
+            }
+            function fb(val, cb) {
+                const ta = document.createElement('textarea');
+                ta.value = val;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    if (cb) cb();
+                } catch(e) {
+                    if (typeof window.showToast === 'function') window.showToast('Gagal menyalin.', 'danger');
+                }
+                document.body.removeChild(ta);
+            }
+        };
+        window.copyTrackingLink = function(url, btn) {
+            window.copyTrackingToClipboard(url, btn, 'Tautan pelacakan berhasil disalin!');
+        };
+    }
+</script>
+@endif

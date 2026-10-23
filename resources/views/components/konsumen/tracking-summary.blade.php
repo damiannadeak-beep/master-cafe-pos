@@ -5,7 +5,7 @@
             <i class="bi bi-receipt me-1" style="color: #c08e5c;"></i> 
             {{ (isset($activeTableOrders) && $activeTableOrders->count() > 1) ? 'Semua Rincian Menu di Meja Ini' : 'Rincian Menu Pesanan' }}
         </h6>
-        <span class="badge rounded-2 bg-dark border border-secondary text-secondary">
+        <span class="text-secondary small fw-medium">
             @if(isset($activeTableOrders) && $activeTableOrders->count() > 1)
                 {{ $activeTableOrders->sum(fn($o) => $o->detail_pesanan->sum('jumlah')) }} Item ({{ $activeTableOrders->count() }} Pesanan)
             @else

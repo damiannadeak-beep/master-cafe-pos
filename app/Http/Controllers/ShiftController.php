@@ -134,7 +134,7 @@ class ShiftController extends Controller
             $query->where('updated_at', '<=', $shift->waktu_tutup);
         }
         
-        $pembayarans = $query->get();
+        $pembayarans = $query->orderByDesc('tanggal')->orderByDesc('id')->get();
 
         $totalCash = $pembayarans->where('metode', 'cash')->sum('total_bayar');
         $totalQris = $pembayarans->where('metode', 'qris')->sum('total_bayar');
@@ -302,7 +302,8 @@ class ShiftController extends Controller
             $html .= '<tr><td colspan="6" style="font-size: 10pt; text-align: left;">Laporan Rekonsiliasi Tutup Shift Kasir</td></tr>';
             $html .= '<tr><td colspan="6"></td></tr>';
             $html .= '<tr><td colspan="3" style="text-align: left;">STAF KASIR: ' . strtoupper(auth()->user()->name) . '</td><td colspan="3" style="text-align: right;">Tanggal Shift: ' . \Carbon\Carbon::parse($hariIni)->translatedFormat("d F Y") . '</td></tr>';
-            $html .= '<tr><td colspan="3" style="text-align: left;">Status Shift: ' . strtoupper($shift->status ?? "OPEN") . '</td><td colspan="3" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
+            $shiftStatusLabel = (($shift->status ?? '') === 'closed') ? 'Shift Selesai (Ditutup)' : 'Shift Masih Berjalan';
+            $html .= '<tr><td colspan="3" style="text-align: left;">Status Shift: ' . $shiftStatusLabel . '</td><td colspan="3" style="text-align: right;">Dicetak: ' . now()->translatedFormat("H:i") . ' WIB</td></tr>';
             $html .= '<tr><td colspan="6"></td></tr>';
             $html .= '</table>';
 
