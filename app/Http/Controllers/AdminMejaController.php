@@ -8,9 +8,25 @@ use App\Models\Meja;
 
 class AdminMejaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $mejas = Meja::orderBy('nama_meja_atau_nomor')->get();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'total_meja' => $mejas->count(),
+                'mejas' => $mejas->map(function ($meja) {
+                    return [
+                        'id' => $meja->id,
+                        'nama_meja_atau_nomor' => $meja->nama_meja_atau_nomor,
+                        'is_available' => (bool) $meja->is_available,
+                        'status' => $meja->status,
+                    ];
+                }),
+            ]);
+        }
+
         return view('admin.meja.index', compact('mejas'));
     }
 

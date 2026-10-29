@@ -16,7 +16,22 @@ class AdminWaitressController extends Controller
 
     public function store(StoreKasirRequest $request, KasirService $kasirService)
     {
-        $kasirService->createKasir($request->validated());
+        $kasir = $kasirService->createKasir($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Akun staf waitress berhasil dibuat.',
+                'kasir' => [
+                    'id' => $kasir->id,
+                    'name' => $kasir->name,
+                    'email' => $kasir->email,
+                    'shift' => $kasir->shift,
+                    'role' => 'kasir',
+                ],
+            ], 201);
+        }
+
         return redirect()->route('admin.kasir.index')->with('success', 'Akun staf waitress berhasil dibuat.');
     }
 

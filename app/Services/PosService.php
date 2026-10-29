@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\{Pesanan, DetailPesanan, Pembayaran, Setting};
+use App\Enums\{OrderStatus, PaymentStatus, PaymentMethod, OrderType};
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 
@@ -14,17 +15,17 @@ class PosService
     public function getActiveOrdersQuery()
     {
         return Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen'])
-            ->whereNotIn('status', ['cancelled', 'void'])
+            ->whereNotIn('status', [OrderStatus::CANCELLED->value, OrderStatus::VOID->value])
             ->where(function ($statusQ) {
                 // 1. Pesanan yang sedang diproses di dapur (pending / processing)
-                $statusQ->whereIn('status', ['pending', 'processing'])
+                $statusQ->whereIn('status', [OrderStatus::PENDING->value, OrderStatus::PROCESSING->value])
                     // 2. ATAU pesanan yang sudah selesai dimasak (completed) tetapi BELUM LUNAS
                     ->orWhere(function ($compUnpaidQ) {
-                        $compUnpaidQ->where('status', 'completed')
+                        $compUnpaidQ->where('status', OrderStatus::COMPLETED->value)
                             ->where(function ($pSub) {
                                 $pSub->whereDoesntHave('pembayaran')
                                      ->orWhereHas('pembayaran', function ($p) {
-                                         $p->where('status', '!=', 'paid');
+                                         $p->where('status', '!=', PaymentStatus::PAID->value);
                                      });
                             });
                     });
@@ -34,11 +35,11 @@ class PosService
                 $sub->whereNotNull('id_kasir')
                     // 2. Sudah dikonfirmasi pembayarannya (Lunas via QRIS/VA atau memilih opsi Bayar Tunai di Kasir)
                     ->orWhereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid')
+                        $p->where('status', PaymentStatus::PAID->value)
                           // 3. Tunai di Meja (Cash): Konsumen sudah selesai memilih metode bayar tunai di kasir
                           ->orWhere(function ($cashQ) {
-                              $cashQ->where('status', 'unpaid')
-                                    ->where('metode', 'cash');
+                              $cashQ->where('status', PaymentStatus::UNPAID->value)
+                                    ->where('metode', PaymentMethod::CASH->value);
                           });
                     });
             });
@@ -50,9 +51,9 @@ class PosService
     public function getCompletedOrdersQuery(int $limit = 50, bool $todayOnly = false)
     {
         $query = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir'])
-            ->where('status', 'completed')
+            ->where('status', OrderStatus::COMPLETED->value)
             ->whereHas('pembayaran', function ($p) {
-                $p->where('status', 'paid');
+                $p->where('status', PaymentStatus::PAID->value);
             });
 
         if ($todayOnly) {
@@ -73,7 +74,7 @@ class PosService
         $query = Pesanan::withTrashed()
             ->where(function ($q) {
                 $q->whereNotNull('deleted_at')
-                  ->orWhereIn('status', ['cancelled', 'void']);
+                  ->orWhereIn('status', [OrderStatus::CANCELLED->value, OrderStatus::VOID->value]);
             })
             ->with(['meja', 'detail_pesanan.menu', 'pembayaran', 'konsumen', 'kasir', 'voidLog.kasir']);
 
@@ -739,5 +740,136 @@ class PosService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Update status pesanan dari kasir (processing, completed, dll)
+     */
+    public function updateOrderStatus(array $ids, string $targetStatus, ?int $kasirId = null): array
+    {
+        $orders = Pesanan::with(['konsumen', 'meja', 'detail_pesanan.menu'])->whereIn('id', $ids)->get();
+        if ($orders->isEmpty()) {
+            throw new \Exception('Pesanan tidak ditemukan.');
+        }
+
+        foreach ($orders as $pesanan) {
+            $pesanan->update([
+                'status' => $targetStatus,
+                'id_kasir' => $kasirId ?: auth()->id()
+            ]);
+
+            if ($targetStatus === OrderStatus::COMPLETED->value) {
+                $pesanan->detail_pesanan()->update(['is_served' => true]);
+            }
+
+            if ($targetStatus === OrderStatus::COMPLETED->value && $pesanan->id_meja) {
+                $hasRemaining = Pesanan::where('id_meja', $pesanan->id_meja)
+                    ->whereNotIn('status', [OrderStatus::CANCELLED->value, OrderStatus::VOID->value])
+                    ->where(function ($q) {
+                        $q->whereIn('status', [OrderStatus::PENDING->value, OrderStatus::PROCESSING->value])
+                          ->orWhere(function ($sub) {
+                              $sub->where('status', OrderStatus::COMPLETED->value)
+                                  ->where(function ($pSub) {
+                                      $pSub->whereDoesntHave('pembayaran')
+                                           ->orWhereHas('pembayaran', function ($p) {
+                                               $p->where('status', '!=', PaymentStatus::PAID->value);
+                                           });
+                                  });
+                          });
+                    })
+                    ->exists();
+
+                if (!$hasRemaining && $pesanan->meja && !$pesanan->meja->is_available) {
+                    $pesanan->meja->update(['is_available' => true]);
+                }
+            }
+
+            try {
+                broadcast(new \App\Events\PesananBaru($pesanan));
+                if ($pesanan->id_meja && $pesanan->meja) {
+                    broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('[PosService] Gagal broadcast status: ' . $e->getMessage());
+            }
+
+            if ($pesanan->id_konsumen && $pesanan->konsumen) {
+                try {
+                    $statusText = $pesanan->status === OrderStatus::COMPLETED->value ? 'Selesai' : 'Diproses';
+                    $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
+                        'Pesanan ' . $statusText,
+                        'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
+                        '/konsumen/profil'
+                    ));
+                } catch (\Throwable $notifyErr) {
+                    \Illuminate\Support\Facades\Log::warning('WebPush gagal dikirim: ' . $notifyErr->getMessage());
+                }
+            }
+
+            if ($pesanan->status === OrderStatus::COMPLETED->value && $pesanan->tipe_pesanan === OrderType::TAKEAWAY->value && !empty($pesanan->guest_phone)) {
+                try {
+                    $pesanan->loadMissing(['detail_pesanan.menu']);
+                    $waMessage = \App\Services\WhatsAppService::formatTakeawayReadyMessage($pesanan);
+                    \App\Services\WhatsAppService::sendMessage($pesanan->guest_phone, $waMessage);
+                } catch (\Throwable $waErr) {
+                    \Illuminate\Support\Facades\Log::warning('[PosService] Gagal kirim WA: ' . $waErr->getMessage());
+                }
+            }
+        }
+
+        return [
+            'status' => $targetStatus,
+            'order_ids' => $ids
+        ];
+    }
+
+    /**
+     * Toggle status centang per-item menu (is_served) oleh waitress
+     */
+    public function toggleItemServed(int $idDetail): array
+    {
+        $item = DetailPesanan::with('pesanan.detail_pesanan')->findOrFail($idDetail);
+        $item->is_served = !$item->is_served;
+        $item->save();
+
+        $pesanan = $item->pesanan;
+        $allServed = false;
+        $servedCount = 0;
+        $totalCount = 0;
+        $statusChanged = false;
+
+        if ($pesanan) {
+            $pesanan->load('detail_pesanan');
+            $totalCount = $pesanan->detail_pesanan->count();
+            $servedCount = $pesanan->detail_pesanan->where('is_served', true)->count();
+            $allServed = ($servedCount === $totalCount && $totalCount > 0);
+
+            if ($allServed && $pesanan->status !== OrderStatus::COMPLETED->value) {
+                $pesanan->status = OrderStatus::COMPLETED->value;
+                $pesanan->save();
+                $statusChanged = true;
+            } elseif (!$allServed && $pesanan->status === OrderStatus::COMPLETED->value) {
+                $pesanan->status = OrderStatus::PROCESSING->value;
+                $pesanan->save();
+                $statusChanged = true;
+            }
+
+            try {
+                broadcast(new \App\Events\PesananBaru($pesanan));
+            } catch (\Throwable $e) {}
+        }
+
+        return [
+            'success' => true,
+            'id' => $item->id,
+            'is_served' => (bool)$item->is_served,
+            'served_count' => $servedCount,
+            'total_count' => $totalCount,
+            'all_served' => $allServed,
+            'order_id' => $pesanan ? $pesanan->id : null,
+            'order_status' => $pesanan ? $pesanan->status : null,
+            'status_changed' => $statusChanged,
+            'message' => $item->is_served ? 'Menu ditandai siap / disajikan.' : 'Menu ditandai belum siap.'
+        ];
     }
 }

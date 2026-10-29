@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\{Pesanan, Pembayaran, Setting};
+use App\Enums\{OrderStatus, PaymentStatus, PaymentMethod, OrderType};
 use App\Mail\ReceiptMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
@@ -194,12 +195,12 @@ class PaymentController extends Controller
         $pembayaran = $pesanan->pembayaran;
         if ($pembayaran) {
             $pembayaran->update([
-                'status' => 'paid',
-                'metode' => 'qris',
+                'status' => PaymentStatus::PAID->value,
+                'metode' => PaymentMethod::QRIS->value,
                 'tanggal' => now(),
             ]);
 
-            $pesanan->update(['status' => 'processing']);
+            $pesanan->update(['status' => OrderStatus::PROCESSING->value]);
 
             try {
                 broadcast(new \App\Events\PesananBaru($pesanan));
@@ -230,6 +231,19 @@ class PaymentController extends Controller
         }
 
         $targetUrl = $pesanan->order_token ? url('/tracking/' . $pesanan->order_token . '?paid_sim=1') : url('/');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran QRIS Midtrans berhasil diselesaikan (LUNAS).',
+                'id_pesanan' => $pesanan->id,
+                'order_token' => $pesanan->order_token,
+                'status' => $pesanan->status,
+                'payment_status' => $pembayaran?->status ?? 'paid',
+                'tracking_url' => $targetUrl,
+            ]);
+        }
+
         return redirect($targetUrl)->with('success', 'Pembayaran QRIS Midtrans berhasil diselesaikan (LUNAS).');
     }
 
@@ -242,10 +256,14 @@ class PaymentController extends Controller
             $userLat = $request->input('user_lat');
             $userLng = $request->input('user_lng');
 
-            $cafeLat = Setting::getVal('cafe_latitude') ?: (Setting::getVal('warung_latitude') ?: 1.4828);
-            $cafeLng = Setting::getVal('cafe_longitude') ?: (Setting::getVal('warung_longitude') ?: 102.1332);
-            $maxRadius = (float) Setting::getVal('geofence_radius', 150);
-            if ($maxRadius < 50) $maxRadius = 150; // default toleransi aman 150m
+            $defaultLat = config('cafe.default_location.latitude', 1.4828);
+            $defaultLng = config('cafe.default_location.longitude', 102.1332);
+            $defaultRadius = config('cafe.default_location.geofence_radius', 150);
+
+            $cafeLat = Setting::getVal('cafe_latitude') ?: (Setting::getVal('warung_latitude') ?: $defaultLat);
+            $cafeLng = Setting::getVal('cafe_longitude') ?: (Setting::getVal('warung_longitude') ?: $defaultLng);
+            $maxRadius = (float) Setting::getVal('geofence_radius', $defaultRadius);
+            if ($maxRadius < 50) $maxRadius = $defaultRadius;
 
             $isInsideCafe = false;
             if (!empty($cafeLat) && !empty($cafeLng) && !empty($userLat) && !empty($userLng)) {
@@ -298,8 +316,8 @@ class PaymentController extends Controller
             }
 
             $pembayaran->update([
-                'status' => 'unpaid',
-                'metode' => 'cash',
+                'status' => PaymentStatus::UNPAID->value,
+                'metode' => PaymentMethod::CASH->value,
                 'uang_diterima' => $totalTagihan, // Set = total tagihan (uang pas)
                 'uang_kembalian' => 0,
                 'catatan_kembalian' => $catatanKembalian,
@@ -308,7 +326,7 @@ class PaymentController extends Controller
             // Sinkronkan ke pesanan lain di meja jika scope 'table'
             if ($paymentScope === 'table' && $pesanan->tipe_pesanan === 'dine_in' && $pesanan->id_meja && $otherUnpaidOrders->isNotEmpty()) {
                 foreach ($otherUnpaidOrders as $other) {
-                    if ($other->pembayaran && $other->pembayaran->status === 'unpaid') {
+                    if ($other->pembayaran && $other->pembayaran->status === PaymentStatus::UNPAID->value) {
                         $otherTotal = (float) $other->pembayaran->total_bayar;
                         $other->pembayaran->update([
                             'uang_diterima' => $otherTotal,
@@ -320,7 +338,7 @@ class PaymentController extends Controller
             }
 
             // Ubah status pesanan agar langsung diproses dimasak dapur
-            $pesanan->update(['status' => 'processing']);
+            $pesanan->update(['status' => OrderStatus::PROCESSING->value]);
 
             try {
                 broadcast(new \App\Events\PesananBaru($pesanan));
@@ -355,6 +373,20 @@ class PaymentController extends Controller
         $successMsg = ($pesanan->tipe_pesanan === 'takeaway')
             ? 'Pilihan bayar Tunai di Kasir berhasil dikonfirmasi. Silakan lakukan pembayaran ke kasir selagi pesanan Anda disiapkan.'
             : 'Pilihan bayar Tunai berhasil dikirim. Waitress akan membawakan makanan beserta struk tagihan Anda.';
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMsg,
+                'id_pesanan' => $pesanan->id,
+                'order_token' => $pesanan->order_token,
+                'status' => $pesanan->status,
+                'payment_status' => 'unpaid',
+                'metode' => 'cash',
+                'tracking_url' => $targetUrl,
+            ]);
+        }
+
         return redirect($targetUrl)->with('success', $successMsg);
     }
 

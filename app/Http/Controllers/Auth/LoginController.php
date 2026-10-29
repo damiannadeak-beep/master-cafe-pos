@@ -74,6 +74,14 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil logout.',
+                'redirect_url' => $redirectUrl,
+            ]);
+        }
+
         return redirect($redirectUrl);
     }
 
@@ -102,13 +110,5 @@ class LoginController extends Controller
 
         // Jika tidak punya role apapun, kembalikan ke halaman awal
         return redirect('/');
-    }
-
-    /**
-     * Tampilkan halaman login khusus Staf Kasir & Pemilik.
-     */
-    public function showStaffLoginForm()
-    {
-        return view('auth.staff-login');
     }
 }

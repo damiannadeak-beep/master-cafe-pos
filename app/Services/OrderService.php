@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\{Menu, Pesanan, DetailPesanan, Promo};
+use App\Models\{Menu, Pesanan, DetailPesanan, Promo, Pembayaran, Meja};
+use App\Enums\{OrderStatus, PaymentStatus, PaymentMethod, OrderType};
 
 class OrderService
 {
@@ -255,17 +256,17 @@ class OrderService
             $idMeja = ($validatedData['tipe_pesanan'] === 'takeaway') ? null : ($validatedData['id_meja'] ?? null);
 
             // Selesaikan sesi meja lama yang sudah berstatus lunas
-            if (!empty($idMeja) && $validatedData['tipe_pesanan'] === 'dine_in') {
+            if (!empty($idMeja) && $validatedData['tipe_pesanan'] === OrderType::DINE_IN->value) {
                 $oldPaidOrders = Pesanan::where('id_meja', $idMeja)
-                    ->whereIn('status', ['pending', 'processing'])
+                    ->whereIn('status', [OrderStatus::PENDING->value, OrderStatus::PROCESSING->value])
                     ->whereHas('pembayaran', function ($p) {
-                        $p->where('status', 'paid');
+                        $p->where('status', PaymentStatus::PAID->value);
                     })
                     ->get();
 
                 foreach ($oldPaidOrders as $oldOrd) {
                     $oldOrd->update([
-                        'status' => 'completed',
+                        'status' => OrderStatus::COMPLETED->value,
                         'id_kasir' => $kasirId
                     ]);
                 }
@@ -278,7 +279,7 @@ class OrderService
                 'id_kasir' => $kasirId,
                 'tipe_pesanan' => $validatedData['tipe_pesanan'],
                 'tanggal' => now(),
-                'status' => 'pending',
+                'status' => OrderStatus::PENDING->value,
                 'promo_id' => $validatedData['promo_id'] ?? null
             ]);
 
@@ -309,16 +310,16 @@ class OrderService
 
             // Status dan metode pembayaran
             $isPaidDirectly = !empty($validatedData['pembayaran_langsung']);
-            $statusBayar = $isPaidDirectly ? 'paid' : 'unpaid';
+            $statusBayar = $isPaidDirectly ? PaymentStatus::PAID->value : PaymentStatus::UNPAID->value;
             $metodeBayar = !empty($validatedData['metode_pembayaran']) 
                 ? $validatedData['metode_pembayaran'] 
-                : ($isPaidDirectly ? 'cash' : null);
+                : ($isPaidDirectly ? PaymentMethod::CASH->value : null);
 
             $uangDiterima = null;
             $uangKembalian = 0;
             $catatanKembalian = null;
 
-            if ($isPaidDirectly && $metodeBayar === 'cash') {
+            if ($isPaidDirectly && $metodeBayar === PaymentMethod::CASH->value) {
                 $isUangPas = !empty($validatedData['is_uang_pas']);
                 $nominalTunaiInput = $validatedData['nominal_tunai'] ?? null;
 

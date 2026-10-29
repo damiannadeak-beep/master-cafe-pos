@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Pesanan;
 use App\Models\Pembayaran;
+use App\Enums\{PaymentStatus, PaymentMethod, OrderStatus};
 use App\Mail\ReceiptMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -29,12 +30,12 @@ class PaymentService
         $pembayaran = Pembayaran::firstOrCreate(
             ['id_pesanan' => $id_pesanan],
             [
-                'status' => 'unpaid',
+                'status' => PaymentStatus::UNPAID->value,
                 'total_bayar' => $totalBayar,
             ]
         );
 
-        if ($pembayaran->status === 'paid') {
+        if ($pembayaran->status === PaymentStatus::PAID->value) {
             throw new \Exception('Pesanan ini sudah dibayar.');
         }
 
@@ -67,7 +68,7 @@ class PaymentService
         }
 
         $pembayaran->update([
-            'status' => 'paid',
+            'status' => PaymentStatus::PAID->value,
             'metode' => $metode,
             'tanggal' => now(),
             'total_bayar' => $totalBayar,
@@ -288,7 +289,7 @@ class PaymentService
         foreach ($ids as $singleId) {
             $pesanan = Pesanan::with('pembayaran')->find($singleId);
             if (!$pesanan) continue;
-            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'paid') {
+            if ($pesanan->pembayaran && $pesanan->pembayaran->status === PaymentStatus::PAID->value) {
                 $lastPesanan = $pesanan;
                 continue;
             }

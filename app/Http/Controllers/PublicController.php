@@ -34,6 +34,24 @@ class PublicController extends Controller
 
         $mejas = \App\Models\Meja::where('is_available', true)->orderBy('nama_meja_atau_nomor', 'asc')->get();
 
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'mejas' => $mejas->map(fn($m) => [
+                    'id' => $m->id,
+                    'nama_meja_atau_nomor' => $m->nama_meja_atau_nomor,
+                    'is_available' => (bool) $m->is_available,
+                ]),
+                'menus' => $menus->map(fn($item) => [
+                    'id' => $item->id,
+                    'nama_menu' => $item->nama_menu,
+                    'harga' => (float) $item->harga,
+                    'kategori' => $item->kategori,
+                    'is_available' => (bool) $item->is_available,
+                ]),
+            ]);
+        }
+
         return view('public.katalog', compact('menus', 'promos', 'promoMenuIds', 'mejas'));
     }
 

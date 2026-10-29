@@ -84,20 +84,8 @@
                         </div>
                     @endif
 
-                    @if($pembayaran->status == 'pending_verification')
-                        <div class="alert alert-warning text-center rounded-4" style="background-color: #2b200b; color: #ffc107; border: 1px solid #c08e5c;">
-                            <i class="bi bi-hourglass-split d-block mb-2" style="font-size: 2rem;"></i>
-                            <h6 class="fw-bold">Menunggu Konfirmasi Waitress</h6>
-                            <small>Bukti pembayaran Anda sedang diverifikasi oleh sistem. Silakan tunggu di meja Anda.</small>
-                        </div>
-                        <div class="d-grid mt-4">
-                            <a href="{{ $pesanan->order_token ? url('/tracking/' . $pesanan->order_token) : (auth()->check() ? url('/konsumen/profil') : url('/')) }}" class="btn btn-outline-secondary btn-lg fw-bold rounded-pill btn-touch">
-                                Lihat Status Pesanan <i class="bi bi-arrow-right ms-2"></i>
-                            </a>
-                        </div>
-                    @else
-                        @if($pembayaran->status !== 'paid' && $pesanan->status === 'pending')
-                            <!-- Countdown Batas Waktu Pembayaran (15 Menit) -->
+                    @if($pembayaran->status !== 'paid' && $pesanan->status === 'pending')
+                        <!-- Countdown Batas Waktu Pembayaran (15 Menit) -->
                             <div id="checkout-timer-box" class="alert border-0 rounded-4 py-2 px-3 mb-3 d-flex align-items-center justify-content-between" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25) !important; color: #fca5a5;">
                                 <span class="small"><i class="bi bi-clock-history me-1 text-danger"></i> Batas Waktu Pembayaran:</span>
                                 <span class="badge bg-danger bg-opacity-75 text-white font-monospace fs-6 px-2 py-1" id="checkout-countdown">15:00</span>
@@ -299,7 +287,6 @@
                                 <small><i class="bi bi-shield-check me-1"></i> Pesanan langsung diteruskan ke dapur untuk dimasak setelah pilihan bayar dipilih.</small>
                             </div>
                         @endif
-                    @endif
                 </div>
             </div>
         </div>

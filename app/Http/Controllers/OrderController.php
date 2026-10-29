@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\{Pesanan, DetailPesanan, Pembayaran, Menu, Meja, Promo, Setting};
+use App\Enums\{OrderStatus, PaymentStatus, PaymentMethod, OrderType};
 use App\Http\Requests\Konsumen\{TambahPesananRequest, CallBellRequest};
 use App\Services\OrderService;
 use App\Helpers\GeoHelper;
@@ -147,12 +148,12 @@ class OrderController extends Controller
                 'id_meja' => $id_meja,
                 'tipe_pesanan' => $tipe_pesanan,
                 'tanggal' => now(),
-                'status' => 'pending',
+                'status' => OrderStatus::PENDING->value,
             ]);
 
             Pembayaran::create([
                 'id_pesanan' => $pesanan->id,
-                'status' => 'unpaid'
+                'status' => PaymentStatus::UNPAID->value,
             ]);
 
             if ($id_meja && $tipe_pesanan === 'dine_in' && $mejaModel) {
@@ -426,10 +427,11 @@ class OrderController extends Controller
 
         $this->checkAndUpdateMidtransStatus($pesanan, $request);
 
+        $expirySeconds = config('cafe.order_expiry_seconds', 900);
         $remainingSeconds = 0;
-        if ($pesanan->status === 'pending' && $pesanan->pembayaran && $pesanan->pembayaran->status === 'unpaid') {
+        if ($pesanan->isPending() && $pesanan->pembayaran && $pesanan->pembayaran->isUnpaid()) {
             $createdAt = $pesanan->created_at ?: now();
-            $remainingSeconds = max(0, 900 - $createdAt->diffInSeconds(now()));
+            $remainingSeconds = max(0, $expirySeconds - $createdAt->diffInSeconds(now()));
         }
 
         return response()->json([
@@ -448,14 +450,15 @@ class OrderController extends Controller
      */
     private function checkOrderExpiry($pesanan): bool
     {
-        if (!$pesanan || $pesanan->status !== 'pending') {
+        if (!$pesanan || !$pesanan->isPending()) {
             return false;
         }
 
         $pembayaran = $pesanan->pembayaran;
-        if ($pembayaran && $pembayaran->status === 'unpaid' && $pembayaran->metode !== 'cash') {
+        if ($pembayaran && $pembayaran->isUnpaid() && $pembayaran->metode !== PaymentMethod::CASH->value) {
             $createdAt = $pesanan->created_at ?: now();
-            if ($createdAt->diffInSeconds(now()) >= 900) { // 15 menit = 900 detik
+            $expirySeconds = config('cafe.order_expiry_seconds', 900);
+            if ($createdAt->diffInSeconds(now()) >= $expirySeconds) {
                 $pesanan->cancelOrder();
                 return true;
             }

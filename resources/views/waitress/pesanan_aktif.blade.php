@@ -277,8 +277,6 @@
 
 @include("components.waitress.merge-bill-modal")
 
-@include("components.waitress.verification-modal")
-
 @include("components.waitress.order-completed-modal")
 
 @include("components.waitress.pesanan-aktif-scripts")

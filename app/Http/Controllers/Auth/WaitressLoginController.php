@@ -45,13 +45,40 @@ class WaitressLoginController extends Controller
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'message' => 'Akses ditolak. Akun ini tidak memiliki hak akses staf waitress.'
+                    ], 403);
+                }
+
                 throw ValidationException::withMessages([
                     'email' => 'Akses ditolak. Akun ini tidak memiliki hak akses staf waitress.',
                 ]);
             }
 
             $request->session()->regenerate();
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login berhasil sebagai Kasir/Waitress.',
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $user->getRoleNames()->first(),
+                    ],
+                    'redirect_url' => route('kasir.pos'),
+                ]);
+            }
+
             return redirect()->intended(route('kasir.pos'));
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Kredensial staf yang diberikan tidak cocok.'
+            ], 422);
         }
 
         throw ValidationException::withMessages([

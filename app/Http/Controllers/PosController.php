@@ -228,92 +228,17 @@ class PosController extends Controller
                 if (is_string($id_pesanan) && str_contains($id_pesanan, ',')) {
                     $ids = array_filter(array_map('trim', explode(',', $id_pesanan)));
                 } else {
-                    $ids = [$id_pesanan];
+                    $ids = [(int)$id_pesanan];
                 }
-            }
-
-            $orders = Pesanan::with(['konsumen', 'meja', 'detail_pesanan.menu'])->whereIn('id', $ids)->get();
-            if ($orders->isEmpty()) {
-                return response()->json(['error' => 'Pesanan tidak ditemukan.'], 404);
             }
 
             $targetStatus = $request->validated('status');
-
-            foreach ($orders as $pesanan) {
-                // Update status
-                $pesanan->update([
-                    'status' => $targetStatus,
-                    'id_kasir' => auth()->id() // Kasir yang memproses pesanan
-                ]);
-
-                if ($targetStatus === 'completed') {
-                    $pesanan->detail_pesanan()->update(['is_served' => true]);
-                }
-
-                // Jika pesanan selesai dan meja tidak lagi memiliki pesanan aktif / belum lunas,
-                // set meja menjadi tersedia kembali (is_available = true)
-                if ($targetStatus === 'completed' && $pesanan->id_meja) {
-                    $hasRemaining = Pesanan::where('id_meja', $pesanan->id_meja)
-                        ->whereNotIn('status', ['cancelled', 'void'])
-                        ->where(function ($q) {
-                            $q->whereIn('status', ['pending', 'processing'])
-                              ->orWhere(function ($sub) {
-                                  $sub->where('status', 'completed')
-                                      ->where(function ($pSub) {
-                                          $pSub->whereDoesntHave('pembayaran')
-                                               ->orWhereHas('pembayaran', function ($p) {
-                                                   $p->where('status', '!=', 'paid');
-                                               });
-                                      });
-                              });
-                        })
-                        ->exists();
-
-                    if (!$hasRemaining && $pesanan->meja && !$pesanan->meja->is_available) {
-                        $pesanan->meja->update(['is_available' => true]);
-                    }
-                }
-
-                // Broadcast status update ke listener real-time (WebSocket / Polling)
-                try {
-                    broadcast(new \App\Events\PesananBaru($pesanan));
-                    if ($pesanan->id_meja && $pesanan->meja) {
-                        broadcast(new \App\Events\MejaStatusUpdated($pesanan->meja));
-                    }
-                } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::warning('[PosController] Gagal broadcast WebSocket status update: ' . $e->getMessage());
-                }
-
-                // Notify Customer via Web Push (non-blocking)
-                if ($pesanan->id_konsumen && $pesanan->konsumen) {
-                    try {
-                        $statusText = $pesanan->status === 'completed' ? 'Selesai' : 'Diproses';
-                        $pesanan->konsumen->notify(new \App\Notifications\WebPushNotification(
-                            'Pesanan ' . $statusText,
-                            'Pesanan Anda (Order #' . $pesanan->id . ') saat ini ' . strtolower($statusText) . '.',
-                            '/konsumen/profil'
-                        ));
-                    } catch (\Throwable $notifyErr) {
-                        \Illuminate\Support\Facades\Log::warning('WebPush gagal dikirim: ' . $notifyErr->getMessage());
-                    }
-                }
-
-                // Kirim Notifikasi WhatsApp Otomatis jika Pesanan Takeaway Selesai
-                if ($pesanan->status === 'completed' && $pesanan->tipe_pesanan === 'takeaway' && !empty($pesanan->guest_phone)) {
-                    try {
-                        $pesanan->loadMissing(['detail_pesanan.menu']);
-                        $waMessage = \App\Services\WhatsAppService::formatTakeawayReadyMessage($pesanan);
-                        \App\Services\WhatsAppService::sendMessage($pesanan->guest_phone, $waMessage);
-                    } catch (\Throwable $waErr) {
-                        \Illuminate\Support\Facades\Log::warning('[PosController] Gagal kirim notifikasi WA Takeaway: ' . $waErr->getMessage());
-                    }
-                }
-            }
+            $result = $this->posService->updateOrderStatus($ids, $targetStatus, auth()->id());
 
             return response()->json([
                 'message' => 'Status pesanan berhasil diupdate',
-                'status' => $targetStatus,
-                'order_ids' => $ids
+                'status' => $result['status'],
+                'order_ids' => $result['order_ids']
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
@@ -326,123 +251,10 @@ class PosController extends Controller
     public function toggleItemServed(Request $request, $id_detail)
     {
         try {
-            $item = DetailPesanan::with('pesanan.detail_pesanan')->findOrFail($id_detail);
-            $item->is_served = !$item->is_served;
-            $item->save();
-
-            $pesanan = $item->pesanan;
-            $allServed = false;
-            $servedCount = 0;
-            $totalCount = 0;
-            $statusChanged = false;
-
-            if ($pesanan) {
-                // Refresh list detail_pesanan setelah perubahan is_served
-                $pesanan->load('detail_pesanan');
-                $totalCount = $pesanan->detail_pesanan->count();
-                $servedCount = $pesanan->detail_pesanan->where('is_served', true)->count();
-                $allServed = ($servedCount === $totalCount && $totalCount > 0);
-
-                // Jika seluruh menu telah siap / disajikan, otomatis selesaikan pesanan (completed)
-                if ($allServed && $pesanan->status !== 'completed') {
-                    $pesanan->status = 'completed';
-                    $pesanan->save();
-                    $statusChanged = true;
-                } elseif (!$allServed && $pesanan->status === 'completed') {
-                    // Jika ada menu yang batal centang dan sebelumnya sudah completed, kembalikan ke processing
-                    $pesanan->status = 'processing';
-                    $pesanan->save();
-                    $statusChanged = true;
-                }
-
-                try {
-                    broadcast(new \App\Events\PesananBaru($pesanan));
-                } catch (\Throwable $e) {}
-            }
-
-            return response()->json([
-                'success' => true,
-                'id' => $item->id,
-                'is_served' => (bool)$item->is_served,
-                'served_count' => $servedCount,
-                'total_count' => $totalCount,
-                'all_served' => $allServed,
-                'order_id' => $pesanan ? $pesanan->id : null,
-                'order_status' => $pesanan ? $pesanan->status : null,
-                'status_changed' => $statusChanged,
-                'message' => $item->is_served ? 'Menu ditandai siap / disajikan.' : 'Menu ditandai belum siap.'
-            ]);
+            $result = $this->posService->toggleItemServed((int) $id_detail);
+            return response()->json($result);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
-        }
-    }
-
-    /**
-     * Update status pembayaran dari kasir
-     */
-    
-    public function verifyPayment($id_pesanan, PaymentService $paymentService)
-    {
-        try {
-            DB::beginTransaction();
-            
-            $pesanan = $paymentService->processPayment(
-                $id_pesanan,
-                'qris', // Default to QRIS since it was uploaded
-                null,
-                auth()->id()
-            );
-
-            // Set status pesanan menjadi processing (dimasak) jika dine_in dan belum processing
-            if ($pesanan->status === 'pending') {
-                $pesanan->status = 'processing';
-                $pesanan->save();
-            }
-
-            DB::commit();
-            if (request()->ajax() || request()->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Pembayaran pesanan #'.$pesanan->id.' berhasil diverifikasi.'
-                ]);
-            }
-            return redirect()->back()->with('success', 'Pembayaran pesanan #'.$pesanan->id.' berhasil diverifikasi.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Gagal verifikasi pembayaran: ' . $e->getMessage());
-            if (request()->ajax() || request()->wantsJson()) {
-                return response()->json(['error' => 'Gagal memverifikasi pembayaran.'], 422);
-            }
-            return redirect()->back()->with('error', 'Gagal memverifikasi pembayaran.');
-        }
-    }
-
-    public function rejectPayment($id_pesanan)
-    {
-        try {
-            $pesanan = Pesanan::with('pembayaran')->findOrFail($id_pesanan);
-            if ($pesanan->pembayaran && $pesanan->pembayaran->status === 'pending_verification') {
-                $pesanan->pembayaran->status = 'unpaid';
-                $pesanan->pembayaran->bukti_bayar = null;
-                $pesanan->pembayaran->save();
-                if (request()->ajax() || request()->wantsJson()) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Bukti pembayaran ditolak. Pesanan dikembalikan ke status belum bayar.'
-                    ]);
-                }
-                return redirect()->back()->with('success', 'Bukti pembayaran ditolak. Pesanan dikembalikan ke status belum bayar.');
-            }
-            if (request()->ajax() || request()->wantsJson()) {
-                return response()->json(['error' => 'Pesanan tidak dalam status verifikasi.'], 422);
-            }
-            return redirect()->back()->with('error', 'Pesanan tidak dalam status verifikasi.');
-        } catch (\Exception $e) {
-            Log::error('Gagal tolak pembayaran: ' . $e->getMessage());
-            if (request()->ajax() || request()->wantsJson()) {
-                return response()->json(['error' => 'Gagal menolak pembayaran.'], 422);
-            }
-            return redirect()->back()->with('error', 'Gagal menolak pembayaran.');
         }
     }
 
@@ -461,9 +273,15 @@ class PosController extends Controller
             );
 
             DB::commit();
+            $lastPesanan?->loadMissing('pembayaran');
             return response()->json([
                 'message' => 'Pembayaran berhasil dikonfirmasi.',
-                'id_pesanan' => $lastPesanan ? $lastPesanan->id : $id_pesanan
+                'id_pesanan' => $lastPesanan ? $lastPesanan->id : (int)$id_pesanan,
+                'status' => $lastPesanan?->status,
+                'metode' => $lastPesanan?->pembayaran?->metode ?? 'cash',
+                'total_bayar' => (float) ($lastPesanan?->pembayaran?->total_bayar ?? 0),
+                'uang_diterima' => (float) ($lastPesanan?->pembayaran?->uang_diterima ?? 0),
+                'uang_kembalian' => (float) ($lastPesanan?->pembayaran?->uang_kembalian ?? 0),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -540,7 +358,7 @@ class PosController extends Controller
         try {
             $pesananAsli = Pesanan::with('detail_pesanan')->findOrFail($id_pesanan);
 
-            if ($pesananAsli->pembayaran && $pesananAsli->pembayaran->status === 'paid') {
+            if ($pesananAsli->pembayaran && $pesananAsli->pembayaran->isPaid()) {
                 throw new \Exception('Pesanan sudah dibayar, tidak bisa dipisah.');
             }
 
@@ -584,11 +402,11 @@ class PosController extends Controller
         try {
             $candidates = Pesanan::with(['meja', 'detail_pesanan.menu', 'pembayaran'])
                 ->where('id', '!=', $id_pesanan)
-                ->whereNotIn('status', ['cancelled', 'void', 'completed'])
+                ->whereNotIn('status', [\App\Enums\OrderStatus::CANCELLED->value, \App\Enums\OrderStatus::VOID->value, \App\Enums\OrderStatus::COMPLETED->value])
                 ->where(function ($q) {
                     $q->whereDoesntHave('pembayaran')
                       ->orWhereHas('pembayaran', function ($p) {
-                          $p->where('status', '!=', 'paid');
+                          $p->where('status', '!=', \App\Enums\PaymentStatus::PAID->value);
                       });
                 })
                 ->orderBy('id', 'desc')

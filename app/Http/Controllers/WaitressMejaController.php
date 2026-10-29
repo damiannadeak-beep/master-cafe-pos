@@ -40,7 +40,25 @@ class WaitressMejaController extends Controller
             ->get()
             ->keyBy('id_meja');
 
-        if ($request->ajax() || $request->wantsJson() || $request->query('grid_only')) {
+        if ($request->wantsJson() && !$request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'total_meja' => $totalMeja,
+                'meja_kosong' => $mejaKosong,
+                'meja_terisi' => $mejaAdaPesanan,
+                'mejas' => $mejas->map(function ($m) {
+                    return [
+                        'id' => $m->id,
+                        'nama_meja_atau_nomor' => $m->nama_meja_atau_nomor,
+                        'is_available' => (bool) $m->is_available,
+                        'status' => $m->status,
+                        'ada_pesanan' => $m->pesanan->isNotEmpty(),
+                    ];
+                }),
+            ]);
+        }
+
+        if ($request->ajax() || $request->query('grid_only')) {
             return view('waitress.meja.grid', compact('mejas', 'totalMeja', 'mejaAdaPesanan', 'mejaKosong', 'activeCallsMap'))->render();
         }
 

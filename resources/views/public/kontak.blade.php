@@ -135,41 +135,6 @@
                 @endforeach
             </div>
 
-            <!-- Section FAQ & Reservasi Acara -->
-            <div class="card border-0 rounded-3 p-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
-                <h6 class="fw-semibold text-white mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-question-circle" style="color: #c08e5c;"></i> Pertanyaan Umum & Reservasi Acara
-                </h6>
-                
-                <div class="accordion accordion-flush" id="faqAccordion">
-                    <div class="accordion-item bg-transparent text-white border-bottom border-secondary border-opacity-25">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-transparent text-white shadow-none px-0 py-3 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                Apakah bisa melakukan reservasi tempat untuk acara / rapat?
-                            </button>
-                        </h2>
-                        <div id="faq1" class="collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body px-0 pt-0 text-secondary small lh-base">
-                                Ya, kami menerima reservasi tempat untuk ulang tahun, rapat komunitas, atau acara khusus lainnya. Silakan hubungi kami via WhatsApp minimal 1 hari sebelumnya.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="accordion-item bg-transparent text-white border-bottom border-secondary border-opacity-25">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-transparent text-white shadow-none px-0 py-3 small fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                Metode pembayaran apa saja yang didukung?
-                            </button>
-                        </h2>
-                        <div id="faq2" class="collapse" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body px-0 pt-0 text-secondary small lh-base">
-                                Kami menerima pembayaran Tunai, QRIS (Gopay, OVO, Dana, ShopeePay, BCA Mobile, dll), serta Transfer Bank langsung di kasir atau sistem pemesanan online.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
@@ -183,12 +148,6 @@
     }
     .contact-card-list .list-group-item:last-child {
         border-bottom: none !important;
-    }
-    .accordion-button::after {
-        filter: invert(1);
-    }
-    .accordion-button:not(.collapsed) {
-        color: #c08e5c !important;
     }
 </style>
 

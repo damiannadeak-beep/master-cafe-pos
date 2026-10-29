@@ -14,7 +14,7 @@ class PayOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'metode' => 'required|in:cash,qris,split',
+            'metode' => ['required', \Illuminate\Validation\Rule::enum(\App\Enums\PaymentMethod::class)],
             'email_pelanggan' => 'nullable|email',
             'nominal_tunai' => 'nullable|numeric|min:0',
             'nominal_nontunai' => 'nullable|numeric|min:0',

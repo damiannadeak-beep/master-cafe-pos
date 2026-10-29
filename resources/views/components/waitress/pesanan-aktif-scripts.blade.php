@@ -17,7 +17,7 @@
         'js/waitress/modules/void.js',
         'js/waitress/modules/split-bill.js',
         'js/waitress/modules/merge-bill.js',
-        'js/waitress/modules/verification.js',
+        'js/waitress/modules/thermal.js',
     ];
 @endphp
 

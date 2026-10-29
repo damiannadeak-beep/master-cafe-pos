@@ -19,14 +19,11 @@
         <!-- Step 2: Pembayaran -->
         @php
             $isPaid = ($pembayaran && $pembayaran->status === 'paid');
-            $isPendingVerif = ($pembayaran && $pembayaran->status === 'pending_verification');
         @endphp
         <div class="stepper-item {{ $isPaid ? 'completed' : 'active' }}" id="step-payment">
-            <div class="stepper-icon {{ $isPendingVerif ? 'pulse-icon' : '' }}">
+            <div class="stepper-icon">
                 @if($isPaid)
                     <i class="bi bi-check-circle-fill"></i>
-                @elseif($isPendingVerif)
-                    <i class="bi bi-hourglass-split"></i>
                 @else
                     <i class="bi bi-credit-card"></i>
                 @endif

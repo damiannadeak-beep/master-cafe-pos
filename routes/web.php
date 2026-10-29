@@ -191,8 +191,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/order/{id_pesanan}/pay', [PosController::class, 'payOrder']);
         Route::post('/order/{id_pesanan}/snap-token', [PosController::class, 'getKasirSnapToken'])->name('kasir.order.snap_token');
         Route::post('/order/{id_pesanan}/qris-success', [PosController::class, 'markQrisPaid'])->name('kasir.order.qris_success');
-        Route::put('/order/{id_pesanan}/verify-payment', [PosController::class, 'verifyPayment']);
-        Route::put('/order/{id_pesanan}/reject-payment', [PosController::class, 'rejectPayment']);
         Route::put('/order/{id_pesanan}/void', [PosController::class, 'voidOrder'])->name('kasir.order.void');
         Route::post('/order/{id_pesanan}/split', [PosController::class, 'splitOrder'])->name('kasir.order.split');
         Route::post('/order/{id_pesanan}/merge', [PosController::class, 'mergeOrder'])->name('kasir.order.merge');
@@ -259,27 +257,29 @@ Route::group([], function () {
 
     // Tambah Pesanan (Dine-in Guest / Konsumen)
     Route::post('/konsumen/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
-    Route::post('/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
 
     // Pembatalan Pesanan Sebelum Diproses
     Route::post('/konsumen/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
-    Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
 
     // Checkout & Pembayaran
     Route::get('/konsumen/checkout/{id_pesanan}', [PaymentController::class, 'checkout'])->name('konsumen.checkout');
-    Route::get('/checkout/{id_pesanan}', [PaymentController::class, 'checkout']);
     Route::post('/konsumen/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
-    Route::post('/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
     Route::post('/konsumen/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
-    Route::post('/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
 
     // Panggil Pelayan (Call Bell) dari Meja
     Route::post('/konsumen/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');
     Route::post('/call-bell', [OrderController::class, 'callBell'])->middleware('throttle:5,1');
 
     // Rating & Review (Guest or Registered)
-    Route::post('/rating/store', [KonsumenController::class, 'storeRating'])->name('konsumen.rating.store');
-    Route::post('/konsumen/rating/store', [KonsumenController::class, 'storeRating']);
+    Route::post('/konsumen/rating/store', [KonsumenController::class, 'storeRating'])->name('konsumen.rating.store');
+    Route::post('/rating/store', [KonsumenController::class, 'storeRating']);
+
+    // --- Backward-Compatible Legacy Aliases ---
+    Route::post('/order/add', [OrderController::class, 'tambahPesanan'])->middleware('throttle:30,1');
+    Route::post('/order/{id}/cancel', [OrderController::class, 'cancelOrder']);
+    Route::get('/checkout/{id_pesanan}', [PaymentController::class, 'checkout']);
+    Route::post('/order/{id_pesanan}/simulate-midtrans-pay', [PaymentController::class, 'simulateMidtransPay']);
+    Route::post('/order/{id_pesanan}/choose-cash', [PaymentController::class, 'chooseCashPay']);
 
     // Live Tracking, Status & E-Receipt Pesanan Tamu
     Route::get('/tracking/{order_token}', [OrderController::class, 'tracking'])->name('order.tracking');

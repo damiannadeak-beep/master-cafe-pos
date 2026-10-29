@@ -22,6 +22,36 @@ class Pesanan extends Model
         'total', 'total_hpp', 'discount_amount', 'promo_id', 'status',
     ]; 
 
+    public function getStatusEnumAttribute(): ?\App\Enums\OrderStatus
+    {
+        return \App\Enums\OrderStatus::tryFrom($this->status);
+    }
+
+    public function getTypeEnumAttribute(): ?\App\Enums\OrderType
+    {
+        return \App\Enums\OrderType::tryFrom($this->tipe_pesanan);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === \App\Enums\OrderStatus::PENDING->value;
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->status === \App\Enums\OrderStatus::PROCESSING->value;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === \App\Enums\OrderStatus::COMPLETED->value;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === \App\Enums\OrderStatus::CANCELLED->value;
+    }
+
     public function getCustomerNameAttribute()
     {
         if (!empty($this->guest_name)) {

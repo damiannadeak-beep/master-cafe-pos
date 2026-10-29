@@ -14,7 +14,10 @@ class UpdateOrderStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|in:processing,completed',
+            'status' => ['required', \Illuminate\Validation\Rule::in([
+                \App\Enums\OrderStatus::PROCESSING->value,
+                \App\Enums\OrderStatus::COMPLETED->value
+            ])],
             'order_ids' => 'nullable|array',
             'order_ids.*' => 'integer',
         ];

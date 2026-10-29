@@ -40,13 +40,40 @@ class OwnerLoginController extends Controller
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'message' => 'Akses ditolak. Akun ini tidak memiliki hak akses pemilik.'
+                    ], 403);
+                }
+
                 throw ValidationException::withMessages([
                     'email' => 'Akses ditolak. Akun ini tidak memiliki hak akses pemilik.',
                 ]);
             }
 
             $request->session()->regenerate();
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login berhasil sebagai Pemilik.',
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => 'pemilik',
+                    ],
+                    'redirect_url' => route('admin.dashboard'),
+                ]);
+            }
+
             return redirect()->intended(route('admin.dashboard'));
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Kredensial yang diberikan tidak cocok dengan data kami.'
+            ], 422);
         }
 
         throw ValidationException::withMessages([

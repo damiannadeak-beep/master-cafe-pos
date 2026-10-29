@@ -77,68 +77,7 @@ class AdvancedTransactionsTest extends TestCase
         $this->assertEquals(20000, $pesanan->fresh()->total);
     }
 
-    /** Test 2: Konsumen mengunggah bukti bayar transfer/QRIS */
-    public function test_konsumen_dapat_upload_bukti_bayar()
-    {
-        Storage::fake('public');
-
-        $konsumen = User::factory()->create();
-        $konsumen->assignRole('konsumen');
-
-        $pesanan = Pesanan::create([
-            'id_konsumen' => $konsumen->id,
-            'tipe_pesanan' => 'takeaway',
-            'status' => 'pending',
-            'tanggal' => now(),
-            'total' => 30000,
-        ]);
-
-        $pembayaran = Pembayaran::create([
-            'id_pesanan' => $pesanan->id,
-            'status' => 'unpaid',
-            'total_bayar' => 30000,
-        ]);
-
-        $file = UploadedFile::fake()->image('bukti_transfer.jpg');
-
-        $response = $this->actingAs($konsumen)->post("/konsumen/order/{$pesanan->id}/upload-bukti", [
-            'bukti_bayar' => $file,
-        ]);
-
-        $response->assertRedirect();
-        $this->assertEquals('pending_verification', $pembayaran->fresh()->status);
-        $this->assertNotNull($pembayaran->fresh()->bukti_bayar);
-    }
-
-    /** Test 3: Kasir menolak pembayaran online yang bermasalah (Reject Payment) */
-    public function test_kasir_dapat_menolak_pembayaran_pending_verification()
-    {
-        $kasir = User::factory()->create();
-        $kasir->assignRole('kasir');
-
-        $pesanan = Pesanan::create([
-            'id_kasir' => $kasir->id,
-            'tipe_pesanan' => 'takeaway',
-            'status' => 'pending',
-            'tanggal' => now(),
-            'total' => 30000,
-        ]);
-
-        $pembayaran = Pembayaran::create([
-            'id_pesanan' => $pesanan->id,
-            'status' => 'pending_verification',
-            'bukti_bayar' => 'bukti_bayar/dummy.jpg',
-            'total_bayar' => 30000,
-        ]);
-
-        $response = $this->actingAs($kasir)->putJson("/kasir/order/{$pesanan->id}/reject-payment");
-
-        $response->assertStatus(200);
-        $this->assertEquals('unpaid', $pembayaran->fresh()->status);
-        $this->assertNull($pembayaran->fresh()->bukti_bayar);
-    }
-
-    /** Test 4: Konsumen menekan tombol Panggil Pelayan (Call Bell) */
+    /** Test 2: Konsumen menekan tombol Panggil Pelayan (Call Bell) */
     public function test_konsumen_dapat_memanggil_pelayan_dengan_call_bell()
     {
         $konsumen = User::factory()->create();

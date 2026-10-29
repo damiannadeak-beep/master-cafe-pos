@@ -23,9 +23,26 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_shift_open' => \App\Http\Middleware\EnsureShiftOpen::class,
         ]);
 
-        $middleware->validateCsrfTokens(except: [
-            'logout',
-        ]);
+        $ownerSlug = env('OWNER_SECRET_PATH', 'ruang-owner-x92k');
+        $kasirSlug = env('KASIR_SECRET_PATH', 'pos-kasir-gate-88');
+
+        $csrfExcept = ['logout'];
+
+        // Pada environment local & testing, kecualikan rute untuk memudahkan pengujian via Postman
+        if (in_array(env('APP_ENV', 'local'), ['local', 'testing'])) {
+            $csrfExcept = array_merge($csrfExcept, [
+                $ownerSlug . '/*',
+                $kasirSlug . '/*',
+                'admin/*',
+                'kasir/*',
+                'konsumen/*',
+                'order/*',
+                'rating/*',
+                'call-bell',
+            ]);
+        }
+
+        $middleware->validateCsrfTokens(except: $csrfExcept);
 
         $middleware->redirectGuestsTo(function ($request) {
             $ownerSlug = config('auth.owner_path', 'ruang-owner-x92k');
