@@ -32,11 +32,15 @@
             const customerEl = card.querySelector('.small.text-white.fw-bold span.text-white');
             if (customerEl) customerName = customerEl.innerText.trim();
 
-            const typeEl = card.querySelector('.badge.rounded-pill.text-bg-warning, .badge.rounded-pill.text-bg-secondary');
-            if (typeEl) orderType = typeEl.innerText.trim();
+            const tipe = card.getAttribute('data-tipe');
+            if (tipe === 'takeaway') {
+                orderType = 'Takeaway';
+            } else if (tipe === 'dine_in') {
+                orderType = 'Dine-In';
+            }
 
-            const unpaidBadge = card.querySelector('.badge.bg-danger.border-danger');
-            if (unpaidBadge && unpaidBadge.innerText.includes('Belum Lunas')) {
+            const paidAttr = card.getAttribute('data-paid');
+            if (paidAttr === 'unpaid') {
                 isPaid = false;
             }
         }
@@ -63,8 +67,8 @@
 
         if (!isPaid) {
             if (payBadge) {
-                payBadge.className = 'badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1';
-                payBadge.innerHTML = '<i class="bi bi-x-circle me-1"></i>Belum Lunas';
+                payBadge.className = 'fw-semibold text-danger small';
+                payBadge.innerHTML = 'Belum Lunas';
             }
             if (promptText) {
                 promptText.innerHTML = '<span class="text-warning fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Pesanan telah selesai disiapkan, namun belum lunas.</span><br><small class="text-white-50">Silakan terima pembayaran terlebih dahulu dari konsumen.</small>';
@@ -81,8 +85,8 @@
             }
         } else {
             if (payBadge) {
-                payBadge.className = 'badge bg-success bg-opacity-10 text-success border border-success px-2 py-1';
-                payBadge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Lunas';
+                payBadge.className = 'fw-semibold text-success small';
+                payBadge.innerHTML = 'Lunas';
             }
             if (promptText) {
                 promptText.innerText = 'Pesanan telah selesai disiapkan! Apakah ingin mencetak struk transaksi sekarang?';
@@ -447,12 +451,17 @@
         const served = parseInt(btnElement.getAttribute('data-served-items') || '0');
         const allServed = (btnElement.getAttribute('data-all-served') === '1');
 
-        if (!allServed && total > served) {
+        let confirmMsg = '';
+
+        if (!allServed && total > 1 && served > 0 && total > served) {
             const unserved = total - served;
-            const confirmMsg = `Perhatian: Masih ada ${unserved} menu yang belum dicentang siap.\n\nApakah Anda yakin ingin menandai seluruh pesanan telah selesai dimasak sekarang?`;
-            if (!confirm(confirmMsg)) {
-                return;
-            }
+            confirmMsg = `Perhatian: Masih ada ${unserved} menu yang belum dicentang siap.\n\nTandai seluruh pesanan telah selesai dimasak dan siap diantar ke meja/pelanggan?`;
+        } else {
+            confirmMsg = 'Tandai pesanan telah selesai dimasak dan siap diantar ke meja/pelanggan?';
+        }
+
+        if (confirmMsg && !confirm(confirmMsg)) {
+            return;
         }
 
         // Jalankan update status selesai

@@ -299,7 +299,7 @@
 
     // --- SMART HASH-BASED REALTIME SYNC (Enterprise Standard) ---
     // Memeriksa hash pembaruan data ringan (~100 bytes) alih-alih request render HTML penuh (~30 KB)
-    let lastKnownHash = null;
+    let lastKnownHash = window.WaitressConfig?.initialHash || null;
     let isCheckingHash = false;
 
     window.resetSyncHash = function () {
@@ -339,9 +339,14 @@
                     badgeVoided.innerText = data.voided_count;
                 }
 
-                // Inisialisasi hash pertama kali tanpa render ulang
+                // Inisialisasi hash jika belum ada
                 if (lastKnownHash === null) {
                     lastKnownHash = data.hash;
+                    // Jika saat load awal kartu kosong padahal server mencatat ada pesanan aktif:
+                    const existingCards = document.querySelectorAll('#active-orders-container .order-card-item');
+                    if (existingCards.length === 0 && data.count > 0 && currentOrderTab === 'active') {
+                        window.reloadActiveOrdersCards(true);
+                    }
                     return;
                 }
 
@@ -366,8 +371,17 @@
             });
     }
 
-    // Jalankan Smart Polling setiap 5 detik (sangat ringan, hanya hitungan milidetik)
-    setInterval(checkDataHashAndSync, 5000);
+    // Jalankan Smart Polling setiap 3.5 detik (sangat ringan, hanya hitungan milidetik)
+    setInterval(checkDataHashAndSync, 3500);
+
+    // Tangani saat tab kembali aktif atau difokuskan (agar instan tanpa jeda)
+    const onTabActiveOrFocus = () => {
+        if (!document.hidden) {
+            checkDataHashAndSync();
+        }
+    };
+    document.addEventListener('visibilitychange', onTabActiveOrFocus);
+    window.addEventListener('focus', onTabActiveOrFocus);
 
     // Registrasi ke WaitressApp namespace
     if (window.WaitressApp) {

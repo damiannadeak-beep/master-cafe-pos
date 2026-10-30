@@ -147,4 +147,39 @@ class AuthRoleTest extends TestCase
         $response->assertSee('Terima Bayar');
         $response->assertSee('Budi Test');
     }
+
+    /** TEST 9: Pemilik logout berhasil dan halaman login owner tidak 404 */
+    public function test_pemilik_logout_diarahkan_ke_halaman_login_owner_tanpa_404()
+    {
+        $pemilik = User::factory()->create();
+        $pemilik->assignRole('pemilik');
+
+        $response = $this->actingAs($pemilik)
+            ->withSession(['owner_gate_passed' => true])
+            ->post('/logout');
+
+        $response->assertRedirect(route('owner.login'));
+        $this->assertGuest();
+
+        // Mengikuti redirect dengan session baru yang mempertahankan owner_gate_passed
+        $loginResponse = $this->get(route('owner.login'));
+        $loginResponse->assertStatus(200);
+        $loginResponse->assertSee('Otoritas Pemilik');
+    }
+
+    /** TEST 10: Kasir logout berhasil dan diarahkan ke login kasir */
+    public function test_kasir_logout_diarahkan_ke_login_kasir()
+    {
+        $kasir = User::factory()->create();
+        $kasir->assignRole('kasir');
+
+        $response = $this->actingAs($kasir)
+            ->post('/logout');
+
+        $response->assertRedirect(route('kasir.login'));
+        $this->assertGuest();
+
+        $loginResponse = $this->get(route('kasir.login'));
+        $loginResponse->assertStatus(200);
+    }
 }

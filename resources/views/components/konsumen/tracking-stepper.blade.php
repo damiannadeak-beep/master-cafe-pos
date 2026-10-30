@@ -19,11 +19,14 @@
         <!-- Step 2: Pembayaran -->
         @php
             $isPaid = ($pembayaran && $pembayaran->status === 'paid');
+            $isPendingVerif = ($pembayaran && $pembayaran->status === 'pending_verification');
         @endphp
         <div class="stepper-item {{ $isPaid ? 'completed' : 'active' }}" id="step-payment">
-            <div class="stepper-icon">
+            <div class="stepper-icon {{ $isPendingVerif ? 'pulse-icon' : '' }}">
                 @if($isPaid)
                     <i class="bi bi-check-circle-fill"></i>
+                @elseif($isPendingVerif)
+                    <i class="bi bi-hourglass-split"></i>
                 @else
                     <i class="bi bi-credit-card"></i>
                 @endif
@@ -60,9 +63,9 @@
                 </small>
 
                 @if(!$isPaid && !$isPendingVerif && !empty($remainingSeconds) && $remainingSeconds > 0)
-                    <div class="mt-2 py-1 px-2 rounded-3 d-inline-flex align-items-center gap-2" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5;">
-                        <i class="bi bi-clock-history text-danger"></i>
-                        <span class="small">Sisa Waktu Bayar: <strong id="tracking-timer-text" class="font-monospace">--:--</strong></span>
+                    <div class="mt-2 small text-danger d-flex align-items-center">
+                        <i class="bi bi-clock-history me-2"></i>
+                        <span>Sisa Waktu Bayar: <strong id="tracking-timer-text" class="font-monospace text-danger ms-1">--:--</strong></span>
                     </div>
                 @endif
             </div>

@@ -339,12 +339,12 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-secondary small">Status Bayar</span>
                     @if($cardData->all_paid)
-                        <span class="text-success fw-semibold small d-inline-flex align-items-center" style="gap: 5px;">
-                            <i class="bi bi-check-circle-fill"></i> Lunas
+                        <span class="text-success fw-semibold small">
+                            Lunas
                         </span>
                     @else
-                        <span class="text-danger fw-semibold small d-inline-flex align-items-center" style="gap: 5px;">
-                            <i class="bi bi-x-circle"></i> {{ $cardData->unpaid_amount < $cardData->total_bill ? 'Belum Lunas (Sisa Rp ' . number_format($cardData->unpaid_amount, 0, ',', '.') . ')' : 'Belum Lunas' }}
+                        <span class="text-danger fw-semibold small">
+                            {{ $cardData->unpaid_amount < $cardData->total_bill ? 'Belum Lunas (Sisa Rp ' . number_format($cardData->unpaid_amount, 0, ',', '.') . ')' : 'Belum Lunas' }}
                         </span>
                     @endif
                 </div>
@@ -380,29 +380,27 @@
                             }
                         }
                     @endphp
-                    <div class="p-2 mb-3 rounded-3" style="background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35);">
-                        <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="badge bg-warning text-dark fw-bold"><i class="bi bi-cash-stack me-1"></i>BAYAR TUNAI</span>
-                            @if($cashMode === 'kasir')
-                                <span class="badge bg-info bg-opacity-25 text-info border border-info" style="font-size: 0.7rem;"><i class="bi bi-shop me-1"></i>Datang ke Kasir</span>
-                            @else
-                                <span class="badge bg-success bg-opacity-25 text-success border border-success" style="font-size: 0.7rem;"><i class="bi bi-cash-coin me-1"></i>Bayar di Meja</span>
-                            @endif
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-secondary small">Metode</span>
+                        <div class="text-end">
+                            <span class="text-warning fw-semibold small">
+                                Tunai &bull; {{ $cashMode === 'kasir' ? 'Datang ke Kasir' : 'Bayar di Meja' }}
+                            </span>
                         </div>
-                        @if(!empty($cashNote))
-                            <div class="small text-white-50 mt-1" style="font-size: 0.78rem;">
-                                <i class="bi bi-chat-left-text me-1"></i> {{ $cashNote }}
-                            </div>
-                        @endif
                     </div>
+                    @if(!empty($cashNote))
+                        <div class="small text-secondary mb-2.5" style="font-size: 0.76rem;">
+                            {{ $cashNote }}
+                        </div>
+                    @endif
                 @endif
 
                 <!-- Action Buttons: Clean 2-row layout with clear visual hierarchy -->
                 <div class="d-flex flex-column gap-2 pt-2 border-top" style="border-color: #21262d !important;">
                     <div class="d-flex align-items-center gap-2">
                         <!-- Tiket Dapur / Koki -->
-                        <a href="{{ route('kasir.order.kitchen', $orderIdsStr) }}" target="_blank" class="btn btn-sm px-2.5 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 text-decoration-none shadow-sm flex-fill" style="background-color: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.78rem;" title="Cetak rincian pesanan untuk Koki / Barista">
-                            <i class="bi bi-journal-text"></i> Tiket Dapur
+                        <a href="{{ route('kasir.order.kitchen', $orderIdsStr) }}" target="_blank" class="btn btn-sm px-2.5 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 text-decoration-none shadow-sm flex-fill" style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.78rem;" title="Cetak rincian pesanan untuk Koki / Barista">
+                            <i class="bi bi-journal-text text-secondary"></i> Tiket Dapur
                         </a>
 
                         @if($cardData->overall_status === 'pending')
@@ -410,7 +408,7 @@
                                 $pendingOrders = $cardData->orders->filter(fn($o) => $o->status === 'pending');
                                 $pendingIdsStr = implode(',', $pendingOrders->pluck('id')->toArray());
                             @endphp
-                            <button type="button" class="btn btn-primary btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" style="font-size: 0.78rem;" onclick="window.updateOrderStatus('{{ $pendingIdsStr ?: $orderIdsStr }}', 'processing', this)">
+                            <button type="button" class="btn btn-primary btn-sm px-3 py-2 rounded-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" style="font-size: 0.78rem;" onclick="window.updateOrderStatus('{{ $pendingIdsStr ?: $orderIdsStr }}', 'processing', this)">
                                 <i class="bi bi-fire"></i> {{ $cardData->is_grouped ? 'Konfirmasi & Masak (Semua)' : 'Konfirmasi & Masak' }}
                             </button>
                         @endif
@@ -423,7 +421,7 @@
                             <button type="button" 
                                     id="btn-complete-order-{{ $primaryOrder->id }}"
                                     class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-fill" 
-                                    style="background-color: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); color: #34d399; font-size: 0.78rem;"
+                                    style="background-color: rgba(46, 160, 67, 0.15); border: 1px solid rgba(46, 160, 67, 0.35); color: #3fb950; font-size: 0.78rem;"
                                     data-total-items="{{ $totalItemCount }}"
                                     data-served-items="{{ $servedItemCount }}"
                                     data-all-served="{{ $allCardItemsServed ? '1' : '0' }}"
@@ -432,7 +430,7 @@
                                 <span class="btn-text">
                                     {{ $cardData->tipe_pesanan === 'takeaway' ? 'Selesai & Serahkan' : ($cardData->is_grouped ? 'Selesai Dimasak (Semua)' : 'Selesai Dimasak') }}
                                 </span>
-                                <span class="badge rounded-2 py-0.5 px-1.5 ms-1 counter-badge" style="background: rgba(52, 211, 153, 0.25); color: #34d399; font-size: 0.65rem;">
+                                <span class="badge rounded-2 py-0.5 px-1.5 ms-1 counter-badge" style="background: rgba(46, 160, 67, 0.25); color: #3fb950; font-size: 0.65rem;">
                                     {{ $servedItemCount }}/{{ $totalItemCount }}
                                 </span>
                             </button>
@@ -459,7 +457,7 @@
                                         'total' => (int) $oBill,
                                         'summary' => $itemsSummary
                                     ];
-                                })->values()->toArray();
+                                    })->values()->toArray();
 
                             $primaryDetailsJson = $primaryOrder->detail_pesanan->map(fn($d) => [
                                 'id' => $d->id,
@@ -481,37 +479,37 @@
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('kasir.pos', array_filter(['tipe' => $cardData->tipe_pesanan, 'id_meja' => $cardData->id_meja])) }}" 
                                class="btn btn-sm px-2.5 py-1.5 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill text-decoration-none" 
-                               style="background-color: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.76rem; gap: 5px !important;" 
+                               style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.76rem; gap: 6px !important;" 
                                title="Tambah pesanan / menu baru untuk meja ini">
-                                <i class="bi bi-plus-circle" style="margin: 0 !important; margin-right: 0 !important;"></i> Tambah Menu
+                                <i class="bi bi-plus-circle text-secondary"></i> Tambah Menu
                             </a>
                             @if($canSplitCard)
                                 <button type="button" 
                                         class="btn btn-sm px-2.5 py-1.5 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill" 
-                                        style="background-color: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fbbf24; font-size: 0.76rem; gap: 5px !important;" 
+                                        style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.76rem; gap: 6px !important;" 
                                         data-details="{{ $primaryDetailsJson }}"
                                         data-suborders='@json($unpaidSubOrdersData)'
                                         onclick="window.handleCardSplit({{ $primaryOrder->id }}, this)"
                                         title="Pecah atau pisahkan pesanan ke bon baru">
-                                    <i class="bi bi-scissors" style="margin: 0 !important; margin-right: 0 !important;"></i> Pisah Bon
+                                    <i class="bi bi-scissors text-secondary"></i> Pisah Bon
                                 </button>
                             @endif
                             <button type="button" 
                                     class="btn btn-sm px-2.5 py-1.5 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill" 
-                                    style="background-color: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; font-size: 0.76rem; gap: 5px !important;" 
+                                    style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.76rem; gap: 6px !important;" 
                                     onclick="window.openMergeModal({{ $primaryOrder->id }}, '{{ $targetMejaLabel }} ({{ $cardData->customer_name ?: 'Tamu' }})')"
                                     title="Gabungkan pesanan ini ke meja atau pesanan aktif lain">
-                                <i class="bi bi-intersect" style="margin: 0 !important; margin-right: 0 !important;"></i> Gabung Meja
+                                <i class="bi bi-intersect text-secondary"></i> Gabung Meja
                             </button>
                         </div>
 
                         <!-- Baris Pembayaran / Void -->
                         <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-grow-1" style="background-color: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.25); color: #34d399; font-size: 0.78rem;" onclick='window.payGroupOrders("{{ $orderIdsStr }}", {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }}, @json($unpaidSubOrdersData))'>
+                            <button type="button" class="btn btn-sm px-3 py-2 rounded-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm flex-grow-1" style="background-color: #238636; border: 1px solid #2ea043; color: #ffffff; font-size: 0.8rem; box-shadow: 0 2px 6px rgba(35, 134, 54, 0.25);" onclick='window.payGroupOrders("{{ $orderIdsStr }}", {{ $cardData->unpaid_amount }}, {{ $cardData->total_uang_diterima }}, {{ $cardData->total_uang_kembalian }}, @json($unpaidSubOrdersData))'>
                                 <i class="bi bi-cash-stack"></i> Terima Bayar
                             </button>
                             @if($cardData->can_void)
-                                <button type="button" class="btn btn-sm px-2.5 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm" style="background-color: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.25); color: #f87171; font-size: 0.78rem; min-width: 72px;" onclick='window.voidOrder({{ $cardData->primary_void_id }}, @json($cardData->void_order_options))' title="Void / Batalkan Pesanan Kasir">
+                                <button type="button" class="btn btn-sm px-2.5 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm" style="background-color: transparent; border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171; font-size: 0.78rem; min-width: 72px;" onclick='window.voidOrder({{ $cardData->primary_void_id }}, @json($cardData->void_order_options))' title="Void / Batalkan Pesanan Kasir">
                                     <i class="bi bi-trash3"></i> Void
                                 </button>
                             @endif
@@ -520,17 +518,17 @@
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <a href="{{ route('kasir.pos', array_filter(['tipe' => $cardData->tipe_pesanan, 'id_meja' => $cardData->id_meja])) }}" 
                                class="btn btn-sm px-2.5 py-1.5 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm w-100 text-decoration-none" 
-                               style="background-color: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.76rem; gap: 5px !important;" 
+                               style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.76rem; gap: 6px !important;" 
                                title="Tambah pesanan / menu tambahan untuk meja ini">
-                                <i class="bi bi-plus-circle" style="margin: 0 !important; margin-right: 0 !important;"></i> Tambah Menu
+                                <i class="bi bi-plus-circle text-secondary"></i> Tambah Menu
                             </a>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill" style="background-color: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #38bdf8; font-size: 0.78rem; gap: 5px !important;" onclick="window.printThermal({{ $primaryOrder->id }})" title="Cetak struk ke printer thermal / terminal POS">
-                                <i class="bi bi-printer" style="margin: 0 !important; margin-right: 0 !important;"></i> Cetak Thermal
+                            <button type="button" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill" style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.78rem; gap: 6px !important;" onclick="window.printThermal({{ $primaryOrder->id }})" title="Cetak struk ke printer thermal / terminal POS">
+                                <i class="bi bi-printer text-secondary"></i> Cetak Thermal
                             </button>
-                            <a href="{{ route('kasir.order.receipt', $orderIdsStr) }}" target="_blank" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill text-decoration-none" style="background-color: rgba(192, 142, 92, 0.12); border: 1px solid rgba(192, 142, 92, 0.25); color: #c08e5c; font-size: 0.78rem; gap: 5px !important;" title="Buka atau cetak struk kasir digital">
-                                <i class="bi bi-file-earmark-text" style="margin: 0 !important; margin-right: 0 !important;"></i> Cetak Struk
+                            <a href="{{ route('kasir.order.receipt', $orderIdsStr) }}" target="_blank" class="btn btn-sm px-3 py-2 rounded-3 fw-medium d-inline-flex align-items-center justify-content-center shadow-sm flex-fill text-decoration-none" style="background-color: #21262d; border: 1px solid #30363d; color: #e6edf3; font-size: 0.78rem; gap: 6px !important;" title="Buka atau cetak struk kasir digital">
+                                <i class="bi bi-file-earmark-text text-secondary"></i> Cetak Struk
                             </a>
                         </div>
                     @endif

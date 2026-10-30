@@ -817,6 +817,8 @@ class PosService
             }
         }
 
+        \Illuminate\Support\Facades\Cache::forget('active_orders_count_data');
+
         return [
             'status' => $targetStatus,
             'order_ids' => $ids
@@ -858,6 +860,8 @@ class PosService
                 broadcast(new \App\Events\PesananBaru($pesanan));
             } catch (\Throwable $e) {}
         }
+
+        \Illuminate\Support\Facades\Cache::forget('active_orders_count_data');
 
         return [
             'success' => true,

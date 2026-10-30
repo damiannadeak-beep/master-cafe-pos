@@ -48,16 +48,16 @@
 
         document.querySelectorAll('.btn-main-filter').forEach(b => {
             b.classList.remove('active');
-            b.style.backgroundColor = '';
-            b.style.color = '';
-            b.style.borderColor = 'rgba(255,255,255,0.2)';
+            b.style.backgroundColor = 'transparent';
+            b.style.color = '#8b949e';
+            b.style.borderColor = 'rgba(255,255,255,0.15)';
         });
 
         if (btn) {
             btn.classList.add('active');
-            btn.style.backgroundColor = '#c08e5c';
-            btn.style.color = 'white';
-            btn.style.borderColor = '#c08e5c';
+            btn.style.backgroundColor = '#ffffff';
+            btn.style.color = '#0e1217';
+            btn.style.borderColor = '#ffffff';
         }
 
         renderSubCategoryPills();
@@ -70,15 +70,15 @@
         document.querySelectorAll('.btn-sub-filter').forEach(b => {
             b.classList.remove('active');
             b.style.backgroundColor = 'rgba(255,255,255,0.05)';
-            b.style.color = '#e2e8f0';
+            b.style.color = '#8b949e';
             b.style.borderColor = 'rgba(255,255,255,0.15)';
         });
 
         if (btn) {
             btn.classList.add('active');
-            btn.style.backgroundColor = 'rgba(192, 142, 92, 0.2)';
-            btn.style.color = '#c08e5c';
-            btn.style.borderColor = 'rgba(192, 142, 92, 0.6)';
+            btn.style.backgroundColor = '#ffffff';
+            btn.style.color = '#0e1217';
+            btn.style.borderColor = '#ffffff';
         }
 
         applyHierarchicalMenuFilter();
@@ -88,24 +88,39 @@
         const container = document.getElementById('sub-category-pills-container');
         if (!container) return;
 
+        // Jika 'Semua Menu' aktif atau bukan Makanan/Minuman, hapus total elemen dari DOM
+        if (currentMainCat === 'semua' || (currentMainCat !== 'makanan' && currentMainCat !== 'minuman')) {
+            container.innerHTML = '';
+            container.className = '';
+            container.style.setProperty('display', 'none', 'important');
+            return;
+        }
+
         const data = window.subCategoryData || {};
         let subs = [];
 
         if (currentMainCat === 'makanan') {
             subs = data.makanan || [];
-            container.style.display = 'flex';
         } else if (currentMainCat === 'minuman') {
             subs = data.minuman || [];
-            container.style.display = 'flex';
-        } else {
-            container.style.display = 'none';
+        }
+
+        // Jika kategori tidak memiliki sub-kategori, pastikan DOM bersih
+        if (!subs || subs.length === 0) {
+            container.innerHTML = '';
+            container.className = '';
+            container.style.setProperty('display', 'none', 'important');
             return;
         }
 
+        // Tampilkan kontainer dan buat elemen tombol sub-kategori secara on-demand
+        container.className = 'd-flex gap-2 overflow-auto pb-1';
+        container.style.removeProperty('display');
+
         let html = `
-            <button type="button" class="btn btn-sm btn-sub-filter active rounded-pill px-3 py-1 text-white flex-shrink-0" 
+            <button type="button" class="btn btn-sm btn-sub-filter active rounded-pill px-3 py-1 flex-shrink-0 fw-medium" 
                     onclick="selectSubCategory('semua', this)"
-                    style="background-color: rgba(192, 142, 92, 0.2); color: #c08e5c; border: 1px solid rgba(192, 142, 92, 0.6); font-size: 0.78rem;">
+                    style="background-color: #ffffff; color: #0e1217; border: 1px solid #ffffff; font-size: 0.78rem;">
                 Semua ${currentMainCat === 'makanan' ? 'Makanan' : 'Minuman'}
             </button>
         `;
@@ -113,9 +128,9 @@
         subs.forEach(sub => {
             const safeSub = sub.replace(/'/g, "\\'");
             html += `
-                <button type="button" class="btn btn-sm btn-sub-filter rounded-pill px-3 py-1 flex-shrink-0" 
+                <button type="button" class="btn btn-sm btn-sub-filter rounded-pill px-3 py-1 flex-shrink-0 fw-medium" 
                         onclick="selectSubCategory('${safeSub}', this)"
-                        style="background-color: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); font-size: 0.78rem;">
+                        style="background-color: rgba(255,255,255,0.05); color: #8b949e; border: 1px solid rgba(255,255,255,0.15); font-size: 0.78rem;">
                     ${sub}
                 </button>
             `;
@@ -323,9 +338,11 @@
 
         if (container) {
             if (content === '') {
-                container.innerHTML = '<p class="text-muted my-2 text-center small"><i class="bi bi-check-circle me-1"></i> Menu siap disajikan tanpa tambahan varian khusus.</p>';
+                container.innerHTML = '';
+                container.style.display = 'none';
             } else {
                 container.innerHTML = content;
+                container.style.display = 'block';
             }
         }
 

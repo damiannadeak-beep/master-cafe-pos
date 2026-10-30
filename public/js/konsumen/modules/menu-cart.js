@@ -294,8 +294,8 @@
     // --- 2. VALIDASI NOMOR WHATSAPP GUEST SECARA REALTIME ---
     window.validateGuestPhone = function (showFeedback = false) {
         const inputPhone = document.getElementById('inputGuestPhone');
-        const feedback = document.getElementById('guestPhoneFeedback');
-        const counter = document.getElementById('guestPhoneCounter');
+        const feedback = document.getElementById('guestPhoneFeedback') || document.getElementById('phoneValidationFeedback');
+        const counter = document.getElementById('guestPhoneCounter') || document.getElementById('phoneDigitCounter');
 
         if (!inputPhone) return { isValid: true, message: '', phone: '' };
 
@@ -314,15 +314,15 @@
             inputPhone.value = val;
         }
 
-        // 3. Update counter karakter realtime
+        // 3. Update counter karakter realtime (tanpa kotak badge)
         if (counter) {
             counter.innerText = val.length + ' / ' + maxLen + ' digit';
             if (val.length >= 10 && val.length <= 13) {
-                counter.className = 'badge rounded-pill bg-success bg-opacity-25 text-success border border-success border-opacity-50';
+                counter.className = 'small text-success fw-medium';
             } else if (val.length > 0) {
-                counter.className = 'badge rounded-pill bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50';
+                counter.className = 'small text-warning fw-medium';
             } else {
-                counter.className = 'badge rounded-pill bg-dark border border-secondary text-secondary';
+                counter.className = 'small text-secondary';
             }
         }
 
@@ -334,7 +334,7 @@
                 if (showFeedback && feedback) {
                     feedback.style.display = 'block';
                     feedback.className = 'mt-1 text-danger';
-                    feedback.innerHTML = '<i class="bi bi-x-circle me-1"></i> Nomor WhatsApp wajib diisi untuk pesanan Takeaway.';
+                    feedback.innerHTML = 'Nomor WhatsApp wajib diisi untuk pesanan Takeaway.';
                     inputPhone.style.borderColor = '#dc3545';
                 } else if (feedback) {
                     feedback.style.display = 'none';
@@ -349,14 +349,41 @@
         }
 
         // 5. Validasi awalan: harus diawali 08 atau 628
+        let norm = val;
+        if (norm.startsWith('628')) {
+            norm = '0' + norm.substring(2);
+        }
+
         if (!val.startsWith('08') && !val.startsWith('628')) {
             if (showFeedback && feedback) {
                 feedback.style.display = 'block';
                 feedback.className = 'mt-1 text-danger';
-                feedback.innerHTML = '<i class="bi bi-x-circle me-1"></i> Nomor WhatsApp harus diawali <strong>08</strong> atau <strong>628</strong>.';
+                feedback.innerHTML = 'Nomor WhatsApp harus diawali <strong>08</strong> atau <strong>628</strong>.';
                 inputPhone.style.borderColor = '#dc3545';
             }
             return { isValid: false, message: 'Nomor WhatsApp tidak valid. Harus diawali dengan 08 atau 628 (contoh: 081234567890).', phone: val };
+        }
+
+        // 5b. Validasi Prefix Operator Seluler Indonesia (4 digit awal)
+        const validPrefixes = [
+            '0811', '0812', '0813', '0821', '0822', '0823', '0851', '0852', '0853', // Telkomsel
+            '0814', '0815', '0816', '0855', '0856', '0857', '0858',                 // Indosat
+            '0817', '0818', '0819', '0831', '0832', '0833', '0838', '0859', '0877', '0878', // XL & Axis
+            '0895', '0896', '0897', '0898', '0899',                                 // Tri (3)
+            '0881', '0882', '0883', '0884', '0885', '0886', '0887', '0888', '0889'  // Smartfren
+        ];
+
+        if (norm.length >= 4) {
+            const prefix = norm.substring(0, 4);
+            if (!validPrefixes.includes(prefix)) {
+                if (showFeedback && feedback) {
+                    feedback.style.display = 'block';
+                    feedback.className = 'mt-1 text-danger';
+                    feedback.innerHTML = `Awalan operator <strong>${prefix}</strong> tidak terdaftar pada operator seluler Indonesia.`;
+                    inputPhone.style.borderColor = '#dc3545';
+                }
+                return { isValid: false, message: `Awalan operator ${prefix} tidak dikenali pada operator seluler Indonesia.`, phone: val };
+            }
         }
 
         // 6. Validasi batas minimum angka
@@ -365,7 +392,7 @@
             if (showFeedback && feedback) {
                 feedback.style.display = 'block';
                 feedback.className = 'mt-1 text-warning';
-                feedback.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i> Terlalu pendek (minimal ${minLen} angka, saat ini ${val.length} angka).`;
+                feedback.innerHTML = `Nomor terlalu pendek (minimal ${minLen} angka, saat ini ${val.length} angka).`;
                 inputPhone.style.borderColor = '#ffc107';
             }
             return { isValid: false, message: `Nomor WhatsApp terlalu pendek. Minimal ${minLen} digit angka (contoh: 081234567890).`, phone: val };
@@ -375,17 +402,55 @@
             if (showFeedback && feedback) {
                 feedback.style.display = 'block';
                 feedback.className = 'mt-1 text-danger';
-                feedback.innerHTML = `<i class="bi bi-x-circle me-1"></i> Terlalu panjang (maksimal ${maxLen} angka).`;
+                feedback.innerHTML = `Nomor terlalu panjang (maksimal ${maxLen} angka).`;
                 inputPhone.style.borderColor = '#dc3545';
             }
             return { isValid: false, message: `Nomor WhatsApp terlalu panjang (maksimal ${maxLen} digit angka).`, phone: val };
+        }
+
+        // 6b. Deteksi Pola Angka Berulang (cth: 081111111111, 082222222222, 089999999999)
+        if (/(.)\1{5,}/.test(norm)) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-danger';
+                feedback.innerHTML = 'Nomor terdeteksi tidak wajar (deretan angka kembar berulang).';
+                inputPhone.style.borderColor = '#dc3545';
+            }
+            return { isValid: false, message: 'Nomor WhatsApp tidak wajar (terdeteksi deretan angka berulang palsu).', phone: val };
+        }
+
+        // 6c. Deteksi Pola Angka Berurutan Palsu (cth: 081234567890)
+        const fakeSequences = ['12345678', '87654321', '01234567', '76543210'];
+        for (const seq of fakeSequences) {
+            if (norm.includes(seq)) {
+                if (showFeedback && feedback) {
+                    feedback.style.display = 'block';
+                    feedback.className = 'mt-1 text-danger';
+                    feedback.innerHTML = 'Nomor tidak valid (terdeteksi deretan angka berurutan palsu).';
+                    inputPhone.style.borderColor = '#dc3545';
+                }
+                return { isValid: false, message: 'Nomor WhatsApp tidak valid (terdeteksi angka berurutan palsu).', phone: val };
+            }
+        }
+
+        // 6d. Deteksi Variasi Angka Terlalu Sedikit (cth: 081200000000 atau nomor fiktif)
+        const remainingDigits = norm.substring(4);
+        const uniqueDigits = new Set(remainingDigits.split('')).size;
+        if (uniqueDigits < 3) {
+            if (showFeedback && feedback) {
+                feedback.style.display = 'block';
+                feedback.className = 'mt-1 text-danger';
+                feedback.innerHTML = 'Nomor tidak valid (kombinasi digit terlalu sedikit / nomor fiktif).';
+                inputPhone.style.borderColor = '#dc3545';
+            }
+            return { isValid: false, message: 'Nomor WhatsApp terdeteksi fiktif. Mohon masukkan nomor WhatsApp asli Anda.', phone: val };
         }
 
         // 7. Format dinyatakan valid
         if (showFeedback && feedback) {
             feedback.style.display = 'block';
             feedback.className = 'mt-1 text-success';
-            feedback.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Format nomor WhatsApp valid (${val.length} digit).`;
+            feedback.innerHTML = `Format nomor WhatsApp valid (${val.length} digit).`;
             inputPhone.style.borderColor = '#238636';
         } else if (feedback) {
             feedback.style.display = 'none';
@@ -402,13 +467,93 @@
             return;
         }
 
-        const modalQty = document.getElementById('modal-summary-qty');
         const modalTotal = document.getElementById('modal-summary-total');
-        if (modalQty && document.getElementById('cart-qty')) {
-            modalQty.innerText = document.getElementById('cart-qty').innerText;
-        }
         if (modalTotal && document.getElementById('cart-total')) {
             modalTotal.innerHTML = document.getElementById('cart-total').innerHTML;
+        }
+
+        // Render rincian menu pesanan ke dalam modal konfirmasi
+        const confirmListEl = document.getElementById('modalConfirmOrderItemsList');
+        const modalQty = document.getElementById('modal-summary-qty');
+        
+        let totalQty = 0;
+        let itemsHtml = '';
+        cart.forEach((item, idx) => {
+            totalQty += item.jumlah;
+            const subtotal = item.harga * item.jumlah;
+            let varDetails = '';
+            if (item.variants && item.variants.length > 0) {
+                const vList = item.variants.map(v => (v.qty && v.qty > 1 ? `${v.qty}x ${v.name}` : v.name)).join(', ');
+                varDetails = `<div class="text-white-50 small" style="font-size: 0.72rem;"><i class="bi bi-tags me-1 text-warning"></i>${vList}</div>`;
+            }
+            let noteDetails = '';
+            if (item.catatan) {
+                noteDetails = `<div class="text-warning small fst-italic" style="font-size: 0.72rem;"><i class="bi bi-chat-left-dots me-1"></i>"${item.catatan}"</div>`;
+            }
+
+            const isLast = (idx === cart.length - 1);
+            itemsHtml += `
+                <div class="d-flex justify-content-between align-items-start py-2 ${!isLast ? 'border-bottom border-secondary border-opacity-10' : ''}" style="gap: 8px;">
+                    <div class="overflow-hidden">
+                        <div class="text-white small fw-medium text-truncate">
+                            <span class="fw-bold me-1" style="color: #c08e5c;">${item.jumlah}x</span> ${item.nama}
+                        </div>
+                        ${varDetails}
+                        ${noteDetails}
+                    </div>
+                    <div class="text-end flex-shrink-0">
+                        <span class="small fw-semibold text-white-50">Rp ${subtotal.toLocaleString('id-ID')}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (confirmListEl) {
+            confirmListEl.innerHTML = itemsHtml || '<div class="text-secondary small text-center py-2">Tidak ada menu yang dipilih</div>';
+        }
+
+        if (modalQty) {
+            modalQty.innerText = totalQty + ' Item';
+        }
+
+        // Cek promo aktif untuk ditampilkan di rincian
+        const promoRow = document.getElementById('modalConfirmPromoRow');
+        const promoLabel = document.getElementById('modalConfirmPromoLabel');
+        const promoVal = document.getElementById('modalConfirmPromoVal');
+        const promoSelect = document.getElementById('promo_id');
+
+        if (promoRow && promoSelect && promoSelect.value) {
+            const opt = promoSelect.options[promoSelect.selectedIndex];
+            const pType = opt.getAttribute('data-type');
+            const pValue = parseFloat(opt.getAttribute('data-value') || 0);
+            promoRow.style.setProperty('display', 'flex', 'important');
+            
+            const rawTitle = opt.text.split('(')[0].trim();
+            if (promoLabel) promoLabel.innerText = 'Promo (' + rawTitle + ')';
+
+            let subtotalSemua = cart.reduce((s, i) => s + (i.harga * i.jumlah), 0);
+            let discountAmount = 0;
+            if (pType === 'discount') {
+                discountAmount = pValue <= 100 ? (subtotalSemua * (pValue / 100)) : pValue;
+            } else if (pType === 'package') {
+                let packageMenus = JSON.parse(opt.getAttribute('data-menus') || '[]');
+                let packageNormalPrice = 0;
+                let maxPackageCount = Infinity;
+                let cartMap = {};
+                cart.forEach(item => { cartMap[item.id_menu] = (cartMap[item.id_menu] || 0) + item.jumlah; });
+                packageMenus.forEach(pm => {
+                    packageNormalPrice += (pm.harga * pm.jumlah);
+                    let availableInCart = cartMap[pm.id] || 0;
+                    let count = Math.floor(availableInCart / pm.jumlah);
+                    if (count < maxPackageCount) maxPackageCount = count;
+                });
+                if (maxPackageCount > 0 && maxPackageCount !== Infinity) {
+                    discountAmount = (packageNormalPrice - pValue) * maxPackageCount;
+                }
+            }
+            if (promoVal) promoVal.innerText = '-Rp ' + Math.max(0, Math.round(discountAmount)).toLocaleString('id-ID');
+        } else if (promoRow) {
+            promoRow.style.setProperty('display', 'none', 'important');
         }
 
         // Auto-fill nama dan nomor HP yang tersimpan jika ini adalah pesanan tambahan
@@ -630,6 +775,21 @@
             phoneInputEl.addEventListener('paste', function () {
                 setTimeout(() => window.validateGuestPhone(true), 50);
             });
+        }
+
+        // Auto-add atau buka modal dari parameter URL pesan_menu / tambah_menu
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoMenuId = parseInt(urlParams.get('pesan_menu') || urlParams.get('tambah_menu'), 10);
+            if (autoMenuId && !isNaN(autoMenuId)) {
+                setTimeout(() => {
+                    if (typeof window.handleAddToCart === 'function') {
+                        window.handleAddToCart(autoMenuId);
+                    }
+                }, 350);
+            }
+        } catch (e) {
+            console.warn('Auto add menu error:', e);
         }
     });
 })();

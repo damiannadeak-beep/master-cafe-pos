@@ -1,15 +1,16 @@
 <style>
     .void-card-luxury {
-        background-color: #141820 !important;
-        border: 1px solid rgba(239, 68, 68, 0.2) !important;
-        border-radius: 16px !important;
+        background-color: #161b22 !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-top: 3px solid #f87171 !important;
+        border-radius: 14px !important;
         box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.45);
         padding: 1.25rem !important;
         transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .void-card-luxury:hover {
         transform: translateY(-2px);
-        border-color: rgba(239, 68, 68, 0.35) !important;
+        border-color: rgba(248, 113, 113, 0.35) !important;
         box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.55);
     }
     .void-order-items::-webkit-scrollbar {
@@ -49,113 +50,116 @@
         <div class="col-12 col-md-6 col-xl-4 voided-order-item" data-search="{{ $searchKey }}">
             <div class="card h-100 border-0 position-relative void-card-luxury d-flex flex-column">
                 
-                <!-- 1. Card Header: Bersih & Terpadu -->
-                <div class="d-flex justify-content-between align-items-center pb-2.5 mb-2.5" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                <!-- 1. Header: Nomor Pesanan, Status, dan Meja -->
+                <div class="d-flex justify-content-between align-items-center pb-2.5 mb-2.5 border-bottom border-secondary border-opacity-25">
                     <div class="d-flex align-items-center gap-2">
                         <span class="fw-bold text-white fs-5" style="letter-spacing: -0.02em;">
-                            <span class="text-danger fw-normal">#</span>{{ $order->id }}
+                            #{{ $order->id }}
                         </span>
-                        <span class="text-danger fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem; gap: 4px;">
-                            <i class="bi bi-x-circle-fill"></i> DIBATALKAN / VOID
+                        <span class="text-danger fw-semibold small d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-x-circle-fill"></i> Dibatalkan
                         </span>
                     </div>
 
                     <div>
                         @if($order->meja)
-                            <span class="fw-medium text-warning d-inline-flex align-items-center" style="font-size: 0.78rem; gap: 4px;">
-                                <i class="bi bi-geo-alt"></i> {{ $labelMeja }}
+                            <span class="text-secondary small fw-medium d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-geo-alt text-warning"></i> {{ $labelMeja }}
                             </span>
                         @else
-                            <span class="fw-medium text-secondary d-inline-flex align-items-center" style="font-size: 0.78rem; gap: 4px;">
+                            <span class="text-secondary small fw-medium d-inline-flex align-items-center gap-1">
                                 <i class="bi bi-bag"></i> Takeaway
                             </span>
                         @endif
                     </div>
                 </div>
 
-                <!-- 2. Customer & Metadata Info (Aliran Alami, Tanpa Kolom Kaku) -->
-                <div class="mb-2.5">
-                    <div class="d-flex justify-content-between align-items-start gap-2 mb-1.5">
+                <!-- 2. Customer & Waktu -->
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
                         <div>
-                            <div class="text-white fw-semibold" style="font-size: 0.95rem; line-height: 1.3;">
+                            <div class="text-white fw-bold" style="font-size: 0.95rem;">
                                 {{ $custName }}
                             </div>
                             @if(!empty($order->guest_phone))
-                                <div class="text-white-50 mt-1" style="font-size: 0.74rem;">
-                                    <i class="bi bi-telephone me-1.5 opacity-60"></i>{{ $order->guest_phone }}
+                                <div class="text-secondary small mt-0.5" style="font-size: 0.75rem;">
+                                    <i class="bi bi-telephone me-1"></i>{{ $order->guest_phone }}
                                 </div>
                             @endif
                         </div>
-                        <div class="text-end text-white-50">
-                            <div style="font-size: 0.74rem;">
-                                <i class="bi bi-clock me-1 opacity-75"></i> {{ $voidTime ? $voidTime->format('H:i') : '-' }} WIB
+                        <div class="text-end text-secondary small" style="font-size: 0.74rem;">
+                            <div>
+                                <i class="bi bi-clock me-1"></i>{{ $voidTime ? $voidTime->format('H:i') : '-' }} WIB
                             </div>
-                            <div class="opacity-60" style="font-size: 0.68rem;">
+                            <div class="opacity-75" style="font-size: 0.68rem;">
                                 {{ $voidTime ? $voidTime->diffForHumans() : '' }}
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Alasan & Pemohon (Elegan tanpa kotak tebal kaku) -->
-                    <div class="pt-2 mt-2" style="border-top: 1px solid rgba(255, 255, 255, 0.06);">
-                        <div class="d-flex align-items-baseline gap-1.5">
-                            <span class="text-white-50 small" style="font-size: 0.74rem; flex-shrink: 0;">Alasan:</span>
-                            <span class="fw-medium text-truncate" style="font-size: 0.78rem; color: #fca5a5;">{{ $alasan }}</span>
-                        </div>
-                        <div class="text-white-50 mt-0.5" style="font-size: 0.72rem;">
-                            <i class="bi bi-person-badge me-1 opacity-60"></i>Petugas: <span class="text-light">{{ $pelaku }}</span>
-                        </div>
+                <!-- 3. Informasi Audit Pembatalan -->
+                <div class="my-2 py-0.5">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                        <span class="text-secondary small" style="font-size: 0.74rem;">Alasan</span>
+                        <span class="text-danger fw-semibold small text-truncate" style="font-size: 0.76rem; max-width: 65%;">
+                            {{ $alasan }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-2 text-secondary small" style="font-size: 0.72rem;">
+                        <span>Petugas</span>
+                        <span class="text-white-50">{{ $pelaku }}</span>
                     </div>
                 </div>
 
-                <!-- 3. Daftar Item Pesanan yang Dibatalkan (Menyatu Mulus di Atas Kartu) -->
+                <!-- 4. Rincian Item (Typography Nyaman & Mudah Dibaca) -->
                 <div class="flex-grow-1 d-flex flex-column mb-3">
-                    <div class="d-flex justify-content-between align-items-center pb-1.5 mb-1.5" style="border-bottom: 1px solid rgba(255, 255, 255, 0.06);">
-                        <span class="text-uppercase fw-semibold text-secondary" style="font-size: 0.68rem; letter-spacing: 0.06em;">
+                    <div class="d-flex justify-content-between align-items-center pb-1.5 mb-1.5 border-bottom border-secondary border-opacity-10">
+                        <span class="text-uppercase fw-semibold text-secondary" style="font-size: 0.68rem; letter-spacing: 0.05em;">
                             Item Dibatalkan ({{ $order->detail_pesanan->sum('jumlah') }})
                         </span>
-                        <span class="text-white-50 d-inline-flex align-items-center" style="font-size: 0.68rem; gap: 3px;">
-                            <i class="bi bi-arrow-return-left"></i> Stok Dikembalikan
+                        <span class="text-secondary small d-inline-flex align-items-center gap-1" style="font-size: 0.7rem;">
+                            <i class="bi bi-arrow-return-left"></i> Stok Kembali
                         </span>
                     </div>
 
-                    <div class="void-order-items py-1 flex-grow-1" style="max-height: 180px; overflow-y: auto;">
+                    <div class="void-order-items py-1 flex-grow-1" style="max-height: 160px; overflow-y: auto;">
                         <ul class="list-unstyled mb-0">
                             @forelse($order->detail_pesanan as $detail)
-                                <li class="d-flex justify-content-between align-items-start py-1.5" style="border-bottom: 1px dashed rgba(255, 255, 255, 0.05);">
+                                <li class="d-flex justify-content-between align-items-start py-1.5 border-bottom border-secondary border-opacity-10">
                                     <div class="pe-2 text-truncate" style="min-width: 0;">
                                         <div class="d-flex align-items-baseline">
                                             <span class="fw-semibold text-secondary me-2" style="font-size: 0.82rem; flex-shrink: 0;">{{ $detail->jumlah }}×</span>
-                                            <span class="text-white-50 text-decoration-line-through text-truncate" style="font-size: 0.84rem;">{{ $detail->menu->nama_menu ?? 'Item Menu' }}</span>
+                                            <span class="text-white-50 text-truncate" style="font-size: 0.82rem;">{{ $detail->menu->nama_menu ?? 'Item Menu' }}</span>
                                         </div>
                                         @if($detail->catatan)
-                                            <div class="fst-italic ps-3 mt-0.5 text-white-50 opacity-50" style="font-size: 0.7rem;">
+                                            <div class="fst-italic ps-3 mt-0.5 text-secondary" style="font-size: 0.7rem;">
                                                 &bull; {{ $detail->catatan }}
                                             </div>
                                         @endif
                                     </div>
-                                    <span class="text-white-50 text-decoration-line-through text-nowrap ms-2" style="font-size: 0.8rem; font-variant-numeric: tabular-nums;">
+                                    <span class="text-secondary small text-nowrap ms-2" style="font-size: 0.8rem; font-variant-numeric: tabular-nums;">
                                         Rp {{ number_format($detail->subtotal, 0, ',', '.') }}
                                     </span>
                                 </li>
                             @empty
-                                <li class="text-white-50 small py-2 fst-italic">Tidak ada rincian item</li>
+                                <li class="text-secondary small py-2 fst-italic">Tidak ada rincian item</li>
                             @endforelse
                         </ul>
                     </div>
                 </div>
 
-                <!-- 4. Footer: Total Nilai Void & Info Bersih -->
-                <div class="pt-2.5 mt-auto" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                    <div class="d-flex justify-content-between align-items-baseline mb-2">
-                        <span class="text-white-50" style="font-size: 0.82rem;">Total Nilai Void:</span>
-                        <span class="fw-bold" style="font-size: 1.1rem; color: #f87171; letter-spacing: -0.01em;">
+                <!-- 5. Footer: Total Dibatalkan & Status Audit -->
+                <div class="pt-2.5 mt-auto border-top border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-secondary small">Total Dibatalkan</span>
+                        <span class="fw-bold text-danger fs-6" style="letter-spacing: -0.01em;">
                             Rp {{ number_format($order->total, 0, ',', '.') }}
                         </span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-center gap-1.5 py-1 text-white-50" style="font-size: 0.73rem;">
-                        <i class="bi bi-shield-check text-success opacity-80"></i>
-                        <span>Transaksi resmi dibatalkan & ditutup</span>
+                    <div class="d-flex align-items-center justify-content-center gap-1.5 text-secondary pt-1" style="font-size: 0.72rem;">
+                        <i class="bi bi-arrow-counterclockwise text-secondary"></i>
+                        <span>Stok dikembalikan &bull; Transaksi ditutup</span>
                     </div>
                 </div>
             </div>

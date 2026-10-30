@@ -15,8 +15,15 @@
             <div class="card shadow-lg border-0 rounded-4" style="background-color: #161b22; border: 1px solid #21262d !important;">
                 <div class="card-header border-0 py-4 text-center" style="background: var(--gradient-bronze); border-radius: 1rem 1rem 0 0;">
                     <i class="bi bi-qr-code-scan text-white mb-2 d-block" style="font-size: 2.5rem;"></i>
-                    <h4 class="mb-0 text-white fw-bold">Pembayaran Pesanan</h4>
+                    <h4 class="mb-1 text-white fw-bold">Pembayaran Pesanan</h4>
                     <p class="text-white-50 mb-0 small">ID Pesanan: #{{ $pesanan->id }}</p>
+                    @if($pembayaran->status !== 'paid' && $pesanan->status === 'pending')
+                        <div id="checkout-timer-box" class="d-inline-flex align-items-center justify-content-center mt-2 text-white-50 small" style="font-size: 0.82rem;">
+                            <i class="bi bi-clock-history text-white-50 me-2"></i>
+                            <span>Selesaikan pembayaran dalam</span>
+                            <span class="fw-bold text-white font-monospace ms-1" id="checkout-countdown">15:00</span>
+                        </div>
+                    @endif
                 </div>
                 <div class="card-body p-4">
                     <!-- Ringkasan Belanja -->
@@ -83,14 +90,6 @@
                             </div>
                         </div>
                     @endif
-
-                    @if($pembayaran->status !== 'paid' && $pesanan->status === 'pending')
-                        <!-- Countdown Batas Waktu Pembayaran (15 Menit) -->
-                            <div id="checkout-timer-box" class="alert border-0 rounded-4 py-2 px-3 mb-3 d-flex align-items-center justify-content-between" style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25) !important; color: #fca5a5;">
-                                <span class="small"><i class="bi bi-clock-history me-1 text-danger"></i> Batas Waktu Pembayaran:</span>
-                                <span class="badge bg-danger bg-opacity-75 text-white font-monospace fs-6 px-2 py-1" id="checkout-countdown">15:00</span>
-                            </div>
-                        @endif
 
                         <!-- Opsi 1: Pembayaran QRIS & VA Midtrans -->
                         <div class="p-3 rounded-4 mb-3" style="background: linear-gradient(135deg, rgba(192, 142, 92, 0.12) 0%, rgba(22, 27, 34, 0.9) 100%); border: 1px solid rgba(192, 142, 92, 0.4);">
@@ -268,7 +267,7 @@
                                     </div>
 
                                     <!-- Info Tagihan -->
-                                    <div id="cash-summary-card" class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.04); border: 1px dashed rgba(255, 255, 255, 0.15); display: none;">
+                                    <div id="cash-summary-card" class="mb-3 py-1" style="display: none;">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="text-white-50 small">Total Tagihan:</span>
                                             <span id="label-tagihan-target" class="text-white fw-bold">Rp {{ number_format($selfTotal, 0, ',', '.') }}</span>
@@ -283,9 +282,9 @@
                                 </form>
                             </div>
 
-                            <div class="alert alert-info border-0 rounded-4 text-center mb-0" style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2) !important; color: #93c5fd;">
-                                <small><i class="bi bi-shield-check me-1"></i> Pesanan langsung diteruskan ke dapur untuk dimasak setelah pilihan bayar dipilih.</small>
-                            </div>
+                            <p class="text-center text-white-50 small mb-0 mt-3" style="font-size: 0.8rem;">
+                                Pesanan langsung diteruskan ke dapur untuk dimasak setelah pilihan bayar dipilih.
+                            </p>
                         @endif
                 </div>
             </div>
@@ -418,12 +417,8 @@
         labelTagihan.innerText = 'Rp ' + formatRupiah(TOTAL_TAGIHAN);
 
         if (mode === 'kasir') {
-            summaryCard.style.background = 'rgba(13, 202, 240, 0.08)';
-            summaryCard.style.borderColor = 'rgba(13, 202, 240, 0.3)';
             modeInfo.innerHTML = '<i class="bi bi-shop text-info me-1"></i> <span class="text-info">Anda akan bayar langsung di kasir.</span> Pesanan tetap langsung diproses dapur.';
         } else {
-            summaryCard.style.background = 'rgba(34, 197, 94, 0.08)';
-            summaryCard.style.borderColor = 'rgba(34, 197, 94, 0.3)';
             modeInfo.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i> <span class="text-success">Waitress akan mengantar pesanan & menjemput uang tunai di meja.</span>';
         }
     }
@@ -538,6 +533,7 @@
         const timerEl = document.getElementById('checkout-countdown');
         if (!timerEl) return;
 
+        remainingSeconds = Math.max(0, Math.floor(remainingSeconds));
         if (remainingSeconds <= 0) {
             timerEl.innerText = '00:00';
             window.location.reload();
@@ -545,7 +541,7 @@
         }
 
         const mins = Math.floor(remainingSeconds / 60);
-        const secs = remainingSeconds % 60;
+        const secs = Math.floor(remainingSeconds % 60);
         timerEl.innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
         remainingSeconds--;
     }

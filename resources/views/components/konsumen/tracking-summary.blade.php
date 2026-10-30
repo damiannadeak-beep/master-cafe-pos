@@ -36,22 +36,22 @@
                             <span class="badge bg-warning text-dark py-0.5 px-1.5 ms-1 fw-bold" style="font-size: 0.65rem;">Sedang Dilihat</span>
                         @endif
                     </div>
-                    <div class="d-flex align-items-center gap-1">
+                    <div class="d-flex align-items-center gap-2">
                         @if($subPaid)
-                            <span class="badge bg-success bg-opacity-25 text-success border border-success" style="font-size: 0.7rem;">
+                            <span class="text-success small fw-semibold" style="font-size: 0.72rem;">
                                 <i class="bi bi-check-circle me-1"></i>Lunas ({{ strtoupper($subOrder->pembayaran->metode ?? 'QRIS') }})
                             </span>
                         @else
-                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger" style="font-size: 0.7rem;">
+                            <span class="text-danger small fw-semibold" style="font-size: 0.72rem;">
                                 <i class="bi bi-clock me-1"></i>Belum Lunas
                             </span>
                         @endif
                         @if($subOrder->status === 'processing')
-                            <span class="badge bg-primary" style="font-size: 0.7rem;"><i class="bi bi-fire me-1"></i>Sedang Dimasak</span>
+                            <span class="text-primary small" style="font-size: 0.72rem;"><i class="bi bi-fire me-1"></i>Dimasak</span>
                         @elseif($subOrder->status === 'completed')
-                            <span class="badge bg-success" style="font-size: 0.7rem;"><i class="bi bi-check2-all me-1"></i>Siap Dihidangkan</span>
+                            <span class="text-success small" style="font-size: 0.72rem;"><i class="bi bi-check2-all me-1"></i>Siap</span>
                         @else
-                            <span class="badge bg-warning text-dark" style="font-size: 0.7rem;"><i class="bi bi-hourglass-split me-1"></i>Menunggu</span>
+                            <span class="text-warning small" style="font-size: 0.72rem;"><i class="bi bi-hourglass-split me-1"></i>Menunggu</span>
                         @endif
                     </div>
                 </div>
@@ -63,11 +63,11 @@
                                 <div class="d-flex align-items-center gap-1.5 flex-wrap">
                                     <span class="text-white small fw-medium">{{ $detail->jumlah }}x {{ $detail->menu->nama_menu ?? 'Item' }}</span>
                                     @if($detail->is_served)
-                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0 px-1.5 rounded-pill" style="font-size: 0.65rem;">
-                                            <i class="bi bi-check2"></i> Siap / Disajikan
+                                        <span class="text-success small ms-1" style="font-size: 0.7rem;">
+                                            <i class="bi bi-check2"></i> Disajikan
                                         </span>
                                     @else
-                                        <span class="badge bg-secondary bg-opacity-25 text-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.65rem;">
+                                        <span class="text-secondary small ms-1" style="font-size: 0.7rem;">
                                             <i class="bi bi-hourglass-split"></i> Disiapkan
                                         </span>
                                     @endif
@@ -139,23 +139,23 @@
         @endphp
 
         @if($hasCashUnpaidGroup && $maxUangDiterimaGroup > 0)
-            <div class="mt-3 p-3 rounded-3" style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25);">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="badge bg-success bg-opacity-25 text-success border border-success fw-bold">
-                        <i class="bi bi-cash-stack me-1"></i> Bayar Tunai di Meja
+            <div class="mt-3 pt-3 border-top border-secondary border-opacity-25">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+                    <span class="text-success fw-bold d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-cash-stack"></i> <span>Bayar Tunai di Meja</span>
                     </span>
-                    <small class="text-white-50">Bayar saat makanan tiba</small>
+                    <small class="text-secondary">Bayar saat makanan tiba</small>
                 </div>
                 @if($kembalianMejaGroup > 0)
-                    <div class="small text-white mt-2">
+                    <div class="small text-secondary mt-1">
                         Uang disiapkan: <strong class="text-white">Rp {{ number_format($maxUangDiterimaGroup, 0, ',', '.') }}</strong>
                     </div>
-                    <div class="small text-warning fw-bold">
-                        <i class="bi bi-wallet-fill me-1"></i> Kembalian Waitress: Rp {{ number_format($kembalianMejaGroup, 0, ',', '.') }}
+                    <div class="small text-warning fw-bold d-flex align-items-center gap-2 mt-1">
+                        <i class="bi bi-wallet-fill"></i> <span>Kembalian Waitress: Rp {{ number_format($kembalianMejaGroup, 0, ',', '.') }}</span>
                     </div>
                 @else
-                    <div class="small text-success fw-bold mt-2">
-                        <i class="bi bi-check-circle me-1"></i> Uang Pas: Rp {{ number_format($maxUangDiterimaGroup, 0, ',', '.') }} (Tanpa Kembalian)
+                    <div class="small text-success fw-bold d-flex align-items-center gap-2 mt-1">
+                        <i class="bi bi-check-circle"></i> <span>Uang Pas: Rp {{ number_format($maxUangDiterimaGroup, 0, ',', '.') }} (Tanpa Kembalian)</span>
                     </div>
                 @endif
             </div>
@@ -169,11 +169,11 @@
                         <div class="d-flex align-items-center gap-1.5 flex-wrap">
                             <h6 class="text-white mb-0 fs-6">{{ $detail->jumlah }}x {{ $detail->menu->nama_menu ?? 'Item' }}</h6>
                             @if($detail->is_served)
-                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 py-0 px-1.5 rounded-pill ms-1" style="font-size: 0.68rem;">
-                                    <i class="bi bi-check2"></i> Siap / Disajikan
+                                <span class="text-success small ms-2" style="font-size: 0.75rem;">
+                                    <i class="bi bi-check2"></i> Disajikan
                                 </span>
                             @else
-                                <span class="badge bg-secondary bg-opacity-25 text-secondary py-0 px-1.5 rounded-pill ms-1" style="font-size: 0.68rem;">
+                                <span class="text-secondary small ms-2" style="font-size: 0.75rem;">
                                     <i class="bi bi-hourglass-split"></i> Disiapkan
                                 </span>
                             @endif
@@ -215,23 +215,23 @@
             </div>
 
             @if(($pesanan->tipe_pesanan ?? '') === 'dine_in' && $pembayaran && $pembayaran->metode === 'cash')
-                <div class="mt-3 p-3 rounded-3" style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25);">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="badge bg-success bg-opacity-25 text-success border border-success fw-bold">
-                            <i class="bi bi-cash-stack me-1"></i> Bayar Tunai (Cash) di Meja
+                <div class="mt-3 pt-3 border-top border-secondary border-opacity-25">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mb-1">
+                        <span class="text-success fw-bold d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-cash-stack"></i> <span>Bayar Tunai (Cash) di Meja</span>
                         </span>
-                        <small class="text-white-50">Bayar saat makanan tiba</small>
+                        <small class="text-secondary">Bayar saat makanan tiba</small>
                     </div>
                     @if($pembayaran->uang_kembalian > 0)
-                        <div class="small text-white mt-2">
+                        <div class="small text-secondary mt-1">
                             Uang disiapkan: <strong class="text-white">Rp {{ number_format($pembayaran->uang_diterima, 0, ',', '.') }}</strong>
                         </div>
-                        <div class="small text-warning fw-bold">
-                            <i class="bi bi-wallet-fill me-1"></i> Kembalian Waitress: Rp {{ number_format($pembayaran->uang_kembalian, 0, ',', '.') }}
+                        <div class="small text-warning fw-bold d-flex align-items-center gap-2 mt-1">
+                            <i class="bi bi-wallet-fill"></i> <span>Kembalian Waitress: Rp {{ number_format($pembayaran->uang_kembalian, 0, ',', '.') }}</span>
                         </div>
                     @elseif($pembayaran->uang_diterima)
-                        <div class="small text-success fw-bold mt-2">
-                            <i class="bi bi-check-circle me-1"></i> Uang Pas (Tanpa Kembalian)
+                        <div class="small text-success fw-bold d-flex align-items-center gap-2 mt-1">
+                            <i class="bi bi-check-circle"></i> <span>Uang Pas (Tanpa Kembalian)</span>
                         </div>
                     @endif
                 </div>

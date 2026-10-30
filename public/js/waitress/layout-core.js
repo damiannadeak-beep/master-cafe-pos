@@ -358,14 +358,18 @@
         window.fetchWaitressNotifications();
 
         let syncInterval = setInterval(() => {
+            window.fetchActiveOrdersCount();
             window.fetchWaitressNotifications();
-        }, 8000);
+        }, 3500);
 
-        document.addEventListener('visibilitychange', () => {
+        const handleVisibilityOrFocus = () => {
             if (!document.hidden) {
+                window.fetchActiveOrdersCount();
                 window.fetchWaitressNotifications();
             }
-        });
+        };
+        document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+        window.addEventListener('focus', handleVisibilityOrFocus);
 
         // Setup WebSocket (Laravel Echo / Reverb)
         setTimeout(() => {
@@ -410,25 +414,25 @@
 
                 if (window.Echo.connector && window.Echo.connector.pusher) {
                     const pusherConn = window.Echo.connector.pusher.connection;
-                    pusherConn.bind('connected', () => {
+                    const restartSync = () => {
                         clearInterval(syncInterval);
-                        syncInterval = setInterval(window.fetchActiveOrdersCount, 4000);
-                    });
-                    pusherConn.bind('unavailable', () => {
-                        clearInterval(syncInterval);
-                        syncInterval = setInterval(window.fetchActiveOrdersCount, 4000);
-                    });
-                    pusherConn.bind('failed', () => {
-                        clearInterval(syncInterval);
-                        syncInterval = setInterval(window.fetchActiveOrdersCount, 4000);
-                    });
-                    pusherConn.bind('disconnected', () => {
-                        clearInterval(syncInterval);
-                        syncInterval = setInterval(window.fetchActiveOrdersCount, 4000);
-                    });
+                        syncInterval = setInterval(() => {
+                            window.fetchActiveOrdersCount();
+                            window.fetchWaitressNotifications();
+                        }, 4000);
+                    };
+                    pusherConn.bind('connected', restartSync);
+                    pusherConn.bind('unavailable', restartSync);
+                    pusherConn.bind('failed', restartSync);
+                    pusherConn.bind('disconnected', restartSync);
                 }
             } else {
-                console.warn('[WebSocket] Laravel Echo is not loaded. Using smart auto-sync 4s.');
+                console.info('[WebSocket] Laravel Echo is not loaded. Using smart auto-sync 3.5s.');
+                clearInterval(syncInterval);
+                syncInterval = setInterval(() => {
+                    window.fetchActiveOrdersCount();
+                    window.fetchWaitressNotifications();
+                }, 3500);
             }
         }, 1000);
     });

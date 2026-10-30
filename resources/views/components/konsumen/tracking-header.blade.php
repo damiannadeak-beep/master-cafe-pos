@@ -189,17 +189,17 @@
                         <i class="bi bi-check-all me-1.5"></i> Selesai
                     </button>
                 @elseif($pesanan->status === 'processing')
-                    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 fs-6 pulse-animation" style="border-radius: 8px;">
-                        <i class="bi bi-cup-hot-fill me-1.5"></i> Sedang Disiapkan
-                    </span>
+                    <div class="fw-semibold d-inline-flex align-items-center gap-2" style="font-size: 0.95rem; color: #c08e5c;">
+                        <i class="bi bi-cup-hot-fill"></i> <span>Sedang Disiapkan</span>
+                    </div>
                 @elseif($pesanan->status === 'cancelled')
-                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 fs-6" style="border-radius: 8px;">
-                        <i class="bi bi-x-circle me-1.5"></i> Dibatalkan
-                    </span>
+                    <div class="text-danger fw-semibold d-inline-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                        <i class="bi bi-x-circle"></i> <span>Dibatalkan</span>
+                    </div>
                 @else
-                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-3 py-2 fs-6" style="border-radius: 8px;">
-                        <i class="bi bi-clock-history me-1.5"></i> Menunggu
-                    </span>
+                    <div class="text-warning fw-semibold d-inline-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                        <i class="bi bi-clock-history"></i> <span>Menunggu</span>
+                    </div>
                 @endif
             </div>
         </div>

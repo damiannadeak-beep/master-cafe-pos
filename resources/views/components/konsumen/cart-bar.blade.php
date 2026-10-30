@@ -143,65 +143,85 @@
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-4">
+            <div class="modal-body py-3 px-3 px-md-4">
+                <!-- 1. Bagian Rincian Menu Pesanan yang Dipilih -->
                 <div class="mb-3">
-                    <label for="inputGuestName" class="form-label text-white small fw-bold">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary border-opacity-10">
+                        <span class="text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.05em; font-size: 0.72rem;">
+                            <i class="bi bi-receipt me-1 text-warning"></i> Rincian Menu Pesanan
+                        </span>
+                        <span class="text-secondary small" id="modal-summary-qty" style="font-size: 0.75rem;">0 Item</span>
+                    </div>
+
+                    <!-- List menu pesanan langsung tanpa kotak-kotak bertumpuk -->
+                    <div id="modalConfirmOrderItemsList" class="py-1" style="max-height: 200px; overflow-y: auto;">
+                        <div class="text-secondary small text-center py-2">Memuat pesanan...</div>
+                    </div>
+
+                    <!-- Ringkasan Total Tagihan Bersih Tanpa Box Bertingkat -->
+                    <div class="pt-2 mt-2 border-top border-secondary border-opacity-15">
+                        <div class="d-flex justify-content-between align-items-center mb-1" id="modalConfirmPromoRow" style="display: none !important;">
+                            <span class="text-secondary small" id="modalConfirmPromoLabel">Diskon Promo</span>
+                            <span class="text-success small fw-semibold" id="modalConfirmPromoVal">-Rp 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-white-50 small">Total Pembayaran</span>
+                            <span class="fw-bold fs-5" style="color: #c08e5c;" id="modal-summary-total">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider Pemisah Halus -->
+                <div class="border-top mb-3" style="border-color: rgba(255,255,255,0.08) !important;"></div>
+
+                <!-- 2. Form Identitas Pemesan -->
+                <div class="mb-3">
+                    <label for="inputGuestName" class="form-label text-white small fw-bold mb-1">
                         Nama Pemesan / Panggilan <span class="text-danger">*</span>
                     </label>
-                    <input type="text" id="inputGuestName" class="form-control form-control-lg rounded-3 text-white" 
-                           placeholder="Contoh: Budi / Sarah" 
-                           style="background-color: #0e1217; border: 1px solid #30363d; font-size: 1rem;" 
+                    <input type="text" id="inputGuestName" class="form-control rounded-3 text-white" 
+                           placeholder="Masukkan nama Anda" 
+                           style="background-color: #0e1217; border: 1px solid #30363d; font-size: 0.95rem; padding: 0.65rem 0.9rem;" 
                            value="{{ auth()->check() ? auth()->user()->name : '' }}" required maxlength="50">
                 </div>
 
                 @if(!isset($meja))
-                <div class="mb-3">
+                <div class="mb-2">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label for="inputGuestPhone" class="form-label text-white small fw-bold mb-0">
                             No. WhatsApp / HP <span class="text-danger">* (Wajib)</span>
                         </label>
-                        <span id="phoneDigitCounter" class="badge rounded-2 bg-dark border border-secondary text-secondary" style="font-size: 0.7rem; font-weight: 500;">0 digit</span>
+                        <span id="guestPhoneCounter" class="small text-secondary" style="font-size: 0.75rem;">0 digit</span>
                     </div>
                     
                     <div class="input-group">
                         <span class="input-group-text rounded-start-3 text-success fw-bold px-3" style="background-color: #161b22; border: 1px solid #30363d; border-right: none;">
                             <i class="bi bi-whatsapp"></i>
                         </span>
-                        <input type="tel" id="inputGuestPhone" class="form-control form-control-lg rounded-end-3 text-white" 
+                        <input type="tel" id="inputGuestPhone" class="form-control rounded-end-3 text-white" 
                                placeholder="Contoh: 081234567890" 
                                inputmode="numeric" 
                                pattern="[0-9]*" 
                                maxlength="15" 
-                               style="background-color: #0e1217; border: 1px solid #30363d; border-left: none; font-size: 1rem;" 
+                               style="background-color: #0e1217; border: 1px solid #30363d; border-left: none; font-size: 0.95rem; padding: 0.65rem 0.9rem;" 
                                autocomplete="tel"
                                required>
                     </div>
 
                     <!-- Feedback Pesan Validasi Real-time -->
-                    <div id="phoneValidationFeedback" class="mt-1" style="font-size: 0.78rem; display: none;"></div>
+                    <div id="guestPhoneFeedback" class="mt-1" style="font-size: 0.78rem; display: none;"></div>
 
-                    <small class="text-secondary d-block mt-1" style="font-size: 0.76rem; line-height: 1.35;">
-                        <i class="bi bi-info-circle me-1 text-warning"></i> Digunakan kasir & dapur untuk konfirmasi via WhatsApp saat pesanan selesai dibungkus (diawali <strong>08</strong> atau <strong>628</strong>, 10-14 angka).
+                    <small class="text-secondary d-block mt-1" style="font-size: 0.74rem; line-height: 1.35;">
+                        <i class="bi bi-info-circle me-1 text-warning"></i> Digunakan kasir & dapur untuk konfirmasi via WhatsApp saat pesanan selesai dibungkus.
                     </small>
                 </div>
                 @endif
-
-                <div class="p-3 rounded-3 mt-3" style="background-color: #0e1217; border: 1px solid #21262d;">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="text-secondary small">Total Item</span>
-                        <span class="text-white fw-semibold small" id="modal-summary-qty">0 Item</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-secondary small">Total Pembayaran</span>
-                        <span class="fw-bold fs-5" style="color: #c08e5c;" id="modal-summary-total">Rp 0</span>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Kembali</button>
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Ubah Menu</button>
                 <button type="button" id="btnSubmitFinalOrder" onclick="submitCustomerOrder()" class="btn rounded-pill px-4 fw-bold shadow-sm" 
                         style="background: var(--gradient-bronze); color: white; border: none;">
-                    Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>
+                    Konfirmasi & Kirim Pesanan <i class="bi bi-arrow-right ms-1"></i>
                 </button>
             </div>
         </div>

@@ -20,13 +20,13 @@
                         <span class="text-white-50 small">Pemesan:</span>
                         <strong class="text-white small" id="orderCompletedCustomer">-</strong>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
                         <span class="text-white-50 small">Layanan:</span>
-                        <span class="badge rounded-2 text-bg-secondary" id="orderCompletedType">-</span>
+                        <span class="fw-semibold text-white small" id="orderCompletedType">-</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-white-50 small">Status Pembayaran:</span>
-                        <span id="orderCompletedPayBadge" class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Lunas</span>
+                        <span id="orderCompletedPayBadge" class="fw-semibold text-success small">Lunas</span>
                     </div>
                 </div>
 

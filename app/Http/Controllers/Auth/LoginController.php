@@ -59,10 +59,12 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         $redirectUrl = '/';
+        $isOwner = false;
 
         if (\Illuminate\Support\Facades\Auth::check()) {
             $user = \Illuminate\Support\Facades\Auth::user();
             if ($user->hasRole('pemilik')) {
+                $isOwner = true;
                 $redirectUrl = route('owner.login');
             } elseif ($user->hasRole('kasir')) {
                 $redirectUrl = route('kasir.login');
@@ -73,6 +75,12 @@ class LoginController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        // Pertahankan otorisasi gerbang rahasia pemilik pada sesi baru
+        // agar setelah logout, pemilik tetap bisa melihat form login owner tanpa terbentur 404 stealth decoy
+        if ($isOwner) {
+            $request->session()->put('owner_gate_passed', true);
+        }
 
         if ($request->wantsJson()) {
             return response()->json([

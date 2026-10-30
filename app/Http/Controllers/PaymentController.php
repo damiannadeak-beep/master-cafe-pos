@@ -52,7 +52,7 @@ class PaymentController extends Controller
 
         $remainingSeconds = 900;
         if ($pesanan->created_at) {
-            $remainingSeconds = max(0, 900 - $pesanan->created_at->diffInSeconds(now()));
+            $remainingSeconds = max(0, (int) round(900 - $pesanan->created_at->diffInSeconds(now())));
         }
 
         // Cegah generate ulang jika sudah lunas
@@ -143,6 +143,17 @@ class PaymentController extends Controller
             $priorOrders = Pesanan::where('id_meja', $pesanan->id_meja)
                 ->where('id', '!=', $pesanan->id)
                 ->whereIn('status', ['pending', 'processing'])
+                ->where(function ($q) {
+                    $q->whereNotNull('id_kasir')
+                      ->orWhere('status', 'processing')
+                      ->orWhereHas('pembayaran', function ($p) {
+                          $p->where('status', 'paid')
+                            ->orWhere(function ($cashQ) {
+                                $cashQ->where('status', 'unpaid')
+                                      ->where('metode', 'cash');
+                            });
+                      });
+                })
                 ->whereHas('pembayaran', function ($p) {
                     $p->where('status', '!=', 'paid');
                 })
@@ -201,6 +212,7 @@ class PaymentController extends Controller
             ]);
 
             $pesanan->update(['status' => OrderStatus::PROCESSING->value]);
+            \Illuminate\Support\Facades\Cache::forget('active_orders_count_data');
 
             try {
                 broadcast(new \App\Events\PesananBaru($pesanan));
@@ -339,6 +351,7 @@ class PaymentController extends Controller
 
             // Ubah status pesanan agar langsung diproses dimasak dapur
             $pesanan->update(['status' => OrderStatus::PROCESSING->value]);
+            \Illuminate\Support\Facades\Cache::forget('active_orders_count_data');
 
             try {
                 broadcast(new \App\Events\PesananBaru($pesanan));
@@ -434,6 +447,7 @@ class PaymentController extends Controller
             
             if ($pesanan) {
                 $pesanan->update(['status' => 'processing']);
+                \Illuminate\Support\Facades\Cache::forget('active_orders_count_data');
 
                 // Trigger WebSocket Event (Reverb) ke POS Kasir & Layar Monitor Meja
                 try {

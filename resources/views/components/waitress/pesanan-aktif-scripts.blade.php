@@ -2,6 +2,7 @@
     window.WaitressConfig = Object.assign(window.WaitressConfig || {}, {
         pesananAktifUrl: "{{ route('kasir.pesanan_aktif') }}",
         ordersCountUrl: "{{ route('kasir.active_orders_count') }}",
+        initialHash: "{{ app(\App\Services\PosService::class)->getActiveOrdersCountData()['hash'] ?? '' }}",
         csrfToken: "{{ csrf_token() }}"
     });
 </script>

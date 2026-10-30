@@ -19,9 +19,9 @@
         
         <!-- Area Gambar dengan Overlay Badge -->
         <div class="position-relative cursor-pointer" 
-             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : 'toggleConsumerMenuDesc(' . $menu->id . ')' }}"
+             onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price || $menu->harga == 0 ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
              style="cursor: pointer;"
-             title="Sentuh untuk melihat detail hidangan">
+             title="Sentuh untuk melihat detail hidangan & memesan">
             
             @if($menu->image)
                 <div class="text-center w-100 p-2 d-flex align-items-center justify-content-center" 
@@ -59,30 +59,21 @@
         <!-- Body Kartu -->
         <div class="card-body p-2 p-md-3 d-flex flex-column flex-grow-1">
             <div class="cursor-pointer mb-2 flex-grow-1 d-flex flex-column" 
-                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : 'toggleConsumerMenuDesc(' . $menu->id . ')' }}"
-                 style="cursor: pointer;">
+                 onclick="{{ !$menu->is_available ? 'alert(\'Mohon maaf, menu ' . addslashes($menu->nama_menu) . ' sedang habis.\')' : ($menu->is_dynamic_price || $menu->harga == 0 ? 'openDynamicPriceNotice(' . $menu->id . ')' : 'openVariantModal(' . $menu->id . ')') }}"
+                 style="cursor: pointer;"
+                 title="Sentuh untuk melihat detail hidangan & memesan">
                 <!-- Nama Menu (Tinggi 2 baris terstandarisasi) -->
                 <h6 class="fw-bold text-white mb-1" 
-                    style="font-size: 0.92rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em;"
+                    style="font-size: 0.92rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
                     title="{{ $menu->nama_menu }}">
                     {{ $menu->nama_menu }}
                 </h6>
 
-                <!-- Deskripsi Pendek: 2 baris presisi, memanjang ke bawah saat diklik -->
-                <p class="small text-secondary mb-2 consumer-desc-text flex-grow-1" id="consumer-desc-{{ $menu->id }}"
-                   style="font-size: 0.75rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.8em; transition: color 0.3s ease;">
-                    {{ $menu->deskripsi ?? 'Racikan istimewa Master Cafe.' }}
-                </p>
-
-                <!-- Harga & Toggle Indikator -->
-                <div class="d-flex align-items-center justify-content-between mt-auto">
+                <!-- Harga Tepat di Bawah Nama -->
+                <div class="mt-1">
                     <span class="fw-bold fs-6 text-nowrap" style="color: #c08e5c;">
                         {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
                     </span>
-                    <small class="text-secondary opacity-75 d-flex align-items-center gap-1" style="font-size: 0.7rem;">
-                        <i class="bi bi-chevron-down" id="desc-icon-{{ $menu->id }}"></i>
-                        <span id="desc-text-{{ $menu->id }}">See more</span>
-                    </small>
                 </div>
             </div>
 

@@ -324,7 +324,7 @@
         }
 
         if (data.remaining_seconds !== undefined) {
-            remainingSeconds = data.remaining_seconds;
+            remainingSeconds = Math.max(0, Math.floor(Number(data.remaining_seconds) || 0));
         }
 
         if (data.status !== currentStatus || data.payment_status !== currentPayStatus) {
@@ -335,11 +335,12 @@
     }
 
     // --- 7. COUNTDOWN TIMER PEMBAYARAN ONLINE (15 MENIT) ---
-    let remainingSeconds = config.remainingSeconds || 0;
+    let remainingSeconds = Math.max(0, Math.floor(Number(config.remainingSeconds) || 0));
     function updateTrackingCountdown() {
         const timerEl = document.getElementById('tracking-timer-text');
         if (!timerEl) return;
 
+        remainingSeconds = Math.max(0, Math.floor(remainingSeconds));
         if (remainingSeconds <= 0) {
             timerEl.innerText = '00:00';
             pollOrderStatus();
@@ -347,7 +348,7 @@
         }
 
         const mins = Math.floor(remainingSeconds / 60);
-        const secs = remainingSeconds % 60;
+        const secs = Math.floor(remainingSeconds % 60);
         timerEl.innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
         remainingSeconds--;
     }

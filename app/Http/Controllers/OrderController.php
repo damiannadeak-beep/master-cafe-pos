@@ -136,8 +136,18 @@ class OrderController extends Controller
             }
             $guestPhone = !empty($validated['guest_phone']) ? trim($validated['guest_phone']) : null;
 
-            $orderToken = (string) \Illuminate\Support\Str::uuid();
+            // Jika ada pesanan sebelumnya di sesi ini yang belum pernah checkout / belum pilih metode bayar, batalkan agar tidak menjadi pesanan gantung
+            if (session('active_order_id')) {
+                $prevOrder = Pesanan::with('pembayaran')->find(session('active_order_id'));
+                if ($prevOrder && $prevOrder->status === OrderStatus::PENDING->value 
+                    && $prevOrder->pembayaran 
+                    && $prevOrder->pembayaran->status === PaymentStatus::UNPAID->value 
+                    && empty($prevOrder->pembayaran->metode)) {
+                    $prevOrder->cancelOrder();
+                }
+            }
 
+            $orderToken = (string) \Illuminate\Support\Str::uuid();
 
             // Buat Pesanan & Pembayaran Baru
             $pesanan = Pesanan::create([
@@ -337,11 +347,17 @@ class OrderController extends Controller
         $pembayaran = $pesanan->pembayaran;
         $meja = $pesanan->meja;
 
+        // Cegah celah keamanan (URL Direct Access): Jika pesanan belum memilih metode bayar & belum lunas, wajib ke checkout dulu
+        if ($pesanan->status === 'pending' && $pembayaran && $pembayaran->status === 'unpaid' && empty($pembayaran->metode)) {
+            return redirect(url('/konsumen/checkout/' . $pesanan->id . '?token=' . $order_token))
+                ->with('info', 'Silakan pilih metode pembayaran dan selesaikan pesanan Anda terlebih dahulu.');
+        }
+
         // Hitung sisa waktu pembayaran (15 menit = 900 detik)
         $remainingSeconds = 0;
         if ($pesanan->status === 'pending' && $pembayaran && $pembayaran->status === 'unpaid') {
             $createdAt = $pesanan->created_at ?: now();
-            $remainingSeconds = max(0, 900 - $createdAt->diffInSeconds(now()));
+            $remainingSeconds = max(0, (int) round(900 - $createdAt->diffInSeconds(now())));
         }
 
         // Cari semua pesanan terkait dalam sesi yang sama (Dine-In per Meja, Takeaway per Nomor HP)
@@ -431,7 +447,7 @@ class OrderController extends Controller
         $remainingSeconds = 0;
         if ($pesanan->isPending() && $pesanan->pembayaran && $pesanan->pembayaran->isUnpaid()) {
             $createdAt = $pesanan->created_at ?: now();
-            $remainingSeconds = max(0, $expirySeconds - $createdAt->diffInSeconds(now()));
+            $remainingSeconds = max(0, (int) round($expirySeconds - $createdAt->diffInSeconds(now())));
         }
 
         return response()->json([

@@ -24,15 +24,17 @@
 </head>
 <body class="text-light" data-bs-theme="dark" style="background-color: #0e1217 !important;">
     <div id="app">
+        @if(!request()->routeIs('konsumen.checkout'))
         <!-- Banner Pemulihan Pesanan Aktif (LocalStorage Guest Order) -->
         <div id="active-order-recovery-banner" class="alert alert-warning border-0 rounded-0 mb-0 text-center py-2 shadow-sm" style="display: none; background: linear-gradient(90deg, #1c2128 0%, #282015 50%, #1c2128 100%); border-bottom: 1px solid #c08e5c !important; z-index: 1040; position: relative;">
             <div class="container d-flex align-items-center justify-content-center flex-wrap gap-2 small">
-                <span class="text-white" id="active-order-recovery-text"><i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:</span>
+                <span class="text-white" id="active-order-recovery-text"><i class="bi bi-clock-history me-2" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:</span>
                 <a id="active-order-recovery-link" href="#" class="btn btn-sm rounded-pill fw-bold px-3 btn-touch" style="background: var(--gradient-bronze); color: white; border: none; font-size: 0.78rem;">
                     Lihat Status Pesanan <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             </div>
         </div>
+        @endif
 
         <nav class="navbar navbar-expand-md navbar-dark shadow-sm sticky-top">
             <div class="container">
@@ -231,7 +233,7 @@
                     }
                 }
 
-                if (orders.length > 0 && !window.location.pathname.includes('/tracking/')) {
+                if (orders.length > 0 && !window.location.pathname.includes('/tracking/') && !window.location.pathname.includes('/checkout/')) {
                     const latestOrder = orders[0];
                     fetch('/api/tracking/' + latestOrder.token + '/status', { headers: { 'Accept': 'application/json' } })
                         .then(res => {
@@ -254,11 +256,21 @@
                                 const link = document.getElementById('active-order-recovery-link');
                                 const textEl = document.getElementById('active-order-recovery-text');
                                 if (banner && link) {
-                                    link.href = '/tracking/' + latestOrder.token;
-                                    if (textEl) {
-                                        textEl.innerHTML = orders.length > 1 
-                                            ? `<i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki <strong>${orders.length} pesanan aktif</strong> di Master Cafe:` 
-                                            : `<i class="bi bi-clock-history me-1" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:`;
+                                    const isUnpaid = (data.payment_status !== 'paid' && (!data.payment_method || data.payment_method === '-' || data.payment_method === ''));
+                                    if (isUnpaid) {
+                                        link.href = '/konsumen/checkout/' + data.id + '?token=' + latestOrder.token;
+                                        link.innerHTML = 'Lanjutkan Pembayaran <i class="bi bi-arrow-right ms-1"></i>';
+                                        if (textEl) {
+                                            textEl.innerHTML = `<i class="bi bi-clock-history me-2" style="color: #c08e5c;"></i> Anda memiliki pesanan yang <strong>belum dibayar</strong>:`;
+                                        }
+                                    } else {
+                                        link.href = '/tracking/' + latestOrder.token;
+                                        link.innerHTML = 'Lihat Status Pesanan <i class="bi bi-arrow-right ms-1"></i>';
+                                        if (textEl) {
+                                            textEl.innerHTML = orders.length > 1 
+                                                ? `<i class="bi bi-clock-history me-2" style="color: #c08e5c;"></i> Anda memiliki <strong>${orders.length} pesanan aktif</strong> di Master Cafe:` 
+                                                : `<i class="bi bi-clock-history me-2" style="color: #c08e5c;"></i> Anda memiliki pesanan aktif di Master Cafe:`;
+                                        }
                                     }
                                     banner.style.display = 'block';
                                 }

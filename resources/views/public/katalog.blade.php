@@ -64,41 +64,36 @@
         $allSubs = $hasSubKategoriCol ? $menus->pluck('sub_kategori')->filter()->unique()->values() : collect();
     @endphp
 
-    <!-- Search & Filter Controls (Simetris & Terpusat di Tengah) -->
-    <!-- Search & Filter Controls (Simetris, Terpusat, & Elegan Minimalis) -->
-    <div class="mb-4">
-        <!-- Search Bar Terpusat -->
-        <div class="mx-auto mb-3" style="max-width: 440px;">
-            <div class="catalog-search-box input-group rounded-pill overflow-hidden shadow-sm" style="background-color: #14181f; border: 1px solid rgba(255, 255, 255, 0.12); transition: all 0.25s ease;">
-                <span class="input-group-text bg-transparent border-0 text-secondary ps-3 pe-2">
-                    <i class="bi bi-search search-icon" style="color: #8b949e; font-size: 0.9rem; transition: color 0.2s ease;"></i>
-                </span>
-                <input type="text" id="publicSearchInput" class="form-control bg-transparent border-0 text-white shadow-none ps-1 pe-2 py-2" placeholder="Cari hidangan atau minuman..." style="font-size: 0.875rem;" oninput="onPublicSearchInput(this.value)">
-                <button type="button" id="publicSearchClearBtn" class="btn bg-transparent border-0 text-secondary pe-3" style="display: none; font-size: 0.85rem;" onclick="clearPublicSearch()">
-                    <i class="bi bi-x-circle-fill"></i>
-                </button>
-            </div>
+    <!-- Search & Filter Controls (Opsi A: Toolbar Sejajar Kiri - Kanan) -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-3">
+        <!-- Sisi Kiri: Filter Kategori Utama (Level 1) -->
+        <div class="rounded-pill p-1 shadow-sm d-inline-flex gap-1" role="group" style="background-color: #14181f; border: 1px solid rgba(255, 255, 255, 0.1); width: fit-content;">
+            <button type="button" class="btn btn-sm rounded-pill px-3 px-md-4 py-1.5 fw-semibold filter-main-btn active-filter" onclick="filterPublicMain('semua', this)" style="font-size: 0.85rem;">
+                Semua
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 px-md-4 py-1.5 fw-semibold filter-main-btn" onclick="filterPublicMain('makanan', this)" style="font-size: 0.85rem; color: #8b949e;">
+                Makanan
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 px-md-4 py-1.5 fw-semibold filter-main-btn" onclick="filterPublicMain('minuman', this)" style="font-size: 0.85rem; color: #8b949e;">
+                Minuman
+            </button>
         </div>
 
-        <!-- Filter Kategori Utama (Level 1 - Terpusat Simetris di Bawah Search Bar) -->
-        <div class="d-flex justify-content-center">
-            <div class="rounded-pill p-1 shadow-sm d-inline-flex gap-1" role="group" style="background-color: #14181f; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <button type="button" class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold filter-main-btn active-filter" onclick="filterPublicMain('semua', this)" style="font-size: 0.85rem;">
-                    Semua
-                </button>
-                <button type="button" class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold filter-main-btn" onclick="filterPublicMain('makanan', this)" style="font-size: 0.85rem; color: #8b949e;">
-                    Makanan
-                </button>
-                <button type="button" class="btn btn-sm rounded-pill px-4 py-1.5 fw-semibold filter-main-btn" onclick="filterPublicMain('minuman', this)" style="font-size: 0.85rem; color: #8b949e;">
-                    Minuman
-                </button>
-            </div>
+        <!-- Sisi Kanan: Search Bar -->
+        <div class="catalog-search-box input-group rounded-pill overflow-hidden shadow-sm" style="background-color: #14181f; border: 1px solid rgba(255, 255, 255, 0.12); max-width: 360px; width: 100%; transition: all 0.25s ease;">
+            <span class="input-group-text bg-transparent border-0 text-secondary ps-3 pe-2">
+                <i class="bi bi-search search-icon" style="color: #8b949e; font-size: 0.9rem; transition: color 0.2s ease;"></i>
+            </span>
+            <input type="text" id="publicSearchInput" class="form-control bg-transparent border-0 text-white shadow-none ps-1 pe-2 py-2" placeholder="Cari hidangan atau minuman..." style="font-size: 0.875rem;" oninput="onPublicSearchInput(this.value)">
+            <button type="button" id="publicSearchClearBtn" class="btn bg-transparent border-0 text-secondary pe-3" style="display: none; font-size: 0.85rem;" onclick="clearPublicSearch()">
+                <i class="bi bi-x-circle-fill"></i>
+            </button>
         </div>
     </div>
 
-    <!-- Filter Sub-Kategori (Level 2 - Muncul dinamis jika Makanan / Minuman dipilih) -->
+    <!-- Filter Sub-Kategori (Level 2 - Muncul dinamis jika Makanan / Minuman dipilih, mengalir alami rata kiri) -->
     <div id="public-sub-category-wrapper" class="w-100 mb-4" style="display: none !important;">
-        <div id="public-sub-category-pills" class="d-flex justify-content-start justify-content-md-center gap-2 pb-2 px-2 overflow-auto subcat-touch-scroll align-items-center" style="white-space: nowrap; flex-wrap: nowrap; width: 100%; -webkit-overflow-scrolling: touch;">
+        <div id="public-sub-category-pills" class="d-flex justify-content-start gap-2 pb-2 px-1 overflow-auto subcat-touch-scroll align-items-center" style="white-space: nowrap; flex-wrap: nowrap; width: 100%; -webkit-overflow-scrolling: touch;">
             <!-- Rendered dynamically by JS -->
         </div>
     </div>
@@ -116,14 +111,14 @@
              data-nama="{{ strtolower($menu->nama_menu) }}" 
              data-deskripsi="{{ strtolower($menu->deskripsi ?? '') }}"
              style="align-self: flex-start;">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card d-flex flex-column position-relative w-100" 
-                 id="menu-card-{{ $loop->index }}"
-                 onclick="toggleMenuDetail({{ $loop->index }})"
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden hover-lift katalog-menu-card d-flex flex-column position-relative w-100 h-100" 
+                 id="menu-card-{{ $menu->id }}"
+                 onclick="openKatalogDetailModal({{ $menu->id }})"
                  style="background-color: #161b22; border: 1px solid #21262d !important; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; {{ !$menu->is_available ? 'opacity: 0.6;' : '' }}"
-                 title="Sentuh untuk melihat / menutup detail deskripsi">
+                 title="Sentuh untuk melihat detail menu & memesan">
                 
                 @if($isNewMenu)
-                <!-- Diagonal Corner Ribbon New (Persis seperti tangkapan layar) -->
+                <!-- Diagonal Corner Ribbon New -->
                 <div class="corner-ribbon-wrap">
                     <span class="corner-ribbon-tag">New</span>
                 </div>
@@ -152,7 +147,7 @@
                     </div>
                     @endif
 
-                    <!-- Overlay Habis (Hanya tampil jika menu HABIS, tidak membengkakkan tampilan jika tersedia) -->
+                    <!-- Overlay Habis -->
                     @if(!$menu->is_available)
                     <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge rounded-2 px-2 py-1" style="background: rgba(220, 38, 38, 0.92); backdrop-filter: blur(4px); color: #ffffff; font-size: 0.65rem; font-weight: 600;">
@@ -169,30 +164,14 @@
                     @endif
                 </div>
                 
-                <div class="card-body p-3 p-md-4 d-flex flex-column flex-grow-1">
-                    <div class="menu-title-price-wrap mb-2" style="min-height: 4.4rem;">
-                        <h5 class="fw-bold mb-1 text-white fs-6 fs-md-5" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35;" title="{{ $menu->nama_menu }}">{{ $menu->nama_menu }}</h5>
-                        <div>
-                            <span class="fw-bold fs-6 fs-md-5" style="color: #c08e5c;">
+                <div class="card-body p-3 d-flex flex-column justify-content-between flex-grow-1">
+                    <div>
+                        <h5 class="fw-bold mb-1 text-white fs-6" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35;" title="{{ $menu->nama_menu }}">
+                            {{ $menu->nama_menu }}
+                        </h5>
+                        <div class="mt-1">
+                            <span class="fw-bold fs-6" style="color: #c08e5c;">
                                 {{ ($menu->is_dynamic_price || $menu->harga == 0) ? 'Sesuai Timbangan' : 'Rp ' . number_format($menu->harga, 0, ',', '.') }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Area Deskripsi: Default ringkas 2 baris, jika panjang ada see detail di kanan -->
-                    <div class="menu-desc-container mt-auto">
-                        <p class="menu-desc-text small mb-0" id="desc-{{ $loop->index }}" 
-                           style="color: #a0aec0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.8rem; line-height: 1.45; transition: color 0.3s ease;">
-                            {{ $menu->deskripsi ?? 'Hidangan istimewa racikan Master Cafe.' }}
-                        </p>
-
-                        <!-- Toggle See Detail (Seperti pesan bawa pulang: soft text-secondary dengan chevron icon) -->
-                        <div class="see-more-wrap pt-1 text-end" id="see-more-wrap-{{ $loop->index }}" style="display: none;">
-                            <span class="see-detail-link text-secondary opacity-75 d-inline-flex align-items-center gap-1" id="btn-detail-{{ $loop->index }}"
-                                  onclick="event.stopPropagation(); toggleMenuDetail({{ $loop->index }})"
-                                  style="font-size: 0.72rem; cursor: pointer; transition: all 0.2s ease;">
-                                <i class="bi bi-chevron-down" id="icon-detail-{{ $loop->index }}"></i>
-                                <span id="text-detail-{{ $loop->index }}">See detail</span>
                             </span>
                         </div>
                     </div>
@@ -470,73 +449,108 @@
         checkAllSeeMoreTriggers();
     }
 
-    function toggleMenuDetail(index) {
-        const card = document.getElementById('menu-card-' + index);
-        const wrap = document.getElementById('see-more-wrap-' + index);
-        const text = document.getElementById('text-detail-' + index);
-        const icon = document.getElementById('icon-detail-' + index);
-        if (!card) return;
+    window.catalogMenus = @json($menus);
 
-        // Jika teks pendek dan tidak ada overflow (see more tidak aktif), kartu tidak perlu expand
-        if (wrap && wrap.style.display === 'none' && !card.classList.contains('is-expanded')) {
-            return;
-        }
+    window.openKatalogDetailModal = function(id) {
+        const menu = (window.catalogMenus || []).find(m => m.id === id);
+        if (!menu) return;
 
-        const isCurrentlyExpanded = card.classList.contains('is-expanded');
+        const modalEl = document.getElementById('katalogDetailModal');
+        if (!modalEl) return;
 
-        // Tutup kartu lain yang sedang terbuka agar HANYA kartu yang diklik yang terbuka
-        document.querySelectorAll('.katalog-menu-card.is-expanded').forEach((otherCard) => {
-            if (otherCard !== card) {
-                otherCard.classList.remove('is-expanded');
-                const otherId = otherCard.id.replace('menu-card-', '');
-                const otherText = document.getElementById('text-detail-' + otherId);
-                const otherIcon = document.getElementById('icon-detail-' + otherId);
-                if (otherText) otherText.innerText = 'See detail';
-                if (otherIcon) otherIcon.className = 'bi bi-chevron-down';
+        // Badge Kategori
+        const catBadge = document.getElementById('katalogModalCatBadge');
+        if (catBadge) catBadge.innerText = (menu.sub_kategori || menu.kategori || 'MENU').toUpperCase();
+
+        // Badge Ketersediaan
+        const stockBadge = document.getElementById('katalogModalStockBadge');
+        if (stockBadge) {
+            if (menu.is_available) {
+                stockBadge.style.background = 'rgba(72, 187, 120, 0.15)';
+                stockBadge.style.color = '#48bb78';
+                stockBadge.style.border = '1px solid rgba(72, 187, 120, 0.3)';
+                stockBadge.innerHTML = `<i class="bi bi-check-circle me-1"></i> Tersedia`;
+            } else {
+                stockBadge.style.background = 'rgba(245, 101, 101, 0.15)';
+                stockBadge.style.color = '#f56565';
+                stockBadge.style.border = '1px solid rgba(245, 101, 101, 0.3)';
+                stockBadge.innerHTML = `<i class="bi bi-x-circle me-1"></i> Habis`;
             }
-        });
-
-        if (!isCurrentlyExpanded) {
-            card.classList.add('is-expanded');
-            if (text) text.innerText = 'See less';
-            if (icon) icon.className = 'bi bi-chevron-up';
-        } else {
-            card.classList.remove('is-expanded');
-            if (text) text.innerText = 'See detail';
-            if (icon) icon.className = 'bi bi-chevron-down';
         }
-    }
+
+        // Gambar
+        const imgEl = document.getElementById('katalogModalImg');
+        if (imgEl) {
+            imgEl.onerror = function() { this.onerror = null; this.src = '/images/logo.png'; };
+            imgEl.src = menu.image_url || (menu.image ? (menu.image.startsWith('http') ? menu.image : '/storage/' + menu.image) : '/images/logo.png');
+        }
+
+        // Nama & Harga
+        const titleEl = document.getElementById('katalogModalMenuTitle');
+        if (titleEl) titleEl.innerText = menu.nama_menu;
+
+        const priceEl = document.getElementById('katalogModalMenuPrice');
+        if (priceEl) {
+            priceEl.innerText = (menu.is_dynamic_price || Number(menu.harga) === 0)
+                ? 'Sesuai Timbangan'
+                : 'Rp ' + Number(menu.harga).toLocaleString('id-ID');
+        }
+
+        // Deskripsi Lengkap
+        const descEl = document.getElementById('katalogModalMenuDesc');
+        if (descEl) {
+            descEl.innerText = menu.deskripsi || 'Hidangan istimewa racikan Master Cafe dengan kualitas bahan dan cita rasa terbaik.';
+        }
+
+        // Tombol Aksi Pesan
+        const actionContainer = document.getElementById('katalogModalActionContainer');
+        if (actionContainer) {
+            if (!menu.is_available) {
+                actionContainer.innerHTML = `
+                    <button class="btn btn-secondary w-100 rounded-pill py-2.5 fw-bold" disabled style="opacity: 0.65;">
+                        <i class="bi bi-slash-circle me-1"></i> Menu Sedang Habis
+                    </button>
+                `;
+            } else if (menu.is_dynamic_price || Number(menu.harga) === 0) {
+                actionContainer.innerHTML = `
+                    <div class="text-center p-2 rounded-3" style="background: rgba(192, 142, 92, 0.1); border: 1px solid rgba(192, 142, 92, 0.3);">
+                        <p class="text-white small mb-0"><i class="bi bi-info-circle me-1" style="color: #c08e5c;"></i> Harga menu ini dihitung sesuai timbangan di kasir/waitress kafe.</p>
+                    </div>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <a href="{{ url('/konsumen/menu-takeaway') }}?pesan_menu=${menu.id}" class="btn w-100 rounded-pill py-2.5 fw-bold text-white shadow-lg d-flex align-items-center justify-content-center gap-2" style="background: var(--gradient-bronze); border: none; font-size: 0.95rem;">
+                        <i class="bi bi-bag-check-fill"></i>
+                        <span>Pesan Bawa Pulang (Takeaway)</span>
+                    </a>
+                    <div class="text-center mt-2 text-white-50 small" style="font-size: 0.76rem;">
+                        <i class="bi bi-qr-code-scan me-1 text-warning"></i> Untuk makan di tempat, silakan scan stiker QR di atas meja kafe Anda.
+                    </div>
+                `;
+            }
+        }
+
+        if (typeof bootstrap !== 'undefined') {
+            const bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            bsModal.show();
+        }
+    };
 
     function checkAllSeeMoreTriggers() {
-        requestAnimationFrame(() => {
-            document.querySelectorAll('.menu-item').forEach((item, index) => {
-                const desc = document.getElementById('desc-' + index);
-                const wrap = document.getElementById('see-more-wrap-' + index);
-                const card = document.getElementById('menu-card-' + index);
-                if (!desc || !wrap) return;
-
-                if (card && card.classList.contains('is-expanded')) {
-                    wrap.style.display = 'block';
-                    return;
-                }
-
-                // Cek apakah teks deskripsi meluap (overflow) melebihi 2 baris
-                if (desc.scrollHeight > (desc.clientHeight + 2)) {
-                    wrap.style.display = 'block';
-                } else {
-                    wrap.style.display = 'none';
-                }
-            });
-        });
+        // No-op for backward compatibility
     }
 
     document.addEventListener('DOMContentLoaded', function() {
         renderPublicSubPills();
-        checkAllSeeMoreTriggers();
-        setTimeout(checkAllSeeMoreTriggers, 150);
-        setTimeout(checkAllSeeMoreTriggers, 600);
 
-        window.addEventListener('resize', checkAllSeeMoreTriggers);
+        const katalogModalEl = document.getElementById('katalogDetailModal');
+        if (katalogModalEl) {
+            katalogModalEl.addEventListener('hide.bs.modal', function() {
+                if (document.activeElement && katalogModalEl.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            });
+        }
 
         const scrollContainer = document.getElementById('public-sub-category-pills');
         if (scrollContainer) {
@@ -549,5 +563,58 @@
         }
     });
 </script>
+
+<!-- Modal Detail Menu & Pesan (Bottom Sheet di HP, Centered Modal di Desktop) -->
+<div class="modal fade modal-bottom-sheet" id="katalogDetailModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-bottom-sheet" style="max-width: 460px;">
+        <div class="modal-content border-0 shadow-lg overflow-hidden" id="katalogModalContentBox" style="background-color: #161b22; border: 1px solid #21262d !important; display: flex; flex-direction: column;">
+            
+            <!-- Area Drag Handle (Mobile) -->
+            <div class="modal-drag-zone" id="katalogModalDragZone" style="cursor: grab; touch-action: none; user-select: none;">
+                <div class="pt-3 pb-1 text-center d-md-none">
+                    <div style="width: 40px; height: 5px; background: rgba(255,255,255,0.25); border-radius: 999px; margin: 0 auto;"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center px-4 pt-3 pt-md-3 pb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-2 px-3 py-1 fw-semibold" id="katalogModalCatBadge" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.75rem;">
+                            Menu
+                        </span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
+                </div>
+            </div>
+
+            <!-- Scroll Body -->
+            <div class="modal-body px-4 py-2" style="overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: calc(85vh - 160px);">
+                <!-- Foto Menu -->
+                <div class="rounded-4 overflow-hidden mb-3 text-center position-relative" style="background-color: #14171c; border: 1px solid #21262d; max-height: 220px;">
+                    <img id="katalogModalImg" src="" alt="Menu Image" onerror="this.onerror=null; this.src='/images/logo.png';" style="width: 100%; height: 210px; object-fit: contain; padding: 10px; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.5));">
+                </div>
+
+                <!-- Info Nama & Harga -->
+                <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                    <h5 class="fw-bold text-white mb-0" id="katalogModalMenuTitle" style="font-size: 1.2rem; line-height: 1.35;"></h5>
+                    <span class="fw-bold fs-5 text-nowrap" id="katalogModalMenuPrice" style="color: #c08e5c;"></span>
+                </div>
+
+                <!-- Deskripsi Produk -->
+                <div class="p-3 rounded-3 mb-3" style="background: rgba(255,255,255,0.03); border: 1px solid #21262d;">
+                    <div class="text-secondary small fw-bold text-uppercase mb-1" style="letter-spacing: 0.05em; font-size: 0.7rem;">
+                        <i class="bi bi-info-circle me-1" style="color: #c08e5c;"></i> Deskripsi & Racikan
+                    </div>
+                    <p class="text-white-50 mb-0" id="katalogModalMenuDesc" style="font-size: 0.88rem; line-height: 1.55; white-space: pre-line;"></p>
+                </div>
+            </div>
+
+            <!-- Sticky Action Footer -->
+            <div class="modal-footer border-top px-4 py-3" style="background-color: #161b22; border-color: #21262d !important; flex-shrink: 0; padding-bottom: max(1rem, env(safe-area-inset-bottom, 16px));">
+                <div class="w-100" id="katalogModalActionContainer">
+                    <!-- Tombol Pesan Dinamis -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 @endsection
 

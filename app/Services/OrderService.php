@@ -359,6 +359,8 @@ class OrderService
                 }
             }
 
+            \Illuminate\Support\Facades\Cache::forget('active_orders_count_data');
+
             return [
                 'pesanan' => $pesanan,
                 'snap_data' => $snapData,

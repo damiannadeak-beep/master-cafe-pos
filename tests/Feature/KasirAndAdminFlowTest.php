@@ -61,7 +61,7 @@ class KasirAndAdminFlowTest extends TestCase
             'catatan' => 'Shift siang lancar',
         ]);
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('kasir.login'));
         $this->assertDatabaseHas('kasir_shifts', [
             'id' => $shift->id,
             'status' => 'closed',

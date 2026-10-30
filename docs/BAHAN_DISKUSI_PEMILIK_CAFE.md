@@ -101,7 +101,7 @@ Agar Pemilik Kafe dapat melihat dan mencoba langsung kecanggihan sistem di lapto
 
 | Peran | Pintu URL Login Rahasia | Akun Pengujian | Fungsi Utama yang Ditunjukkan |
 |---|---|---|---|
-| **Waitress / Tablet Staf** | `http://localhost:8000/pos-kasir-gate-88/login` | **Email:** `safik@gmail.com`<br>**Password:** `password123` | • Layar Pesanan Aktif Antrean Meja (`/kasir/pesanan-aktif`)<br>• Lonceng audio (*chime*) saat pesanan meja masuk<br>• Konfirmasi pesanan & cetak tiket dapur<br>• Pengantaran pesanan ke meja |
+| **Waitress / Tablet Staf** | `http://localhost:8000/   ` | **Email:** `safik@gmail.com`<br>**Password:** `password123` | • Layar Pesanan Aktif Antrean Meja (`/kasir/pesanan-aktif`)<br>• Lonceng audio (*chime*) saat pesanan meja masuk<br>• Konfirmasi pesanan & cetak tiket dapur<br>• Pengantaran pesanan ke meja |
 | **Owner (Admin)** | `http://localhost:8000/ruang-owner-x92k/login?key=MasterCafeSecret2026!`<br>*(Buka di Incognito/Private Window)* | **Email:** `damiannadeak@gmail.com`<br>**Password:** `password123` | • Dashboard omzet penjualan harian & laba<br>• Manajemen menu & promo kafe<br>• Generator & Cetak stiker QR meja (`/admin/meja`) |
 
 ---

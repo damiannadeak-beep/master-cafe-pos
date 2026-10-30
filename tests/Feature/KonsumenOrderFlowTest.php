@@ -126,4 +126,72 @@ class KonsumenOrderFlowTest extends TestCase
             'komentar' => 'Makanan sangat lezat dan pelayanan cepat!',
         ]);
     }
+
+    /** Test 5: Konsumen dapat mengakses halaman tracking pesanan */
+    public function test_konsumen_dapat_mengakses_halaman_tracking()
+    {
+        $token = (string) \Illuminate\Support\Str::uuid();
+        $pesanan = Pesanan::create([
+            'order_token' => $token,
+            'tipe_pesanan' => 'takeaway',
+            'status' => 'pending',
+            'tanggal' => now(),
+            'total' => 25000,
+            'guest_name' => 'Damian',
+        ]);
+
+        Pembayaran::create([
+            'id_pesanan' => $pesanan->id,
+            'metode' => 'qris',
+            'status' => 'unpaid',
+            'total_bayar' => 25000,
+        ]);
+
+        $response = $this->get('/tracking/' . $token);
+        $response->assertStatus(200);
+        $response->assertSee('Progres Pesanan Real-Time');
+    }
+
+    /** Test 6: Validasi keamanan nomor telepon takeaway menyaring nomor palsu */
+    public function test_validasi_keamanan_nomor_telepon_takeaway()
+    {
+        $menu = Menu::create([
+            'nama_menu' => 'Kopi Validasi',
+            'harga' => 10000,
+            'stok' => 10,
+            'kategori' => 'minuman',
+            'is_available' => true,
+        ]);
+
+        $basePayload = [
+            'tipe_pesanan' => 'takeaway',
+            'guest_name' => 'Tamu Uji',
+            'items' => [
+                ['id_menu' => $menu->id, 'jumlah' => 1]
+            ]
+        ];
+
+        // 1. Tolak nomor urut palsu (081234567890)
+        $resFakeSeq = $this->postJson('/konsumen/order/add', array_merge($basePayload, ['guest_phone' => '081234567890']));
+        $resFakeSeq->assertStatus(422);
+        $resFakeSeq->assertJsonValidationErrors(['guest_phone']);
+
+        // 2. Tolak nomor kembar berulang (081111111111)
+        $resFakeRepeat = $this->postJson('/konsumen/order/add', array_merge($basePayload, ['guest_phone' => '081111111111']));
+        $resFakeRepeat->assertStatus(422);
+        $resFakeRepeat->assertJsonValidationErrors(['guest_phone']);
+
+        // 3. Tolak prefix operator fiktif (08001234567)
+        $resFakePrefix = $this->postJson('/konsumen/order/add', array_merge($basePayload, ['guest_phone' => '080012345678']));
+        $resFakePrefix->assertStatus(422);
+        $resFakePrefix->assertJsonValidationErrors(['guest_phone']);
+
+        // 4. Terima nomor operator asli Indonesia (081298761234)
+        $resValid = $this->postJson('/konsumen/order/add', array_merge($basePayload, ['guest_phone' => '081298761234']));
+        $resValid->assertStatus(200);
+        $this->assertDatabaseHas('pesanan', [
+            'guest_phone' => '081298761234',
+            'tipe_pesanan' => 'takeaway',
+        ]);
+    }
 }

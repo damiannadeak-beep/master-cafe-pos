@@ -13,9 +13,6 @@
                         <span class="badge rounded-2 px-3 py-1 fw-semibold" id="variantModalCategoryBadge" style="background: rgba(192, 142, 92, 0.15); border: 1px solid rgba(192, 142, 92, 0.3); color: #c08e5c; font-size: 0.75rem;">
                             Menu
                         </span>
-                        <span id="variantModalStockBadge" class="badge rounded-2 px-3 py-1 fw-semibold" style="font-size: 0.75rem;">
-                            Tersedia
-                        </span>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
                 </div>
@@ -36,7 +33,7 @@
 
                 <!-- Deskripsi Produk -->
                 <div class="p-3 rounded-3 mb-3" style="background: rgba(255,255,255,0.03); border: 1px solid #21262d;">
-                    <label class="text-secondary small fw-bold text-uppercase d-block mb-1" style="letter-spacing: 0.05em; font-size: 0.7rem;">Deskripsi</label>
+                    <div class="text-secondary small fw-bold text-uppercase mb-1" style="letter-spacing: 0.05em; font-size: 0.7rem;">Deskripsi</div>
                     <p class="text-white-50 mb-0" id="variantModalMenuDesc" style="font-size: 0.85rem; line-height: 1.45;"></p>
                 </div>
 
@@ -46,7 +43,7 @@
 
                 <!-- Input Catatan Khusus Pesanan -->
                 <div class="p-3 rounded-3 mb-2" style="background: rgba(255,255,255,0.03); border: 1px solid #21262d;">
-                    <label class="text-secondary small fw-bold text-uppercase d-block mb-1" style="letter-spacing: 0.05em; font-size: 0.7rem;">
+                    <label for="variantModalCatatan" class="text-secondary small fw-bold text-uppercase d-block mb-1" style="letter-spacing: 0.05em; font-size: 0.7rem;">
                         <i class="bi bi-pencil-square me-1" style="color: #c08e5c;"></i> Catatan Khusus (Opsional)
                     </label>
                     <input type="text" id="variantModalCatatan" class="form-control text-white border-0 rounded-pill px-3 py-2" 
@@ -207,7 +204,13 @@
                 });
             }
 
-            // Bersihkan transform saat modal tersembunyi
+            // Bersihkan transform saat modal tersembunyi & hilangkan focus agar tidak memicu aria-hidden warning
+            modalEl.addEventListener('hide.bs.modal', function() {
+                if (document.activeElement && modalEl.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            });
+
             modalEl.addEventListener('hidden.bs.modal', function() {
                 contentBox.style.transform = '';
                 contentBox.style.transition = '';
